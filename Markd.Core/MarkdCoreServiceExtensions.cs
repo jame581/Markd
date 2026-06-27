@@ -1,4 +1,5 @@
 ﻿using Markd.Core.Data;
+using Markd.Core.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +14,9 @@ namespace Markd.Core
         public static IServiceCollection AddMarkdCore(this IServiceCollection services, string databasePath)
         {
             services.AddDbContext<MarkdDbContext>(options => options.UseSqlite($"Data Source={databasePath}"));
+
+            services.AddScoped<IOccasionService, OccasionService>();
+
             return services;
         }
 
