@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Markd.Core;
 
 namespace Markd
 {
@@ -19,7 +20,13 @@ namespace Markd
     		builder.Logging.AddDebug();
 #endif
 
-            return builder.Build();
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "markd.db");
+            builder.Services.AddMarkdCore(dbPath);
+
+            var app = builder.Build();
+            app.Services.InitializeMarkdDatabase();
+
+            return app;
         }
     }
 }
