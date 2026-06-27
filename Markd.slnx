@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="Markd/Markd.csproj" />
+  <Project Path="Markd.Core/Markd.Core.csproj" />
+  <Project Path="Markd/Markd.csproj">
+    <Deploy Solution="Debug|*" />
+  </Project>
 </Solution>
