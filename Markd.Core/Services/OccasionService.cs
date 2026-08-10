@@ -84,9 +84,23 @@ namespace Markd.Core.Services
             if (occasion.IsPinned)
                 await UnpinAllAsync(occasion.Id);
 
-            db.Occasions.Update(occasion);
+            var existing = await db.Occasions
+                .FirstOrDefaultAsync(o => o.Id == occasion.Id);
+
+            if (existing == null)
+                throw new InvalidOperationException($"Occasion {occasion.Id} was not found.");
+
+            existing.Title = occasion.Title;
+            existing.Emoji = occasion.Emoji;
+            existing.ColorHex = occasion.ColorHex;
+            existing.AnchorDate = occasion.AnchorDate;
+            existing.Direction = occasion.Direction;
+            existing.Notes = occasion.Notes;
+            existing.IsPinned = occasion.IsPinned;
+            existing.CategoryId = occasion.CategoryId;
+
             await db.SaveChangesAsync();
-            return occasion;
+            return existing;
         }
 
         public async Task SetPinnedAsync(int id)

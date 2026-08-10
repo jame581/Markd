@@ -64,6 +64,39 @@ public class CoreIntegrationTests
     }
 
     [Fact]
+    public async Task UpdateAsync_WorksWhenTrackedInstanceAlreadyExists()
+    {
+        using var scope = CreateScope();
+        var service = new OccasionService(scope.Context);
+
+        var created = await service.CreateAsync(new Occasion
+        {
+            Title = "Betka",
+            AnchorDate = DateTime.UtcNow.Date,
+            Direction = OccasionDirection.Since
+        });
+
+        _ = await service.GetByIdAsync(created.Id);
+
+        var category = await new CategoryService(scope.Context).CreateAsync(new Category { Name = "Family" });
+
+        var detachedUpdate = new Occasion
+        {
+            Id = created.Id,
+            Title = "Betka",
+            AnchorDate = created.AnchorDate,
+            Direction = created.Direction,
+            Notes = "updated",
+            CategoryId = category.Id
+        };
+
+        var updated = await service.UpdateAsync(detachedUpdate);
+
+        Assert.Equal(category.Id, updated.CategoryId);
+        Assert.Equal("updated", updated.Notes);
+    }
+
+    [Fact]
     public async Task CategoryService_Crud_WorksWithSqlite()
     {
         using var scope = CreateScope();
