@@ -115,6 +115,30 @@ namespace Markd.Core.Services
             await db.SaveChangesAsync();
         }
 
+        public async Task<Milestone> AddMilestoneAsync(int occasionId, int thresholdDays, string label)
+        {
+            var milestone = new Milestone
+            {
+                OccasionId = occasionId,
+                ThresholdDays = thresholdDays,
+                Label = label
+            };
+
+            db.Milestones.Add(milestone);
+            await db.SaveChangesAsync();
+            return milestone;
+        }
+
+        public async Task RemoveMilestoneAsync(int milestoneId)
+        {
+            var milestone = await db.Milestones.FindAsync(milestoneId);
+            if (milestone == null)
+                return;
+
+            db.Milestones.Remove(milestone);
+            await db.SaveChangesAsync();
+        }
+
         private async Task UnpinAllAsync(int? keepId = null)
         {
             var pinned = await db.Occasions

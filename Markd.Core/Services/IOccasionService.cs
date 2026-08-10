@@ -10,6 +10,8 @@ namespace Markd.Core.Services
         Task<Occasion> UpdateAsync(Occasion occasion);
         Task DeleteAsync(int id);
         Task SetPinnedAsync(int id);
+        Task<Milestone> AddMilestoneAsync(int occasionId, int thresholdDays, string label);
+        Task RemoveMilestoneAsync(int milestoneId);
 
         /// <summary>
         /// Returns elapsed days for Since, or remaining days for Until.

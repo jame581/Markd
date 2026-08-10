@@ -97,6 +97,33 @@ public class CoreIntegrationTests
     }
 
     [Fact]
+    public async Task Milestone_AddRemove_WorksWithSqlite()
+    {
+        using var scope = CreateScope();
+        var service = new OccasionService(scope.Context);
+
+        var occasion = await service.CreateAsync(new Occasion
+        {
+            Title = "Anniversary",
+            AnchorDate = DateTime.UtcNow.Date,
+            Direction = OccasionDirection.Since
+        });
+
+        var milestone = await service.AddMilestoneAsync(occasion.Id, 30, "30 days");
+        Assert.True(milestone.Id > 0);
+
+        var loaded = await service.GetByIdAsync(occasion.Id);
+        Assert.NotNull(loaded);
+        Assert.Single(loaded.Milestones);
+
+        await service.RemoveMilestoneAsync(milestone.Id);
+
+        loaded = await service.GetByIdAsync(occasion.Id);
+        Assert.NotNull(loaded);
+        Assert.Empty(loaded.Milestones);
+    }
+
+    [Fact]
     public async Task CategoryService_Crud_WorksWithSqlite()
     {
         using var scope = CreateScope();
