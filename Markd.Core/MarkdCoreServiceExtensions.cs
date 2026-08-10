@@ -16,6 +16,7 @@ namespace Markd.Core
             services.AddDbContext<MarkdDbContext>(options => options.UseSqlite($"Data Source={databasePath}"));
 
             services.AddScoped<IOccasionService, OccasionService>();
+            services.AddScoped<ICategoryService, CategoryService>();
 
             return services;
         }

@@ -2,13 +2,14 @@
 
 namespace Markd.Core.Services
 {
-    internal interface IOccasionService
+    public interface IOccasionService
     {
         Task<List<Occasion>> GetAllAsync();
         Task<Occasion?> GetByIdAsync(int id);
         Task<Occasion> CreateAsync(Occasion occasion);
         Task<Occasion> UpdateAsync(Occasion occasion);
         Task DeleteAsync(int id);
+        Task SetPinnedAsync(int id);
 
         /// <summary>
         /// Returns elapsed days for Since, or remaining days for Until.

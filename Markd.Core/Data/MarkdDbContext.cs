@@ -22,6 +22,10 @@ namespace Markd.Core.Data
                 entity.Property(o => o.Title).IsRequired().HasMaxLength(100);
                 entity.Property(o => o.Emoji).HasMaxLength(8);
                 entity.Property(o => o.ColorHex).HasMaxLength(7);
+                entity.Property(o => o.IsPinned).IsRequired().HasDefaultValue(false);
+                entity.HasIndex(o => o.IsPinned)
+                      .HasFilter("\"IsPinned\" = 1")
+                      .IsUnique();
                 entity.Property(o => o.Direction).HasConversion<string>();
                 entity.Property(o => o.AnchorDate).IsRequired();
                 entity.Property(o => o.CreatedAt).IsRequired();

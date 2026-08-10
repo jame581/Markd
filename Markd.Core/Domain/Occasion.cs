@@ -10,6 +10,8 @@
 
         public string? ColorHex { get; set; }
 
+        public bool IsPinned { get; set; }
+
         /// <summary>
         /// The date this occasion is measured from (Since) or toward (Until).
         /// Stored as UTC.

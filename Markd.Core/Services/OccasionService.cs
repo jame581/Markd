@@ -9,6 +9,10 @@ namespace Markd.Core.Services
         public async Task<Occasion> CreateAsync(Occasion occasion)
         {
             occasion.CreatedAt = DateTime.UtcNow;
+
+            if (occasion.IsPinned)
+                await UnpinAllAsync();
+
             db.Occasions.Add(occasion);
             await db.SaveChangesAsync();
             return occasion;
@@ -77,9 +81,34 @@ namespace Markd.Core.Services
 
         public async Task<Occasion> UpdateAsync(Occasion occasion)
         {
+            if (occasion.IsPinned)
+                await UnpinAllAsync(occasion.Id);
+
             db.Occasions.Update(occasion);
             await db.SaveChangesAsync();
             return occasion;
+        }
+
+        public async Task SetPinnedAsync(int id)
+        {
+            await UnpinAllAsync(id);
+
+            var occasion = await db.Occasions.FindAsync(id);
+            if (occasion == null)
+                return;
+
+            occasion.IsPinned = true;
+            await db.SaveChangesAsync();
+        }
+
+        private async Task UnpinAllAsync(int? keepId = null)
+        {
+            var pinned = await db.Occasions
+                .Where(o => o.IsPinned && (!keepId.HasValue || o.Id != keepId.Value))
+                .ToListAsync();
+
+            foreach (var occasion in pinned)
+                occasion.IsPinned = false;
         }
     }
 }
