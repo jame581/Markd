@@ -29,6 +29,10 @@ public class OccasionFormPage : ContentPage
         var directionPicker = new Picker { Title = "Direction", ItemsSource = Enum.GetValues(typeof(OccasionDirection)).Cast<OccasionDirection>().ToList() };
         directionPicker.SetBinding(Picker.SelectedItemProperty, nameof(OccasionFormViewModel.Direction));
 
+        var categoryPicker = new Picker { Title = "Category", ItemDisplayBinding = new Binding(nameof(Category.Name)) };
+        categoryPicker.SetBinding(Picker.ItemsSourceProperty, nameof(OccasionFormViewModel.Categories));
+        categoryPicker.SetBinding(Picker.SelectedItemProperty, nameof(OccasionFormViewModel.SelectedCategory));
+
         var notesEditor = new Editor { Placeholder = "Notes", HeightRequest = 120, AutoSize = EditorAutoSizeOption.TextChanges };
         notesEditor.SetBinding(Editor.TextProperty, nameof(OccasionFormViewModel.Notes));
 
@@ -64,6 +68,7 @@ public class OccasionFormPage : ContentPage
                     colorEntry,
                     datePicker,
                     directionPicker,
+                    categoryPicker,
                     notesEditor,
                     pinLayout,
                     errorLabel,

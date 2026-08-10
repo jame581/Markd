@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using Markd.Core.Domain;
 using Markd.Core.Services;
@@ -6,7 +7,10 @@ namespace Markd.ViewModels;
 
 public class OccasionFormViewModel : ViewModelBase
 {
+    private static readonly Category NoneCategory = new() { Id = 0, Name = "Uncategorized" };
+
     private readonly IOccasionService _occasionService;
+    private readonly ICategoryService _categoryService;
     private string _title = string.Empty;
     private string? _emoji;
     private string? _colorHex;
@@ -14,15 +18,18 @@ public class OccasionFormViewModel : ViewModelBase
     private OccasionDirection _direction = OccasionDirection.Since;
     private string? _notes;
     private bool _isPinned;
+    private Category? _selectedCategory;
 
-    public OccasionFormViewModel(IOccasionService occasionService)
+    public OccasionFormViewModel(IOccasionService occasionService, ICategoryService categoryService)
     {
         _occasionService = occasionService;
+        _categoryService = categoryService;
         SaveCommand = new AsyncRelayCommand(SaveAsync);
     }
 
     public int OccasionId { get; private set; }
     public IAsyncRelayCommand SaveCommand { get; }
+    public ObservableCollection<Category> Categories { get; } = new();
 
     public string Title
     {
@@ -66,12 +73,20 @@ public class OccasionFormViewModel : ViewModelBase
         set => SetProperty(ref _isPinned, value);
     }
 
+    public Category? SelectedCategory
+    {
+        get => _selectedCategory;
+        set => SetProperty(ref _selectedCategory, value);
+    }
+
     public string Header => OccasionId == 0 ? "New Occasion" : "Edit Occasion";
 
     public async Task InitializeAsync(int id)
     {
         OccasionId = id;
         ErrorMessage = null;
+
+        await LoadCategoriesAsync();
 
         if (id == 0)
         {
@@ -82,6 +97,7 @@ public class OccasionFormViewModel : ViewModelBase
             Direction = OccasionDirection.Since;
             Notes = null;
             IsPinned = false;
+            SelectedCategory = NoneCategory;
             OnPropertyChanged(nameof(Header));
             return;
         }
@@ -100,6 +116,11 @@ public class OccasionFormViewModel : ViewModelBase
         Direction = occasion.Direction;
         Notes = occasion.Notes;
         IsPinned = occasion.IsPinned;
+
+        SelectedCategory = occasion.CategoryId.HasValue
+            ? Categories.FirstOrDefault(c => c.Id == occasion.CategoryId.Value)
+            : NoneCategory;
+
         OnPropertyChanged(nameof(Header));
     }
 
@@ -128,7 +149,8 @@ public class OccasionFormViewModel : ViewModelBase
                 AnchorDate = AnchorDate.ToUniversalTime(),
                 Direction = Direction,
                 Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
-                IsPinned = IsPinned
+                IsPinned = IsPinned,
+                CategoryId = SelectedCategory is { Id: > 0 } category ? category.Id : null
             };
 
             if (OccasionId == 0)
@@ -146,5 +168,15 @@ public class OccasionFormViewModel : ViewModelBase
         {
             IsBusy = false;
         }
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        Categories.Clear();
+        Categories.Add(NoneCategory);
+
+        var categories = await _categoryService.GetAllAsync();
+        foreach (var category in categories)
+            Categories.Add(category);
     }
 }
