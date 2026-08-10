@@ -7,7 +7,7 @@
     Title="Markd">
 
     <ShellContent
-        Title="Home"
+        Title="Dashboard"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
 

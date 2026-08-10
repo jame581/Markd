@@ -1,5 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using Markd.Core;
+﻿using Markd.Core;
+using Markd.ViewModels;
+using Microsoft.Extensions.Logging;
 
 namespace Markd
 {
@@ -17,11 +18,16 @@ namespace Markd
                 });
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "markd.db");
             builder.Services.AddMarkdCore(dbPath);
+
+            builder.Services.AddSingleton<AppShell>();
+            builder.Services.AddTransient<OccasionListViewModel>();
+            builder.Services.AddTransient<OccasionFormViewModel>();
+            builder.Services.AddTransient<OccasionDetailViewModel>();
 
             var app = builder.Build();
             app.Services.InitializeMarkdDatabase();
