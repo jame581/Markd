@@ -1,5 +1,6 @@
 ﻿using Markd.Core.Domain;
 using Markd.ViewModels;
+using Microsoft.Maui.Controls.Shapes;
 
 namespace Markd
 {
@@ -16,9 +17,27 @@ namespace Markd
             var addButton = new Button { Text = "Add Occasion" };
             addButton.SetBinding(Button.CommandProperty, nameof(OccasionListViewModel.AddCommand));
 
+            var categoriesButton = new Button { Text = "Manage Categories" };
+            categoriesButton.SetBinding(Button.CommandProperty, nameof(OccasionListViewModel.ManageCategoriesCommand));
+
+            var buttonRow = new Grid
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition(GridLength.Star),
+                    new ColumnDefinition(GridLength.Star)
+                },
+                ColumnSpacing = 10
+            };
+            buttonRow.Add(addButton);
+            Grid.SetColumn(addButton, 0);
+            buttonRow.Add(categoriesButton);
+            Grid.SetColumn(categoriesButton, 1);
+
             var collectionView = new CollectionView
             {
                 SelectionMode = SelectionMode.Single,
+                IsGrouped = true,
                 EmptyView = new VerticalStackLayout
                 {
                     Spacing = 6,
@@ -30,8 +49,15 @@ namespace Markd
                 }
             };
 
-            collectionView.SetBinding(ItemsView.ItemsSourceProperty, nameof(OccasionListViewModel.Occasions));
+            collectionView.SetBinding(ItemsView.ItemsSourceProperty, nameof(OccasionListViewModel.OccasionGroups));
             collectionView.SelectionChanged += OnOccasionSelected;
+
+            collectionView.GroupHeaderTemplate = new DataTemplate(() =>
+            {
+                var label = new Label { FontSize = 16, FontAttributes = FontAttributes.Bold, Margin = new Thickness(0, 8, 0, 4) };
+                label.SetBinding(Label.TextProperty, nameof(ViewModels.OccasionGroup.CategoryName));
+                return label;
+            });
 
             collectionView.ItemTemplate = new DataTemplate(() =>
             {
@@ -52,11 +78,12 @@ namespace Markd
                 var anchor = new Label();
                 anchor.SetBinding(Label.TextProperty, new Binding(nameof(Occasion.AnchorDate), stringFormat: "Anchor: {0:D}"));
 
-                return new Frame
+                return new Border
                 {
                     Padding = 12,
                     Margin = new Thickness(0, 4),
-                    BorderColor = Color.FromArgb("#DDDDDD"),
+                    Stroke = Color.FromArgb("#DDDDDD"),
+                    StrokeShape = new RoundRectangle { CornerRadius = 8 },
                     Content = new VerticalStackLayout { Spacing = 4, Children = { row, direction, anchor } }
                 };
             });
@@ -72,8 +99,8 @@ namespace Markd
                 RowSpacing = 12
             };
 
-            layoutGrid.Add(addButton);
-            Grid.SetRow(addButton, 0);
+            layoutGrid.Add(buttonRow);
+            Grid.SetRow(buttonRow, 0);
 
             layoutGrid.Add(collectionView);
             Grid.SetRow(collectionView, 1);
