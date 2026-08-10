@@ -14,12 +14,14 @@ public class OccasionListViewModel : ViewModelBase
         _occasionService = occasionService;
         AddCommand = new AsyncRelayCommand(AddAsync);
         OpenDetailCommand = new AsyncRelayCommand<Occasion?>(OpenDetailAsync);
+        ManageCategoriesCommand = new AsyncRelayCommand(ManageCategoriesAsync);
     }
 
-    public ObservableCollection<Occasion> Occasions { get; } = new();
+    public ObservableCollection<OccasionGroup> OccasionGroups { get; } = new();
 
     public IAsyncRelayCommand AddCommand { get; }
     public IAsyncRelayCommand<Occasion?> OpenDetailCommand { get; }
+    public IAsyncRelayCommand ManageCategoriesCommand { get; }
 
     public async Task LoadAsync()
     {
@@ -30,11 +32,18 @@ public class OccasionListViewModel : ViewModelBase
         {
             IsBusy = true;
             ErrorMessage = null;
-            Occasions.Clear();
+            OccasionGroups.Clear();
 
             var occasions = await _occasionService.GetAllAsync();
-            foreach (var occasion in occasions.OrderByDescending(o => o.IsPinned).ThenBy(o => o.Title))
-                Occasions.Add(occasion);
+            var grouped = occasions
+                .OrderByDescending(o => o.IsPinned)
+                .ThenBy(o => o.Title)
+                .GroupBy(o => string.IsNullOrWhiteSpace(o.Category?.Name) ? "Uncategorized" : o.Category!.Name)
+                .OrderBy(g => g.Key)
+                .Select(g => new OccasionGroup(g.Key, g));
+
+            foreach (var group in grouped)
+                OccasionGroups.Add(group);
         }
         catch (Exception ex)
         {
@@ -57,5 +66,10 @@ public class OccasionListViewModel : ViewModelBase
             return;
 
         await Shell.Current.GoToAsync($"{nameof(OccasionDetailPage)}?id={occasion.Id}");
+    }
+
+    private async Task ManageCategoriesAsync()
+    {
+        await Shell.Current.GoToAsync(nameof(CategoryPage));
     }
 }
