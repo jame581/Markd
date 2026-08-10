@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="Markd.Core.Tests/Markd.Core.Tests.csproj" />
   <Project Path="Markd.Core/Markd.Core.csproj" />
   <Project Path="Markd/Markd.csproj">
     <Deploy Solution="Debug|*" />
