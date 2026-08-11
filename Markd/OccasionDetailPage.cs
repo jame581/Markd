@@ -38,6 +38,15 @@ public class OccasionDetailPage : ContentPage
             TextColor = Color.FromArgb("#2E7D4F")
         };
 
+        var timeBreakdownLabel = new Label
+        {
+            FontSize = 13,
+            HorizontalTextAlignment = TextAlignment.Center,
+            TextColor = Color.FromArgb("#2E7D4F"),
+            Margin = new Thickness(0, 4, 0, 0)
+        };
+        timeBreakdownLabel.SetBinding(Label.TextProperty, nameof(OccasionDetailViewModel.TimeBreakdown));
+
         var directionBadge = new Label
         {
             FontSize = 13,
@@ -59,7 +68,7 @@ public class OccasionDetailPage : ContentPage
             Content = new VerticalStackLayout
             {
                 Spacing = 2,
-                Children = { _daysNumberLabel, _daysUnitLabel, directionBadge }
+                Children = { _daysNumberLabel, _daysUnitLabel, timeBreakdownLabel, directionBadge }
             }
         };
 
@@ -221,6 +230,14 @@ public class OccasionDetailPage : ContentPage
             _counterCard.FadeTo(1, 350, Easing.CubicOut),
             _counterCard.ScaleTo(1, 350, Easing.SpringOut)
         );
+
+        _viewModel.StartTimer();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _viewModel.StopTimer();
     }
 
     private async Task InitializeFromQueryAsync(string? idValue)
