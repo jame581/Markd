@@ -38,13 +38,41 @@ namespace Markd
             {
                 SelectionMode = SelectionMode.Single,
                 IsGrouped = true,
-                EmptyView = new VerticalStackLayout
+                EmptyView = new Border
                 {
-                    Spacing = 6,
-                    Children =
+                    Padding = new Thickness(28, 36),
+                    Margin = new Thickness(0, 24),
+                    BackgroundColor = Color.FromArgb("#F0FFF4"),
+                    Stroke = Color.FromArgb("#1B6B3A"),
+                    StrokeThickness = 1.5,
+                    StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 16 },
+                    Content = new VerticalStackLayout
                     {
-                        new Label { Text = "No occasions yet.", FontSize = 18, FontAttributes = FontAttributes.Bold },
-                        new Label { Text = "Tap 'Add Occasion' to create your first tracker." }
+                        Spacing = 8,
+                        HorizontalOptions = LayoutOptions.Center,
+                        Children =
+                        {
+                            new Label
+                            {
+                                Text = "🔖",
+                                FontSize = 48,
+                                HorizontalTextAlignment = TextAlignment.Center
+                            },
+                            new Label
+                            {
+                                Text = "No occasions yet",
+                                FontSize = 20,
+                                FontAttributes = FontAttributes.Bold,
+                                HorizontalTextAlignment = TextAlignment.Center
+                            },
+                            new Label
+                            {
+                                Text = "Tap \"Add Occasion\" to start tracking\nsomething meaningful.",
+                                FontSize = 14,
+                                TextColor = Colors.Gray,
+                                HorizontalTextAlignment = TextAlignment.Center
+                            }
+                        }
                     }
                 }
             };
