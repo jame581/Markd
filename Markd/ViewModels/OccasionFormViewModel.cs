@@ -25,11 +25,21 @@ public class OccasionFormViewModel : ViewModelBase
         _occasionService = occasionService;
         _categoryService = categoryService;
         SaveCommand = new AsyncRelayCommand(SaveAsync);
+        SelectColorCommand = new RelayCommand<string?>(hex => ColorHex = hex);
     }
 
     public int OccasionId { get; private set; }
     public IAsyncRelayCommand SaveCommand { get; }
+    public IRelayCommand<string?> SelectColorCommand { get; }
     public ObservableCollection<Category> Categories { get; } = new();
+
+    /// <summary>Preset color palette for the swatch picker.</summary>
+    public static IReadOnlyList<string> ColorSwatches { get; } =
+    [
+        "#E53935", "#F4511E", "#F6BF26", "#33B679",
+        "#0B8043", "#039BE5", "#3F51B5", "#7986CB",
+        "#8E24AA", "#795548", "#616161", "#000000"
+    ];
 
     public string Title
     {

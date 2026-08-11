@@ -1,5 +1,7 @@
+using Markd.Converters;
 using Markd.Core.Domain;
 using Markd.ViewModels;
+using Microsoft.Maui.Controls.Shapes;
 
 namespace Markd;
 
@@ -20,8 +22,84 @@ public class OccasionFormPage : ContentPage
         var emojiEntry = new Entry { Placeholder = "Emoji" };
         emojiEntry.SetBinding(Entry.TextProperty, nameof(OccasionFormViewModel.Emoji));
 
-        var colorEntry = new Entry { Placeholder = "Color Hex (e.g. #FF0066)" };
-        colorEntry.SetBinding(Entry.TextProperty, nameof(OccasionFormViewModel.ColorHex));
+        // ── Color swatch picker ──────────────────────────────────────────
+        var colorLabel = new Label { Text = "Color", FontAttributes = FontAttributes.Bold };
+
+        var colorPreview = new BoxView
+        {
+            WidthRequest = 28,
+            HeightRequest = 28,
+            CornerRadius = 14,
+            Margin = new Thickness(0, 0, 8, 0),
+            VerticalOptions = LayoutOptions.Center
+        };
+        colorPreview.SetBinding(BoxView.ColorProperty,
+            new Binding(nameof(OccasionFormViewModel.ColorHex),
+                converter: new ColorHexConverter(), converterParameter: Colors.Gray));
+
+        var colorPreviewLabel = new Label { VerticalOptions = LayoutOptions.Center };
+        colorPreviewLabel.SetBinding(Label.TextProperty, nameof(OccasionFormViewModel.ColorHex));
+
+        var colorPreviewRow = new HorizontalStackLayout
+        {
+            Spacing = 4,
+            Children = { colorPreview, colorPreviewLabel }
+        };
+
+        // Build two rows of 6 swatches each
+        var swatchRows = new VerticalStackLayout { Spacing = 6 };
+        var swatches = OccasionFormViewModel.ColorSwatches;
+        for (var row = 0; row < 2; row++)
+        {
+            var rowLayout = new HorizontalStackLayout { Spacing = 8 };
+            for (var col = 0; col < 6; col++)
+            {
+                var hex = swatches[row * 6 + col];
+                var swatch = new Border
+                {
+                    WidthRequest = 36,
+                    HeightRequest = 36,
+                    StrokeShape = new RoundRectangle { CornerRadius = 18 },
+                    StrokeThickness = 0,
+                    BackgroundColor = Color.FromArgb(hex)
+                };
+
+                var selectedIndicator = new Label
+                {
+                    Text = "✓",
+                    TextColor = Colors.White,
+                    FontSize = 16,
+                    FontAttributes = FontAttributes.Bold,
+                    HorizontalOptions = LayoutOptions.Center,
+                    VerticalOptions = LayoutOptions.Center
+                };
+
+                swatch.Content = selectedIndicator;
+
+                // Bind checkmark visibility to whether this hex is selected
+                selectedIndicator.SetBinding(IsVisibleProperty,
+                    new Binding(nameof(OccasionFormViewModel.ColorHex),
+                        converter: new StringEqualsConverter(),
+                        converterParameter: hex));
+
+                var tapGesture = new TapGestureRecognizer
+                {
+                    CommandParameter = hex
+                };
+                tapGesture.SetBinding(TapGestureRecognizer.CommandProperty,
+                    nameof(OccasionFormViewModel.SelectColorCommand));
+                swatch.GestureRecognizers.Add(tapGesture);
+
+                rowLayout.Children.Add(swatch);
+            }
+            swatchRows.Children.Add(rowLayout);
+        }
+
+        var colorSection = new VerticalStackLayout
+        {
+            Spacing = 6,
+            Children = { colorLabel, colorPreviewRow, swatchRows }
+        };
 
         var datePicker = new DatePicker();
         datePicker.SetBinding(DatePicker.DateProperty, nameof(OccasionFormViewModel.AnchorDate));
@@ -65,7 +143,7 @@ public class OccasionFormPage : ContentPage
                     header,
                     titleEntry,
                     emojiEntry,
-                    colorEntry,
+                    colorSection,
                     datePicker,
                     directionPicker,
                     categoryPicker,
