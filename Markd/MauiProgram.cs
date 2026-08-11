@@ -33,6 +33,7 @@ namespace Markd
             builder.Services.AddTransient<OccasionFormViewModel>();
             builder.Services.AddTransient<OccasionDetailViewModel>();
             builder.Services.AddTransient<CategoryViewModel>();
+            builder.Services.AddTransient<SettingsViewModel>();
 
             var app = builder.Build();
             app.Services.InitializeMarkdDatabase();
