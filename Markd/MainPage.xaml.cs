@@ -93,8 +93,9 @@ namespace Markd
                 Padding = 16,
                 RowDefinitions =
                 {
-                    new RowDefinition(GridLength.Auto),
-                    new RowDefinition(GridLength.Star)
+                    new RowDefinition(GridLength.Auto),  // buttons
+                    new RowDefinition(GridLength.Auto),  // featured pinned card
+                    new RowDefinition(GridLength.Star)   // grouped list
                 },
                 RowSpacing = 12
             };
@@ -102,10 +103,67 @@ namespace Markd
             layoutGrid.Add(buttonRow);
             Grid.SetRow(buttonRow, 0);
 
+            var featuredCard = BuildFeaturedCard();
+            layoutGrid.Add(featuredCard);
+            Grid.SetRow(featuredCard, 1);
+
             layoutGrid.Add(collectionView);
-            Grid.SetRow(collectionView, 1);
+            Grid.SetRow(collectionView, 2);
 
             Content = layoutGrid;
+        }
+
+        private View BuildFeaturedCard()
+        {
+            var featuredEmoji = new Label { FontSize = 32 };
+            featuredEmoji.SetBinding(Label.TextProperty, $"{nameof(OccasionListViewModel.FeaturedOccasion)}.{nameof(Occasion.Emoji)}");
+
+            var featuredTitle = new Label { FontSize = 22, FontAttributes = FontAttributes.Bold };
+            featuredTitle.SetBinding(Label.TextProperty, $"{nameof(OccasionListViewModel.FeaturedOccasion)}.{nameof(Occasion.Title)}");
+
+            var featuredAnchor = new Label { FontSize = 14, TextColor = Colors.Gray };
+            featuredAnchor.SetBinding(Label.TextProperty, new Binding(
+                $"{nameof(OccasionListViewModel.FeaturedOccasion)}.{nameof(Occasion.AnchorDate)}",
+                stringFormat: "Since {0:D}"));
+
+            var featuredLabel = new Label
+            {
+                Text = "⭐ PINNED",
+                FontSize = 11,
+                FontAttributes = FontAttributes.Bold,
+                TextColor = Color.FromArgb("#0A7C2F")
+            };
+
+            var card = new Border
+            {
+                Padding = 16,
+                Stroke = Color.FromArgb("#0A7C2F"),
+                StrokeThickness = 2,
+                StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 12 },
+                BackgroundColor = Color.FromArgb("#F0FFF4"),
+                Content = new VerticalStackLayout
+                {
+                    Spacing = 4,
+                    Children =
+                    {
+                        featuredLabel,
+                        new HorizontalStackLayout { Spacing = 8, Children = { featuredEmoji, featuredTitle } },
+                        featuredAnchor
+                    }
+                }
+            };
+
+            card.SetBinding(IsVisibleProperty, nameof(OccasionListViewModel.HasFeaturedOccasion));
+
+            var tapGesture = new TapGestureRecognizer();
+            tapGesture.Tapped += async (s, e) =>
+            {
+                if (_viewModel.FeaturedOccasion is { } occ)
+                    await _viewModel.OpenDetailCommand.ExecuteAsync(occ);
+            };
+            card.GestureRecognizers.Add(tapGesture);
+
+            return card;
         }
 
         protected override async void OnAppearing()

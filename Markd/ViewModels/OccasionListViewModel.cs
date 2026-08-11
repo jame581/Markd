@@ -8,6 +8,7 @@ namespace Markd.ViewModels;
 public class OccasionListViewModel : ViewModelBase
 {
     private readonly IOccasionService _occasionService;
+    private Occasion? _featuredOccasion;
 
     public OccasionListViewModel(IOccasionService occasionService)
     {
@@ -18,6 +19,14 @@ public class OccasionListViewModel : ViewModelBase
     }
 
     public ObservableCollection<OccasionGroup> OccasionGroups { get; } = new();
+
+    public Occasion? FeaturedOccasion
+    {
+        get => _featuredOccasion;
+        private set => SetProperty(ref _featuredOccasion, value);
+    }
+
+    public bool HasFeaturedOccasion => FeaturedOccasion is not null;
 
     public IAsyncRelayCommand AddCommand { get; }
     public IAsyncRelayCommand<Occasion?> OpenDetailCommand { get; }
@@ -35,6 +44,10 @@ public class OccasionListViewModel : ViewModelBase
             OccasionGroups.Clear();
 
             var occasions = await _occasionService.GetAllAsync();
+
+            FeaturedOccasion = occasions.FirstOrDefault(o => o.IsPinned);
+            OnPropertyChanged(nameof(HasFeaturedOccasion));
+
             var grouped = occasions
                 .OrderByDescending(o => o.IsPinned)
                 .ThenBy(o => o.Title)
