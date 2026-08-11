@@ -17,6 +17,7 @@ namespace Markd.Core
 
             services.AddScoped<IOccasionService, OccasionService>();
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IAppSettingsService, AppSettingsService>();
 
             return services;
         }
