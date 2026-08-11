@@ -24,5 +24,10 @@ namespace Markd.Core.Services
         /// Returns milestones that should trigger a notification.
         /// </summary>
         Task<List<(Occasion, Milestone)>> GetPendingMilestonesAsync();
+
+        /// <summary>
+        /// Marks a milestone as notified so it won't be returned again by GetPendingMilestonesAsync.
+        /// </summary>
+        Task MarkMilestoneNotifiedAsync(int milestoneId);
     }
 }

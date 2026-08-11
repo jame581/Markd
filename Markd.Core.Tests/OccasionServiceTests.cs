@@ -80,6 +80,34 @@ public class OccasionServiceTests
         Assert.Equal("7 days", pending[0].Item2.Label);
     }
 
+    [Fact]
+    public async Task MarkMilestoneNotifiedAsync_SetsMilestoneNotifiedTrue()
+    {
+        using var tuple = CreateService();
+
+        var occasion = new Occasion
+        {
+            Title = "Test",
+            AnchorDate = DateTime.UtcNow.Date.AddDays(-10),
+            Direction = OccasionDirection.Since,
+            Milestones = [new Milestone { Label = "5 days", ThresholdDays = 5, Notified = false }]
+        };
+
+        await tuple.Context.Occasions.AddAsync(occasion);
+        await tuple.Context.SaveChangesAsync();
+
+        var milestoneId = occasion.Milestones.First().Id;
+        await tuple.Service.MarkMilestoneNotifiedAsync(milestoneId);
+
+        var updated = await tuple.Context.Milestones.FindAsync(milestoneId);
+        Assert.NotNull(updated);
+        Assert.True(updated.Notified);
+
+        // Should no longer appear in pending list
+        var pending = await tuple.Service.GetPendingMilestonesAsync();
+        Assert.Empty(pending);
+    }
+
     private static ServiceScope CreateService()
     {
         var (context, connection) = TestDbFactory.CreateSqliteInMemoryContext();

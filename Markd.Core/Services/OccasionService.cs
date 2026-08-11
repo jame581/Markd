@@ -148,5 +148,13 @@ namespace Markd.Core.Services
             foreach (var occasion in pinned)
                 occasion.IsPinned = false;
         }
+
+        public async Task MarkMilestoneNotifiedAsync(int milestoneId)
+        {
+            var milestone = await db.Milestones.FindAsync(milestoneId);
+            if (milestone is null) return;
+            milestone.Notified = true;
+            await db.SaveChangesAsync();
+        }
     }
 }
