@@ -14,7 +14,7 @@ public class OccasionListViewModel : ViewModelBase
     {
         _occasionService = occasionService;
         AddCommand = new AsyncRelayCommand(AddAsync);
-        OpenDetailCommand = new AsyncRelayCommand<Occasion?>(OpenDetailAsync);
+        OpenDetailCommand = new AsyncRelayCommand<OccasionSummary?>(OpenDetailAsync);
         ManageCategoriesCommand = new AsyncRelayCommand(ManageCategoriesAsync);
     }
 
@@ -29,7 +29,7 @@ public class OccasionListViewModel : ViewModelBase
     public bool HasFeaturedOccasion => FeaturedOccasion is not null;
 
     public IAsyncRelayCommand AddCommand { get; }
-    public IAsyncRelayCommand<Occasion?> OpenDetailCommand { get; }
+    public IAsyncRelayCommand<OccasionSummary?> OpenDetailCommand { get; }
     public IAsyncRelayCommand ManageCategoriesCommand { get; }
 
     public async Task LoadAsync()
@@ -48,10 +48,14 @@ public class OccasionListViewModel : ViewModelBase
             FeaturedOccasion = occasions.FirstOrDefault(o => o.IsPinned);
             OnPropertyChanged(nameof(HasFeaturedOccasion));
 
-            var grouped = occasions
-                .OrderByDescending(o => o.IsPinned)
-                .ThenBy(o => o.Title)
-                .GroupBy(o => string.IsNullOrWhiteSpace(o.Category?.Name) ? "Uncategorized" : o.Category!.Name)
+            var summaries = occasions
+                .Select(o => new OccasionSummary(o, _occasionService.GetDays(o)))
+                .OrderByDescending(s => s.Occasion.IsPinned)
+                .ThenBy(s => s.Occasion.Title);
+
+            var grouped = summaries
+                .GroupBy(s => string.IsNullOrWhiteSpace(s.Occasion.Category?.Name)
+                    ? "Uncategorized" : s.Occasion.Category!.Name)
                 .OrderBy(g => g.Key)
                 .Select(g => new OccasionGroup(g.Key, g));
 
@@ -73,12 +77,12 @@ public class OccasionListViewModel : ViewModelBase
         await Shell.Current.GoToAsync(nameof(OccasionFormPage));
     }
 
-    private async Task OpenDetailAsync(Occasion? occasion)
+    private async Task OpenDetailAsync(OccasionSummary? summary)
     {
-        if (occasion == null)
+        if (summary == null)
             return;
 
-        await Shell.Current.GoToAsync($"{nameof(OccasionDetailPage)}?id={occasion.Id}");
+        await Shell.Current.GoToAsync($"{nameof(OccasionDetailPage)}?id={summary.Occasion.Id}");
     }
 
     private async Task ManageCategoriesAsync()

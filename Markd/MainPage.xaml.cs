@@ -90,21 +90,23 @@ namespace Markd
             collectionView.ItemTemplate = new DataTemplate(() =>
             {
                 var emoji = new Label { FontSize = 20 };
-                emoji.SetBinding(Label.TextProperty, nameof(Occasion.Emoji));
+                emoji.SetBinding(Label.TextProperty, $"{nameof(OccasionSummary.Occasion)}.{nameof(Occasion.Emoji)}");
 
                 var title = new Label { FontSize = 18, FontAttributes = FontAttributes.Bold };
-                title.SetBinding(Label.TextProperty, nameof(Occasion.Title));
+                title.SetBinding(Label.TextProperty, $"{nameof(OccasionSummary.Occasion)}.{nameof(Occasion.Title)}");
 
                 var pinned = new Label { Text = "PINNED", FontAttributes = FontAttributes.Bold, TextColor = Color.FromArgb("#0A7C2F") };
-                pinned.SetBinding(IsVisibleProperty, nameof(Occasion.IsPinned));
+                pinned.SetBinding(IsVisibleProperty, $"{nameof(OccasionSummary.Occasion)}.{nameof(Occasion.IsPinned)}");
 
                 var row = new HorizontalStackLayout { Spacing = 8, Children = { emoji, title, pinned } };
 
-                var direction = new Label();
-                direction.SetBinding(Label.TextProperty, nameof(Occasion.Direction));
+                var timeLabel = new Label { FontSize = 13, TextColor = Color.FromArgb("#2E7D4F"), FontAttributes = FontAttributes.Italic };
+                timeLabel.SetBinding(Label.TextProperty, nameof(OccasionSummary.TimeLabel));
 
-                var anchor = new Label();
-                anchor.SetBinding(Label.TextProperty, new Binding(nameof(Occasion.AnchorDate), stringFormat: "Anchor: {0:D}"));
+                var anchor = new Label { FontSize = 12, TextColor = Colors.Gray };
+                anchor.SetBinding(Label.TextProperty, new Binding(
+                    $"{nameof(OccasionSummary.Occasion)}.{nameof(Occasion.AnchorDate)}",
+                    stringFormat: "{0:d}"));
 
                 return new Border
                 {
@@ -112,7 +114,7 @@ namespace Markd
                     Margin = new Thickness(0, 4),
                     Stroke = Color.FromArgb("#DDDDDD"),
                     StrokeShape = new RoundRectangle { CornerRadius = 8 },
-                    Content = new VerticalStackLayout { Spacing = 4, Children = { row, direction, anchor } }
+                    Content = new VerticalStackLayout { Spacing = 4, Children = { row, timeLabel, anchor } }
                 };
             });
 
@@ -187,7 +189,7 @@ namespace Markd
             tapGesture.Tapped += async (s, e) =>
             {
                 if (_viewModel.FeaturedOccasion is { } occ)
-                    await _viewModel.OpenDetailCommand.ExecuteAsync(occ);
+                    await _viewModel.OpenDetailCommand.ExecuteAsync(new OccasionSummary(occ, 0));
             };
             card.GestureRecognizers.Add(tapGesture);
 
@@ -202,10 +204,10 @@ namespace Markd
 
         private async void OnOccasionSelected(object? sender, SelectionChangedEventArgs e)
         {
-            if (e.CurrentSelection.FirstOrDefault() is not Occasion occasion)
+            if (e.CurrentSelection.FirstOrDefault() is not OccasionSummary summary)
                 return;
 
-            await _viewModel.OpenDetailCommand.ExecuteAsync(occasion);
+            await _viewModel.OpenDetailCommand.ExecuteAsync(summary);
 
             if (sender is CollectionView collectionView)
                 collectionView.SelectedItem = null;
