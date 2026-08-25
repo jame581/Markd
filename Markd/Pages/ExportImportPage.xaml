@@ -10,7 +10,7 @@
             <Label Text="Export creates a JSON backup and opens the share sheet. Import lets you pick a JSON file and replaces the current app data with its contents." />
 
             <Button Text="Export JSON" Command="{Binding ExportJsonCommand}" />
-            <Button Text="Import JSON" Command="{Binding ImportJsonCommand}" />
+            <Button Text="Import JSON" Clicked="OnImportJsonClicked" />
 
             <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
 

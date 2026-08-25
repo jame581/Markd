@@ -72,7 +72,7 @@ namespace Markd.ViewModels
             }
         }
 
-        private async Task ImportJsonAsync()
+        public async Task ImportJsonAsync()
         {
             if (IsBusy)
                 return;
