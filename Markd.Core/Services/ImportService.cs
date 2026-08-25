@@ -44,7 +44,8 @@ namespace Markd.Core.Services
 
                 // Derive key (PBKDF2) - match ExportService
                 const int iterations = 200_000;
-                using var kdf = new Rfc2898DeriveBytes(passphrase, salt, iterations, HashAlgorithmName.SHA256);
+                const int iterationsLocal = iterations; // preserve iterations
+                using var kdf = new Rfc2898DeriveBytes(passphrase, salt, iterationsLocal, HashAlgorithmName.SHA256);
                 var key = kdf.GetBytes(32);
 
                 var plain = new byte[ciphertext.Length];
@@ -81,7 +82,7 @@ namespace Markd.Core.Services
             if (!string.IsNullOrEmpty(dataSource) && File.Exists(dataSource))
             {
                 backupPath = dataSource + $".backup-{DateTime.UtcNow:yyyyMMddHHmmss}";
-                File.Copy(dataSource, backupPath);
+                File.Copy(dataSource, backupPath!);
             }
 
             using var transaction = await _db.Database.BeginTransactionAsync();
@@ -170,7 +171,7 @@ namespace Markd.Core.Services
                 {
                     try
                     {
-                        File.Copy(backupPath, dataSource, overwrite: true);
+                        File.Copy(backupPath!, dataSource!, overwrite: true);
                     }
                     catch
                     {

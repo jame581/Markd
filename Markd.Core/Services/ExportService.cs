@@ -44,7 +44,8 @@ namespace Markd.Core.Services
             // Derive key using PBKDF2 (Rfc2898) with a strong iteration count. Prefer Argon2 externally when available.
             var salt = RandomNumberGenerator.GetBytes(16);
             const int iterations = 200_000; // reasonable default on modern devices
-            using var kdf = new Rfc2898DeriveBytes(passphrase, salt, iterations, HashAlgorithmName.SHA256);
+            const int iterationsLocal = iterations; // preserve original iterations constant name
+            using var kdf = new Rfc2898DeriveBytes(passphrase, salt, iterationsLocal, HashAlgorithmName.SHA256);
             var key = kdf.GetBytes(32);
 
             // Encrypt with AES-GCM
