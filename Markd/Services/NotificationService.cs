@@ -1,5 +1,6 @@
 using Markd.Core.Services;
 using Plugin.LocalNotification;
+using Plugin.LocalNotification.Core.Models;
 
 namespace Markd.Services
 {
