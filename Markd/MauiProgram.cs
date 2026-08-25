@@ -35,6 +35,10 @@ namespace Markd
             builder.Services.AddTransient<CategoryViewModel>();
             builder.Services.AddTransient<SettingsViewModel>();
 
+            // Export / Import UI + VM for testing
+            builder.Services.AddTransient<ViewModels.ExportImportViewModel>();
+            builder.Services.AddTransient<Pages.ExportImportPage>();
+
             var app = builder.Build();
             app.Services.InitializeMarkdDatabase();
 

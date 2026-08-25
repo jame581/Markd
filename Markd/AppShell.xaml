@@ -11,4 +11,9 @@
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
 
+    <ShellContent
+        Title="Import / Export"
+        ContentTemplate="{DataTemplate local:ExportImportPage}"
+        Route="ExportImportPage" />
+
 </Shell>
