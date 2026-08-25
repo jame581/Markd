@@ -19,6 +19,7 @@ namespace Markd.Core
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IAppSettingsService, AppSettingsService>();
             services.AddScoped<IExportService, ExportService>();
+            services.AddScoped<IImportService, ImportService>();
 
             return services;
         }
