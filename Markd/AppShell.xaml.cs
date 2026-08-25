@@ -23,6 +23,14 @@
                 Route = nameof(SettingsPage),
                 ContentTemplate = new DataTemplate(typeof(SettingsPage))
             });
+
+            Items.Add(new ShellContent
+            {
+                Title = "Import / Export",
+                Icon = "⇅",
+                Route = nameof(Pages.ExportImportPage),
+                ContentTemplate = new DataTemplate(typeof(Pages.ExportImportPage))
+            });
         }
     }
 }

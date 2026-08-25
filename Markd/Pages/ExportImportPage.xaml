@@ -1,30 +1,21 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:vm="clr-namespace:Markd.ViewModels"
              x:Class="Markd.Pages.ExportImportPage"
              Title="Import / Export">
 
-    <VerticalStackLayout Padding="16" Spacing="12">
-        <Label Text="Export / Import (test UI)" FontSize="18" FontAttributes="Bold" />
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16">
+            <Label Text="JSON Import / Export" FontSize="18" FontAttributes="Bold" />
+            <Label Text="Export creates a JSON backup and opens the share sheet. Import lets you pick a JSON file and replaces the current app data with its contents." />
 
-        <HorizontalStackLayout Spacing="8">
-            <Button Text="Export (JSON)" Command="{Binding ExportPlainCommand}" />
-            <Button Text="Export (Encrypted)" Command="{Binding ExportEncryptedCommand}" />
-        </HorizontalStackLayout>
+            <Button Text="Export JSON" Command="{Binding ExportJsonCommand}" />
+            <Button Text="Import JSON" Command="{Binding ImportJsonCommand}" />
 
-        <HorizontalStackLayout Spacing="8">
-            <Button Text="Import (JSON)" Command="{Binding ImportPlainCommand}" />
-            <Button Text="Import (Encrypted)" Command="{Binding ImportEncryptedCommand}" />
-        </HorizontalStackLayout>
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
 
-        <Label Text="Passphrase (for encrypted export/import)" />
-        <Entry Text="{Binding Passphrase}" Placeholder="Enter passphrase" />
-
-        <Label Text="Status:" FontAttributes="Bold" />
-        <Label Text="{Binding Status}" />
-
-        <Label Text="Files used (AppDataDirectory):" FontAttributes="Bold" />
-        <Label Text="export-markd.json / export-markd.bin" FontSize="12" />
-    </VerticalStackLayout>
+            <Label Text="Status" FontAttributes="Bold" />
+            <Label Text="{Binding Status}" />
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
