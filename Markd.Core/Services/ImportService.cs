@@ -81,86 +81,93 @@ namespace Markd.Core.Services
             string? backupPath = null;
             if (!string.IsNullOrEmpty(dataSource) && File.Exists(dataSource))
             {
-                backupPath = dataSource + $".backup-{DateTime.UtcNow:yyyyMMddHHmmss}";
-                File.Copy(dataSource, backupPath!);
+                backupPath = dataSource + $".backup-{DateTime.UtcNow:yyyyMMddHHmmssfff}-{Guid.NewGuid():N}";
+                File.Copy(dataSource, backupPath, overwrite: true);
             }
 
             using var transaction = await _db.Database.BeginTransactionAsync();
             try
             {
-                // Categories: use existing by name (case-insensitive) or create
+                var existingMilestones = await _db.Milestones.ToListAsync();
+                var existingOccasions = await _db.Occasions.ToListAsync();
+                var existingCategories = await _db.Categories.ToListAsync();
+
+                if (existingMilestones.Count > 0)
+                    _db.Milestones.RemoveRange(existingMilestones);
+
+                if (existingOccasions.Count > 0)
+                    _db.Occasions.RemoveRange(existingOccasions);
+
+                if (existingCategories.Count > 0)
+                    _db.Categories.RemoveRange(existingCategories);
+
+                await _db.SaveChangesAsync();
+
                 var categoryMap = new System.Collections.Generic.Dictionary<int, int>();
                 foreach (var c in model.Categories)
                 {
-                    var existing = await _db.Categories.FirstOrDefaultAsync(x => x.Name.ToLower() == c.Name.ToLower());
-                    if (existing != null)
+                    var category = new Category
                     {
-                        categoryMap[c.SourceId] = existing.Id;
-                    }
-                    else
-                    {
-                        var nc = new Category { Name = c.Name, Emoji = c.Emoji, ColorHex = c.ColorHex };
-                        _db.Categories.Add(nc);
-                        await _db.SaveChangesAsync();
-                        categoryMap[c.SourceId] = nc.Id;
-                    }
+                        Name = c.Name,
+                        Emoji = c.Emoji,
+                        ColorHex = c.ColorHex
+                    };
+
+                    _db.Categories.Add(category);
+                    await _db.SaveChangesAsync();
+                    categoryMap[c.SourceId] = category.Id;
                 }
 
-                // Occasions: create new occasions, mapping category ids
                 var occasionMap = new System.Collections.Generic.Dictionary<int, int>();
                 foreach (var o in model.Occasions)
                 {
-                    var occ = new Occasion
+                    var occasion = new Occasion
                     {
                         Title = o.Title,
                         Emoji = o.Emoji,
                         ColorHex = o.ColorHex,
                         IsPinned = o.IsPinned,
                         AnchorDate = o.AnchorDate,
-                        Direction = Enum.TryParse<OccasionDirection>(o.Direction, true, out var d) ? d : OccasionDirection.Since,
+                        Direction = Enum.TryParse<OccasionDirection>(o.Direction, true, out var direction) ? direction : OccasionDirection.Since,
                         Notes = o.Notes,
                         CreatedAt = o.CreatedAt,
-                        CategoryId = o.CategorySourceId.HasValue && categoryMap.ContainsKey(o.CategorySourceId.Value) ? categoryMap[o.CategorySourceId.Value] : null
+                        CategoryId = o.CategorySourceId.HasValue && categoryMap.TryGetValue(o.CategorySourceId.Value, out var categoryId)
+                            ? categoryId
+                            : null
                     };
 
-                    _db.Occasions.Add(occ);
+                    _db.Occasions.Add(occasion);
                     await _db.SaveChangesAsync();
-                    occasionMap[o.SourceId] = occ.Id;
+                    occasionMap[o.SourceId] = occasion.Id;
                 }
 
-                // Milestones: create and attach to mapped occasions
                 foreach (var m in model.Milestones)
                 {
-                    if (!occasionMap.ContainsKey(m.OccasionSourceId))
-                        continue; // skip orphaned
+                    if (!occasionMap.TryGetValue(m.OccasionSourceId, out var occasionId))
+                        continue;
 
-                    var ms = new Milestone
+                    _db.Milestones.Add(new Milestone
                     {
-                        OccasionId = occasionMap[m.OccasionSourceId],
+                        OccasionId = occasionId,
                         ThresholdDays = m.ThresholdDays,
                         Label = m.Label,
                         Notified = m.Notified
-                    };
-                    _db.Milestones.Add(ms);
+                    });
                 }
-                await _db.SaveChangesAsync();
 
-                // Settings
-                if (model.Settings != null)
+                var settingsData = model.Settings ?? new AppSettingsDto();
+                var settings = await _db.AppSettings.FirstOrDefaultAsync();
+                if (settings == null)
                 {
-                    var settings = await _db.AppSettings.FirstOrDefaultAsync();
-                    if (settings == null)
-                    {
-                        settings = new Core.Domain.AppSettings();
-                        _db.AppSettings.Add(settings);
-                    }
-
-                    settings.Theme = model.Settings.Theme;
-                    settings.Language = model.Settings.Language;
-                    settings.NotificationsEnabled = model.Settings.NotificationsEnabled;
-                    await _db.SaveChangesAsync();
+                    settings = new Core.Domain.AppSettings();
+                    _db.AppSettings.Add(settings);
                 }
 
+                settings.Theme = settingsData.Theme;
+                settings.Language = settingsData.Language;
+                settings.NotificationsEnabled = settingsData.NotificationsEnabled;
+
+                await _db.SaveChangesAsync();
                 await transaction.CommitAsync();
             }
             catch (Exception)

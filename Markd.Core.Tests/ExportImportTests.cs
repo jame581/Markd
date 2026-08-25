@@ -53,27 +53,53 @@ namespace Markd.Core.Tests
                 };
                 src.Milestones.Add(milestone);
 
-                src.AppSettings.Add(new Markd.Core.Domain.AppSettings { Theme = "Light", Language = "en", NotificationsEnabled = true });
+                var sourceSettings = await src.AppSettings.FirstAsync();
+                sourceSettings.Theme = "Light";
+                sourceSettings.Language = "en";
+                sourceSettings.NotificationsEnabled = true;
                 await src.SaveChangesAsync();
 
                 var exporter = new ExportService(src);
                 var package = await exporter.CreateExportPackageAsync();
 
-                // Import into new DB
+                // Import into new DB with existing data that should be replaced
                 var tgtPath = Path.Combine(Path.GetTempPath(), $"markd_tgt_{Guid.NewGuid():N}.db");
                 using (var tgt = CreateSqliteContext(tgtPath))
                 {
+                    tgt.Categories.Add(new Markd.Core.Domain.Category { Name = "Old Category", Emoji = "🗂️" });
+                    await tgt.SaveChangesAsync();
+
+                    var oldCategory = tgt.Categories.First();
+                    tgt.Occasions.Add(new Markd.Core.Domain.Occasion
+                    {
+                        Title = "Old Occasion",
+                        AnchorDate = new DateTime(2019, 1, 1),
+                        Direction = Markd.Core.Domain.OccasionDirection.Since,
+                        CategoryId = oldCategory.Id
+                    });
+
+                    var targetSettings = await tgt.AppSettings.FirstAsync();
+                    targetSettings.Theme = "Dark";
+                    targetSettings.Language = "cs";
+                    targetSettings.NotificationsEnabled = false;
+                    await tgt.SaveChangesAsync();
+
                     var importer = new ImportService(tgt);
                     var model = await importer.ParseImportPackageAsync(package);
                     await importer.ApplyImportAsync(model);
 
-                    // Validate
+                    // Validate replacement
                     Assert.Equal(1, await tgt.Categories.CountAsync());
                     Assert.Equal(1, await tgt.Occasions.CountAsync());
                     Assert.Equal(1, await tgt.Milestones.CountAsync());
+                    Assert.DoesNotContain(await tgt.Categories.Select(x => x.Name).ToListAsync(), name => name == "Old Category");
+                    Assert.DoesNotContain(await tgt.Occasions.Select(x => x.Title).ToListAsync(), title => title == "Old Occasion");
+
                     var settings = await tgt.AppSettings.FirstOrDefaultAsync();
                     Assert.NotNull(settings);
                     Assert.Equal("Light", settings.Theme);
+                    Assert.Equal("en", settings.Language);
+                    Assert.True(settings.NotificationsEnabled);
                 }
             }
         }

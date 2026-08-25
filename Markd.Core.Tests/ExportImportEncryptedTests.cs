@@ -45,7 +45,10 @@ namespace Markd.Core.Tests
                 src.Occasions.Add(occ);
                 await src.SaveChangesAsync();
 
-                src.AppSettings.Add(new Markd.Core.Domain.AppSettings { Theme = "Dark", Language = "cs", NotificationsEnabled = false });
+                var settings = await src.AppSettings.FirstAsync();
+                settings.Theme = "Dark";
+                settings.Language = "cs";
+                settings.NotificationsEnabled = false;
                 await src.SaveChangesAsync();
 
                 var exporter = new ExportService(src);
@@ -60,15 +63,15 @@ namespace Markd.Core.Tests
 
                     Assert.Equal(1, await tgt.Categories.CountAsync());
                     Assert.Equal(1, await tgt.Occasions.CountAsync());
-                    var settings = await tgt.AppSettings.FirstOrDefaultAsync();
-                    Assert.NotNull(settings);
-                    Assert.Equal("Dark", settings.Theme);
+                    var importedSettings = await tgt.AppSettings.FirstOrDefaultAsync();
+                    Assert.NotNull(importedSettings);
+                    Assert.Equal("Dark", importedSettings.Theme);
                 }
             }
         }
 
         [Fact]
-        public async Task Import_Twice_CategoryNotDuplicated_OccasionsDuplicated()
+        public async Task Import_Twice_ReplacesExistingData()
         {
             var srcPath = Path.Combine(Path.GetTempPath(), $"markd_src_dup_{Guid.NewGuid():N}.db");
             using (var src = CreateSqliteContext(srcPath))
@@ -100,11 +103,9 @@ namespace Markd.Core.Tests
                     // Apply the same model again
                     await importer.ApplyImportAsync(model);
 
-                    // Categories should not be duplicated (ImportService matches by name)
                     Assert.Equal(1, await tgt.Categories.CountAsync());
-                    // Occasions are created each import, so expect 2
-                    Assert.Equal(2, await tgt.Occasions.CountAsync());
-                    // Milestones duplicated similarly
+                    Assert.Equal(1, await tgt.Occasions.CountAsync());
+                    Assert.Equal("Project Start", await tgt.Occasions.Select(x => x.Title).SingleAsync());
                 }
             }
         }
