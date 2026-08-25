@@ -103,5 +103,26 @@ namespace Markd.Core.Tests
                 }
             }
         }
+
+        [Fact]
+        public async Task ParseImportPackageAsync_UnsupportedSchema_ThrowsClearError()
+        {
+            var dbPath = Path.Combine(Path.GetTempPath(), $"markd_schema_{Guid.NewGuid():N}.db");
+            using var db = CreateSqliteContext(dbPath);
+            var importer = new ImportService(db);
+            var bytes = System.Text.Encoding.UTF8.GetBytes("""
+                {
+                  "schemaVersion": "2",
+                  "appVersion": "1.0.0",
+                  "exportedAt": "2026-01-01T00:00:00Z",
+                  "categories": [],
+                  "occasions": [],
+                  "milestones": []
+                }
+                """);
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => importer.ParseImportPackageAsync(bytes));
+            Assert.Equal("Unsupported import schema version '2'. This app supports schema version 1.", ex.Message);
+        }
     }
 }

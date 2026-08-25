@@ -30,9 +30,11 @@ namespace Markd.Core.Services
 
         public async Task<ExportModel> ParseImportPackageAsync(byte[] package, string? passphrase = null)
         {
+            if (package == null || package.Length == 0)
+                throw new InvalidOperationException("The selected file is empty.");
+
             if (package.Length >= Magic.Length && package.Take(Magic.Length).SequenceEqual(Magic))
             {
-                // Encrypted container
                 var idx = Magic.Length;
                 var salt = package.Skip(idx).Take(16).ToArray(); idx += 16;
                 var nonce = package.Skip(idx).Take(12).ToArray(); idx += 12;
@@ -40,11 +42,10 @@ namespace Markd.Core.Services
                 var ciphertext = package.Skip(idx).ToArray();
 
                 if (string.IsNullOrEmpty(passphrase))
-                    throw new InvalidOperationException("Passphrase required for encrypted import package.");
+                    throw new InvalidOperationException("This import file is encrypted and requires a passphrase.");
 
-                // Derive key (PBKDF2) - match ExportService
                 const int iterations = 200_000;
-                const int iterationsLocal = iterations; // preserve iterations
+                const int iterationsLocal = iterations;
                 using var kdf = new Rfc2898DeriveBytes(passphrase, salt, iterationsLocal, HashAlgorithmName.SHA256);
                 var key = kdf.GetBytes(32);
 
@@ -56,20 +57,13 @@ namespace Markd.Core.Services
                 }
                 catch (CryptographicException ex)
                 {
-                    throw new InvalidOperationException("Decryption failed. Incorrect passphrase or corrupted package.", ex);
+                    throw new InvalidOperationException("The import file could not be decrypted. Check the passphrase or file contents.", ex);
                 }
 
-                var json = Encoding.UTF8.GetString(plain);
-                var model = JsonSerializer.Deserialize<ExportModel>(json, _jsonOptions);
-                if (model == null) throw new InvalidOperationException("Failed to parse import JSON.");
-                return model;
+                return ParseAndValidateImportJson(Encoding.UTF8.GetString(plain));
             }
 
-            // Plain JSON
-            var text = Encoding.UTF8.GetString(package);
-            var parsed = JsonSerializer.Deserialize<ExportModel>(text, _jsonOptions);
-            if (parsed == null) throw new InvalidOperationException("Failed to parse import JSON.");
-            return parsed;
+            return ParseAndValidateImportJson(Encoding.UTF8.GetString(package));
         }
 
         public async Task ApplyImportAsync(ExportModel model)
@@ -188,6 +182,43 @@ namespace Markd.Core.Services
 
                 throw;
             }
+        }
+
+        private ExportModel ParseAndValidateImportJson(string json)
+        {
+            ExportModel? model;
+            try
+            {
+                model = JsonSerializer.Deserialize<ExportModel>(json, _jsonOptions);
+            }
+            catch (JsonException ex)
+            {
+                throw new InvalidOperationException("The selected file is not a valid Markd JSON export.", ex);
+            }
+
+            if (model == null)
+                throw new InvalidOperationException("The selected file is not a valid Markd JSON export.");
+
+            ValidateModel(model);
+            return model;
+        }
+
+        private static void ValidateModel(ExportModel model)
+        {
+            if (string.IsNullOrWhiteSpace(model.SchemaVersion))
+                throw new InvalidOperationException("The selected file is missing a schema version.");
+
+            if (!string.Equals(model.SchemaVersion, "1", StringComparison.Ordinal))
+                throw new InvalidOperationException($"Unsupported import schema version '{model.SchemaVersion}'. This app supports schema version 1.");
+
+            if (model.Categories.Any(c => string.IsNullOrWhiteSpace(c.Name)))
+                throw new InvalidOperationException("The selected file contains a category with a missing name.");
+
+            if (model.Occasions.Any(o => string.IsNullOrWhiteSpace(o.Title)))
+                throw new InvalidOperationException("The selected file contains an occasion with a missing title.");
+
+            if (model.Milestones.Any(m => string.IsNullOrWhiteSpace(m.Label)))
+                throw new InvalidOperationException("The selected file contains a milestone with a missing label.");
         }
 
         private static string? GetSqliteDataSource(string connectionString)
