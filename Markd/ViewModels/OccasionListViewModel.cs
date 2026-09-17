@@ -9,6 +9,7 @@ public class OccasionListViewModel : ViewModelBase
 {
     private readonly IOccasionService _occasionService;
     private Occasion? _featuredOccasion;
+    private OccasionSummary? _featuredSummary;
 
     public OccasionListViewModel(IOccasionService occasionService)
     {
@@ -19,6 +20,12 @@ public class OccasionListViewModel : ViewModelBase
     }
 
     public ObservableCollection<OccasionGroup> OccasionGroups { get; } = new();
+
+    public OccasionSummary? FeaturedSummary
+    {
+        get => _featuredSummary;
+        private set => SetProperty(ref _featuredSummary, value);
+    }
 
     public Occasion? FeaturedOccasion
     {
@@ -44,14 +51,15 @@ public class OccasionListViewModel : ViewModelBase
             OccasionGroups.Clear();
 
             var occasions = await _occasionService.GetAllAsync();
-
-            FeaturedOccasion = occasions.FirstOrDefault(o => o.IsPinned);
-            OnPropertyChanged(nameof(HasFeaturedOccasion));
-
             var summaries = occasions
                 .Select(o => new OccasionSummary(o, _occasionService.GetDays(o)))
                 .OrderByDescending(s => s.Occasion.IsPinned)
-                .ThenBy(s => s.Occasion.Title);
+                .ThenBy(s => s.Occasion.Title)
+                .ToList();
+
+            FeaturedSummary = summaries.FirstOrDefault(s => s.Occasion.IsPinned);
+            FeaturedOccasion = FeaturedSummary?.Occasion;
+            OnPropertyChanged(nameof(HasFeaturedOccasion));
 
             var grouped = summaries
                 .GroupBy(s => string.IsNullOrWhiteSpace(s.Occasion.Category?.Name)

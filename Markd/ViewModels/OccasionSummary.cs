@@ -8,6 +8,18 @@ namespace Markd.ViewModels;
 /// </summary>
 public record OccasionSummary(Occasion Occasion, int Days)
 {
+    public int DisplayDays => Math.Abs(Days);
+
+    public string CountLabel => Occasion.Direction == OccasionDirection.Since
+        ? "DAYS"
+        : Days >= 0 ? "TO GO" : "AGO";
+
+    public string AnchorLabel => Occasion.Direction == OccasionDirection.Since
+        ? $"since {Occasion.AnchorDate:dd MMM yyyy}"
+        : Days >= 0
+            ? $"until {Occasion.AnchorDate:dd MMM yyyy}"
+            : $"was {Occasion.AnchorDate:dd MMM yyyy}";
+
     /// <summary>
     /// Human-readable time label shown on the list card.
     /// e.g. "365 days since" or "12 days until"

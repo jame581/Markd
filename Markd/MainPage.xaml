@@ -1,39 +1,436 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:domain="clr-namespace:Markd.Core.Domain;assembly=Markd.Core"
+             xmlns:viewModels="clr-namespace:Markd.ViewModels"
              x:Class="Markd.MainPage"
-             Title="Markd">
+             x:Name="RootPage"
+             x:DataType="viewModels:OccasionListViewModel"
+             Title="Markd"
+             Style="{StaticResource MarkdPage}">
 
-    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="12">
-        <Button Grid.Row="0" Text="Add Occasion" Command="{Binding AddCommand}" />
+    <ContentPage.Resources>
+        <Style x:Key="SectionCard" TargetType="Border" BasedOn="{StaticResource Card}">
+            <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+            <Setter Property="Padding" Value="18" />
+        </Style>
 
-        <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding Occasions}"
-                        SelectionMode="Single"
-                        SelectionChanged="OnOccasionSelected">
-            <CollectionView.EmptyView>
-                <VerticalStackLayout Spacing="6">
-                    <Label Text="No occasions yet." FontSize="18" FontAttributes="Bold" />
-                    <Label Text="Tap 'Add Occasion' to create your first tracker." />
-                </VerticalStackLayout>
-            </CollectionView.EmptyView>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="domain:Occasion">
-                    <Frame Padding="12" Margin="0,4" BorderColor="#DDDDDD">
-                        <VerticalStackLayout Spacing="4">
+        <Style x:Key="OccasionRowCard" TargetType="Border" BasedOn="{StaticResource Card}">
+            <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+            <Setter Property="MinimumHeightRequest" Value="64" />
+        </Style>
+
+        <Style x:Key="HeaderTitle" TargetType="Label">
+            <Setter Property="FontFamily" Value="FigtreeExtraBold" />
+            <Setter Property="FontSize" Value="28" />
+            <Setter Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource TextPrimaryLight},
+                                            Dark={StaticResource TextPrimaryDark}}" />
+        </Style>
+
+        <Style x:Key="HeaderSubtitle" TargetType="Label" BasedOn="{StaticResource RowSubtitle}">
+            <Setter Property="FontSize" Value="13" />
+        </Style>
+
+        <Style x:Key="RowCountValue" TargetType="Label">
+            <Setter Property="FontFamily" Value="FigtreeSemiBold" />
+            <Setter Property="FontSize" Value="19" />
+            <Setter Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource TextPrimaryLight},
+                                            Dark={StaticResource TextPrimaryDark}}" />
+            <Setter Property="HorizontalTextAlignment" Value="End" />
+        </Style>
+
+        <Style x:Key="RowCountCaption" TargetType="Label">
+            <Setter Property="FontFamily" Value="FigtreeSemiBold" />
+            <Setter Property="FontSize" Value="10.5" />
+            <Setter Property="CharacterSpacing" Value="0.5" />
+            <Setter Property="TextTransform" Value="Uppercase" />
+            <Setter Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource TextTertiaryLight},
+                                            Dark={StaticResource TextTertiaryDark}}" />
+            <Setter Property="HorizontalTextAlignment" Value="End" />
+        </Style>
+
+        <Style x:Key="MetaChip" TargetType="Border">
+            <Setter Property="Padding" Value="8,4" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 6" />
+            <Setter Property="BackgroundColor"
+                    Value="{AppThemeBinding Light={StaticResource AccentTintLight},
+                                            Dark={StaticResource AccentTintDark}}" />
+        </Style>
+
+        <Style x:Key="EmptyStateBody" TargetType="Label">
+            <Setter Property="FontFamily" Value="FigtreeRegular" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="LineHeight" Value="1.55" />
+            <Setter Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource TextSecondaryLight},
+                                            Dark={StaticResource TextSecondaryDark}}" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid Padding="26,18,26,40"
+          RowDefinitions="Auto,*"
+          RowSpacing="18">
+        <Grid Grid.Row="0"
+              ColumnDefinitions="*,Auto"
+              ColumnSpacing="16">
+            <VerticalStackLayout Spacing="4">
+                <Label Text="Home"
+                       Style="{StaticResource HeaderTitle}" />
+                <Label Text="Keep your featured moment close and everything else grouped below."
+                       Style="{StaticResource HeaderSubtitle}" />
+            </VerticalStackLayout>
+
+            <Button Grid.Column="1"
+                    Text="+ New occasion"
+                    Style="{StaticResource PrimaryButton}"
+                    HeightRequest="36"
+                    Padding="16,0"
+                    CornerRadius="8"
+                    VerticalOptions="Center"
+                    Command="{Binding AddCommand}" />
+        </Grid>
+
+        <Grid Grid.Row="1"
+              x:Name="HomeLayoutGrid"
+              ColumnSpacing="24">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="ListPaneColumn" Width="*" />
+                <ColumnDefinition x:Name="DetailPaneColumn" Width="0" />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0"
+                  RowDefinitions="Auto,*"
+                  RowSpacing="18">
+                <Border Grid.Row="0"
+                        x:Name="MobileFeaturedCard"
+                        Style="{StaticResource FeaturedCard}"
+                        IsVisible="False">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnFeaturedCardTapped" />
+                    </Border.GestureRecognizers>
+
+                    <VerticalStackLayout BindingContext="{Binding FeaturedSummary}"
+                                         x:DataType="viewModels:OccasionSummary"
+                                         Spacing="14">
+                        <Grid ColumnDefinitions="Auto,*,Auto"
+                              ColumnSpacing="12">
+                            <Grid WidthRequest="30"
+                                  HeightRequest="30">
+                                <Border BackgroundColor="{Binding Occasion.ColorHex}"
+                                        Opacity="0.13"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 10" />
+                                <Label Text="{Binding Occasion.Emoji}"
+                                       FontSize="16"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center" />
+                            </Grid>
+
+                            <VerticalStackLayout Grid.Column="1"
+                                                 Spacing="2"
+                                                 VerticalOptions="Center">
+                                <Label Text="{Binding Occasion.Title}"
+                                       Style="{StaticResource RowTitle}" />
+                                <Label Text="{Binding AnchorLabel}"
+                                       Style="{StaticResource RowSubtitle}" />
+                            </VerticalStackLayout>
+
+                            <Border Grid.Column="2"
+                                    Style="{StaticResource MetaChip}"
+                                    IsVisible="{Binding Occasion.IsPinned}"
+                                    VerticalOptions="Start">
+                                <Label Text="Pinned"
+                                       Style="{StaticResource Overline}"
+                                       TextColor="{AppThemeBinding Light={StaticResource AccentTextLight},
+                                                                   Dark={StaticResource AccentTextDark}}" />
+                            </Border>
+                        </Grid>
+
+                        <HorizontalStackLayout Spacing="8">
+                            <Label Text="{Binding DisplayDays}"
+                                   Style="{StaticResource CountLabel}" />
+                            <Label Text="days"
+                                   FontFamily="FigtreeSemiBold"
+                                   FontSize="19"
+                                   Margin="0,0,0,10"
+                                   VerticalOptions="End"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight},
+                                                               Dark={StaticResource TextSecondaryDark}}" />
+                        </HorizontalStackLayout>
+
+                        <Label Text="{Binding TimeLabel}"
+                               Style="{StaticResource BreakdownLabel}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <CollectionView Grid.Row="1"
+                                x:Name="OccasionGroupsView"
+                                ItemsSource="{Binding OccasionGroups}"
+                                IsGrouped="True"
+                                SelectionMode="Single"
+                                SelectionChanged="OnOccasionSelected">
+                    <CollectionView.EmptyView>
+                        <Border Style="{StaticResource SectionCard}"
+                                Margin="0,24,0,0"
+                                Padding="28,32">
+                            <VerticalStackLayout Spacing="14"
+                                                 HorizontalOptions="Center">
+                                <Border WidthRequest="84"
+                                        HeightRequest="84"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 26"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource AccentTintLight},
+                                                                          Dark={StaticResource AccentTintDark}}">
+                                    <Label Text="🗓️"
+                                           FontSize="38"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Border>
+
+                                <Label Text="Nothing marked yet"
+                                       FontFamily="FigtreeSemiBold"
+                                       FontSize="21"
+                                       HorizontalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight},
+                                                                   Dark={StaticResource TextPrimaryDark}}" />
+
+                                <Label Text="Start with one meaningful date and Markd will keep the count ready on this device."
+                                       Style="{StaticResource EmptyStateBody}"
+                                       MaximumWidthRequest="360" />
+
+                                <Button Text="Add your first occasion"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Padding="22,14"
+                                        Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.AddCommand}" />
+
+                                <Label Text="Your dates and notes stay stored locally."
+                                       Style="{StaticResource RowSubtitle}"
+                                       HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </CollectionView.EmptyView>
+
+                    <CollectionView.GroupHeaderTemplate>
+                        <DataTemplate x:DataType="viewModels:OccasionGroup">
+                            <Label Text="{Binding CategoryName}"
+                                   Style="{StaticResource Overline}"
+                                   Margin="4,0,0,7" />
+                        </DataTemplate>
+                    </CollectionView.GroupHeaderTemplate>
+
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="viewModels:OccasionSummary">
+                            <Border Style="{StaticResource OccasionRowCard}">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroup Name="CommonStates">
+                                        <VisualState Name="Normal" />
+                                        <VisualState Name="Selected">
+                                            <VisualState.Setters>
+                                                <Setter Property="Stroke" Value="{StaticResource AccentBorderColor}" />
+                                            </VisualState.Setters>
+                                        </VisualState>
+                                    </VisualStateGroup>
+                                </VisualStateManager.VisualStateGroups>
+
+                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                      ColumnSpacing="12">
+                                    <Grid WidthRequest="30"
+                                          HeightRequest="30"
+                                          VerticalOptions="Center">
+                                        <Border BackgroundColor="{Binding Occasion.ColorHex}"
+                                                Opacity="0.13"
+                                                StrokeThickness="0"
+                                                StrokeShape="RoundRectangle 10" />
+                                        <Label Text="{Binding Occasion.Emoji}"
+                                               FontSize="15"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center" />
+                                    </Grid>
+
+                                    <VerticalStackLayout Grid.Column="1"
+                                                         Spacing="2"
+                                                         VerticalOptions="Center">
+                                        <Label Text="{Binding Occasion.Title}"
+                                               Style="{StaticResource RowTitle}"
+                                               LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding AnchorLabel}"
+                                               Style="{StaticResource RowSubtitle}" />
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout Grid.Column="2"
+                                                         Spacing="1"
+                                                         VerticalOptions="Center">
+                                        <Label Text="{Binding DisplayDays}"
+                                               Style="{StaticResource RowCountValue}" />
+                                        <Label Text="{Binding CountLabel}"
+                                               Style="{StaticResource RowCountCaption}" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+
+            <ScrollView Grid.Column="1"
+                        x:Name="DesktopDetailScroll"
+                        IsVisible="False">
+                <VerticalStackLayout x:Name="DesktopDetailRoot"
+                                     x:DataType="viewModels:OccasionDetailViewModel"
+                                     Spacing="18">
+                    <Border Style="{StaticResource FeaturedCard}">
+                        <VerticalStackLayout Spacing="14">
+                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                  ColumnSpacing="12">
+                                <Grid WidthRequest="30"
+                                      HeightRequest="30">
+                                    <Border BackgroundColor="{Binding CurrentOccasion.ColorHex}"
+                                            Opacity="0.13"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 10" />
+                                    <Label Text="{Binding CurrentOccasion.Emoji}"
+                                           FontSize="16"
+                                           HorizontalOptions="Center"
+                                           VerticalOptions="Center" />
+                                </Grid>
+
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Spacing="2"
+                                                     VerticalOptions="Center">
+                                    <Label Text="{Binding CurrentOccasion.Title}"
+                                           Style="{StaticResource RowTitle}" />
+                                    <Label Text="{Binding CurrentOccasion.AnchorDate, StringFormat='Anchor · {0:dd MMM yyyy}'}"
+                                           Style="{StaticResource RowSubtitle}" />
+                                </VerticalStackLayout>
+
+                                <Border Grid.Column="2"
+                                        Style="{StaticResource MetaChip}"
+                                        IsVisible="{Binding CurrentOccasion.IsPinned}"
+                                        VerticalOptions="Start">
+                                    <Label Text="Pinned"
+                                           Style="{StaticResource Overline}"
+                                           TextColor="{AppThemeBinding Light={StaticResource AccentTextLight},
+                                                                       Dark={StaticResource AccentTextDark}}" />
+                                </Border>
+                            </Grid>
+
                             <HorizontalStackLayout Spacing="8">
-                                <Label Text="{Binding Emoji}" FontSize="20" />
-                                <Label Text="{Binding Title}" FontSize="18" FontAttributes="Bold" />
-                                <Label Text="PINNED" IsVisible="{Binding IsPinned}" FontAttributes="Bold" TextColor="#0A7C2F" />
+                                <Label Text="{Binding Days}"
+                                       Style="{StaticResource CountLabel}" />
+                                <Label Text="days"
+                                       FontFamily="FigtreeSemiBold"
+                                       FontSize="19"
+                                       Margin="0,0,0,10"
+                                       VerticalOptions="End"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight},
+                                                                   Dark={StaticResource TextSecondaryDark}}" />
                             </HorizontalStackLayout>
-                            <Label Text="{Binding Direction}" />
-                            <Label Text="{Binding AnchorDate, StringFormat='Anchor: {0:D}'}" />
-                        </VerticalStackLayout>
-                    </Frame>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </Grid>
 
+                            <Label Text="{Binding TimeBreakdown}"
+                                   Style="{StaticResource BreakdownLabel}" />
+
+                            <HorizontalStackLayout Spacing="8">
+                                <Border Style="{StaticResource MetaChip}">
+                                    <Label Text="{Binding CurrentOccasion.Direction}"
+                                           Style="{StaticResource Overline}"
+                                           TextColor="{AppThemeBinding Light={StaticResource AccentTextLight},
+                                                                       Dark={StaticResource AccentTextDark}}" />
+                                </Border>
+                                <Label Text="{Binding CurrentOccasion.AnchorDate, StringFormat='{0:dd MMM yyyy}'}"
+                                       Style="{StaticResource RowSubtitle}"
+                                       VerticalTextAlignment="Center" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Notes"
+                                       Style="{StaticResource Overline}" />
+                                <Button Grid.Column="1"
+                                        Text="Open details"
+                                        Style="{StaticResource TonalButton}"
+                                        HeightRequest="36"
+                                        Padding="14,0"
+                                        CornerRadius="8"
+                                        Clicked="OnOpenDetailClicked" />
+                            </Grid>
+
+                            <Label Text="{Binding CurrentOccasion.Notes, TargetNullValue='No notes yet.'}"
+                                   FontFamily="FigtreeRegular"
+                                   FontSize="15"
+                                   LineHeight="1.55"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight},
+                                                               Dark={StaticResource TextPrimaryDark}}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource SectionCard}">
+                        <VerticalStackLayout Spacing="12">
+                            <Label Text="Milestones"
+                                   Style="{StaticResource Overline}" />
+
+                            <Label Text="No milestones yet."
+                                   Style="{StaticResource RowSubtitle}"
+                                   IsVisible="False">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding Milestones.Count}"
+                                                 Value="0">
+                                        <Setter Property="IsVisible" Value="True" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Milestones}"
+                                                 Spacing="10">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="domain:Milestone">
+                                        <Grid ColumnDefinitions="Auto,*,Auto"
+                                              ColumnSpacing="10">
+                                            <Border WidthRequest="24"
+                                                    HeightRequest="24"
+                                                    BackgroundColor="{AppThemeBinding Light={StaticResource AccentTintLight},
+                                                                                      Dark={StaticResource SurfaceCardPressedDark}}"
+                                                    StrokeThickness="0"
+                                                    StrokeShape="RoundRectangle 12"
+                                                    VerticalOptions="Center">
+                                                <Label Text="•"
+                                                       FontSize="18"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center"
+                                                       TextColor="{AppThemeBinding Light={StaticResource AccentTextLight},
+                                                                                   Dark={StaticResource TextSecondaryDark}}" />
+                                            </Border>
+
+                                            <VerticalStackLayout Grid.Column="1"
+                                                                 Spacing="2">
+                                                <Label Text="{Binding Label}"
+                                                       Style="{StaticResource RowTitle}" />
+                                                <Label Text="{Binding ThresholdDays, StringFormat='Threshold · {0}d'}"
+                                                       Style="{StaticResource RowSubtitle}" />
+                                            </VerticalStackLayout>
+
+                                            <Label Grid.Column="2"
+                                                   Text="{Binding ThresholdDays, StringFormat='{0}d'}"
+                                                   Style="{StaticResource BreakdownLabel}"
+                                                   VerticalOptions="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
+    </Grid>
 </ContentPage>
