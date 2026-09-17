@@ -3,6 +3,7 @@ using Markd.Services;
 using Markd.ViewModels;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
+using CommunityToolkit.Maui;
 
 namespace Markd
 {
@@ -14,8 +15,16 @@ namespace Markd
             builder
                 .UseMauiApp<App>()
                 .UseLocalNotification()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
+                    fonts.AddFont("Figtree-Regular.ttf",  "FigtreeRegular");
+                    fonts.AddFont("Figtree-Medium.ttf",   "FigtreeMedium");
+                    fonts.AddFont("Figtree-SemiBold.ttf", "FigtreeSemiBold");
+                    fonts.AddFont("Figtree-Bold.ttf",     "FigtreeBold");
+                    fonts.AddFont("Figtree-ExtraBold.ttf","FigtreeExtraBold");
+                    fonts.AddFont("IBMPlexMono-Medium.ttf", "PlexMonoMedium");
+                    // keep OpenSans registered until every page is migrated
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });

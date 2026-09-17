@@ -1,0 +1,2 @@
+IBM Plex Mono license (SIL OFL) placeholder
+Please include the real LICENSE text from the IBM Plex Mono distribution.
