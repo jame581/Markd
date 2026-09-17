@@ -61,14 +61,18 @@ namespace Markd.Core.Data
                 entity.HasKey(a => a.Id);
                 entity.Property(a => a.Theme).HasMaxLength(20);
                 entity.Property(a => a.Language).HasMaxLength(10);
+                entity.Property(a => a.NotificationTimeOfDay)
+                      .HasColumnType("TEXT")
+                      .HasDefaultValue(new TimeSpan(9, 0, 0));
 
                 // Seed default settings row
                 entity.HasData(new AppSettings
                 {
                     Id = 1,
                     Theme = "System",
-                    Language = "en",                 
-                    NotificationsEnabled = true
+                    Language = "en",
+                    NotificationsEnabled = true,
+                    NotificationTimeOfDay = new TimeSpan(9, 0, 0)
                 });
             });
         }

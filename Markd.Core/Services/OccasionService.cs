@@ -28,6 +28,16 @@ namespace Markd.Core.Services
             await db.SaveChangesAsync();
         }
 
+        public async Task DeleteAllAsync()
+        {
+            await using var transaction = await db.Database.BeginTransactionAsync();
+
+            await db.Milestones.ExecuteDeleteAsync();
+            await db.Occasions.ExecuteDeleteAsync();
+
+            await transaction.CommitAsync();
+        }
+
         public async Task<List<Occasion>> GetAllAsync()
         {
             return await db.Occasions
@@ -77,6 +87,87 @@ namespace Markd.Core.Services
             }
 
             return pending;
+        }
+
+        public async Task<IReadOnlyList<CalendarMark>> GetCalendarMarksAsync(int year, int month)
+        {
+            var monthStart = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc);
+            var monthEnd = monthStart.AddMonths(1);
+
+            var anchorMarks = await db.Occasions
+                .AsNoTracking()
+                .Where(o => o.AnchorDate >= monthStart && o.AnchorDate < monthEnd)
+                .Select(o => new
+                {
+                    o.Id,
+                    o.Title,
+                    o.Emoji,
+                    o.ColorHex,
+                    o.AnchorDate
+                })
+                .ToListAsync();
+
+            var milestoneMarks = await db.Occasions
+                .AsNoTracking()
+                .Join(
+                    db.Milestones.AsNoTracking(),
+                    occasion => occasion.Id,
+                    milestone => milestone.OccasionId,
+                    (occasion, milestone) => new
+                    {
+                        occasion.Id,
+                        occasion.Title,
+                        occasion.Emoji,
+                        occasion.ColorHex,
+                        occasion.Direction,
+                        occasion.AnchorDate,
+                        milestone.Label,
+                        milestone.ThresholdDays,
+                        milestone.Notified
+                    })
+                .Select(mark => new
+                {
+                    mark.Id,
+                    mark.Title,
+                    mark.Emoji,
+                    mark.ColorHex,
+                    Date = mark.Direction == OccasionDirection.Since
+                        ? mark.AnchorDate.AddDays(mark.ThresholdDays)
+                        : mark.AnchorDate.AddDays(-mark.ThresholdDays),
+                    mark.Label,
+                    mark.ThresholdDays,
+                    mark.Notified
+                })
+                .Where(mark => mark.Date >= monthStart && mark.Date < monthEnd)
+                .ToListAsync();
+
+            var marks = anchorMarks
+                .Select(mark => new CalendarMark(
+                    DateOnly.FromDateTime(mark.AnchorDate),
+                    mark.Id,
+                    mark.Title,
+                    mark.Emoji,
+                    mark.ColorHex,
+                    CalendarMarkKind.Anchor,
+                    null,
+                    null,
+                    false))
+                .Concat(milestoneMarks.Select(mark => new CalendarMark(
+                    DateOnly.FromDateTime(mark.Date),
+                    mark.Id,
+                    mark.Title,
+                    mark.Emoji,
+                    mark.ColorHex,
+                    CalendarMarkKind.Milestone,
+                    mark.Label,
+                    mark.ThresholdDays,
+                    mark.Notified)))
+                .OrderBy(mark => mark.Date)
+                .ThenBy(mark => mark.Kind)
+                .ThenBy(mark => mark.Title)
+                .ToList();
+
+            return marks;
         }
 
         public async Task<Occasion> UpdateAsync(Occasion occasion)

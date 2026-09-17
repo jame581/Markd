@@ -40,6 +40,7 @@ namespace Markd.Core.Services
                 existing.Theme = settings.Theme;
                 existing.Language = settings.Language;
                 existing.NotificationsEnabled = settings.NotificationsEnabled;
+                existing.NotificationTimeOfDay = settings.NotificationTimeOfDay;
             }
 
             await db.SaveChangesAsync();

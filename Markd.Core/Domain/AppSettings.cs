@@ -10,5 +10,7 @@
 
         public bool NotificationsEnabled { get; set; } = true;
 
+        public TimeSpan NotificationTimeOfDay { get; set; } = new(9, 0, 0);
+
     }
 }

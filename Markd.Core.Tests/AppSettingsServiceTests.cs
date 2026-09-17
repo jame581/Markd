@@ -20,6 +20,7 @@ public class AppSettingsServiceTests
             Assert.Equal("System", settings.Theme);
             Assert.Equal("en", settings.Language);
             Assert.True(settings.NotificationsEnabled);
+            Assert.Equal(new TimeSpan(9, 0, 0), settings.NotificationTimeOfDay);
         }
     }
 
@@ -36,6 +37,7 @@ public class AppSettingsServiceTests
             settings.Theme = "Dark";
             settings.Language = "cs";
             settings.NotificationsEnabled = false;
+            settings.NotificationTimeOfDay = new TimeSpan(7, 45, 0);
 
             await service.SaveAsync(settings);
 
@@ -43,6 +45,7 @@ public class AppSettingsServiceTests
             Assert.Equal("Dark", reloaded.Theme);
             Assert.Equal("cs", reloaded.Language);
             Assert.False(reloaded.NotificationsEnabled);
+            Assert.Equal(new TimeSpan(7, 45, 0), reloaded.NotificationTimeOfDay);
         }
     }
 

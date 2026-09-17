@@ -108,6 +108,92 @@ public class OccasionServiceTests
         Assert.Empty(pending);
     }
 
+    [Fact]
+    public async Task DeleteAllAsync_RemovesOccasionsAndMilestones()
+    {
+        using var tuple = CreateService();
+
+        var occasion = new Occasion
+        {
+            Title = "Test",
+            AnchorDate = DateTime.UtcNow.Date,
+            Direction = OccasionDirection.Since,
+            Milestones =
+            [
+                new Milestone { Label = "7 days", ThresholdDays = 7, Notified = false },
+                new Milestone { Label = "30 days", ThresholdDays = 30, Notified = false }
+            ]
+        };
+
+        await tuple.Context.Occasions.AddAsync(occasion);
+        await tuple.Context.SaveChangesAsync();
+
+        await tuple.Service.DeleteAllAsync();
+
+        Assert.Empty(await tuple.Service.GetAllAsync());
+        Assert.Empty(tuple.Context.Milestones);
+    }
+
+    [Fact]
+    public async Task GetCalendarMarksAsync_ReturnsAnchorAndMilestoneMarksForRequestedMonth()
+    {
+        using var tuple = CreateService();
+
+        var anchorOccasion = new Occasion
+        {
+            Title = "Anchor",
+            AnchorDate = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Utc),
+            Direction = OccasionDirection.Since,
+            Emoji = "🎂",
+            ColorHex = "#ff0000"
+        };
+
+        var milestoneOccasion = new Occasion
+        {
+            Title = "Milestone",
+            AnchorDate = new DateTime(2025, 12, 31, 0, 0, 0, DateTimeKind.Utc),
+            Direction = OccasionDirection.Since,
+            Emoji = "💍",
+            ColorHex = "#00ff00",
+            Milestones =
+            [
+                new Milestone
+                {
+                    Label = "12 days",
+                    ThresholdDays = 12,
+                    Notified = false
+                }
+            ]
+        };
+
+        await tuple.Context.Occasions.AddRangeAsync(anchorOccasion, milestoneOccasion);
+        await tuple.Context.SaveChangesAsync();
+
+        var marks = await tuple.Service.GetCalendarMarksAsync(2026, 1);
+
+        Assert.Equal(2, marks.Count);
+
+        var anchorMark = Assert.Single(marks, mark => mark.Kind == CalendarMarkKind.Anchor);
+        Assert.Equal(new DateOnly(2026, 1, 12), anchorMark.Date);
+        Assert.Equal(anchorOccasion.Id, anchorMark.OccasionId);
+        Assert.Equal("Anchor", anchorMark.Title);
+        Assert.Equal("🎂", anchorMark.Emoji);
+        Assert.Equal("#ff0000", anchorMark.ColorHex);
+        Assert.Null(anchorMark.Label);
+        Assert.Null(anchorMark.ThresholdDays);
+        Assert.False(anchorMark.Notified);
+
+        var milestoneMark = Assert.Single(marks, mark => mark.Kind == CalendarMarkKind.Milestone);
+        Assert.Equal(new DateOnly(2026, 1, 12), milestoneMark.Date);
+        Assert.Equal(milestoneOccasion.Id, milestoneMark.OccasionId);
+        Assert.Equal("Milestone", milestoneMark.Title);
+        Assert.Equal("💍", milestoneMark.Emoji);
+        Assert.Equal("#00ff00", milestoneMark.ColorHex);
+        Assert.Equal("12 days", milestoneMark.Label);
+        Assert.Equal(12, milestoneMark.ThresholdDays);
+        Assert.False(milestoneMark.Notified);
+    }
+
     private static ServiceScope CreateService()
     {
         var (context, connection) = TestDbFactory.CreateSqliteInMemoryContext();
