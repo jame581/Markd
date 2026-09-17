@@ -87,6 +87,6 @@ public class OccasionListViewModel : ViewModelBase
 
     private async Task ManageCategoriesAsync()
     {
-        await Shell.Current.GoToAsync(nameof(CategoryPage));
+        await Shell.Current.GoToAsync("//categories");
     }
 }
