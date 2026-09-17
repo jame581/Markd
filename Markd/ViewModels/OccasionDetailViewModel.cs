@@ -2,27 +2,39 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using Markd.Core.Domain;
 using Markd.Core.Services;
+using Markd.Services;
+using Microsoft.Maui.Devices;
 
 namespace Markd.ViewModels;
 
 public class OccasionDetailViewModel : ViewModelBase
 {
     private readonly IOccasionService _occasionService;
+    private readonly IAppShellService _shellService;
+    private readonly IShareService _shareService;
     private Occasion? _currentOccasion;
     private int _days;
     private string _timeBreakdown = string.Empty;
     private string _newMilestoneLabel = string.Empty;
     private string _newMilestoneThresholdDays = string.Empty;
+    private MilestoneViewState? _nextMilestone;
+    private double _nextMilestoneProgress;
     private IDispatcherTimer? _timer;
 
-    public OccasionDetailViewModel(IOccasionService occasionService)
+    public OccasionDetailViewModel(
+        IOccasionService occasionService,
+        IAppShellService shellService,
+        IShareService shareService)
     {
         _occasionService = occasionService;
+        _shellService = shellService;
+        _shareService = shareService;
         EditCommand = new AsyncRelayCommand(EditAsync);
         DeleteCommand = new AsyncRelayCommand(DeleteAsync);
         PinCommand = new AsyncRelayCommand(PinAsync);
         AddMilestoneCommand = new AsyncRelayCommand(AddMilestoneAsync);
         RemoveMilestoneCommand = new AsyncRelayCommand<Milestone?>(RemoveMilestoneAsync);
+        ShareCommand = new AsyncRelayCommand(ShareAsync);
     }
 
     public Occasion? CurrentOccasion
@@ -33,6 +45,9 @@ public class OccasionDetailViewModel : ViewModelBase
             if (SetProperty(ref _currentOccasion, value))
             {
                 OnPropertyChanged(nameof(LocalAnchorDate));
+                OnPropertyChanged(nameof(DirectionChipText));
+                OnPropertyChanged(nameof(NotesText));
+                OnPropertyChanged(nameof(PinButtonText));
             }
         }
     }
@@ -53,6 +68,7 @@ public class OccasionDetailViewModel : ViewModelBase
     }
 
     public ObservableCollection<Milestone> Milestones { get; } = new();
+    public ObservableCollection<MilestoneViewState> MilestoneStates { get; } = new();
 
     public string NewMilestoneLabel
     {
@@ -71,6 +87,35 @@ public class OccasionDetailViewModel : ViewModelBase
     public IAsyncRelayCommand PinCommand { get; }
     public IAsyncRelayCommand AddMilestoneCommand { get; }
     public IAsyncRelayCommand<Milestone?> RemoveMilestoneCommand { get; }
+    public IAsyncRelayCommand ShareCommand { get; }
+
+    public string DirectionChipText => CurrentOccasion?.Direction == OccasionDirection.Until ? "UNTIL" : "SINCE";
+    public string NotesText => string.IsNullOrWhiteSpace(CurrentOccasion?.Notes) ? "No notes yet." : CurrentOccasion!.Notes!.Trim();
+    public string PinButtonText => CurrentOccasion?.IsPinned == true ? "Unpin" : "Pin";
+
+    public MilestoneViewState? NextMilestone
+    {
+        get => _nextMilestone;
+        private set
+        {
+            if (SetProperty(ref _nextMilestone, value))
+            {
+                OnPropertyChanged(nameof(HasNextMilestone));
+                OnPropertyChanged(nameof(NextMilestoneHeading));
+                OnPropertyChanged(nameof(NextMilestoneStatus));
+            }
+        }
+    }
+
+    public bool HasNextMilestone => NextMilestone is not null;
+    public string NextMilestoneHeading => NextMilestone is null ? string.Empty : $"Next · {NextMilestone.Label}";
+    public string NextMilestoneStatus => NextMilestone?.StatusText ?? string.Empty;
+
+    public double NextMilestoneProgress
+    {
+        get => _nextMilestoneProgress;
+        private set => SetProperty(ref _nextMilestoneProgress, value);
+    }
 
     public async Task LoadAsync(int id)
     {
@@ -86,8 +131,19 @@ public class OccasionDetailViewModel : ViewModelBase
         UpdateTimeBreakdown();
 
         Milestones.Clear();
+        MilestoneStates.Clear();
         foreach (var milestone in model.Milestones.OrderBy(m => m.ThresholdDays))
+        {
             Milestones.Add(milestone);
+            MilestoneStates.Add(CreateMilestoneState(model, milestone));
+        }
+
+        NextMilestone = MilestoneStates
+            .Where(state => !state.IsReached)
+            .OrderBy(state => state.DaysAway < 0 ? int.MaxValue : state.DaysAway)
+            .ThenBy(state => state.Milestone.ThresholdDays)
+            .FirstOrDefault();
+        NextMilestoneProgress = CalculateNextMilestoneProgress(NextMilestone);
 
         ErrorMessage = null;
     }
@@ -171,7 +227,7 @@ public class OccasionDetailViewModel : ViewModelBase
         if (CurrentOccasion == null)
             return;
 
-        await Shell.Current.GoToAsync($"{nameof(OccasionFormPage)}?id={CurrentOccasion.Id}");
+        await _shellService.GoToAsync($"{nameof(OccasionFormPage)}?id={CurrentOccasion.Id}");
     }
 
     private async Task DeleteAsync()
@@ -179,12 +235,12 @@ public class OccasionDetailViewModel : ViewModelBase
         if (CurrentOccasion == null)
             return;
 
-        var confirmed = await Shell.Current.DisplayAlertAsync("Delete", $"Delete '{CurrentOccasion.Title}'?", "Delete", "Cancel");
+        var confirmed = await _shellService.DisplayAlertAsync("Delete", $"Delete '{CurrentOccasion.Title}'?", "Delete", "Cancel");
         if (!confirmed)
             return;
 
         await _occasionService.DeleteAsync(CurrentOccasion.Id);
-        await Shell.Current.GoToAsync("..");
+        await _shellService.GoToAsync("..");
     }
 
     private async Task PinAsync()
@@ -192,7 +248,16 @@ public class OccasionDetailViewModel : ViewModelBase
         if (CurrentOccasion == null)
             return;
 
-        await _occasionService.SetPinnedAsync(CurrentOccasion.Id);
+        if (CurrentOccasion.IsPinned)
+        {
+            CurrentOccasion.IsPinned = false;
+            await _occasionService.UpdateAsync(CurrentOccasion);
+        }
+        else
+        {
+            await _occasionService.SetPinnedAsync(CurrentOccasion.Id);
+        }
+
         await LoadAsync(CurrentOccasion.Id);
     }
 
@@ -225,11 +290,81 @@ public class OccasionDetailViewModel : ViewModelBase
         if (CurrentOccasion == null || milestone == null)
             return;
 
-        var confirmed = await Shell.Current.DisplayAlertAsync("Remove milestone", $"Remove '{milestone.Label}'?", "Remove", "Cancel");
-        if (!confirmed)
-            return;
+        if (_shellService.Platform != DevicePlatform.Android)
+        {
+            var confirmed = await _shellService.DisplayAlertAsync("Remove milestone", $"Remove '{milestone.Label}'?", "Remove", "Cancel");
+            if (!confirmed)
+                return;
+        }
 
         await _occasionService.RemoveMilestoneAsync(milestone.Id);
         await LoadAsync(CurrentOccasion.Id);
     }
+
+    private async Task ShareAsync()
+    {
+        if (CurrentOccasion is null)
+            return;
+
+        await _shareService.ShareOccasionAsync(new OccasionShareRequest(
+            CurrentOccasion,
+            Days,
+            TimeBreakdown,
+            NextMilestone?.Label,
+            NextMilestone?.StatusText));
+    }
+
+    private MilestoneViewState CreateMilestoneState(Occasion occasion, Milestone milestone)
+    {
+        var milestoneDate = occasion.Direction == OccasionDirection.Since
+            ? occasion.AnchorDate.ToLocalTime().Date.AddDays(milestone.ThresholdDays)
+            : occasion.AnchorDate.ToLocalTime().Date.AddDays(-milestone.ThresholdDays);
+
+        var daysAway = occasion.Direction == OccasionDirection.Since
+            ? milestone.ThresholdDays - Days
+            : Days - milestone.ThresholdDays;
+
+        var statusText = milestone.Notified
+            ? $"Reached {milestoneDate:dd MMM yyyy}"
+            : daysAway == 0
+                ? "Today"
+                : daysAway == 1
+                    ? "1 day away"
+                    : daysAway > 1
+                        ? $"{daysAway} days away"
+                        : $"{Math.Abs(daysAway)} days past";
+
+        return new MilestoneViewState(milestone, milestone.Notified, statusText, daysAway);
+    }
+
+    private double CalculateNextMilestoneProgress(MilestoneViewState? milestone)
+    {
+        if (CurrentOccasion is null || milestone is null || milestone.Milestone.ThresholdDays <= 0)
+            return 0;
+
+        return CurrentOccasion.Direction == OccasionDirection.Since
+            ? Math.Clamp((double)Days / milestone.Milestone.ThresholdDays, 0, 1)
+            : Days <= 0
+                ? 1
+                : Math.Clamp((double)milestone.Milestone.ThresholdDays / Days, 0, 1);
+    }
+}
+
+public sealed class MilestoneViewState
+{
+    public MilestoneViewState(Milestone milestone, bool isReached, string statusText, int daysAway)
+    {
+        Milestone = milestone;
+        IsReached = isReached;
+        StatusText = statusText;
+        DaysAway = daysAway;
+    }
+
+    public Milestone Milestone { get; }
+    public string Label => Milestone.Label;
+    public string ThresholdText => $"{Milestone.ThresholdDays}d";
+    public string StatusText { get; }
+    public int DaysAway { get; }
+    public bool IsReached { get; }
+    public string StateGlyph => IsReached ? "✓" : "⚑";
 }

@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:Markd.ViewModels"
+             x:Class="Markd.OccasionDetailPage"
+             x:Name="RootPage"
+             x:DataType="viewModels:OccasionDetailViewModel"
+             Title="Occasion"
+             Style="{StaticResource MarkdPage}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Edit"
+                     Command="{Binding EditCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <ContentPage.Resources>
+        <Style x:Key="DetailSectionCard"
+               TargetType="Border"
+               BasedOn="{StaticResource Card}">
+            <Setter Property="Padding" Value="18" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+        </Style>
+
+        <Style x:Key="HeroCountLabel"
+               TargetType="Label"
+               BasedOn="{StaticResource CountLabel}">
+            <Setter Property="FontSize" Value="76" />
+            <Setter Property="HorizontalTextAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="HeroCaptionLabel"
+               TargetType="Label">
+            <Setter Property="FontFamily" Value="FigtreeSemiBold" />
+            <Setter Property="FontSize" Value="21" />
+            <Setter Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource TextSecondaryLight},
+                                            Dark={StaticResource TextSecondaryDark}}" />
+        </Style>
+
+        <Style x:Key="HeroChip"
+               TargetType="Border">
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="StrokeThickness" Value="0" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 8" />
+            <Setter Property="BackgroundColor"
+                    Value="{AppThemeBinding Light={StaticResource AccentTintLight},
+                                            Dark={StaticResource AccentTintDark}}" />
+        </Style>
+
+        <Style x:Key="SectionBody"
+               TargetType="Label">
+            <Setter Property="FontFamily" Value="FigtreeRegular" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="LineHeight" Value="1.55" />
+            <Setter Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource TextPrimaryLight},
+                                            Dark={StaticResource TextPrimaryDark}}" />
+        </Style>
+
+        <Style x:Key="MilestoneActionButton"
+               TargetType="Button">
+            <Setter Property="BackgroundColor" Value="Transparent" />
+            <Setter Property="TextColor"
+                    Value="{AppThemeBinding Light={StaticResource TextSecondaryLight},
+                                            Dark={StaticResource TextSecondaryDark}}" />
+            <Setter Property="FontFamily" Value="FigtreeMedium" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Padding" Value="10,0" />
+            <Setter Property="HeightRequest" Value="34" />
+        </Style>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24,18,24,40"
+                             Spacing="18">
+            <Grid ColumnDefinitions="Auto,*,Auto"
+                  ColumnSpacing="12">
+                <Border WidthRequest="36"
+                        HeightRequest="36"
+                        BackgroundColor="{Binding CurrentOccasion.ColorHex}"
+                        Opacity="0.13"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 12">
+                    <Label Text="{Binding CurrentOccasion.Emoji}"
+                           FontSize="18"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+                </Border>
+
+                <VerticalStackLayout Grid.Column="1"
+                                     Spacing="2"
+                                     VerticalOptions="Center">
+                    <Label Text="{Binding CurrentOccasion.Title}"
+                           Style="{StaticResource RowTitle}"
+                           FontSize="22" />
+                    <Label Text="{Binding LocalAnchorDate, StringFormat='Anchor · {0:dd MMM yyyy}'}"
+                           Style="{StaticResource RowSubtitle}" />
+                </VerticalStackLayout>
+
+                <Border Grid.Column="2"
+                        Style="{StaticResource HeroChip}"
+                        IsVisible="{Binding CurrentOccasion.IsPinned}">
+                    <Label Text="Pinned"
+                           Style="{StaticResource Overline}"
+                           TextColor="{AppThemeBinding Light={StaticResource AccentTextLight},
+                                                       Dark={StaticResource AccentTextDark}}" />
+                </Border>
+            </Grid>
+
+            <Border x:Name="HeroCard"
+                    Style="{StaticResource FeaturedCard}">
+                <VerticalStackLayout Spacing="14">
+                    <HorizontalStackLayout HorizontalOptions="Center"
+                                           Spacing="8">
+                        <Label Text="{Binding Days}"
+                               Style="{StaticResource HeroCountLabel}" />
+                        <Label Text="days"
+                               Style="{StaticResource HeroCaptionLabel}"
+                               Margin="0,0,0,14"
+                               VerticalOptions="End" />
+                    </HorizontalStackLayout>
+
+                    <Label Text="{Binding TimeBreakdown}"
+                           Style="{StaticResource BreakdownLabel}"
+                           HorizontalTextAlignment="Center" />
+
+                    <Border HorizontalOptions="Center"
+                            Style="{StaticResource HeroChip}">
+                        <Label Text="{Binding DirectionChipText}"
+                               Style="{StaticResource Overline}"
+                               TextColor="{AppThemeBinding Light={StaticResource AccentTextLight},
+                                                           Dark={StaticResource AccentTextDark}}" />
+                    </Border>
+
+                    <Label Text="{Binding LocalAnchorDate, StringFormat='{0:D}'}"
+                           Style="{StaticResource RowSubtitle}"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource DetailSectionCard}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Notes"
+                           Style="{StaticResource Overline}" />
+                    <Label Text="{Binding NotesText}"
+                           Style="{StaticResource SectionBody}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource DetailSectionCard}">
+                <VerticalStackLayout Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto"
+                          ColumnSpacing="12">
+                        <Label Text="Milestones"
+                               Style="{StaticResource Overline}"
+                               VerticalOptions="Center" />
+                        <Button Grid.Column="1"
+                                Text="Add"
+                                Style="{StaticResource TonalButton}"
+                                HeightRequest="36"
+                                Padding="14,0"
+                                Clicked="OnAddMilestoneClicked" />
+                    </Grid>
+
+                    <Border Style="{StaticResource Card}"
+                            IsVisible="{Binding HasNextMilestone}">
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto"
+                                  ColumnSpacing="10">
+                                <Label Text="{Binding NextMilestoneHeading}"
+                                       FontFamily="FigtreeSemiBold"
+                                       FontSize="14"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight},
+                                                                   Dark={StaticResource TextPrimaryDark}}" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding NextMilestoneStatus}"
+                                       Style="{StaticResource BreakdownLabel}" />
+                            </Grid>
+                            <ProgressBar Progress="{Binding NextMilestoneProgress}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <CollectionView ItemsSource="{Binding MilestoneStates}"
+                                    SelectionMode="None">
+                        <CollectionView.EmptyView>
+                            <Label Text="No milestones yet."
+                                   Style="{StaticResource RowSubtitle}" />
+                        </CollectionView.EmptyView>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:MilestoneViewState">
+                                <Grid Padding="0,4"
+                                      ColumnDefinitions="Auto,*,Auto,Auto"
+                                      ColumnSpacing="10">
+                                    <Border WidthRequest="24"
+                                            HeightRequest="24"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 12"
+                                            VerticalOptions="Center">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border"
+                                                         Binding="{Binding IsReached}"
+                                                         Value="True">
+                                                <Setter Property="BackgroundColor"
+                                                        Value="{AppThemeBinding Light={StaticResource AccentFillLight},
+                                                                                Dark={StaticResource AccentFillDark}}" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Border"
+                                                         Binding="{Binding IsReached}"
+                                                         Value="False">
+                                                <Setter Property="BackgroundColor"
+                                                        Value="{AppThemeBinding Light={StaticResource SurfaceCardPressedLight},
+                                                                                Dark={StaticResource SurfaceCardPressedDark}}" />
+                                            </DataTrigger>
+                                        </Border.Triggers>
+
+                                        <Label Text="{Binding StateGlyph}"
+                                               FontFamily="FigtreeSemiBold"
+                                               FontSize="14"
+                                               HorizontalOptions="Center"
+                                               VerticalOptions="Center">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label"
+                                                             Binding="{Binding IsReached}"
+                                                             Value="True">
+                                                    <Setter Property="TextColor" Value="White" />
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Label"
+                                                             Binding="{Binding IsReached}"
+                                                             Value="False">
+                                                    <Setter Property="TextColor"
+                                                            Value="{AppThemeBinding Light={StaticResource TextSecondaryLight},
+                                                                                    Dark={StaticResource TextSecondaryDark}}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Column="1"
+                                                         Spacing="2">
+                                        <Label Text="{Binding Label}"
+                                               Style="{StaticResource RowTitle}"
+                                               FontSize="15" />
+                                        <Label Text="{Binding StatusText}"
+                                               Style="{StaticResource RowSubtitle}" />
+                                    </VerticalStackLayout>
+
+                                    <Label Grid.Column="2"
+                                           Text="{Binding ThresholdText}"
+                                           Style="{StaticResource BreakdownLabel}"
+                                           VerticalOptions="Center" />
+
+                                    <Button Grid.Column="3"
+                                            Text="Remove"
+                                            Style="{StaticResource MilestoneActionButton}"
+                                            Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.RemoveMilestoneCommand}"
+                                            CommandParameter="{Binding Milestone}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </VerticalStackLayout>
+            </Border>
+
+            <Label Text="{Binding ErrorMessage}"
+                   TextColor="{AppThemeBinding Light={StaticResource DangerLight},
+                                               Dark={StaticResource DangerDark}}" />
+
+            <Grid ColumnDefinitions="*,*"
+                  ColumnSpacing="12">
+                <Button Text="{Binding PinButtonText}"
+                        Style="{StaticResource PrimaryButton}"
+                        Command="{Binding PinCommand}" />
+                <Button Grid.Column="1"
+                        Text="Share"
+                        Style="{StaticResource TonalButton}"
+                        Command="{Binding ShareCommand}" />
+            </Grid>
+
+            <Button Text="Delete occasion"
+                    Style="{StaticResource DangerButton}"
+                    Command="{Binding DeleteCommand}" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

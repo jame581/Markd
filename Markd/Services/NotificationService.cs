@@ -1,6 +1,7 @@
 using Markd.Core.Services;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models;
+using Markd.Core.Domain;
 
 namespace Markd.Services
 {
@@ -8,6 +9,7 @@ namespace Markd.Services
     {
         private readonly IOccasionService _occasionService;
         private readonly IAppSettingsService _appSettingsService;
+        public event EventHandler<MilestoneReachedEventArgs>? MilestoneReached;
 
         public NotificationService(IOccasionService occasionService, IAppSettingsService appSettingsService)
         {
@@ -30,6 +32,11 @@ namespace Markd.Services
 
             foreach (var (occasion, milestone) in pending)
             {
+                var nextMilestone = occasion.Milestones
+                    .Where(candidate => candidate.Id != milestone.Id && !candidate.Notified)
+                    .OrderBy(candidate => candidate.ThresholdDays)
+                    .FirstOrDefault();
+
                 var notification = new NotificationRequest
                 {
                     NotificationId = milestone.Id,
@@ -39,7 +46,10 @@ namespace Markd.Services
 
                 await LocalNotificationCenter.Current.Show(notification);
                 await _occasionService.MarkMilestoneNotifiedAsync(milestone.Id);
+                MilestoneReached?.Invoke(this, new MilestoneReachedEventArgs(occasion, milestone, nextMilestone));
             }
         }
     }
+
+    public sealed record MilestoneReachedEventArgs(Occasion Occasion, Milestone Milestone, Milestone? NextMilestone);
 }

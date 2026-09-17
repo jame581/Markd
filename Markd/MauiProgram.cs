@@ -37,7 +37,9 @@ namespace Markd
             builder.Services.AddMarkdCore(dbPath);
 
             builder.Services.AddSingleton<AppShell>();
+            builder.Services.AddSingleton<IAppShellService, AppShellService>();
             builder.Services.AddSingleton<NotificationService>();
+            builder.Services.AddSingleton<IShareService, ShareService>();
             builder.Services.AddTransient<OccasionListViewModel>();
             builder.Services.AddTransient<OccasionFormViewModel>();
             builder.Services.AddTransient<OccasionDetailViewModel>();

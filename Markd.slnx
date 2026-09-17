@@ -4,4 +4,5 @@
   <Project Path="Markd/Markd.csproj">
     <Deploy Solution="Debug|*" />
   </Project>
+  <Project Path="Markd.Tests/Markd.Tests.csproj" />
 </Solution>
