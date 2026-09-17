@@ -1,36 +1,16 @@
-﻿namespace Markd
+namespace Markd;
+
+public partial class AppShell : Shell
 {
-    public partial class AppShell : Shell
+    public AppShell()
     {
-        public AppShell()
-        {
-            Routing.RegisterRoute(nameof(OccasionFormPage), typeof(OccasionFormPage));
-            Routing.RegisterRoute(nameof(OccasionDetailPage), typeof(OccasionDetailPage));
-            Routing.RegisterRoute(nameof(CategoryPage), typeof(CategoryPage));
+        InitializeComponent();
 
-            Items.Add(new ShellContent
-            {
-                Title = "Dashboard",
-                Icon = "🏠",
-                Route = nameof(MainPage),
-                ContentTemplate = new DataTemplate(typeof(MainPage))
-            });
-
-            Items.Add(new ShellContent
-            {
-                Title = "Settings",
-                Icon = "⚙️",
-                Route = nameof(SettingsPage),
-                ContentTemplate = new DataTemplate(typeof(SettingsPage))
-            });
-
-            Items.Add(new ShellContent
-            {
-                Title = "Import / Export",
-                Icon = "⇅",
-                Route = nameof(Pages.ExportImportPage),
-                ContentTemplate = new DataTemplate(typeof(Pages.ExportImportPage))
-            });
-        }
+        Routing.RegisterRoute(nameof(OccasionFormPage), typeof(OccasionFormPage));
+        Routing.RegisterRoute(nameof(OccasionDetailPage), typeof(OccasionDetailPage));
+        Routing.RegisterRoute(nameof(CategoryPage), typeof(CategoryPage));
+        Routing.RegisterRoute(nameof(CalendarPage), typeof(CalendarPage));
+        Routing.RegisterRoute(nameof(AboutPage), typeof(AboutPage));
+        Routing.RegisterRoute(nameof(Pages.ExportImportPage), typeof(Pages.ExportImportPage));
     }
 }
