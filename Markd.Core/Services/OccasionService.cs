@@ -91,12 +91,14 @@ namespace Markd.Core.Services
 
         public async Task<IReadOnlyList<CalendarMark>> GetCalendarMarksAsync(int year, int month)
         {
-            var monthStart = new DateTime(year, month, 1, 0, 0, 0, DateTimeKind.Utc);
-            var monthEnd = monthStart.AddMonths(1);
+            var monthStartLocal = DateTime.SpecifyKind(new DateTime(year, month, 1), DateTimeKind.Local);
+            var monthEndLocal = monthStartLocal.AddMonths(1);
+            var monthStartUtc = monthStartLocal.ToUniversalTime();
+            var monthEndUtc = monthEndLocal.ToUniversalTime();
 
             var anchorMarks = await db.Occasions
                 .AsNoTracking()
-                .Where(o => o.AnchorDate >= monthStart && o.AnchorDate < monthEnd)
+                .Where(o => o.AnchorDate >= monthStartUtc && o.AnchorDate < monthEndUtc)
                 .Select(o => new
                 {
                     o.Id,
@@ -138,12 +140,12 @@ namespace Markd.Core.Services
                     mark.ThresholdDays,
                     mark.Notified
                 })
-                .Where(mark => mark.Date >= monthStart && mark.Date < monthEnd)
+                .Where(mark => mark.Date >= monthStartUtc && mark.Date < monthEndUtc)
                 .ToListAsync();
 
             var marks = anchorMarks
                 .Select(mark => new CalendarMark(
-                    DateOnly.FromDateTime(mark.AnchorDate),
+                    DateOnly.FromDateTime(DateTime.SpecifyKind(mark.AnchorDate, DateTimeKind.Utc).ToLocalTime()),
                     mark.Id,
                     mark.Title,
                     mark.Emoji,
@@ -153,7 +155,7 @@ namespace Markd.Core.Services
                     null,
                     false))
                 .Concat(milestoneMarks.Select(mark => new CalendarMark(
-                    DateOnly.FromDateTime(mark.Date),
+                    DateOnly.FromDateTime(DateTime.SpecifyKind(mark.Date, DateTimeKind.Utc).ToLocalTime()),
                     mark.Id,
                     mark.Title,
                     mark.Emoji,
