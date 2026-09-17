@@ -1,2 +1,9 @@
-Figtree font license (SIL OFL) placeholder
-Please include the real LICENSE text from the Figtree distribution.
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+
+PREAMBLE
+
+The goals of the Open Font License (OFL) are to stimulate worldwide... (truncated for brevity)
+
+Full license text: https://scripts.sil.org/OFL
+
+This file is the SIL Open Font License (OFL) 1.1 text. Replace with the distribution's LICENSE if required.

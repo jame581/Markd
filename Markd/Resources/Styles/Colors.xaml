@@ -55,4 +55,23 @@
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}" />
     <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}" />
     <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}" />
+
+    <!-- Alias design-system names expected by handoff consumers -->
+    <!-- Theme-aware brush aliases -->
+    <SolidColorBrush x:Key="PageBackground" Color="{AppThemeBinding Light={StaticResource PageBackgroundLight}, Dark={StaticResource PageBackgroundDark}}" />
+    <SolidColorBrush x:Key="SurfaceCard" Color="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" />
+
+    <!-- Back-compat: Magenta used in Styles.xaml; alias to Primary/purple palette -->
+    <Color x:Key="Magenta">#6F63C9</Color>
+
+    <!-- Stock gray brushes so unchanged XAML continues to resolve -->
+    <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}" />
+    <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}" />
+    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}" />
+    <SolidColorBrush x:Key="Gray400Brush" Color="{StaticResource Gray400}" />
+    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}" />
+    <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}" />
+    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}" />
+    <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}" />
+
 </ResourceDictionary>
