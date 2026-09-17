@@ -8,6 +8,8 @@ namespace Markd.ViewModels;
 /// </summary>
 public record OccasionSummary(Occasion Occasion, int Days)
 {
+    public DateTime LocalAnchorDate => Occasion.AnchorDate.ToLocalTime().Date;
+
     public int DisplayDays => Math.Abs(Days);
 
     public string CountLabel => Occasion.Direction == OccasionDirection.Since
@@ -15,10 +17,10 @@ public record OccasionSummary(Occasion Occasion, int Days)
         : Days >= 0 ? "TO GO" : "AGO";
 
     public string AnchorLabel => Occasion.Direction == OccasionDirection.Since
-        ? $"since {Occasion.AnchorDate:dd MMM yyyy}"
+        ? $"since {LocalAnchorDate:dd MMM yyyy}"
         : Days >= 0
-            ? $"until {Occasion.AnchorDate:dd MMM yyyy}"
-            : $"was {Occasion.AnchorDate:dd MMM yyyy}";
+            ? $"until {LocalAnchorDate:dd MMM yyyy}"
+            : $"was {LocalAnchorDate:dd MMM yyyy}";
 
     /// <summary>
     /// Human-readable time label shown on the list card.

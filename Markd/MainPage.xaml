@@ -306,7 +306,7 @@
                                                      VerticalOptions="Center">
                                     <Label Text="{Binding CurrentOccasion.Title}"
                                            Style="{StaticResource RowTitle}" />
-                                    <Label Text="{Binding CurrentOccasion.AnchorDate, StringFormat='Anchor · {0:dd MMM yyyy}'}"
+                                    <Label Text="{Binding LocalAnchorDate, StringFormat='Anchor · {0:dd MMM yyyy}'}"
                                            Style="{StaticResource RowSubtitle}" />
                                 </VerticalStackLayout>
 
@@ -343,7 +343,7 @@
                                            TextColor="{AppThemeBinding Light={StaticResource AccentTextLight},
                                                                        Dark={StaticResource AccentTextDark}}" />
                                 </Border>
-                                <Label Text="{Binding CurrentOccasion.AnchorDate, StringFormat='{0:dd MMM yyyy}'}"
+                                <Label Text="{Binding LocalAnchorDate, StringFormat='{0:dd MMM yyyy}'}"
                                        Style="{StaticResource RowSubtitle}"
                                        VerticalTextAlignment="Center" />
                             </HorizontalStackLayout>

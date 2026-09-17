@@ -1,3 +1,4 @@
+using Markd.Home;
 using Markd.ViewModels;
 using Microsoft.Maui.Devices;
 
@@ -5,12 +6,9 @@ namespace Markd;
 
 public partial class MainPage : ContentPage
 {
-    private const double SplitViewBreakpoint = 960;
-
     private readonly OccasionListViewModel _viewModel;
     private readonly OccasionDetailViewModel _detailViewModel;
-    private OccasionSummary? _selectedSummary;
-    private bool _isTwoPane;
+    private readonly HomeSurfaceController _controller;
     private bool _isSyncingSelection;
 
     public MainPage()
@@ -19,6 +17,10 @@ public partial class MainPage : ContentPage
 
         _viewModel = ServiceHelper.GetRequiredService<OccasionListViewModel>();
         _detailViewModel = ServiceHelper.GetRequiredService<OccasionDetailViewModel>();
+        _controller = new HomeSurfaceController(
+            _viewModel,
+            new HomeSurfaceDetailPresenter(_detailViewModel),
+            DeviceInfo.Current.Platform == DevicePlatform.WinUI);
 
         BindingContext = _viewModel;
         DesktopDetailRoot.BindingContext = _detailViewModel;
@@ -31,23 +33,18 @@ public partial class MainPage : ContentPage
     {
         base.OnAppearing();
 
-        await _viewModel.LoadAsync();
-        UpdateLayoutState(Width);
-        await RefreshDetailAsync();
+        await ApplyStateAsync(await _controller.InitializeAsync(Width));
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        _detailViewModel.StopTimer();
+        _controller.Stop();
     }
 
     private async void OnPageSizeChanged(object? sender, EventArgs e)
     {
-        var layoutChanged = UpdateLayoutState(Width);
-
-        if (layoutChanged)
-            await RefreshDetailAsync();
+        await ApplyStateAsync(await _controller.HandleWidthChangedAsync(Width));
     }
 
     private async void OnOccasionSelected(object? sender, SelectionChangedEventArgs e)
@@ -58,134 +55,44 @@ public partial class MainPage : ContentPage
         if (e.CurrentSelection.FirstOrDefault() is not OccasionSummary summary)
             return;
 
-        _selectedSummary = summary;
-
-        if (_isTwoPane)
-        {
-            await LoadDetailAsync(summary);
-            return;
-        }
-
-        await _viewModel.OpenDetailCommand.ExecuteAsync(summary);
-
-        if (sender is CollectionView collectionView)
-            collectionView.SelectedItem = null;
+        var interaction = await _controller.HandleOccasionSelectedAsync(summary);
+        await ApplyInteractionAsync(interaction);
     }
 
     private async void OnFeaturedCardTapped(object? sender, TappedEventArgs e)
     {
-        if (_viewModel.FeaturedSummary is not { } featured)
-            return;
-
-        if (_isTwoPane)
-        {
-            _selectedSummary = featured;
-            SetSelectedItem(featured);
-            await LoadDetailAsync(featured);
-            return;
-        }
-
-        await _viewModel.OpenDetailCommand.ExecuteAsync(featured);
+        await ApplyInteractionAsync(await _controller.HandleFeaturedInvokedAsync());
     }
 
     private async void OnOpenDetailClicked(object? sender, EventArgs e)
     {
-        if (_selectedSummary is null)
+        if (_controller.ActiveSummary is not { } summary)
             return;
 
-        await _viewModel.OpenDetailCommand.ExecuteAsync(_selectedSummary);
+        await _viewModel.OpenDetailCommand.ExecuteAsync(summary);
     }
 
-    private bool UpdateLayoutState(double width)
+    private async Task ApplyInteractionAsync(HomeSurfaceInteraction interaction)
     {
-        var shouldUseTwoPane = DeviceInfo.Current.Platform == DevicePlatform.WinUI && width >= SplitViewBreakpoint;
+        await ApplyStateAsync(interaction.State);
 
-        if (_isTwoPane == shouldUseTwoPane)
-        {
-            ApplyLayoutVisibility();
-            return false;
-        }
+        if (interaction.NavigateToDetail && interaction.NavigationTarget is not null)
+            await _viewModel.OpenDetailCommand.ExecuteAsync(interaction.NavigationTarget);
 
-        _isTwoPane = shouldUseTwoPane;
-        ListPaneColumn.Width = shouldUseTwoPane ? 380 : GridLength.Star;
-        DetailPaneColumn.Width = shouldUseTwoPane ? GridLength.Star : new GridLength(0);
-        HomeLayoutGrid.ColumnSpacing = shouldUseTwoPane ? 24 : 0;
-
-        if (!shouldUseTwoPane)
-            OccasionGroupsView.SelectedItem = null;
-
-        ApplyLayoutVisibility();
-        return true;
+        if (interaction.ClearListSelection)
+            SetSelectedItem(null);
     }
 
-    private void ApplyLayoutVisibility()
+    private Task ApplyStateAsync(HomeSurfaceState state)
     {
-        var hasAnyOccasions = TryGetFirstSummary() is not null;
-        MobileFeaturedCard.IsVisible = !_isTwoPane && _viewModel.HasFeaturedOccasion;
-        DesktopDetailScroll.IsVisible = _isTwoPane && hasAnyOccasions && _detailViewModel.CurrentOccasion is not null;
-    }
+        ListPaneColumn.Width = state.IsTwoPane ? 380 : GridLength.Star;
+        DetailPaneColumn.Width = state.IsTwoPane ? GridLength.Star : new GridLength(0);
+        HomeLayoutGrid.ColumnSpacing = state.IsTwoPane ? 24 : 0;
+        MobileFeaturedCard.IsVisible = state.ShowMobileFeaturedCard;
+        DesktopDetailScroll.IsVisible = state.ShowDesktopDetailPane && _detailViewModel.CurrentOccasion is not null;
 
-    private async Task RefreshDetailAsync()
-    {
-        var selectedSummary = _selectedSummary is null
-            ? null
-            : FindSummaryById(_selectedSummary.Occasion.Id);
-
-        var target = _isTwoPane
-            ? selectedSummary ?? _viewModel.FeaturedSummary ?? TryGetFirstSummary()
-            : _viewModel.FeaturedSummary;
-
-        if (target is null)
-        {
-            _detailViewModel.StopTimer();
-            DesktopDetailScroll.IsVisible = false;
-            return;
-        }
-
-        if (_isTwoPane && !ReferenceEquals(OccasionGroupsView.SelectedItem, target))
-            SetSelectedItem(target);
-
-        await LoadDetailAsync(target);
-        ApplyLayoutVisibility();
-    }
-
-    private async Task LoadDetailAsync(OccasionSummary summary)
-    {
-        _selectedSummary = FindSummaryById(summary.Occasion.Id) ?? summary;
-
-        if (_detailViewModel.CurrentOccasion?.Id == summary.Occasion.Id)
-        {
-            ApplyLayoutVisibility();
-            return;
-        }
-
-        _detailViewModel.StopTimer();
-        await _detailViewModel.LoadAsync(summary.Occasion.Id);
-        _detailViewModel.StartTimer();
-        ApplyLayoutVisibility();
-    }
-
-    private OccasionSummary? TryGetFirstSummary()
-    {
-        foreach (var group in _viewModel.OccasionGroups)
-        {
-            if (group.Count > 0)
-                return group[0];
-        }
-
-        return null;
-    }
-
-    private OccasionSummary? FindSummaryById(int occasionId)
-    {
-        foreach (var group in _viewModel.OccasionGroups)
-        {
-            var match = group.FirstOrDefault(summary => summary.Occasion.Id == occasionId);
-            if (match is not null)
-                return match;
-        }
-
-        return null;
+        SetSelectedItem(state.SelectedSummary);
+        return Task.CompletedTask;
     }
 
     private void SetSelectedItem(OccasionSummary? summary)

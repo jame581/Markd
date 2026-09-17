@@ -28,8 +28,16 @@ public class OccasionDetailViewModel : ViewModelBase
     public Occasion? CurrentOccasion
     {
         get => _currentOccasion;
-        set => SetProperty(ref _currentOccasion, value);
+        set
+        {
+            if (SetProperty(ref _currentOccasion, value))
+            {
+                OnPropertyChanged(nameof(LocalAnchorDate));
+            }
+        }
     }
+
+    public DateTime? LocalAnchorDate => CurrentOccasion?.AnchorDate.ToLocalTime().Date;
 
     public int Days
     {
