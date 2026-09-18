@@ -1,5 +1,6 @@
 using Markd.Core.Domain;
 using Markd.Core.Localization;
+using Markd.ViewModels;
 
 namespace Markd.Services;
 
@@ -27,7 +28,7 @@ public sealed class ShareService : IShareService
     public Task ShareOccasionAsync(OccasionShareRequest request)
     {
         var title = string.Format(Strings.Share_Title, request.Occasion.Title);
-        var dateText = request.Occasion.AnchorDate.ToLocalTime().ToString("dd MMM yyyy");
+        var dateText = OccasionMath.FormatShortDate(OccasionDates.ToLocalDate(request.Occasion.AnchorDate));
         var daysPhrase = FormatDaysPhrase(request.Occasion.Direction, request.Days, dateText);
         var text = $"{request.Occasion.Emoji} {request.Occasion.Title}\n" +
                    $"{daysPhrase}\n" +
@@ -50,7 +51,7 @@ public sealed class ShareService : IShareService
     public Task ShareMilestoneAsync(MilestoneShareRequest request)
     {
         var title = string.Format(Strings.Share_Title, request.MilestoneLabel);
-        var dateText = request.Occasion.AnchorDate.ToLocalTime().ToString("dd MMM yyyy");
+        var dateText = OccasionMath.FormatShortDate(OccasionDates.ToLocalDate(request.Occasion.AnchorDate));
         var daysPhrase = FormatDaysPhrase(request.Occasion.Direction, request.ThresholdDays, dateText);
         var text = $"{request.Occasion.Emoji} {request.Occasion.Title}\n" +
                    $"{request.MilestoneLabel} · {daysPhrase}";

@@ -104,9 +104,9 @@ public static class OccasionMath
     /// <summary>Unit under a count: "days"; "to go" for a future Until or a Since that has not started; "days ago" for a passed Until.</summary>
     public static string UnitLabel(Occasion occasion, int days) => occasion.Direction switch
     {
-        OccasionDirection.Until when days >= 0 => Strings.Occasion_UnitToGo,
+        OccasionDirection.Until when days >= 0 => PluralWord("Occasion_UnitToGo", days),
         OccasionDirection.Until => PluralWord("Occasion_UnitDaysAgo", days),
-        OccasionDirection.Since when days < 0 => Strings.Occasion_UnitToGo,
+        OccasionDirection.Since when days < 0 => PluralWord("Occasion_UnitToGo", days),
         _ => PluralWord("Occasion_UnitDays", days)
     };
 

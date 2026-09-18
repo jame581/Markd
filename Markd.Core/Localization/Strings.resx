@@ -65,7 +65,9 @@
   <data name="Occasion_Until" xml:space="preserve"><value>Until</value></data>
   <data name="Occasion_SincePhrase" xml:space="preserve"><value>since {0}</value></data>
   <data name="Occasion_UntilPhrase" xml:space="preserve"><value>until {0}</value></data>
-  <data name="Occasion_UnitToGo" xml:space="preserve"><value>to go</value></data>
+  <data name="Occasion_UnitToGo_One" xml:space="preserve"><value>to go</value></data>
+  <data name="Occasion_UnitToGo_Few" xml:space="preserve"><value>to go</value></data>
+  <data name="Occasion_UnitToGo_Many" xml:space="preserve"><value>to go</value></data>
   <data name="Occasion_UnitDaysAgo_One" xml:space="preserve"><value>day ago</value></data>
   <data name="Occasion_UnitDaysAgo_Few" xml:space="preserve"><value>days ago</value></data>
   <data name="Occasion_UnitDaysAgo_Many" xml:space="preserve"><value>days ago</value></data>

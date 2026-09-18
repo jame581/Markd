@@ -65,7 +65,9 @@
   <data name="Occasion_Until" xml:space="preserve"><value>Do</value></data>
   <data name="Occasion_SincePhrase" xml:space="preserve"><value>od {0}</value></data>
   <data name="Occasion_UntilPhrase" xml:space="preserve"><value>do {0}</value></data>
-  <data name="Occasion_UnitToGo" xml:space="preserve"><value>zbývá</value></data>
+  <data name="Occasion_UnitToGo_One" xml:space="preserve"><value>zbývá</value></data>
+  <data name="Occasion_UnitToGo_Few" xml:space="preserve"><value>zbývají</value></data>
+  <data name="Occasion_UnitToGo_Many" xml:space="preserve"><value>zbývá</value></data>
   <data name="Occasion_UnitDaysAgo_One" xml:space="preserve"><value>den zpět</value></data>
   <data name="Occasion_UnitDaysAgo_Few" xml:space="preserve"><value>dny zpět</value></data>
   <data name="Occasion_UnitDaysAgo_Many" xml:space="preserve"><value>dní zpět</value></data>

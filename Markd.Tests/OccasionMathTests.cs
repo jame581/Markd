@@ -189,4 +189,25 @@ public class OccasionMathTests
         var occasion = new Occasion { AnchorDate = AnniversaryAnchor, Direction = OccasionDirection.Since };
         Assert.Equal("od 14. 10. 2022", OccasionMath.AnchorPhrase(occasion, Zone));
     }
+
+    [Theory]
+    [InlineData(1, "zbývá")]
+    [InlineData(3, "zbývají")]
+    [InlineData(12, "zbývá")]
+    public void UnitLabel_UntilToGo_Czech_Pluralizes(int days, string expected)
+    {
+        using var _ = new CultureScope("cs-CZ");
+        var occasion = new Occasion { Direction = OccasionDirection.Until };
+        Assert.Equal(expected, OccasionMath.UnitLabel(occasion, days));
+    }
+
+    [Theory]
+    [InlineData(1, "to go")]
+    [InlineData(3, "to go")]
+    [InlineData(12, "to go")]
+    public void UnitLabel_UntilToGo_English_StaysToGo(int days, string expected)
+    {
+        var occasion = new Occasion { Direction = OccasionDirection.Until };
+        Assert.Equal(expected, OccasionMath.UnitLabel(occasion, days));
+    }
 }
