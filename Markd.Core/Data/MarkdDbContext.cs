@@ -1,4 +1,5 @@
 ﻿using Markd.Core.Domain;
+using Markd.Core.Localization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Markd.Core.Data
@@ -70,7 +71,7 @@ namespace Markd.Core.Data
                 {
                     Id = 1,
                     Theme = "System",
-                    Language = "en",
+                    Language = LanguageSetting.System,
                     NotificationsEnabled = true,
                     NotificationTimeOfDay = new TimeSpan(9, 0, 0)
                 });

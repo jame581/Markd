@@ -9,6 +9,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Markd.Core.Data;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 
 namespace Markd.Core.Services
 {
@@ -158,7 +159,7 @@ namespace Markd.Core.Services
                 }
 
                 settings.Theme = settingsData.Theme;
-                settings.Language = settingsData.Language;
+                settings.Language = LanguageSetting.IsValid(settingsData.Language) ? settingsData.Language : LanguageSetting.System;
                 settings.NotificationsEnabled = settingsData.NotificationsEnabled;
 
                 await _db.SaveChangesAsync();

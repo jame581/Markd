@@ -18,7 +18,7 @@ public class AppSettingsServiceTests
 
             Assert.NotNull(settings);
             Assert.Equal("System", settings.Theme);
-            Assert.Equal("en", settings.Language);
+            Assert.Equal("system", settings.Language);
             Assert.True(settings.NotificationsEnabled);
             Assert.Equal(new TimeSpan(9, 0, 0), settings.NotificationTimeOfDay);
         }

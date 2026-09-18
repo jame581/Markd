@@ -6,7 +6,7 @@
 
         public string Theme { get; set; } = "System";
 
-        public string Language { get; set; } = "en";
+        public string Language { get; set; } = Localization.LanguageSetting.System;
 
         public bool NotificationsEnabled { get; set; } = true;
 

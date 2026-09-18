@@ -152,5 +152,24 @@ namespace Markd.Core.Tests
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => importer.ParseImportPackageAsync(bytes));
             Assert.Equal("Unsupported import schema version '2'. This app supports schema version 1.", ex.Message);
         }
+
+        [Theory]
+        [InlineData("cs", "cs")]
+        [InlineData("system", "system")]
+        [InlineData("klingon", "system")]
+        [InlineData("", "system")]
+        public async Task Import_NormalizesLanguage(string imported, string stored)
+        {
+            var (db, connection) = TestDbFactory.CreateSqliteInMemoryContext();
+            using var _ = connection;
+            using var __ = db;
+
+            var importer = new ImportService(db);
+            var json = $$$"""{"schemaVersion":"1","settings":{"theme":"Dark","language":"{{{imported}}}","notificationsEnabled":true}}""";
+            var model = await importer.ParseImportPackageAsync(System.Text.Encoding.UTF8.GetBytes(json));
+            await importer.ApplyImportAsync(model);
+
+            Assert.Equal(stored, (await db.AppSettings.FirstAsync()).Language);
+        }
     }
 }

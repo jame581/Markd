@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Markd.Core.Localization;
 
 namespace Markd.Core.Services
 {
@@ -51,7 +52,7 @@ namespace Markd.Core.Services
     public class AppSettingsDto
     {
         public string Theme { get; set; } = "System";
-        public string Language { get; set; } = "en";
+        public string Language { get; set; } = LanguageSetting.System;
         public bool NotificationsEnabled { get; set; } = true;
     }
 }
