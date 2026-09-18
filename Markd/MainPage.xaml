@@ -1,436 +1,194 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:domain="clr-namespace:Markd.Core.Domain;assembly=Markd.Core"
-             xmlns:viewModels="clr-namespace:Markd.ViewModels"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:m="clr-namespace:Markd.Controls.Mobile"
              x:Class="Markd.MainPage"
              x:Name="RootPage"
-             x:DataType="viewModels:OccasionListViewModel"
-             Title="Markd"
-             Style="{StaticResource MarkdPage}">
+             x:DataType="vm:OccasionListViewModel"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
 
-    <ContentPage.Resources>
-        <Style x:Key="SectionCard" TargetType="Border" BasedOn="{StaticResource Card}">
-            <Setter Property="StrokeShape" Value="RoundRectangle 16" />
-            <Setter Property="Padding" Value="18" />
-        </Style>
+    <Grid RowDefinitions="Auto,*,Auto">
 
-        <Style x:Key="OccasionRowCard" TargetType="Border" BasedOn="{StaticResource Card}">
-            <Setter Property="StrokeShape" Value="RoundRectangle 12" />
-            <Setter Property="Padding" Value="12,10" />
-            <Setter Property="Margin" Value="0,0,0,12" />
-            <Setter Property="MinimumHeightRequest" Value="64" />
-        </Style>
+        <m:MediumTopAppBar Title="Markd">
+            <c:IconButton x:Name="OverflowButton" Glyph="Dots" Clicked="OnOverflowClicked" IsVisible="{Binding HasOccasions}" />
+        </m:MediumTopAppBar>
 
-        <Style x:Key="HeaderTitle" TargetType="Label">
-            <Setter Property="FontFamily" Value="FigtreeExtraBold" />
-            <Setter Property="FontSize" Value="28" />
-            <Setter Property="TextColor"
-                    Value="{AppThemeBinding Light={StaticResource TextPrimaryLight},
-                                            Dark={StaticResource TextPrimaryDark}}" />
-        </Style>
+        <!-- Populated -->
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding UnpinnedGroups}"
+                        IsGrouped="True"
+                        SelectionMode="None"
+                        IsVisible="{Binding HasOccasions}"
+                        VerticalScrollBarVisibility="Never"
+                        Margin="16,0">
 
-        <Style x:Key="HeaderSubtitle" TargetType="Label" BasedOn="{StaticResource RowSubtitle}">
-            <Setter Property="FontSize" Value="13" />
-        </Style>
-
-        <Style x:Key="RowCountValue" TargetType="Label">
-            <Setter Property="FontFamily" Value="FigtreeSemiBold" />
-            <Setter Property="FontSize" Value="19" />
-            <Setter Property="TextColor"
-                    Value="{AppThemeBinding Light={StaticResource TextPrimaryLight},
-                                            Dark={StaticResource TextPrimaryDark}}" />
-            <Setter Property="HorizontalTextAlignment" Value="End" />
-        </Style>
-
-        <Style x:Key="RowCountCaption" TargetType="Label">
-            <Setter Property="FontFamily" Value="FigtreeSemiBold" />
-            <Setter Property="FontSize" Value="10.5" />
-            <Setter Property="CharacterSpacing" Value="0.5" />
-            <Setter Property="TextTransform" Value="Uppercase" />
-            <Setter Property="TextColor"
-                    Value="{AppThemeBinding Light={StaticResource TextTertiaryLight},
-                                            Dark={StaticResource TextTertiaryDark}}" />
-            <Setter Property="HorizontalTextAlignment" Value="End" />
-        </Style>
-
-        <Style x:Key="MetaChip" TargetType="Border">
-            <Setter Property="Padding" Value="8,4" />
-            <Setter Property="StrokeThickness" Value="0" />
-            <Setter Property="StrokeShape" Value="RoundRectangle 6" />
-            <Setter Property="BackgroundColor"
-                    Value="{AppThemeBinding Light={StaticResource AccentTintLight},
-                                            Dark={StaticResource AccentTintDark}}" />
-        </Style>
-
-        <Style x:Key="EmptyStateBody" TargetType="Label">
-            <Setter Property="FontFamily" Value="FigtreeRegular" />
-            <Setter Property="FontSize" Value="15" />
-            <Setter Property="LineHeight" Value="1.55" />
-            <Setter Property="TextColor"
-                    Value="{AppThemeBinding Light={StaticResource TextSecondaryLight},
-                                            Dark={StaticResource TextSecondaryDark}}" />
-            <Setter Property="HorizontalTextAlignment" Value="Center" />
-        </Style>
-    </ContentPage.Resources>
-
-    <Grid Padding="26,18,26,40"
-          RowDefinitions="Auto,*"
-          RowSpacing="18">
-        <Grid Grid.Row="0"
-              ColumnDefinitions="*,Auto"
-              ColumnSpacing="16">
-            <VerticalStackLayout Spacing="4">
-                <Label Text="Home"
-                       Style="{StaticResource HeaderTitle}" />
-                <Label Text="Keep your featured moment close and everything else grouped below."
-                       Style="{StaticResource HeaderSubtitle}" />
-            </VerticalStackLayout>
-
-            <Button Grid.Column="1"
-                    Text="+ New occasion"
-                    Style="{StaticResource PrimaryButton}"
-                    HeightRequest="36"
-                    Padding="16,0"
-                    CornerRadius="8"
-                    VerticalOptions="Center"
-                    Command="{Binding AddCommand}" />
-        </Grid>
-
-        <Grid Grid.Row="1"
-              x:Name="HomeLayoutGrid"
-              ColumnSpacing="24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition x:Name="ListPaneColumn" Width="*" />
-                <ColumnDefinition x:Name="DetailPaneColumn" Width="0" />
-            </Grid.ColumnDefinitions>
-
-            <Grid Grid.Column="0"
-                  RowDefinitions="Auto,*"
-                  RowSpacing="18">
-                <Border Grid.Row="0"
-                        x:Name="MobileFeaturedCard"
-                        Style="{StaticResource FeaturedCard}"
-                        IsVisible="False">
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Tapped="OnFeaturedCardTapped" />
-                    </Border.GestureRecognizers>
-
-                    <VerticalStackLayout BindingContext="{Binding FeaturedSummary}"
-                                         x:DataType="viewModels:OccasionSummary"
-                                         Spacing="14">
-                        <Grid ColumnDefinitions="Auto,*,Auto"
-                              ColumnSpacing="12">
-                            <Grid WidthRequest="30"
-                                  HeightRequest="30">
-                                <Border BackgroundColor="{Binding Occasion.ColorHex}"
-                                        Opacity="0.13"
-                                        StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 10" />
-                                <Label Text="{Binding Occasion.Emoji}"
-                                       FontSize="16"
-                                       HorizontalOptions="Center"
-                                       VerticalOptions="Center" />
-                            </Grid>
-
-                            <VerticalStackLayout Grid.Column="1"
-                                                 Spacing="2"
-                                                 VerticalOptions="Center">
-                                <Label Text="{Binding Occasion.Title}"
-                                       Style="{StaticResource RowTitle}" />
-                                <Label Text="{Binding AnchorLabel}"
-                                       Style="{StaticResource RowSubtitle}" />
-                            </VerticalStackLayout>
-
-                            <Border Grid.Column="2"
-                                    Style="{StaticResource MetaChip}"
-                                    IsVisible="{Binding Occasion.IsPinned}"
-                                    VerticalOptions="Start">
-                                <Label Text="Pinned"
-                                       Style="{StaticResource Overline}"
-                                       TextColor="{AppThemeBinding Light={StaticResource AccentTextLight},
-                                                                   Dark={StaticResource AccentTextDark}}" />
-                            </Border>
-                        </Grid>
-
-                        <HorizontalStackLayout Spacing="8">
-                            <Label Text="{Binding DisplayDays}"
-                                   Style="{StaticResource CountLabel}" />
-                            <Label Text="days"
-                                   FontFamily="FigtreeSemiBold"
-                                   FontSize="19"
-                                   Margin="0,0,0,10"
-                                   VerticalOptions="End"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight},
-                                                               Dark={StaticResource TextSecondaryDark}}" />
-                        </HorizontalStackLayout>
-
-                        <Label Text="{Binding TimeLabel}"
-                               Style="{StaticResource BreakdownLabel}" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <CollectionView Grid.Row="1"
-                                x:Name="OccasionGroupsView"
-                                ItemsSource="{Binding OccasionGroups}"
-                                IsGrouped="True"
-                                SelectionMode="Single"
-                                SelectionChanged="OnOccasionSelected">
-                    <CollectionView.EmptyView>
-                        <Border Style="{StaticResource SectionCard}"
-                                Margin="0,24,0,0"
-                                Padding="28,32">
-                            <VerticalStackLayout Spacing="14"
-                                                 HorizontalOptions="Center">
-                                <Border WidthRequest="84"
-                                        HeightRequest="84"
-                                        StrokeThickness="0"
-                                        StrokeShape="RoundRectangle 26"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource AccentTintLight},
-                                                                          Dark={StaticResource AccentTintDark}}">
-                                    <Label Text="🗓️"
-                                           FontSize="38"
-                                           HorizontalOptions="Center"
-                                           VerticalOptions="Center" />
-                                </Border>
-
-                                <Label Text="Nothing marked yet"
-                                       FontFamily="FigtreeSemiBold"
-                                       FontSize="21"
-                                       HorizontalTextAlignment="Center"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight},
-                                                                   Dark={StaticResource TextPrimaryDark}}" />
-
-                                <Label Text="Start with one meaningful date and Markd will keep the count ready on this device."
-                                       Style="{StaticResource EmptyStateBody}"
-                                       MaximumWidthRequest="360" />
-
-                                <Button Text="Add your first occasion"
-                                        Style="{StaticResource PrimaryButton}"
-                                        Padding="22,14"
-                                        Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.AddCommand}" />
-
-                                <Label Text="Your dates and notes stay stored locally."
-                                       Style="{StaticResource RowSubtitle}"
-                                       HorizontalTextAlignment="Center" />
-                            </VerticalStackLayout>
-                        </Border>
-                    </CollectionView.EmptyView>
-
-                    <CollectionView.GroupHeaderTemplate>
-                        <DataTemplate x:DataType="viewModels:OccasionGroup">
-                            <Label Text="{Binding CategoryName}"
-                                   Style="{StaticResource Overline}"
-                                   Margin="4,0,0,7" />
-                        </DataTemplate>
-                    </CollectionView.GroupHeaderTemplate>
-
-                    <CollectionView.ItemTemplate>
-                        <DataTemplate x:DataType="viewModels:OccasionSummary">
-                            <Border Style="{StaticResource OccasionRowCard}">
-                                <VisualStateManager.VisualStateGroups>
-                                    <VisualStateGroup Name="CommonStates">
-                                        <VisualState Name="Normal" />
-                                        <VisualState Name="Selected">
-                                            <VisualState.Setters>
-                                                <Setter Property="Stroke" Value="{StaticResource AccentBorderColor}" />
-                                            </VisualState.Setters>
-                                        </VisualState>
-                                    </VisualStateGroup>
-                                </VisualStateManager.VisualStateGroups>
-
-                                <Grid ColumnDefinitions="Auto,*,Auto"
-                                      ColumnSpacing="12">
-                                    <Grid WidthRequest="30"
-                                          HeightRequest="30"
-                                          VerticalOptions="Center">
-                                        <Border BackgroundColor="{Binding Occasion.ColorHex}"
-                                                Opacity="0.13"
-                                                StrokeThickness="0"
-                                                StrokeShape="RoundRectangle 10" />
-                                        <Label Text="{Binding Occasion.Emoji}"
-                                               FontSize="15"
-                                               HorizontalOptions="Center"
-                                               VerticalOptions="Center" />
-                                    </Grid>
-
-                                    <VerticalStackLayout Grid.Column="1"
-                                                         Spacing="2"
-                                                         VerticalOptions="Center">
-                                        <Label Text="{Binding Occasion.Title}"
-                                               Style="{StaticResource RowTitle}"
-                                               LineBreakMode="TailTruncation" />
-                                        <Label Text="{Binding AnchorLabel}"
-                                               Style="{StaticResource RowSubtitle}" />
-                                    </VerticalStackLayout>
-
-                                    <VerticalStackLayout Grid.Column="2"
-                                                         Spacing="1"
-                                                         VerticalOptions="Center">
-                                        <Label Text="{Binding DisplayDays}"
-                                               Style="{StaticResource RowCountValue}" />
-                                        <Label Text="{Binding CountLabel}"
-                                               Style="{StaticResource RowCountCaption}" />
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
-            </Grid>
-
-            <ScrollView Grid.Column="1"
-                        x:Name="DesktopDetailScroll"
-                        IsVisible="False">
-                <VerticalStackLayout x:Name="DesktopDetailRoot"
-                                     x:DataType="viewModels:OccasionDetailViewModel"
-                                     Spacing="18">
-                    <Border Style="{StaticResource FeaturedCard}">
-                        <VerticalStackLayout Spacing="14">
-                            <Grid ColumnDefinitions="Auto,*,Auto"
-                                  ColumnSpacing="12">
-                                <Grid WidthRequest="30"
-                                      HeightRequest="30">
-                                    <Border BackgroundColor="{Binding CurrentOccasion.ColorHex}"
-                                            Opacity="0.13"
-                                            StrokeThickness="0"
-                                            StrokeShape="RoundRectangle 10" />
-                                    <Label Text="{Binding CurrentOccasion.Emoji}"
-                                           FontSize="16"
-                                           HorizontalOptions="Center"
-                                           VerticalOptions="Center" />
-                                </Grid>
-
-                                <VerticalStackLayout Grid.Column="1"
-                                                     Spacing="2"
-                                                     VerticalOptions="Center">
-                                    <Label Text="{Binding CurrentOccasion.Title}"
-                                           Style="{StaticResource RowTitle}" />
-                                    <Label Text="{Binding LocalAnchorDate, StringFormat='Anchor · {0:dd MMM yyyy}'}"
-                                           Style="{StaticResource RowSubtitle}" />
-                                </VerticalStackLayout>
-
-                                <Border Grid.Column="2"
-                                        Style="{StaticResource MetaChip}"
-                                        IsVisible="{Binding CurrentOccasion.IsPinned}"
-                                        VerticalOptions="Start">
-                                    <Label Text="Pinned"
-                                           Style="{StaticResource Overline}"
-                                           TextColor="{AppThemeBinding Light={StaticResource AccentTextLight},
-                                                                       Dark={StaticResource AccentTextDark}}" />
-                                </Border>
-                            </Grid>
-
-                            <HorizontalStackLayout Spacing="8">
-                                <Label Text="{Binding Days}"
-                                       Style="{StaticResource CountLabel}" />
-                                <Label Text="days"
-                                       FontFamily="FigtreeSemiBold"
-                                       FontSize="19"
-                                       Margin="0,0,0,10"
-                                       VerticalOptions="End"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight},
-                                                                   Dark={StaticResource TextSecondaryDark}}" />
-                            </HorizontalStackLayout>
-
-                            <Label Text="{Binding TimeBreakdown}"
-                                   Style="{StaticResource BreakdownLabel}" />
-
-                            <HorizontalStackLayout Spacing="8">
-                                <Border Style="{StaticResource MetaChip}">
-                                    <Label Text="{Binding CurrentOccasion.Direction}"
-                                           Style="{StaticResource Overline}"
-                                           TextColor="{AppThemeBinding Light={StaticResource AccentTextLight},
-                                                                       Dark={StaticResource AccentTextDark}}" />
-                                </Border>
-                                <Label Text="{Binding LocalAnchorDate, StringFormat='{0:dd MMM yyyy}'}"
-                                       Style="{StaticResource RowSubtitle}"
-                                       VerticalTextAlignment="Center" />
-                            </HorizontalStackLayout>
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <Border Style="{StaticResource SectionCard}">
-                        <VerticalStackLayout Spacing="10">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <Label Text="Notes"
-                                       Style="{StaticResource Overline}" />
-                                <Button Grid.Column="1"
-                                        Text="Open details"
-                                        Style="{StaticResource TonalButton}"
-                                        HeightRequest="36"
-                                        Padding="14,0"
-                                        CornerRadius="8"
-                                        Clicked="OnOpenDetailClicked" />
-                            </Grid>
-
-                            <Label Text="{Binding CurrentOccasion.Notes, TargetNullValue='No notes yet.'}"
-                                   FontFamily="FigtreeRegular"
-                                   FontSize="15"
-                                   LineHeight="1.55"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight},
-                                                               Dark={StaticResource TextPrimaryDark}}" />
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <Border Style="{StaticResource SectionCard}">
+            <CollectionView.Header>
+                <Grid Padding="0,0,0,2">
+                    <Border Style="{StaticResource M3TonalCard}"
+                            StrokeShape="RoundRectangle 20"
+                            Padding="20"
+                            IsVisible="{Binding HasFeaturedOccasion}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnFeaturedTapped" />
+                        </Border.GestureRecognizers>
                         <VerticalStackLayout Spacing="12">
-                            <Label Text="Milestones"
-                                   Style="{StaticResource Overline}" />
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <c:EmojiAvatar Size="32" EmojiSize="16" LightAlpha="0.15" DarkAlpha="0.26"
+                                               Emoji="{Binding FeaturedSummary.Emoji}"
+                                               ColorHex="{Binding FeaturedSummary.ColorHex}" />
+                                <Label Grid.Column="1"
+                                       Text="{Binding FeaturedSummary.Title}"
+                                       Style="{StaticResource M3OnContainer}"
+                                       FontFamily="FigtreeSemiBold" FontSize="17"
+                                       LineBreakMode="TailTruncation"
+                                       VerticalOptions="Center" />
+                                <Border Grid.Column="2"
+                                        StrokeShape="RoundRectangle 8"
+                                        Padding="9,5"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource OnContainerChipLight}, Dark={StaticResource OnContainerChipDark}}"
+                                        VerticalOptions="Center">
+                                    <HorizontalStackLayout Spacing="5">
+                                        <c:SvgIcon Glyph="Pin" Size="13" VerticalOptions="Center"
+                                                   Color="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
+                                        <Label Text="PINNED" Style="{StaticResource M3OnContainer}"
+                                               FontFamily="FigtreeSemiBold" FontSize="11" CharacterSpacing="0.8"
+                                               VerticalOptions="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </Grid>
 
-                            <Label Text="No milestones yet."
-                                   Style="{StaticResource RowSubtitle}"
-                                   IsVisible="False">
-                                <Label.Triggers>
-                                    <DataTrigger TargetType="Label"
-                                                 Binding="{Binding Milestones.Count}"
-                                                 Value="0">
-                                        <Setter Property="IsVisible" Value="True" />
-                                    </DataTrigger>
-                                </Label.Triggers>
-                            </Label>
+                            <HorizontalStackLayout Spacing="9">
+                                <Label Text="{Binding FeaturedSummary.DisplayDays}"
+                                       Style="{StaticResource M3OnContainer}"
+                                       FontFamily="FigtreeExtraBold" FontSize="64" CharacterSpacing="-0.56"
+                                       LineHeight="0.9" />
+                                <Label Text="{Binding FeaturedSummary.UnitLabel}"
+                                       Style="{StaticResource M3OnContainer}"
+                                       FontFamily="FigtreeSemiBold" FontSize="19"
+                                       Opacity="0.72" VerticalOptions="End" Margin="0,0,0,10" />
+                            </HorizontalStackLayout>
 
-                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Milestones}"
-                                                 Spacing="10">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="domain:Milestone">
-                                        <Grid ColumnDefinitions="Auto,*,Auto"
-                                              ColumnSpacing="10">
-                                            <Border WidthRequest="24"
-                                                    HeightRequest="24"
-                                                    BackgroundColor="{AppThemeBinding Light={StaticResource AccentTintLight},
-                                                                                      Dark={StaticResource SurfaceCardPressedDark}}"
-                                                    StrokeThickness="0"
-                                                    StrokeShape="RoundRectangle 12"
-                                                    VerticalOptions="Center">
-                                                <Label Text="•"
-                                                       FontSize="18"
-                                                       HorizontalOptions="Center"
-                                                       VerticalOptions="Center"
-                                                       TextColor="{AppThemeBinding Light={StaticResource AccentTextLight},
-                                                                                   Dark={StaticResource TextSecondaryDark}}" />
-                                            </Border>
+                            <Label Text="{Binding FeaturedBreakdown}"
+                                   Style="{StaticResource M3OnContainer}"
+                                   FontFamily="PlexMonoMedium" FontSize="13" Opacity="0.78" />
 
-                                            <VerticalStackLayout Grid.Column="1"
-                                                                 Spacing="2">
-                                                <Label Text="{Binding Label}"
-                                                       Style="{StaticResource RowTitle}" />
-                                                <Label Text="{Binding ThresholdDays, StringFormat='Threshold · {0}d'}"
-                                                       Style="{StaticResource RowSubtitle}" />
-                                            </VerticalStackLayout>
-
-                                            <Label Grid.Column="2"
-                                                   Text="{Binding ThresholdDays, StringFormat='{0}d'}"
-                                                   Style="{StaticResource BreakdownLabel}"
-                                                   VerticalOptions="Center" />
-                                        </Grid>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
+                            <VerticalStackLayout Spacing="8" Margin="0,2,0,0">
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                    <Label Text="{Binding FeaturedSummary.NextHeading}"
+                                           Style="{StaticResource M3OnContainer}"
+                                           FontFamily="FigtreeSemiBold" FontSize="13"
+                                           LineBreakMode="TailTruncation" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding FeaturedSummary.NextStatus}"
+                                           Style="{StaticResource M3OnContainer}"
+                                           FontFamily="PlexMonoMedium" FontSize="12.5" Opacity="0.75" />
+                                </Grid>
+                                <c:ProgressTrack HeightRequest="6"
+                                                 Progress="{Binding FeaturedSummary.NextProgress}"
+                                                 TrackColor="{AppThemeBinding Light={StaticResource OnContainerTrackLight}, Dark={StaticResource OnContainerTrackDark}}" />
                             </VerticalStackLayout>
                         </VerticalStackLayout>
                     </Border>
-                </VerticalStackLayout>
-            </ScrollView>
-        </Grid>
+                </Grid>
+            </CollectionView.Header>
+
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate x:DataType="vm:OccasionGroup">
+                    <Label Text="{Binding CategoryName}"
+                           Style="{StaticResource M3SectionHeader}"
+                           Margin="4,18,0,8" />
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="vm:OccasionSummary">
+                    <Border Style="{StaticResource M3Card}"
+                            Padding="16,14"
+                            Margin="0,0,0,8"
+                            MinimumHeightRequest="68">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.OpenDetailCommand, x:DataType=ContentPage}"
+                                                  CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <c:EmojiAvatar Size="40" EmojiSize="18" LightAlpha="0.15" DarkAlpha="0.26"
+                                           Emoji="{Binding Emoji}" ColorHex="{Binding ColorHex}"
+                                           VerticalOptions="Center" />
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label Text="{Binding Title}" Style="{StaticResource M3RowTitle}" />
+                                <Label Text="{Binding AnchorLabel}" Style="{StaticResource M3RowSub}" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="2" Spacing="1" VerticalOptions="Center">
+                                <Label Text="{Binding DisplayDays}"
+                                       FontFamily="FigtreeBold" FontSize="20"
+                                       HorizontalOptions="End" />
+                                <Label Text="{Binding UnitLabel}"
+                                       Style="{StaticResource M3RowSub}"
+                                       FontSize="10.5" CharacterSpacing="0.8" TextTransform="Uppercase"
+                                       HorizontalOptions="End" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+
+            <CollectionView.Footer>
+                <BoxView HeightRequest="96" Color="Transparent" />
+            </CollectionView.Footer>
+        </CollectionView>
+
+        <!-- First run -->
+        <VerticalStackLayout Grid.Row="1"
+                             IsVisible="{Binding IsEmpty}"
+                             Spacing="18"
+                             Padding="44,0,44,70"
+                             VerticalOptions="Center">
+            <Border WidthRequest="100" HeightRequest="100"
+                    StrokeShape="RoundRectangle 50"
+                    HorizontalOptions="Center"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainerLight}, Dark={StaticResource PrimaryContainerDark}}">
+                <c:SvgIcon Glyph="MarkBig" Size="42" HorizontalOptions="Center" VerticalOptions="Center"
+                           Color="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
+            </Border>
+            <Label Text="Nothing marked yet"
+                   FontFamily="FigtreeSemiBold" FontSize="22"
+                   HorizontalTextAlignment="Center" />
+            <Label Text="Pick a date that matters — a first day, a last day, a day you're counting toward — and Markd keeps the number for you."
+                   Style="{StaticResource M3RowSub}"
+                   FontSize="15" LineHeight="1.25"
+                   HorizontalTextAlignment="Center" />
+            <Border HeightRequest="52"
+                    StrokeShape="RoundRectangle 26"
+                    Padding="26,0"
+                    Margin="0,4,0,0"
+                    HorizontalOptions="Center"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding AddCommand}" />
+                </Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="9" VerticalOptions="Center">
+                    <c:SvgIcon Glyph="Plus" Size="20" VerticalOptions="Center"
+                               Color="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                    <Label Text="Add your first occasion"
+                           FontFamily="FigtreeSemiBold" FontSize="16" VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                </HorizontalStackLayout>
+            </Border>
+            <Label Text="No account. No ads. Everything stays on this phone."
+                   Style="{StaticResource M3RowSub}"
+                   Opacity="0.8"
+                   HorizontalTextAlignment="Center" />
+        </VerticalStackLayout>
+
+        <m:ExtendedFab Grid.Row="1"
+                       Text="New occasion"
+                       Command="{Binding AddCommand}"
+                       IsVisible="{Binding HasOccasions}"
+                       Margin="0,0,16,16" />
+
+        <m:BottomNavBar x:Name="NavBar" Grid.Row="2" Selected="home" />
     </Grid>
 </ContentPage>

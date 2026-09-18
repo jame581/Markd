@@ -1,4 +1,4 @@
-using Markd.Pages;
+using Markd.Services;
 using Markd.ViewModels;
 
 namespace Markd;
@@ -6,8 +6,10 @@ namespace Markd;
 [QueryProperty(nameof(OccasionIdQuery), "id")]
 public partial class OccasionDetailPage : ContentPage
 {
+    private const string ShareItem = "Share milestone";
+    private const string RemoveItem = "Remove milestone";
+
     private readonly OccasionDetailViewModel _viewModel;
-    private string? _occasionIdQuery;
 
     public OccasionDetailPage()
     {
@@ -16,27 +18,23 @@ public partial class OccasionDetailPage : ContentPage
         BindingContext = _viewModel;
     }
 
-    public string? OccasionIdQuery
-    {
-        get => _occasionIdQuery;
-        set => _occasionIdQuery = value;
-    }
+    public string? OccasionIdQuery { get; set; }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        SystemBars.Apply(withNavigationBar: false);
+        SnackbarFeedbackService.Anchor = null;
 
         if (int.TryParse(OccasionIdQuery, out var id))
-        {
             await _viewModel.LoadAsync(id);
-            Title = _viewModel.CurrentOccasion?.Title ?? "Occasion";
-        }
 
-        HeroCard.Opacity = 0;
-        HeroCard.Scale = 0.92;
-        await Task.WhenAll(
-            HeroCard.FadeToAsync(1, 250, Easing.CubicOut),
-            HeroCard.ScaleToAsync(1, 250, Easing.CubicOut));
+        // A stale notification can point at an occasion that has since been deleted.
+        if (!_viewModel.HasOccasion)
+        {
+            await Shell.Current.GoToAsync("..");
+            return;
+        }
 
         _viewModel.StartTimer();
     }
@@ -47,16 +45,34 @@ public partial class OccasionDetailPage : ContentPage
         _viewModel.StopTimer();
     }
 
-    private async void OnAddMilestoneClicked(object? sender, EventArgs e)
+    private async void OnOverflowClicked(object? sender, EventArgs e)
     {
-        var editorPage = new MilestoneEditorPage();
-        await Navigation.PushModalAsync(editorPage);
-        var result = await editorPage.WaitForResultAsync();
-        if (result is null)
+        var menu = ServiceHelper.GetRequiredService<IActionMenuService>();
+        switch (await menu.ShowAsync(OverflowButton, ["Share", "Delete occasion"], "Delete occasion"))
+        {
+            case "Share":
+                await _viewModel.ShareCommand.ExecuteAsync(null);
+                break;
+            case "Delete occasion":
+                await _viewModel.DeleteCommand.ExecuteAsync(null);
+                break;
+        }
+    }
+
+    private async void OnMilestoneTapped(object? sender, TappedEventArgs e)
+    {
+        if (sender is not View { BindingContext: MilestoneViewState state } view)
             return;
 
-        _viewModel.NewMilestoneLabel = result.Label;
-        _viewModel.NewMilestoneThresholdDays = result.ThresholdDays.ToString();
-        await _viewModel.AddMilestoneCommand.ExecuteAsync(null);
+        var menu = ServiceHelper.GetRequiredService<IActionMenuService>();
+        switch (await menu.ShowAsync(view, [ShareItem, RemoveItem], RemoveItem))
+        {
+            case ShareItem:
+                await _viewModel.ShareMilestoneCommand.ExecuteAsync(state.Milestone);
+                break;
+            case RemoveItem:
+                await _viewModel.RemoveMilestoneCommand.ExecuteAsync(state.Milestone);
+                break;
+        }
     }
 }

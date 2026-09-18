@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:domain="clr-namespace:Markd.Core.Domain;assembly=Markd.Core"
+             xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             x:Class="Markd.OccasionFormPage"
+             x:Name="RootPage"
+             x:DataType="vm:OccasionFormViewModel"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False"
+             Shell.PresentationMode="ModalAnimated">
+
+    <Grid RowDefinitions="Auto,*">
+        <m:SmallTopAppBar Title="{Binding Header}" LeadingGlyph="Close" LeadingCommand="{Binding CancelCommand}">
+            <Button Text="Save"
+                    Style="{StaticResource M3FilledButton}"
+                    HeightRequest="40" CornerRadius="20" FontSize="14.5" Padding="22,0"
+                    Margin="0,0,4,0"
+                    Command="{Binding SaveCommand}" />
+        </m:SmallTopAppBar>
+
+        <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Padding="16,8,16,28" Spacing="22">
+
+                <Border Style="{StaticResource M3TonalCard}" StrokeShape="RoundRectangle 20" Padding="18">
+                    <VerticalStackLayout Spacing="3" HorizontalOptions="Center">
+                        <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
+                            <Label Text="{Binding PreviewDays}" Style="{StaticResource M3OnContainer}"
+                                   FontFamily="FigtreeExtraBold" FontSize="46" CharacterSpacing="-0.48" LineHeight="0.9" />
+                            <Label Text="days" Style="{StaticResource M3OnContainer}"
+                                   FontFamily="FigtreeSemiBold" FontSize="17" Opacity="0.72"
+                                   VerticalOptions="End" Margin="0,0,0,7" />
+                        </HorizontalStackLayout>
+                        <Label Text="{Binding PreviewCaption}" Style="{StaticResource M3OnContainer}"
+                               FontSize="13" Opacity="0.8" HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <VerticalStackLayout Spacing="16">
+                    <m:OutlinedField Label="Title">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Entry Text="{Binding Title}" Placeholder="What are you marking?" FontSize="16" VerticalOptions="Center" />
+                            <Border Grid.Column="1" WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 18"
+                                    VerticalOptions="Center"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnEmojiTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding Emoji, TargetNullValue='🎉'}" FontSize="17"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+                    </m:OutlinedField>
+                    <!-- Supporting text directly under the field, so a failed Save is visible without scrolling -->
+                    <Label Text="{Binding ErrorMessage}" Style="{StaticResource DangerText}" FontSize="12.5" Margin="16,-12,16,0"
+                           IsVisible="{Binding ErrorMessage, Converter={StaticResource HasText}}" />
+
+                    <m:OutlinedField Label="Category">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Picker ItemsSource="{Binding Categories}"
+                                    ItemDisplayBinding="{Binding Name, x:DataType=domain:Category}"
+                                    SelectedItem="{Binding SelectedCategory}"
+                                    FontSize="16" VerticalOptions="Center" />
+                            <c:SvgIcon Grid.Column="1" Glyph="Caret" Size="14" VerticalOptions="Center" InputTransparent="True"
+                                       Color="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        </Grid>
+                    </m:OutlinedField>
+
+                    <m:OutlinedField Label="Notes">
+                        <Editor Text="{Binding Notes}" Placeholder="Why this day matters" AutoSize="TextChanges"
+                                FontSize="16" MinimumHeightRequest="56" Margin="0,4" />
+                    </m:OutlinedField>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Counting" Style="{StaticResource M3SectionHeader}" Padding="2,0" />
+                    <Border HeightRequest="44" StrokeShape="RoundRectangle 22" StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light={StaticResource CardBorderLight}, Dark={StaticResource CardBorderDark}}">
+                        <Grid ColumnDefinitions="*,1,*">
+                            <Grid>
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetDirectionCommand}" CommandParameter="Since" />
+                                </Grid.GestureRecognizers>
+                                <BoxView Color="{AppThemeBinding Light={StaticResource PrimaryContainerLight}, Dark={StaticResource PrimaryContainerDark}}"
+                                         IsVisible="{Binding IsSinceSelected}" />
+                                <HorizontalStackLayout Spacing="7" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <c:SvgIcon Glyph="Tick" Size="16" VerticalOptions="Center" IsVisible="{Binding IsSinceSelected}"
+                                               Color="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
+                                    <Label Text="Since a date" FontFamily="FigtreeSemiBold" FontSize="14.5" VerticalOptions="Center">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsSinceSelected}" Value="True">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsSinceSelected}" Value="False">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                                <Setter Property="FontFamily" Value="FigtreeMedium" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </HorizontalStackLayout>
+                            </Grid>
+                            <BoxView Grid.Column="1" />
+                            <Grid Grid.Column="2">
+                                <Grid.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding SetDirectionCommand}" CommandParameter="Until" />
+                                </Grid.GestureRecognizers>
+                                <BoxView Color="{AppThemeBinding Light={StaticResource PrimaryContainerLight}, Dark={StaticResource PrimaryContainerDark}}"
+                                         IsVisible="{Binding IsUntilSelected}" />
+                                <HorizontalStackLayout Spacing="7" HorizontalOptions="Center" VerticalOptions="Center">
+                                    <c:SvgIcon Glyph="Tick" Size="16" VerticalOptions="Center" IsVisible="{Binding IsUntilSelected}"
+                                               Color="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
+                                    <Label Text="Until a date" FontFamily="FigtreeSemiBold" FontSize="14.5" VerticalOptions="Center">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsUntilSelected}" Value="True">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Label" Binding="{Binding IsUntilSelected}" Value="False">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                                <Setter Property="FontFamily" Value="FigtreeMedium" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </HorizontalStackLayout>
+                            </Grid>
+                        </Grid>
+                    </Border>
+
+                    <m:OutlinedField Label="Date">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <!-- 3dp matches the text inset of the Entry and Picker above. -->
+                            <Label Text="{Binding AnchorDateText}" FontSize="16" VerticalOptions="Center" Margin="3,0,0,0" />
+                            <c:SvgIcon Grid.Column="1" Glyph="Calendar" Size="20" VerticalOptions="Center"
+                                       Color="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            <!-- The native picker sits on top, nearly invisible, so a tap anywhere opens the system DatePickerDialog. -->
+                            <DatePicker Grid.ColumnSpan="2" Date="{Binding AnchorDate}" Opacity="0.02" TextColor="Transparent" />
+                        </Grid>
+                    </m:OutlinedField>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="11">
+                    <Label Text="Colour" Style="{StaticResource M3SectionHeader}" Padding="2,0" />
+                    <FlexLayout Wrap="Wrap" Direction="Row" AlignItems="Start" JustifyContent="Start"
+                                BindableLayout.ItemsSource="{Binding ColorChoices}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ColorChoice">
+                                <Grid WidthRequest="46" HeightRequest="46" Margin="0,0,2,4">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.SelectColorCommand, x:DataType=ContentPage}"
+                                                              CommandParameter="{Binding Hex}" />
+                                    </Grid.GestureRecognizers>
+                                    <Border StrokeShape="RoundRectangle 23" StrokeThickness="2" BackgroundColor="Transparent"
+                                            Stroke="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}"
+                                            IsVisible="{Binding IsSelected}" />
+                                    <Border WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 18"
+                                            BackgroundColor="{Binding Color}"
+                                            HorizontalOptions="Center" VerticalOptions="Center">
+                                        <c:SvgIcon Glyph="Tick" Size="16" Color="White" IsVisible="{Binding IsSelected}"
+                                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14" Padding="2,4">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding TogglePinCommand}" />
+                    </Grid.GestureRecognizers>
+                    <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                        <Label Text="Pin to Home" FontSize="16" />
+                        <Label Text="Replaces the featured card" Style="{StaticResource M3RowSub}" />
+                    </VerticalStackLayout>
+                    <m:M3Switch Grid.Column="1" IsToggled="{Binding IsPinned}" InputTransparent="True" />
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

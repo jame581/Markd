@@ -1,68 +1,39 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:m="clr-namespace:Markd.Controls.Mobile"
              x:Class="Markd.Pages.MilestoneEditorPage"
-             BackgroundColor="#66000000"
-             Shell.NavBarIsVisible="False">
-    <Grid Padding="24">
-        <Border MaximumWidthRequest="360"
-                HorizontalOptions="Center"
-                VerticalOptions="Center"
-                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight},
-                                                  Dark={StaticResource SurfaceCardDark}}"
-                Stroke="{AppThemeBinding Light={StaticResource CardBorderLight},
-                                         Dark={StaticResource CardBorderDark}}"
-                StrokeShape="RoundRectangle 24"
-                Padding="22">
-            <VerticalStackLayout Spacing="16">
-                <Border WidthRequest="38"
-                        HeightRequest="5"
-                        HorizontalOptions="Center"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource CardBorderLight},
-                                                          Dark={StaticResource CardBorderDark}}"
-                        StrokeThickness="0"
-                        StrokeShape="RoundRectangle 3" />
-
-                <VerticalStackLayout Spacing="4">
-                    <Label Text="Add milestone"
-                           FontFamily="FigtreeSemiBold"
-                           FontSize="20"
-                           TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight},
-                                                       Dark={StaticResource TextPrimaryDark}}" />
-                    <Label Text="Capture the next count without shifting the milestone list."
-                           Style="{StaticResource RowSubtitle}" />
+             x:DataType="vm:MilestoneEditorViewModel"
+             Style="{StaticResource M3DialogPage}"
+             Shell.PresentationMode="ModalNotAnimated">
+    <Grid>
+        <Border Style="{StaticResource M3DialogCard}" Padding="24,24,16,14">
+            <VerticalStackLayout Spacing="18">
+                <VerticalStackLayout Spacing="6" Padding="0,0,8,0">
+                    <Label Text="Add milestone" FontFamily="FigtreeSemiBold" FontSize="22" />
+                    <Label Text="Markd tells you on the morning it lands."
+                           Style="{StaticResource M3RowSub}" FontSize="14" />
                 </VerticalStackLayout>
 
-                <VerticalStackLayout Spacing="6">
-                    <Label Text="Label"
-                           Style="{StaticResource Overline}" />
-                    <Entry x:Name="LabelEntry"
-                           Placeholder="Fifteen hundred" />
+                <VerticalStackLayout Spacing="14" Padding="0,0,8,0">
+                    <m:OutlinedField Label="Name">
+                        <Entry x:Name="LabelEntry" Text="{Binding Label}" Placeholder="Fifteen hundred" FontSize="16" />
+                    </m:OutlinedField>
+                    <m:OutlinedField Label="Days">
+                        <Entry x:Name="ThresholdEntry" Text="{Binding ThresholdDays}" Placeholder="1500"
+                               Keyboard="Numeric" FontFamily="PlexMonoMedium" FontSize="16" />
+                    </m:OutlinedField>
+                    <Label Text="{Binding ErrorMessage}"
+                           Style="{StaticResource DangerText}" FontSize="13"
+                           IsVisible="{Binding ErrorMessage, Converter={StaticResource HasText}}" />
                 </VerticalStackLayout>
 
-                <VerticalStackLayout Spacing="6">
-                    <Label Text="Threshold days"
-                           Style="{StaticResource Overline}" />
-                    <Entry x:Name="ThresholdEntry"
-                           Keyboard="Numeric"
-                           Placeholder="1500" />
-                </VerticalStackLayout>
-
-                <Label x:Name="ErrorLabel"
-                       IsVisible="False"
-                       TextColor="{AppThemeBinding Light={StaticResource DangerLight},
-                                                   Dark={StaticResource DangerDark}}" />
-
-                <Grid ColumnDefinitions="*,*"
-                      ColumnSpacing="10">
-                    <Button Text="Cancel"
-                            Style="{StaticResource TonalButton}"
-                            Clicked="OnCancelClicked" />
-                    <Button Grid.Column="1"
-                            Text="Save"
-                            Style="{StaticResource PrimaryButton}"
-                            Clicked="OnSaveClicked" />
-                </Grid>
+                <HorizontalStackLayout Spacing="6" HorizontalOptions="End">
+                    <Button Text="Cancel" Style="{StaticResource M3TextButton}" Clicked="OnCancelClicked" />
+                    <Button Text="Add" Style="{StaticResource M3FilledButton}" HeightRequest="42" CornerRadius="21"
+                            FontSize="14.5" Clicked="OnSaveClicked" />
+                </HorizontalStackLayout>
             </VerticalStackLayout>
         </Border>
     </Grid>

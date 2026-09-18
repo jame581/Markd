@@ -1,49 +1,50 @@
+using Markd.ViewModels;
+
 namespace Markd.Pages;
 
 public partial class MilestoneEditorPage : ContentPage
 {
-    private readonly TaskCompletionSource<MilestoneEditorResult?> _resultSource = new();
+    private readonly MilestoneEditorViewModel _viewModel;
+    private bool _closing;
 
     public MilestoneEditorPage()
     {
         InitializeComponent();
+        _viewModel = ServiceHelper.GetRequiredService<MilestoneEditorViewModel>();
+        BindingContext = _viewModel;
     }
 
-    public Task<MilestoneEditorResult?> WaitForResultAsync() => _resultSource.Task;
+    public Task<MilestoneEditorResult?> WaitForResultAsync() => _viewModel.WaitForResultAsync();
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        LabelEntry.Focus();
+    }
 
     protected override bool OnBackButtonPressed()
     {
-        _resultSource.TrySetResult(null);
-        return base.OnBackButtonPressed();
+        _ = CloseAsync(null);
+        return true;
     }
 
-    private async void OnCancelClicked(object? sender, EventArgs e)
-    {
-        _resultSource.TrySetResult(null);
-        await Navigation.PopModalAsync();
-    }
+    private async void OnCancelClicked(object? sender, EventArgs e) => await CloseAsync(null);
 
     private async void OnSaveClicked(object? sender, EventArgs e)
     {
-        ErrorLabel.IsVisible = false;
+        var result = _viewModel.TryCreateResult();
+        if (result is not null)
+            await CloseAsync(result);
+    }
 
-        if (string.IsNullOrWhiteSpace(LabelEntry.Text))
-        {
-            ErrorLabel.Text = "Milestone label is required.";
-            ErrorLabel.IsVisible = true;
+    private async Task CloseAsync(MilestoneEditorResult? result)
+    {
+        // Claimed before the await, so a second tap during the pop cannot pop the page underneath.
+        if (_closing)
             return;
-        }
 
-        if (!int.TryParse(ThresholdEntry.Text, out var thresholdDays) || thresholdDays <= 0)
-        {
-            ErrorLabel.Text = "Milestone threshold must be a positive number.";
-            ErrorLabel.IsVisible = true;
-            return;
-        }
-
-        _resultSource.TrySetResult(new MilestoneEditorResult(LabelEntry.Text.Trim(), thresholdDays));
-        await Navigation.PopModalAsync();
+        _closing = true;
+        await Navigation.PopModalAsync(false);
+        _viewModel.ResultSource.TrySetResult(result);
     }
 }
-
-public sealed record MilestoneEditorResult(string Label, int ThresholdDays);

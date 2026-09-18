@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             x:Class="Markd.Pages.CategoryEditorPage"
+             x:Name="RootPage"
+             x:DataType="vm:CategoryViewModel"
+             Style="{StaticResource M3DialogPage}"
+             Shell.PresentationMode="ModalNotAnimated">
+    <Grid>
+        <Border Style="{StaticResource M3DialogCard}" Padding="24,24,16,14">
+            <VerticalStackLayout Spacing="18">
+                <Label Text="{Binding EditorTitle}" FontFamily="FigtreeSemiBold" FontSize="22" />
+
+                <VerticalStackLayout Spacing="14" Padding="0,0,8,0">
+                    <m:OutlinedField Label="Name">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Entry Text="{Binding EditorName}" Placeholder="Health" FontSize="16" VerticalOptions="Center" />
+                            <Border Grid.Column="1" WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 18"
+                                    VerticalOptions="Center"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnEmojiTapped" />
+                                </Border.GestureRecognizers>
+                                <Label Text="{Binding EditorEmoji, TargetNullValue='🏷️'}" FontSize="17"
+                                       HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                        </Grid>
+                    </m:OutlinedField>
+
+                    <Label Text="Colour" Style="{StaticResource M3SectionHeader}" Padding="2,4,0,0" />
+                    <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding EditorColorChoices}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ColorChoice">
+                                <Grid WidthRequest="40" HeightRequest="40" Margin="0,0,2,2">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.SelectEditorColorCommand, x:DataType=ContentPage}"
+                                                              CommandParameter="{Binding Hex}" />
+                                    </Grid.GestureRecognizers>
+                                    <Border StrokeShape="RoundRectangle 20" StrokeThickness="2" BackgroundColor="Transparent"
+                                            Stroke="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}"
+                                            IsVisible="{Binding IsSelected}" />
+                                    <Border WidthRequest="31" HeightRequest="31" StrokeShape="RoundRectangle 16"
+                                            BackgroundColor="{Binding Color}" HorizontalOptions="Center" VerticalOptions="Center">
+                                        <c:SvgIcon Glyph="Tick" Size="14" Color="White" IsVisible="{Binding IsSelected}"
+                                                   HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </FlexLayout>
+
+                    <Label Text="{Binding EditorError}" Style="{StaticResource DangerText}" FontSize="13"
+                           IsVisible="{Binding EditorError, Converter={StaticResource HasText}}" />
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout Spacing="6" HorizontalOptions="End">
+                    <Button Text="Cancel" Style="{StaticResource M3TextButton}" Command="{Binding CancelEditorCommand}" />
+                    <Button Text="{Binding EditorSaveLabel}" Style="{StaticResource M3FilledButton}" HeightRequest="42"
+                            CornerRadius="21" FontSize="14.5" Command="{Binding SaveEditorCommand}" />
+                </HorizontalStackLayout>
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>

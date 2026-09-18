@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             x:Class="Markd.AboutPage"
+             x:DataType="vm:AboutViewModel"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <Style x:Key="AboutRow" TargetType="Border" BasedOn="{StaticResource M3Card}">
+            <Setter Property="Padding" Value="16,15" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+        <m:SmallTopAppBar Title="About" />
+
+        <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Padding="16,26,16,24" Spacing="20">
+                <Border WidthRequest="88" HeightRequest="88" StrokeShape="RoundRectangle 26" HorizontalOptions="Center"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}">
+                    <Border.Shadow>
+                        <Shadow Brush="{StaticResource AccentGlowBrush}" Offset="0,12" Radius="28" Opacity="0.55" />
+                    </Border.Shadow>
+                    <Label Text="M" FontFamily="FigtreeExtraBold" FontSize="44"
+                           HorizontalOptions="Center" VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
+                </Border>
+
+                <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
+                    <Label Text="Markd" FontFamily="FigtreeBold" FontSize="24" HorizontalOptions="Center" />
+                    <Label Text="{Binding VersionText}" FontFamily="PlexMonoMedium" FontSize="13"
+                           Style="{StaticResource SecondaryText}" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+
+                <Label Text="An open-source tracker for the dates you count from and toward. No ads, no paywall, no account."
+                       Style="{StaticResource SecondaryText}" FontSize="15" LineHeight="1.3"
+                       HorizontalTextAlignment="Center" MaximumWidthRequest="300" />
+
+                <VerticalStackLayout Spacing="8">
+                    <Border Style="{StaticResource AboutRow}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenLicenceCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Licence" FontSize="16" />
+                            <Label Grid.Column="1" Text="MIT" Style="{StaticResource SecondaryText}" />
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource AboutRow}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenSourceCommand}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Source code" FontSize="16" />
+                            <Label Grid.Column="1" Text="GitHub" Style="{StaticResource SecondaryText}" />
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource AboutRow}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Translations" FontSize="16" />
+                            <Label Grid.Column="1" Text="EN · CS" Style="{StaticResource SecondaryText}" />
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource AboutRow}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ShowAcknowledgementsCommand}" />
+                        </Border.GestureRecognizers>
+                        <Label Text="Acknowledgements" FontSize="16" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <Label Text="Built with .NET MAUI · SQLite stays on device"
+                       Style="{StaticResource SecondaryText}" FontSize="12.5"
+                       HorizontalTextAlignment="Center" Margin="0,8,0,0" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

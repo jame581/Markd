@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             x:Class="Markd.SettingsPage"
+             x:Name="RootPage"
+             x:DataType="vm:SettingsViewModel"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+
+    <ContentPage.Resources>
+        <Style x:Key="RowGrid" TargetType="Grid">
+            <Setter Property="Padding" Value="16,13" />
+            <Setter Property="ColumnSpacing" Value="16" />
+        </Style>
+        <Style x:Key="SectionDivider" TargetType="BoxView">
+            <Setter Property="HeightRequest" Value="1" />
+            <Setter Property="Margin" Value="16,0" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <m:MediumTopAppBar Title="Settings" />
+
+        <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Padding="8,0,8,24" Spacing="14">
+
+                <VerticalStackLayout>
+                    <Label Text="Appearance" Style="{StaticResource M3SectionHeader}" Padding="16,8,16,10" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding ThemeOptions}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ThemeOption">
+                                <Grid Style="{StaticResource RowGrid}" ColumnDefinitions="Auto,*">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.SelectThemeCommand, x:DataType=ContentPage}"
+                                                              CommandParameter="{Binding .}" />
+                                    </Grid.GestureRecognizers>
+                                    <Grid WidthRequest="20" HeightRequest="20" VerticalOptions="Center">
+                                        <Ellipse StrokeThickness="2"
+                                                 Stroke="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
+                                            <Ellipse.Triggers>
+                                                <DataTrigger TargetType="Ellipse" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}" />
+                                                </DataTrigger>
+                                            </Ellipse.Triggers>
+                                        </Ellipse>
+                                        <Ellipse WidthRequest="10" HeightRequest="10" IsVisible="{Binding IsSelected}"
+                                                 HorizontalOptions="Center" VerticalOptions="Center"
+                                                 Fill="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}" />
+                                    </Grid>
+                                    <Label Grid.Column="1" Text="{Binding Label}" Style="{StaticResource M3ListText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <BoxView Style="{StaticResource SectionDivider}" />
+
+                <VerticalStackLayout>
+                    <Label Text="Notifications" Style="{StaticResource M3SectionHeader}" Padding="16,4,16,10" />
+                    <Grid Style="{StaticResource RowGrid}" ColumnDefinitions="*,Auto" Padding="16,12">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ToggleNotificationsCommand}" />
+                        </Grid.GestureRecognizers>
+                        <VerticalStackLayout Spacing="3" VerticalOptions="Center">
+                            <Label Text="Milestone alerts" FontSize="16" />
+                            <Label Text="On the morning a milestone lands" Style="{StaticResource M3RowSub}" />
+                        </VerticalStackLayout>
+                        <m:M3Switch Grid.Column="1" IsToggled="{Binding NotificationsEnabled}" InputTransparent="True" />
+                    </Grid>
+                    <Grid Style="{StaticResource RowGrid}">
+                        <VerticalStackLayout Spacing="3" VerticalOptions="Center">
+                            <Label Text="Time of day" FontSize="16" />
+                            <Label Text="{Binding NotificationTimeText}" Style="{StaticResource M3RowSub}" />
+                        </VerticalStackLayout>
+                        <TimePicker Time="{Binding NotificationTimeOfDay}" Opacity="0.02" TextColor="Transparent" />
+                    </Grid>
+                </VerticalStackLayout>
+
+                <BoxView Style="{StaticResource SectionDivider}" />
+
+                <VerticalStackLayout>
+                    <Label Text="Your data" Style="{StaticResource M3SectionHeader}" Padding="16,4,16,10" />
+                    <Grid Style="{StaticResource RowGrid}" ColumnDefinitions="*,Auto">
+                        <Label Text="Language" Style="{StaticResource M3ListText}" />
+                        <Label Grid.Column="1" Text="{Binding SelectedLanguage}" Style="{StaticResource M3RowSub}" FontSize="15" VerticalOptions="Center" />
+                        <Picker Grid.ColumnSpan="2" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"
+                                Title="Language" Opacity="0.02" TextColor="Transparent" TitleColor="Transparent" />
+                    </Grid>
+                    <Grid Style="{StaticResource RowGrid}">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ExportCommand}" />
+                        </Grid.GestureRecognizers>
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="Export as JSON" FontSize="16" />
+                            <Label Text="Writes one file to Downloads" Style="{StaticResource M3RowSub}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Grid Style="{StaticResource RowGrid}">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding ImportCommand}" />
+                        </Grid.GestureRecognizers>
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="Import from JSON" FontSize="16" />
+                            <Label Text="Replaces everything on this phone" Style="{StaticResource M3RowSub}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <Grid Style="{StaticResource RowGrid}">
+                        <Grid.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding EraseAllCommand}" />
+                        </Grid.GestureRecognizers>
+                        <Label Text="Erase all occasions" FontSize="16" Style="{StaticResource DangerText}" />
+                    </Grid>
+                    <Label Text="Markd keeps one SQLite file on this device. Nothing is uploaded, so nothing syncs — export before you switch phones."
+                           Style="{StaticResource M3RowSub}" FontSize="12.5" Padding="16,8,16,0" />
+                </VerticalStackLayout>
+
+                <BoxView Style="{StaticResource SectionDivider}" />
+
+                <Grid Style="{StaticResource RowGrid}">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Command="{Binding OpenAboutCommand}" />
+                    </Grid.GestureRecognizers>
+                    <VerticalStackLayout Spacing="3">
+                        <Label Text="About Markd" FontSize="16" />
+                        <Label Text="{Binding VersionText}" Style="{StaticResource M3RowSub}" />
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <m:BottomNavBar x:Name="NavBar" Grid.Row="2" Selected="settings" />
+    </Grid>
+</ContentPage>

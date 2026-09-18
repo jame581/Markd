@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:local="clr-namespace:Markd"
+             x:Class="Markd.CategoryPage"
+             x:Name="RootPage"
+             x:DataType="vm:CategoryViewModel"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <m:MediumTopAppBar Title="Categories" />
+
+        <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Padding="16,0,16,104" Spacing="10">
+                <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding Rows}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:CategoryRow">
+                            <Border x:Name="Row" Style="{StaticResource M3Card}" Padding="16,14,10,14">
+                                <!-- Tap edits; long-press opens the same actions as the overflow button -->
+                                <Border.Behaviors>
+                                    <toolkit:TouchBehavior ShouldMakeChildrenInputTransparent="False"
+                                                           Command="{Binding Source={x:Reference RootPage}, Path=EditRowCommand, x:DataType=local:CategoryPage}"
+                                                           CommandParameter="{Binding .}"
+                                                           LongPressCommand="{Binding Source={x:Reference RootPage}, Path=RowMenuCommand, x:DataType=local:CategoryPage}"
+                                                           LongPressCommandParameter="{x:Reference Row}" />
+                                </Border.Behaviors>
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="14">
+                                    <c:EmojiAvatar Size="40" EmojiSize="18" LightAlpha="0.15" DarkAlpha="0.26"
+                                                   Emoji="{Binding Emoji}" ColorHex="{Binding ColorHex}" VerticalOptions="Center" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                        <Label Text="{Binding Name}" Style="{StaticResource M3RowTitle}" />
+                                        <Label Text="{Binding CountLabel}" Style="{StaticResource M3RowSub}" />
+                                    </VerticalStackLayout>
+                                    <Ellipse Grid.Column="2" WidthRequest="12" HeightRequest="12" VerticalOptions="Center"
+                                             Fill="{Binding DotColor}" />
+                                    <c:IconButton Grid.Column="3" Glyph="Dots" Size="44" IconSize="18" Clicked="OnOverflowClicked" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Label Text="No categories yet. Use New category to group occasions however you think about them."
+                       Style="{StaticResource M3RowSub}" FontSize="14" Padding="6,8"
+                       IsVisible="{Binding IsEmpty}" />
+
+                <Label Text="Long-press or tap the overflow for row actions. Occasions filed under a deleted category move to Uncategorised — they're never removed with it."
+                       Style="{StaticResource M3RowSub}" FontSize="12.5" Padding="6,12,6,0" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <m:ExtendedFab Grid.Row="1" Text="New category" Command="{Binding NewCommand}" Margin="0,0,16,16" />
+
+        <m:BottomNavBar x:Name="NavBar" Grid.Row="2" Selected="categories" />
+    </Grid>
+</ContentPage>
