@@ -15,7 +15,7 @@ public class OccasionServiceTests
         var occasion = new Occasion
         {
             Title = "Test",
-            AnchorDate = DateTime.UtcNow.Date.AddDays(-10),
+            AnchorDate = LocalMidnightUtc(-10),
             Direction = OccasionDirection.Since
         };
 
@@ -32,7 +32,7 @@ public class OccasionServiceTests
         var occasion = new Occasion
         {
             Title = "Test",
-            AnchorDate = DateTime.UtcNow.Date.AddDays(5),
+            AnchorDate = LocalMidnightUtc(5),
             Direction = OccasionDirection.Until
         };
 
@@ -42,14 +42,14 @@ public class OccasionServiceTests
     }
 
     [Fact]
-    public async Task GetPendingMilestonesAsync_ReturnsOnlyUnnotifiedHitMilestonesForSinceOccasions()
+    public async Task GetPendingMilestonesAsync_ReturnsOnlyUnnotifiedReachedMilestones()
     {
         using var tuple = CreateService();
 
         var sinceOccasion = new Occasion
         {
             Title = "Since",
-            AnchorDate = DateTime.UtcNow.Date.AddDays(-30),
+            AnchorDate = LocalMidnightUtc(-30),
             Direction = OccasionDirection.Since,
             Milestones =
             [
@@ -62,11 +62,11 @@ public class OccasionServiceTests
         var untilOccasion = new Occasion
         {
             Title = "Until",
-            AnchorDate = DateTime.UtcNow.Date.AddDays(10),
+            AnchorDate = LocalMidnightUtc(10),
             Direction = OccasionDirection.Until,
             Milestones =
             [
-                new Milestone { Label = "ignored", ThresholdDays = 7, Notified = false }
+                new Milestone { Label = "not yet", ThresholdDays = 7, Notified = false }
             ]
         };
 
@@ -88,7 +88,7 @@ public class OccasionServiceTests
         var occasion = new Occasion
         {
             Title = "Test",
-            AnchorDate = DateTime.UtcNow.Date.AddDays(-10),
+            AnchorDate = LocalMidnightUtc(-10),
             Direction = OccasionDirection.Since,
             Milestones = [new Milestone { Label = "5 days", ThresholdDays = 5, Notified = false }]
         };
@@ -116,7 +116,7 @@ public class OccasionServiceTests
         var occasion = new Occasion
         {
             Title = "Test",
-            AnchorDate = DateTime.UtcNow.Date,
+            AnchorDate = LocalMidnightUtc(0),
             Direction = OccasionDirection.Since,
             Milestones =
             [
@@ -193,6 +193,123 @@ public class OccasionServiceTests
         Assert.Equal(12, milestoneMark.ThresholdDays);
         Assert.False(milestoneMark.Notified);
     }
+
+    [Fact]
+    public async Task GetPendingMilestonesAsync_IncludesReachedUntilMilestones()
+    {
+        using var tuple = CreateService();
+
+        var untilOccasion = new Occasion
+        {
+            Title = "Trip",
+            AnchorDate = LocalMidnightUtc(20),
+            Direction = OccasionDirection.Until,
+            Milestones =
+            [
+                new Milestone { Label = "One month to go", ThresholdDays = 30, Notified = false },
+                new Milestone { Label = "One week to go", ThresholdDays = 7, Notified = false }
+            ]
+        };
+
+        await tuple.Context.Occasions.AddAsync(untilOccasion);
+        await tuple.Context.SaveChangesAsync();
+
+        var pending = await tuple.Service.GetPendingMilestonesAsync();
+
+        var (occasion, milestone) = Assert.Single(pending);
+        Assert.Equal("Trip", occasion.Title);
+        Assert.Equal("One month to go", milestone.Label);
+    }
+
+    [Fact]
+    public async Task RestoreAsync_ReinsertsOccasionWithMilestonesAndSinglePin()
+    {
+        using var tuple = CreateService();
+
+        var other = new Occasion { Title = "Other", AnchorDate = LocalMidnightUtc(-3), IsPinned = true };
+        var doomed = new Occasion
+        {
+            Title = "Doomed",
+            Emoji = "🌱",
+            ColorHex = "#0B8043",
+            AnchorDate = LocalMidnightUtc(-400),
+            Direction = OccasionDirection.Since,
+            Notes = "Keep me",
+            Milestones =
+            [
+                new Milestone { Label = "One year", ThresholdDays = 365, Notified = true },
+                new Milestone { Label = "Five hundred", ThresholdDays = 500, Notified = false }
+            ]
+        };
+
+        await tuple.Context.Occasions.AddRangeAsync(other, doomed);
+        await tuple.Context.SaveChangesAsync();
+
+        var snapshot = await tuple.Service.GetByIdAsync(doomed.Id);
+        Assert.NotNull(snapshot);
+        snapshot.IsPinned = true;
+        await tuple.Service.DeleteAsync(doomed.Id);
+
+        var restored = await tuple.Service.RestoreAsync(snapshot);
+
+        var reloaded = await tuple.Service.GetByIdAsync(restored.Id);
+        Assert.NotNull(reloaded);
+        Assert.Equal("Doomed", reloaded.Title);
+        Assert.Equal("Keep me", reloaded.Notes);
+        Assert.True(reloaded.IsPinned);
+        Assert.Equal(2, reloaded.Milestones.Count);
+        Assert.True(reloaded.Milestones.Single(m => m.ThresholdDays == 365).Notified);
+        Assert.False((await tuple.Service.GetByIdAsync(other.Id))!.IsPinned);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_MovingTheAnchor_RecomputesWhichMilestonesAreReached()
+    {
+        using var tuple = CreateService();
+        var occasion = new Occasion
+        {
+            Title = "Streak",
+            AnchorDate = LocalMidnightUtc(-400),
+            Direction = OccasionDirection.Since,
+            Milestones =
+            [
+                new Milestone { Label = "One year", ThresholdDays = 365, Notified = true },
+                new Milestone { Label = "Five hundred", ThresholdDays = 500, Notified = false }
+            ]
+        };
+        await tuple.Context.Occasions.AddAsync(occasion);
+        await tuple.Context.SaveChangesAsync();
+
+        await tuple.Service.UpdateAsync(new Occasion { Id = occasion.Id, Title = "Streak", AnchorDate = LocalMidnightUtc(-10), Direction = OccasionDirection.Since });
+        var later = await tuple.Service.GetByIdAsync(occasion.Id);
+        Assert.All(later!.Milestones, m => Assert.False(m.Notified));
+
+        await tuple.Service.UpdateAsync(new Occasion { Id = occasion.Id, Title = "Streak", AnchorDate = LocalMidnightUtc(-600), Direction = OccasionDirection.Since });
+        var earlier = await tuple.Service.GetByIdAsync(occasion.Id);
+        Assert.All(earlier!.Milestones, m => Assert.True(m.Notified));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_KeepingTheAnchor_LeavesNotifiedAlone()
+    {
+        using var tuple = CreateService();
+        var occasion = new Occasion
+        {
+            Title = "Streak",
+            AnchorDate = LocalMidnightUtc(-10),
+            Direction = OccasionDirection.Since,
+            Milestones = [new Milestone { Label = "Snoozed", ThresholdDays = 365, Notified = true }]
+        };
+        await tuple.Context.Occasions.AddAsync(occasion);
+        await tuple.Context.SaveChangesAsync();
+
+        await tuple.Service.UpdateAsync(new Occasion { Id = occasion.Id, Title = "Renamed", AnchorDate = occasion.AnchorDate, Direction = OccasionDirection.Since });
+
+        Assert.True((await tuple.Service.GetByIdAsync(occasion.Id))!.Milestones.Single().Notified);
+    }
+
+    private static DateTime LocalMidnightUtc(int dayOffset) =>
+        DateTime.Today.AddDays(dayOffset).ToUniversalTime();
 
     private static ServiceScope CreateService()
     {

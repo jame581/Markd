@@ -206,6 +206,28 @@ public class CoreIntegrationTests
     }
 
     [Fact]
+    public async Task GetCalendarMarksAsync_MilestoneDateIgnoresDaylightSavingChanges()
+    {
+        using var scope = CreateScope();
+        var service = new OccasionService(scope.Context);
+
+        // Stored the way the form stores anchors: the UTC instant of local midnight. In a zone with DST the
+        // anchor is in summer time and the milestone in winter time, which used to shift the dot a day early.
+        var occasion = await service.CreateAsync(new Occasion
+        {
+            Title = "Our anniversary",
+            AnchorDate = new DateTime(2022, 10, 14, 0, 0, 0, DateTimeKind.Local).ToUniversalTime(),
+            Direction = OccasionDirection.Since
+        });
+        await service.AddMilestoneAsync(occasion.Id, 1500, "Fifteen hundred");
+
+        var marks = await service.GetCalendarMarksAsync(2026, 11);
+
+        var milestone = Assert.Single(marks, mark => mark.Kind == CalendarMarkKind.Milestone);
+        Assert.Equal(new DateOnly(2026, 11, 22), milestone.Date);
+    }
+
+    [Fact]
     public async Task CategoryService_Crud_WorksWithSqlite()
     {
         using var scope = CreateScope();

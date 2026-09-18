@@ -1,4 +1,4 @@
-﻿using Markd.Core.Domain;
+using Markd.Core.Domain;
 
 namespace Markd.Core.Services
 {
@@ -9,6 +9,12 @@ namespace Markd.Core.Services
         Task<Occasion> CreateAsync(Occasion occasion);
         Task<Occasion> UpdateAsync(Occasion occasion);
         Task DeleteAsync(int id);
+
+        /// <summary>
+        /// Re-inserts a previously deleted occasion (as a new record) together with its milestones.
+        /// Used by undo; milestone Notified flags are preserved so alerts do not repeat.
+        /// </summary>
+        Task<Occasion> RestoreAsync(Occasion snapshot);
         Task DeleteAllAsync();
         Task SetPinnedAsync(int id);
         Task<Milestone> AddMilestoneAsync(int occasionId, int thresholdDays, string label);
@@ -22,7 +28,8 @@ namespace Markd.Core.Services
         int GetDays(Occasion occasion);
 
         /// <summary>
-        /// Checks all Since occasions for hit milestones that haven't been notified yet.
+        /// Checks all occasions for reached milestones that haven't been notified yet
+        /// (Since: days elapsed ≥ threshold; Until: days remaining ≤ threshold).
         /// Returns milestones that should trigger a notification.
         /// </summary>
         Task<List<(Occasion, Milestone)>> GetPendingMilestonesAsync();

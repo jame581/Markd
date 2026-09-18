@@ -1,4 +1,4 @@
-﻿using Markd.Core.Data;
+using Markd.Core.Data;
 using Markd.Core.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +12,34 @@ namespace Markd.Core.Services
 
             if (occasion.IsPinned)
                 await UnpinAllAsync();
+
+            db.Occasions.Add(occasion);
+            await db.SaveChangesAsync();
+            return occasion;
+        }
+
+        public async Task<Occasion> RestoreAsync(Occasion snapshot)
+        {
+            if (snapshot.IsPinned)
+                await UnpinAllAsync();
+
+            var occasion = new Occasion
+            {
+                Title = snapshot.Title,
+                Emoji = snapshot.Emoji,
+                ColorHex = snapshot.ColorHex,
+                IsPinned = snapshot.IsPinned,
+                AnchorDate = snapshot.AnchorDate,
+                Direction = snapshot.Direction,
+                Notes = snapshot.Notes,
+                CreatedAt = snapshot.CreatedAt == default ? DateTime.UtcNow : snapshot.CreatedAt,
+                CategoryId = snapshot.CategoryId is { } categoryId && await db.Categories.AnyAsync(c => c.Id == categoryId)
+                    ? categoryId
+                    : null,
+                Milestones = snapshot.Milestones
+                    .Select(m => new Milestone { ThresholdDays = m.ThresholdDays, Label = m.Label, Notified = m.Notified })
+                    .ToList()
+            };
 
             db.Occasions.Add(occasion);
             await db.SaveChangesAsync();
@@ -55,24 +83,12 @@ namespace Markd.Core.Services
                 .FirstOrDefaultAsync(o => o.Id == id);
         }
 
-        public int GetDays(Occasion occasion)
-        {
-            var today = DateTime.UtcNow.Date;
-            var anchor = occasion.AnchorDate.Date;
-
-            return occasion.Direction switch
-            {
-                OccasionDirection.Since => (today - anchor).Days,
-                OccasionDirection.Until => (anchor - today).Days,
-                _ => 0
-            };
-        }
+        public int GetDays(Occasion occasion) => OccasionDates.GetDays(occasion, DateTime.Now);
 
         public async Task<List<(Occasion, Milestone)>> GetPendingMilestonesAsync()
         {
             var occasions = await db.Occasions
                 .Include(o => o.Milestones)
-                .Where(o => o.Direction == OccasionDirection.Since)
                 .ToListAsync();
 
             var pending = new List<(Occasion, Milestone)>();
@@ -80,7 +96,9 @@ namespace Markd.Core.Services
             foreach (var occasion in occasions)
             {
                 var days = GetDays(occasion);
-                var hit = occasion.Milestones.Where(m => !m.Notified && m.ThresholdDays <= days);
+                var hit = occasion.Milestones
+                    .Where(m => !m.Notified && OccasionDates.IsMilestoneReached(occasion, m, days))
+                    .OrderBy(m => m.ThresholdDays);
 
                 foreach (var milestone in hit)
                     pending.Add((occasion, milestone));
@@ -109,39 +127,27 @@ namespace Markd.Core.Services
                 })
                 .ToListAsync();
 
-            var milestoneMarks = await db.Occasions
-                .AsNoTracking()
-                .Join(
-                    db.Milestones.AsNoTracking(),
-                    occasion => occasion.Id,
-                    milestone => milestone.OccasionId,
-                    (occasion, milestone) => new
-                    {
-                        occasion.Id,
-                        occasion.Title,
-                        occasion.Emoji,
-                        occasion.ColorHex,
-                        occasion.Direction,
-                        occasion.AnchorDate,
-                        milestone.Label,
-                        milestone.ThresholdDays,
-                        milestone.Notified
-                    })
-                .Select(mark => new
+            // Milestone dates are local calendar dates (anchor date ± threshold). Adding days to the stored UTC instant
+            // drifts by a day across a daylight-saving change, so the dates are computed in memory, not in SQL.
+            var monthStart = DateOnly.FromDateTime(monthStartLocal);
+            var monthEnd = DateOnly.FromDateTime(monthEndLocal);
+            var milestoneMarks = (await db.Milestones
+                    .AsNoTracking()
+                    .Include(m => m.Occasion)
+                    .ToListAsync())
+                .Select(milestone => new
                 {
-                    mark.Id,
-                    mark.Title,
-                    mark.Emoji,
-                    mark.ColorHex,
-                    Date = mark.Direction == OccasionDirection.Since
-                        ? mark.AnchorDate.AddDays(mark.ThresholdDays)
-                        : mark.AnchorDate.AddDays(-mark.ThresholdDays),
-                    mark.Label,
-                    mark.ThresholdDays,
-                    mark.Notified
+                    milestone.Occasion!.Id,
+                    milestone.Occasion.Title,
+                    milestone.Occasion.Emoji,
+                    milestone.Occasion.ColorHex,
+                    Date = DateOnly.FromDateTime(OccasionDates.GetMilestoneDate(milestone.Occasion, milestone)),
+                    milestone.Label,
+                    milestone.ThresholdDays,
+                    milestone.Notified
                 })
-                .Where(mark => mark.Date >= monthStartUtc && mark.Date < monthEndUtc)
-                .ToListAsync();
+                .Where(mark => mark.Date >= monthStart && mark.Date < monthEnd)
+                .ToList();
 
             var marks = anchorMarks
                 .Select(mark => new CalendarMark(
@@ -155,7 +161,7 @@ namespace Markd.Core.Services
                     null,
                     false))
                 .Concat(milestoneMarks.Select(mark => new CalendarMark(
-                    DateOnly.FromDateTime(DateTime.SpecifyKind(mark.Date, DateTimeKind.Utc).ToLocalTime()),
+                    mark.Date,
                     mark.Id,
                     mark.Title,
                     mark.Emoji,
@@ -183,6 +189,8 @@ namespace Markd.Core.Services
             if (existing == null)
                 throw new InvalidOperationException($"Occasion {occasion.Id} was not found.");
 
+            var datesChanged = existing.AnchorDate != occasion.AnchorDate || existing.Direction != occasion.Direction;
+
             existing.Title = occasion.Title;
             existing.Emoji = occasion.Emoji;
             existing.ColorHex = occasion.ColorHex;
@@ -191,6 +199,17 @@ namespace Markd.Core.Services
             existing.Notes = occasion.Notes;
             existing.IsPinned = occasion.IsPinned;
             existing.CategoryId = occasion.CategoryId;
+
+            // Moving the anchor or flipping the direction re-dates every milestone. Reached ones count as announced
+            // (the user just chose the date, as when adding a milestone that has already passed); the rest will
+            // notify again when they land.
+            if (datesChanged)
+            {
+                await db.Entry(existing).Collection(o => o.Milestones).LoadAsync();
+                var days = GetDays(existing);
+                foreach (var milestone in existing.Milestones)
+                    milestone.Notified = OccasionDates.IsMilestoneReached(existing, milestone, days);
+            }
 
             await db.SaveChangesAsync();
             return existing;
