@@ -4,15 +4,16 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:Markd"
+    xmlns:loc="clr-namespace:Markd.Localization"
     Title="Markd"
     Shell.NavBarIsVisible="False"
     Shell.TabBarIsVisible="False">
 
     <!-- Shell is used for routing only; each page draws its own Material 3 app bar and navigation bar. -->
     <TabBar>
-        <ShellContent Title="Home" Route="home" ContentTemplate="{DataTemplate local:MainPage}" />
-        <ShellContent Title="Calendar" Route="calendar" ContentTemplate="{DataTemplate local:CalendarPage}" />
-        <ShellContent Title="Categories" Route="categories" ContentTemplate="{DataTemplate local:CategoryPage}" />
-        <ShellContent Title="Settings" Route="settings" ContentTemplate="{DataTemplate local:SettingsPage}" />
+        <ShellContent Title="{loc:Tr Shell_Home}" Route="home" ContentTemplate="{DataTemplate local:MainPage}" />
+        <ShellContent Title="{loc:Tr Shell_Calendar}" Route="calendar" ContentTemplate="{DataTemplate local:CalendarPage}" />
+        <ShellContent Title="{loc:Tr Shell_Categories}" Route="categories" ContentTemplate="{DataTemplate local:CategoryPage}" />
+        <ShellContent Title="{loc:Tr Shell_Settings}" Route="settings" ContentTemplate="{DataTemplate local:SettingsPage}" />
     </TabBar>
 </Shell>

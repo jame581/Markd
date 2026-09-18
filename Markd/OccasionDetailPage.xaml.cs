@@ -1,3 +1,4 @@
+using Markd.Core.Localization;
 using Markd.Services;
 using Markd.ViewModels;
 
@@ -6,9 +7,6 @@ namespace Markd;
 [QueryProperty(nameof(OccasionIdQuery), "id")]
 public partial class OccasionDetailPage : ContentPage
 {
-    private const string ShareItem = "Share milestone";
-    private const string RemoveItem = "Remove milestone";
-
     private readonly OccasionDetailViewModel _viewModel;
 
     public OccasionDetailPage()
@@ -48,15 +46,12 @@ public partial class OccasionDetailPage : ContentPage
     private async void OnOverflowClicked(object? sender, EventArgs e)
     {
         var menu = ServiceHelper.GetRequiredService<IActionMenuService>();
-        switch (await menu.ShowAsync(OverflowButton, ["Share", "Delete occasion"], "Delete occasion"))
-        {
-            case "Share":
-                await _viewModel.ShareCommand.ExecuteAsync(null);
-                break;
-            case "Delete occasion":
-                await _viewModel.DeleteCommand.ExecuteAsync(null);
-                break;
-        }
+        string[] items = [Strings.Detail_Share, Strings.Detail_DeleteOccasion];
+        var chosen = await menu.ShowAsync(OverflowButton, items, items[1]);
+        if (chosen == items[0])
+            await _viewModel.ShareCommand.ExecuteAsync(null);
+        else if (chosen == items[1])
+            await _viewModel.DeleteCommand.ExecuteAsync(null);
     }
 
     private async void OnMilestoneTapped(object? sender, TappedEventArgs e)
@@ -65,14 +60,11 @@ public partial class OccasionDetailPage : ContentPage
             return;
 
         var menu = ServiceHelper.GetRequiredService<IActionMenuService>();
-        switch (await menu.ShowAsync(view, [ShareItem, RemoveItem], RemoveItem))
-        {
-            case ShareItem:
-                await _viewModel.ShareMilestoneCommand.ExecuteAsync(state.Milestone);
-                break;
-            case RemoveItem:
-                await _viewModel.RemoveMilestoneCommand.ExecuteAsync(state.Milestone);
-                break;
-        }
+        string[] items = [Strings.Detail_ShareMilestone, Strings.Detail_RemoveMilestone];
+        var chosen = await menu.ShowAsync(view, items, items[1]);
+        if (chosen == items[0])
+            await _viewModel.ShareMilestoneCommand.ExecuteAsync(state.Milestone);
+        else if (chosen == items[1])
+            await _viewModel.RemoveMilestoneCommand.ExecuteAsync(state.Milestone);
     }
 }

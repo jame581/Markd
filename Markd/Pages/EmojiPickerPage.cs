@@ -1,4 +1,5 @@
 using Markd.Controls;
+using Markd.Localization;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Markd.Pages;
@@ -37,8 +38,12 @@ public sealed class EmojiPickerPage : ContentPage
             grid.Children.Add(cell);
         }
 
-        var cancel = new Button { Text = "Cancel", Style = (Style)Application.Current.Resources["M3TextButton"], HorizontalOptions = LayoutOptions.End };
+        var cancel = new Button { Style = (Style)Application.Current.Resources["M3TextButton"], HorizontalOptions = LayoutOptions.End };
+        cancel.SetBinding(Button.TextProperty, Tr.Bind("Common_Cancel"));
         cancel.Clicked += async (_, _) => await CloseAsync(null);
+
+        var title = new Label { FontFamily = "FigtreeSemiBold", FontSize = 22, Margin = new Thickness(4, 0) };
+        title.SetBinding(Label.TextProperty, Tr.Bind("Emoji_PickTitle"));
 
         Content = new Grid
         {
@@ -53,7 +58,7 @@ public sealed class EmojiPickerPage : ContentPage
                         Spacing = 14,
                         Children =
                         {
-                            new Label { Text = "Pick an icon", FontFamily = "FigtreeSemiBold", FontSize = 22, Margin = new Thickness(4, 0) },
+                            title,
                             grid,
                             cancel
                         }

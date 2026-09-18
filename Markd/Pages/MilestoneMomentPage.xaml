@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:services="clr-namespace:Markd.Services"
              xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.Pages.MilestoneMomentPage"
              x:DataType="services:MilestoneMoment"
              Style="{StaticResource M3DialogPage}"
@@ -22,7 +23,7 @@
                                HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
                 </Grid>
-                <Label Text="MILESTONE REACHED"
+                <Label Text="{loc:Tr Milestone_Reached}"
                        FontFamily="FigtreeSemiBold" FontSize="11.5" CharacterSpacing="2.24"
                        HorizontalOptions="Center"
                        TextColor="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}" />
@@ -36,8 +37,8 @@
                        Style="{StaticResource M3RowSub}" FontSize="14.5"
                        HorizontalTextAlignment="Center" />
                 <HorizontalStackLayout Spacing="6" HorizontalOptions="End" Margin="0,8,0,0">
-                    <Button Text="Not now" Style="{StaticResource M3TextButton}" Clicked="OnNotNowClicked" />
-                    <Button Text="Share this" Style="{StaticResource M3FilledButton}" HeightRequest="42" CornerRadius="21"
+                    <Button Text="{loc:Tr Milestone_NotNow}" Style="{StaticResource M3TextButton}" Clicked="OnNotNowClicked" />
+                    <Button Text="{loc:Tr Milestone_ShareThis}" Style="{StaticResource M3FilledButton}" HeightRequest="42" CornerRadius="21"
                             FontSize="14.5" Clicked="OnShareClicked" />
                 </HorizontalStackLayout>
             </VerticalStackLayout>

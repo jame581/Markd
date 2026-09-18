@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:Markd.ViewModels"
              xmlns:c="clr-namespace:Markd.Controls"
              xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.MainPage"
              x:Name="RootPage"
              x:DataType="vm:OccasionListViewModel"
@@ -53,7 +54,7 @@
                                     <HorizontalStackLayout Spacing="5">
                                         <c:SvgIcon Glyph="Pin" Size="13" VerticalOptions="Center"
                                                    Color="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
-                                        <Label Text="PINNED" Style="{StaticResource M3OnContainer}"
+                                        <Label Text="{loc:Tr Home_Pinned}" Style="{StaticResource M3OnContainer}"
                                                FontFamily="FigtreeSemiBold" FontSize="11" CharacterSpacing="0.8"
                                                VerticalOptions="Center" />
                                     </HorizontalStackLayout>
@@ -153,10 +154,10 @@
                 <c:SvgIcon Glyph="MarkBig" Size="42" HorizontalOptions="Center" VerticalOptions="Center"
                            Color="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
             </Border>
-            <Label Text="Nothing marked yet"
+            <Label Text="{loc:Tr Home_EmptyTitle}"
                    FontFamily="FigtreeSemiBold" FontSize="22"
                    HorizontalTextAlignment="Center" />
-            <Label Text="Pick a date that matters — a first day, a last day, a day you're counting toward — and Markd keeps the number for you."
+            <Label Text="{loc:Tr Home_EmptyHint}"
                    Style="{StaticResource M3RowSub}"
                    FontSize="15" LineHeight="1.25"
                    HorizontalTextAlignment="Center" />
@@ -172,19 +173,19 @@
                 <HorizontalStackLayout Spacing="9" VerticalOptions="Center">
                     <c:SvgIcon Glyph="Plus" Size="20" VerticalOptions="Center"
                                Color="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
-                    <Label Text="Add your first occasion"
+                    <Label Text="{loc:Tr Home_AddFirst}"
                            FontFamily="FigtreeSemiBold" FontSize="16" VerticalOptions="Center"
                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryLight}, Dark={StaticResource OnPrimaryDark}}" />
                 </HorizontalStackLayout>
             </Border>
-            <Label Text="No account. No ads. Everything stays on this phone."
+            <Label Text="{loc:Tr Home_EmptyFootnote}"
                    Style="{StaticResource M3RowSub}"
                    Opacity="0.8"
                    HorizontalTextAlignment="Center" />
         </VerticalStackLayout>
 
         <m:ExtendedFab Grid.Row="1"
-                       Text="New occasion"
+                       Text="{loc:Tr Home_NewOccasion}"
                        Command="{Binding AddCommand}"
                        IsVisible="{Binding HasOccasions}"
                        Margin="0,0,16,16" />

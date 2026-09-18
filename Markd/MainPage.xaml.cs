@@ -1,3 +1,4 @@
+using Markd.Core.Localization;
 using Markd.Services;
 using Markd.ViewModels;
 
@@ -38,7 +39,7 @@ public partial class MainPage : ContentPage
     private async void OnOverflowClicked(object? sender, EventArgs e)
     {
         var menu = ServiceHelper.GetRequiredService<IActionMenuService>();
-        if (await menu.ShowAsync(OverflowButton, ["About Markd"]) == "About Markd")
+        if (await menu.ShowAsync(OverflowButton, [Strings.Home_AboutMarkd]) == Strings.Home_AboutMarkd)
             await Shell.Current.GoToAsync(nameof(AboutPage));
     }
 }

@@ -92,4 +92,66 @@
   <data name="Calendar_Short_Fri" xml:space="preserve"><value>Fri</value></data>
   <data name="Calendar_Short_Sat" xml:space="preserve"><value>Sat</value></data>
   <data name="Calendar_Short_Sun" xml:space="preserve"><value>Sun</value></data>
+  <data name="Home_Pinned" xml:space="preserve"><value>PINNED</value></data>
+  <data name="Home_EmptyTitle" xml:space="preserve"><value>Nothing marked yet</value></data>
+  <data name="Home_EmptyHint" xml:space="preserve"><value>Pick a date that matters — a first day, a last day, a day you're counting toward — and Markd keeps the number for you.</value></data>
+  <data name="Home_AddFirst" xml:space="preserve"><value>Add your first occasion</value></data>
+  <data name="Home_EmptyFootnote" xml:space="preserve"><value>No account. No ads. Everything stays on this phone.</value></data>
+  <data name="Home_NewOccasion" xml:space="preserve"><value>New occasion</value></data>
+  <data name="Home_AboutMarkd" xml:space="preserve"><value>About Markd</value></data>
+  <data name="Detail_Milestones" xml:space="preserve"><value>Milestones</value></data>
+  <data name="Detail_AddMilestone" xml:space="preserve"><value>Add</value></data>
+  <data name="Detail_NoMilestones" xml:space="preserve"><value>No milestones yet. Add one to get a heads-up on the day it lands.</value></data>
+  <data name="Detail_Share" xml:space="preserve"><value>Share</value></data>
+  <data name="Detail_DeleteOccasion" xml:space="preserve"><value>Delete occasion</value></data>
+  <data name="Detail_ShareMilestone" xml:space="preserve"><value>Share milestone</value></data>
+  <data name="Detail_RemoveMilestone" xml:space="preserve"><value>Remove milestone</value></data>
+  <data name="Form_Days" xml:space="preserve"><value>days</value></data>
+  <data name="Form_Title" xml:space="preserve"><value>Title</value></data>
+  <data name="Form_TitlePlaceholder" xml:space="preserve"><value>What are you marking?</value></data>
+  <data name="Form_Category" xml:space="preserve"><value>Category</value></data>
+  <data name="Form_Notes" xml:space="preserve"><value>Notes</value></data>
+  <data name="Form_NotesPlaceholder" xml:space="preserve"><value>Why this day matters</value></data>
+  <data name="Form_Counting" xml:space="preserve"><value>Counting</value></data>
+  <data name="Form_SinceDate" xml:space="preserve"><value>Since a date</value></data>
+  <data name="Form_UntilDate" xml:space="preserve"><value>Until a date</value></data>
+  <data name="Form_Date" xml:space="preserve"><value>Date</value></data>
+  <data name="Form_Colour" xml:space="preserve"><value>Colour</value></data>
+  <data name="Form_PinToHome" xml:space="preserve"><value>Pin to Home</value></data>
+  <data name="Form_PinToHomeSub" xml:space="preserve"><value>Replaces the featured card</value></data>
+  <data name="Category_Title" xml:space="preserve"><value>Categories</value></data>
+  <data name="Category_Empty" xml:space="preserve"><value>No categories yet. Use New category to group occasions however you think about them.</value></data>
+  <data name="Category_Footnote" xml:space="preserve"><value>Long-press or tap the overflow for row actions. Occasions filed under a deleted category move to Uncategorised — they're never removed with it.</value></data>
+  <data name="Category_New" xml:space="preserve"><value>New category</value></data>
+  <data name="Category_Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Category_NamePlaceholder" xml:space="preserve"><value>Health</value></data>
+  <data name="Category_Colour" xml:space="preserve"><value>Colour</value></data>
+  <data name="Category_Rename" xml:space="preserve"><value>Rename</value></data>
+  <data name="Category_ChangeColour" xml:space="preserve"><value>Change colour</value></data>
+  <data name="Calendar_Title" xml:space="preserve"><value>Calendar</value></data>
+  <data name="Calendar_ComingUp" xml:space="preserve"><value>Coming up</value></data>
+  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Nothing to count toward yet — add an occasion and its milestones show up here.</value></data>
+  <data name="Calendar_DotsLegend" xml:space="preserve"><value>Solid dots are anchor dates · faded dots are milestones.</value></data>
+  <data name="About_Title" xml:space="preserve"><value>About</value></data>
+  <data name="About_Description" xml:space="preserve"><value>An open-source tracker for the dates you count from and toward. No ads, no paywall, no account.</value></data>
+  <data name="About_Licence" xml:space="preserve"><value>Licence</value></data>
+  <data name="About_SourceCode" xml:space="preserve"><value>Source code</value></data>
+  <data name="About_Translations" xml:space="preserve"><value>Translations</value></data>
+  <data name="About_Acknowledgements" xml:space="preserve"><value>Acknowledgements</value></data>
+  <data name="About_Footer" xml:space="preserve"><value>Built with .NET MAUI · SQLite stays on device</value></data>
+  <data name="Shell_Home" xml:space="preserve"><value>Home</value></data>
+  <data name="Shell_Calendar" xml:space="preserve"><value>Calendar</value></data>
+  <data name="Shell_Categories" xml:space="preserve"><value>Categories</value></data>
+  <data name="Shell_Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Milestone_AddTitle" xml:space="preserve"><value>Add milestone</value></data>
+  <data name="Milestone_AddHint" xml:space="preserve"><value>Markd tells you on the morning it lands.</value></data>
+  <data name="Milestone_Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Milestone_NamePlaceholder" xml:space="preserve"><value>Fifteen hundred</value></data>
+  <data name="Milestone_Days" xml:space="preserve"><value>Days</value></data>
+  <data name="Milestone_DaysPlaceholder" xml:space="preserve"><value>1500</value></data>
+  <data name="Milestone_Add" xml:space="preserve"><value>Add</value></data>
+  <data name="Milestone_Reached" xml:space="preserve"><value>MILESTONE REACHED</value></data>
+  <data name="Milestone_NotNow" xml:space="preserve"><value>Not now</value></data>
+  <data name="Milestone_ShareThis" xml:space="preserve"><value>Share this</value></data>
+  <data name="Emoji_PickTitle" xml:space="preserve"><value>Pick an icon</value></data>
 </root>

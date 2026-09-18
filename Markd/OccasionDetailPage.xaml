@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:Markd.ViewModels"
              xmlns:c="clr-namespace:Markd.Controls"
              xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.OccasionDetailPage"
              x:Name="RootPage"
              x:DataType="vm:OccasionDetailViewModel"
@@ -66,7 +67,7 @@
 
                 <VerticalStackLayout Spacing="9">
                     <Grid ColumnDefinitions="*,Auto" Padding="4,0">
-                        <Label Text="Milestones" Style="{StaticResource M3SectionHeader}" VerticalOptions="Center" />
+                        <Label Text="{loc:Tr Detail_Milestones}" Style="{StaticResource M3SectionHeader}" VerticalOptions="Center" />
                         <Border Grid.Column="1"
                                 HeightRequest="32"
                                 StrokeShape="RoundRectangle 16"
@@ -79,13 +80,13 @@
                             <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
                                 <c:SvgIcon Glyph="Plus" Size="15" VerticalOptions="Center"
                                            Color="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}" />
-                                <Label Text="Add" FontFamily="FigtreeSemiBold" FontSize="13" VerticalOptions="Center"
+                                <Label Text="{loc:Tr Detail_AddMilestone}" FontFamily="FigtreeSemiBold" FontSize="13" VerticalOptions="Center"
                                        TextColor="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}" />
                             </HorizontalStackLayout>
                         </Border>
                     </Grid>
 
-                    <Label Text="No milestones yet. Add one to get a heads-up on the day it lands."
+                    <Label Text="{loc:Tr Detail_NoMilestones}"
                            Style="{StaticResource M3RowSub}"
                            Padding="4,0"
                            IsVisible="{Binding HasMilestones, Converter={StaticResource InvertBool}}" />
@@ -131,11 +132,11 @@
                                 Style="{StaticResource M3FilledButton}"
                                 Command="{Binding PinCommand}" />
                         <Button Grid.Column="1"
-                                Text="Share"
+                                Text="{loc:Tr Detail_Share}"
                                 Style="{StaticResource M3TonalButton}"
                                 Command="{Binding ShareCommand}" />
                     </Grid>
-                    <Button Text="Delete occasion"
+                    <Button Text="{loc:Tr Detail_DeleteOccasion}"
                             Style="{StaticResource M3ErrorTextButton}"
                             HorizontalOptions="Center"
                             Command="{Binding DeleteCommand}" />

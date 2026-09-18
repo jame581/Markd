@@ -92,4 +92,66 @@
   <data name="Calendar_Short_Fri" xml:space="preserve"><value>Pá</value></data>
   <data name="Calendar_Short_Sat" xml:space="preserve"><value>So</value></data>
   <data name="Calendar_Short_Sun" xml:space="preserve"><value>Ne</value></data>
+  <data name="Home_Pinned" xml:space="preserve"><value>PŘIPNUTO</value></data>
+  <data name="Home_EmptyTitle" xml:space="preserve"><value>Zatím nic není označeno</value></data>
+  <data name="Home_EmptyHint" xml:space="preserve"><value>Vyberte datum, na kterém záleží — první den, poslední den, den, ke kterému se blížíte — a Markd za vás počítá dny.</value></data>
+  <data name="Home_AddFirst" xml:space="preserve"><value>Přidat první událost</value></data>
+  <data name="Home_EmptyFootnote" xml:space="preserve"><value>Žádný účet. Žádné reklamy. Vše zůstává v tomto telefonu.</value></data>
+  <data name="Home_NewOccasion" xml:space="preserve"><value>Nová událost</value></data>
+  <data name="Home_AboutMarkd" xml:space="preserve"><value>O aplikaci Markd</value></data>
+  <data name="Detail_Milestones" xml:space="preserve"><value>Milníky</value></data>
+  <data name="Detail_AddMilestone" xml:space="preserve"><value>Přidat</value></data>
+  <data name="Detail_NoMilestones" xml:space="preserve"><value>Zatím žádné milníky. Přidejte jeden a dostanete upozornění v den, kdy nastane.</value></data>
+  <data name="Detail_Share" xml:space="preserve"><value>Sdílet</value></data>
+  <data name="Detail_DeleteOccasion" xml:space="preserve"><value>Smazat událost</value></data>
+  <data name="Detail_ShareMilestone" xml:space="preserve"><value>Sdílet milník</value></data>
+  <data name="Detail_RemoveMilestone" xml:space="preserve"><value>Odebrat milník</value></data>
+  <data name="Form_Days" xml:space="preserve"><value>dní</value></data>
+  <data name="Form_Title" xml:space="preserve"><value>Název</value></data>
+  <data name="Form_TitlePlaceholder" xml:space="preserve"><value>Co si značíte?</value></data>
+  <data name="Form_Category" xml:space="preserve"><value>Kategorie</value></data>
+  <data name="Form_Notes" xml:space="preserve"><value>Poznámky</value></data>
+  <data name="Form_NotesPlaceholder" xml:space="preserve"><value>Proč je tento den důležitý</value></data>
+  <data name="Form_Counting" xml:space="preserve"><value>Počítání</value></data>
+  <data name="Form_SinceDate" xml:space="preserve"><value>Od data</value></data>
+  <data name="Form_UntilDate" xml:space="preserve"><value>Do data</value></data>
+  <data name="Form_Date" xml:space="preserve"><value>Datum</value></data>
+  <data name="Form_Colour" xml:space="preserve"><value>Barva</value></data>
+  <data name="Form_PinToHome" xml:space="preserve"><value>Připnout na hlavní stránku</value></data>
+  <data name="Form_PinToHomeSub" xml:space="preserve"><value>Nahradí zvýrazněnou kartu</value></data>
+  <data name="Category_Title" xml:space="preserve"><value>Kategorie</value></data>
+  <data name="Category_Empty" xml:space="preserve"><value>Zatím žádné kategorie. Pomocí Nová kategorie seskupte události podle svého.</value></data>
+  <data name="Category_Footnote" xml:space="preserve"><value>Podržením nebo klepnutím na nabídku zobrazíte akce řádku. Události ze smazané kategorie se přesunou do Bez kategorie — nikdy se s ní nesmažou.</value></data>
+  <data name="Category_New" xml:space="preserve"><value>Nová kategorie</value></data>
+  <data name="Category_Name" xml:space="preserve"><value>Název</value></data>
+  <data name="Category_NamePlaceholder" xml:space="preserve"><value>Zdraví</value></data>
+  <data name="Category_Colour" xml:space="preserve"><value>Barva</value></data>
+  <data name="Category_Rename" xml:space="preserve"><value>Přejmenovat</value></data>
+  <data name="Category_ChangeColour" xml:space="preserve"><value>Změnit barvu</value></data>
+  <data name="Calendar_Title" xml:space="preserve"><value>Kalendář</value></data>
+  <data name="Calendar_ComingUp" xml:space="preserve"><value>Blíží se</value></data>
+  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Zatím není k čemu se blížit — přidejte událost a její milníky se zobrazí zde.</value></data>
+  <data name="Calendar_DotsLegend" xml:space="preserve"><value>Plné tečky jsou výchozí data · vybledlé tečky jsou milníky.</value></data>
+  <data name="About_Title" xml:space="preserve"><value>O aplikaci</value></data>
+  <data name="About_Description" xml:space="preserve"><value>Open-source aplikace pro sledování dat, od kterých a ke kterým počítáte. Žádné reklamy, žádné poplatky, žádný účet.</value></data>
+  <data name="About_Licence" xml:space="preserve"><value>Licence</value></data>
+  <data name="About_SourceCode" xml:space="preserve"><value>Zdrojový kód</value></data>
+  <data name="About_Translations" xml:space="preserve"><value>Překlady</value></data>
+  <data name="About_Acknowledgements" xml:space="preserve"><value>Poděkování</value></data>
+  <data name="About_Footer" xml:space="preserve"><value>Vytvořeno s .NET MAUI · SQLite zůstává v zařízení</value></data>
+  <data name="Shell_Home" xml:space="preserve"><value>Domů</value></data>
+  <data name="Shell_Calendar" xml:space="preserve"><value>Kalendář</value></data>
+  <data name="Shell_Categories" xml:space="preserve"><value>Kategorie</value></data>
+  <data name="Shell_Settings" xml:space="preserve"><value>Nastavení</value></data>
+  <data name="Milestone_AddTitle" xml:space="preserve"><value>Přidat milník</value></data>
+  <data name="Milestone_AddHint" xml:space="preserve"><value>Markd vám dá vědět ráno toho dne.</value></data>
+  <data name="Milestone_Name" xml:space="preserve"><value>Název</value></data>
+  <data name="Milestone_NamePlaceholder" xml:space="preserve"><value>Patnáct set</value></data>
+  <data name="Milestone_Days" xml:space="preserve"><value>Dny</value></data>
+  <data name="Milestone_DaysPlaceholder" xml:space="preserve"><value>1500</value></data>
+  <data name="Milestone_Add" xml:space="preserve"><value>Přidat</value></data>
+  <data name="Milestone_Reached" xml:space="preserve"><value>MILNÍK DOSAŽEN</value></data>
+  <data name="Milestone_NotNow" xml:space="preserve"><value>Teď ne</value></data>
+  <data name="Milestone_ShareThis" xml:space="preserve"><value>Sdílet</value></data>
+  <data name="Emoji_PickTitle" xml:space="preserve"><value>Vyberte ikonu</value></data>
 </root>

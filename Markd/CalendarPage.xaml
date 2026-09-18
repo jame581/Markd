@@ -12,7 +12,7 @@
              Shell.TabBarIsVisible="False">
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <m:MediumTopAppBar Title="Calendar" />
+        <m:MediumTopAppBar Title="{loc:Tr Calendar_Title}" />
 
         <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Padding="16,0,16,20" Spacing="18">
@@ -86,7 +86,7 @@
                 </Border>
 
                 <VerticalStackLayout Spacing="9">
-                    <Label Text="Coming up" Style="{StaticResource M3SectionHeader}" Padding="4,0" />
+                    <Label Text="{loc:Tr Calendar_ComingUp}" Style="{StaticResource M3SectionHeader}" Padding="4,0" />
                     <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding ComingUp}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:CalendarComingUpItem">
@@ -110,10 +110,10 @@
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
-                    <Label Text="Nothing to count toward yet — add an occasion and its milestones show up here."
+                    <Label Text="{loc:Tr Calendar_ComingUpEmpty}"
                            Style="{StaticResource M3RowSub}" FontSize="12.5" Padding="4,0"
                            IsVisible="{Binding HasComingUp, Converter={StaticResource InvertBool}}" />
-                    <Label Text="Solid dots are anchor dates · faded dots are milestones."
+                    <Label Text="{loc:Tr Calendar_DotsLegend}"
                            Style="{StaticResource M3RowSub}" FontSize="12" Padding="4,2" />
                 </VerticalStackLayout>
             </VerticalStackLayout>

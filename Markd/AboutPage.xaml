@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Markd.ViewModels"
              xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.AboutPage"
              x:DataType="vm:AboutViewModel"
              Shell.NavBarIsVisible="False"
@@ -15,7 +16,7 @@
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*">
-        <m:SmallTopAppBar Title="About" />
+        <m:SmallTopAppBar Title="{loc:Tr About_Title}" />
 
         <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Padding="16,26,16,24" Spacing="20">
@@ -35,7 +36,7 @@
                            Style="{StaticResource SecondaryText}" HorizontalOptions="Center" />
                 </VerticalStackLayout>
 
-                <Label Text="An open-source tracker for the dates you count from and toward. No ads, no paywall, no account."
+                <Label Text="{loc:Tr About_Description}"
                        Style="{StaticResource SecondaryText}" FontSize="15" LineHeight="1.3"
                        HorizontalTextAlignment="Center" MaximumWidthRequest="300" />
 
@@ -45,7 +46,7 @@
                             <TapGestureRecognizer Command="{Binding OpenLicenceCommand}" />
                         </Border.GestureRecognizers>
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="Licence" FontSize="16" />
+                            <Label Text="{loc:Tr About_Licence}" FontSize="16" />
                             <Label Grid.Column="1" Text="MIT" Style="{StaticResource SecondaryText}" />
                         </Grid>
                     </Border>
@@ -54,13 +55,13 @@
                             <TapGestureRecognizer Command="{Binding OpenSourceCommand}" />
                         </Border.GestureRecognizers>
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="Source code" FontSize="16" />
+                            <Label Text="{loc:Tr About_SourceCode}" FontSize="16" />
                             <Label Grid.Column="1" Text="GitHub" Style="{StaticResource SecondaryText}" />
                         </Grid>
                     </Border>
                     <Border Style="{StaticResource AboutRow}">
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="Translations" FontSize="16" />
+                            <Label Text="{loc:Tr About_Translations}" FontSize="16" />
                             <Label Grid.Column="1" Text="EN · CS" Style="{StaticResource SecondaryText}" />
                         </Grid>
                     </Border>
@@ -68,11 +69,11 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ShowAcknowledgementsCommand}" />
                         </Border.GestureRecognizers>
-                        <Label Text="Acknowledgements" FontSize="16" />
+                        <Label Text="{loc:Tr About_Acknowledgements}" FontSize="16" />
                     </Border>
                 </VerticalStackLayout>
 
-                <Label Text="Built with .NET MAUI · SQLite stays on device"
+                <Label Text="{loc:Tr About_Footer}"
                        Style="{StaticResource SecondaryText}" FontSize="12.5"
                        HorizontalTextAlignment="Center" Margin="0,8,0,0" />
             </VerticalStackLayout>

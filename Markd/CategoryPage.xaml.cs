@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using Markd.Core.Localization;
 using Markd.Pages;
 using Markd.Services;
 using Markd.ViewModels;
@@ -9,10 +10,6 @@ namespace Markd;
 
 public partial class CategoryPage : ContentPage
 {
-    private const string RenameItem = "Rename";
-    private const string ColourItem = "Change colour";
-    private const string DeleteItem = "Delete";
-
     private readonly CategoryViewModel _viewModel;
     private CategoryEditorPage? _editor;
 
@@ -46,16 +43,12 @@ public partial class CategoryPage : ContentPage
     private async Task ShowRowMenuAsync(View anchor, CategoryRow row)
     {
         var menu = ServiceHelper.GetRequiredService<IActionMenuService>();
-        switch (await menu.ShowAsync(anchor, [RenameItem, ColourItem, DeleteItem], DeleteItem))
-        {
-            case RenameItem:
-            case ColourItem:
-                _viewModel.BeginEdit(row);
-                break;
-            case DeleteItem:
-                await _viewModel.DeleteCommand.ExecuteAsync(row);
-                break;
-        }
+        string[] items = [Strings.Category_Rename, Strings.Category_ChangeColour, Strings.Common_Delete];
+        var chosen = await menu.ShowAsync(anchor, items, items[2]);
+        if (chosen == items[0] || chosen == items[1])
+            _viewModel.BeginEdit(row);
+        else if (chosen == items[2])
+            await _viewModel.DeleteCommand.ExecuteAsync(row);
     }
 
     private async void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

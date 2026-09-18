@@ -6,6 +6,7 @@
              xmlns:m="clr-namespace:Markd.Controls.Mobile"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:local="clr-namespace:Markd"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.CategoryPage"
              x:Name="RootPage"
              x:DataType="vm:CategoryViewModel"
@@ -13,7 +14,7 @@
              Shell.TabBarIsVisible="False">
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <m:MediumTopAppBar Title="Categories" />
+        <m:MediumTopAppBar Title="{loc:Tr Category_Title}" />
 
         <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Padding="16,0,16,104" Spacing="10">
@@ -45,16 +46,16 @@
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
 
-                <Label Text="No categories yet. Use New category to group occasions however you think about them."
+                <Label Text="{loc:Tr Category_Empty}"
                        Style="{StaticResource M3RowSub}" FontSize="14" Padding="6,8"
                        IsVisible="{Binding IsEmpty}" />
 
-                <Label Text="Long-press or tap the overflow for row actions. Occasions filed under a deleted category move to Uncategorised — they're never removed with it."
+                <Label Text="{loc:Tr Category_Footnote}"
                        Style="{StaticResource M3RowSub}" FontSize="12.5" Padding="6,12,6,0" />
             </VerticalStackLayout>
         </ScrollView>
 
-        <m:ExtendedFab Grid.Row="1" Text="New category" Command="{Binding NewCommand}" Margin="0,0,16,16" />
+        <m:ExtendedFab Grid.Row="1" Text="{loc:Tr Category_New}" Command="{Binding NewCommand}" Margin="0,0,16,16" />
 
         <m:BottomNavBar x:Name="NavBar" Grid.Row="2" Selected="categories" />
     </Grid>

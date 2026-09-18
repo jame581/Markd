@@ -5,6 +5,7 @@
              xmlns:domain="clr-namespace:Markd.Core.Domain;assembly=Markd.Core"
              xmlns:c="clr-namespace:Markd.Controls"
              xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.OccasionFormPage"
              x:Name="RootPage"
              x:DataType="vm:OccasionFormViewModel"
@@ -14,7 +15,7 @@
 
     <Grid RowDefinitions="Auto,*">
         <m:SmallTopAppBar Title="{Binding Header}" LeadingGlyph="Close" LeadingCommand="{Binding CancelCommand}">
-            <Button Text="Save"
+            <Button Text="{loc:Tr Common_Save}"
                     Style="{StaticResource M3FilledButton}"
                     HeightRequest="40" CornerRadius="20" FontSize="14.5" Padding="22,0"
                     Margin="0,0,4,0"
@@ -29,7 +30,7 @@
                         <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
                             <Label Text="{Binding PreviewDays}" Style="{StaticResource M3OnContainer}"
                                    FontFamily="FigtreeExtraBold" FontSize="46" CharacterSpacing="-0.48" LineHeight="0.9" />
-                            <Label Text="days" Style="{StaticResource M3OnContainer}"
+                            <Label Text="{loc:Tr Form_Days}" Style="{StaticResource M3OnContainer}"
                                    FontFamily="FigtreeSemiBold" FontSize="17" Opacity="0.72"
                                    VerticalOptions="End" Margin="0,0,0,7" />
                         </HorizontalStackLayout>
@@ -39,9 +40,9 @@
                 </Border>
 
                 <VerticalStackLayout Spacing="16">
-                    <m:OutlinedField Label="Title">
+                    <m:OutlinedField Label="{loc:Tr Form_Title}">
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                            <Entry Text="{Binding Title}" Placeholder="What are you marking?" FontSize="16" VerticalOptions="Center" />
+                            <Entry Text="{Binding Title}" Placeholder="{loc:Tr Form_TitlePlaceholder}" FontSize="16" VerticalOptions="Center" />
                             <Border Grid.Column="1" WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 18"
                                     VerticalOptions="Center"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
@@ -57,7 +58,7 @@
                     <Label Text="{Binding ErrorMessage}" Style="{StaticResource DangerText}" FontSize="12.5" Margin="16,-12,16,0"
                            IsVisible="{Binding ErrorMessage, Converter={StaticResource HasText}}" />
 
-                    <m:OutlinedField Label="Category">
+                    <m:OutlinedField Label="{loc:Tr Form_Category}">
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                             <Picker ItemsSource="{Binding Categories}"
                                     ItemDisplayBinding="{Binding Name, x:DataType=domain:Category}"
@@ -68,14 +69,14 @@
                         </Grid>
                     </m:OutlinedField>
 
-                    <m:OutlinedField Label="Notes">
-                        <Editor Text="{Binding Notes}" Placeholder="Why this day matters" AutoSize="TextChanges"
+                    <m:OutlinedField Label="{loc:Tr Form_Notes}">
+                        <Editor Text="{Binding Notes}" Placeholder="{loc:Tr Form_NotesPlaceholder}" AutoSize="TextChanges"
                                 FontSize="16" MinimumHeightRequest="56" Margin="0,4" />
                     </m:OutlinedField>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="12">
-                    <Label Text="Counting" Style="{StaticResource M3SectionHeader}" Padding="2,0" />
+                    <Label Text="{loc:Tr Form_Counting}" Style="{StaticResource M3SectionHeader}" Padding="2,0" />
                     <Border HeightRequest="44" StrokeShape="RoundRectangle 22" StrokeThickness="1"
                             Stroke="{AppThemeBinding Light={StaticResource CardBorderLight}, Dark={StaticResource CardBorderDark}}">
                         <Grid ColumnDefinitions="*,1,*">
@@ -88,7 +89,7 @@
                                 <HorizontalStackLayout Spacing="7" HorizontalOptions="Center" VerticalOptions="Center">
                                     <c:SvgIcon Glyph="Tick" Size="16" VerticalOptions="Center" IsVisible="{Binding IsSinceSelected}"
                                                Color="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
-                                    <Label Text="Since a date" FontFamily="FigtreeSemiBold" FontSize="14.5" VerticalOptions="Center">
+                                    <Label Text="{loc:Tr Form_SinceDate}" FontFamily="FigtreeSemiBold" FontSize="14.5" VerticalOptions="Center">
                                         <Label.Triggers>
                                             <DataTrigger TargetType="Label" Binding="{Binding IsSinceSelected}" Value="True">
                                                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
@@ -111,7 +112,7 @@
                                 <HorizontalStackLayout Spacing="7" HorizontalOptions="Center" VerticalOptions="Center">
                                     <c:SvgIcon Glyph="Tick" Size="16" VerticalOptions="Center" IsVisible="{Binding IsUntilSelected}"
                                                Color="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
-                                    <Label Text="Until a date" FontFamily="FigtreeSemiBold" FontSize="14.5" VerticalOptions="Center">
+                                    <Label Text="{loc:Tr Form_UntilDate}" FontFamily="FigtreeSemiBold" FontSize="14.5" VerticalOptions="Center">
                                         <Label.Triggers>
                                             <DataTrigger TargetType="Label" Binding="{Binding IsUntilSelected}" Value="True">
                                                 <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimaryContainerLight}, Dark={StaticResource OnPrimaryContainerDark}}" />
@@ -127,7 +128,7 @@
                         </Grid>
                     </Border>
 
-                    <m:OutlinedField Label="Date">
+                    <m:OutlinedField Label="{loc:Tr Form_Date}">
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                             <!-- 3dp matches the text inset of the Entry and Picker above. -->
                             <Label Text="{Binding AnchorDateText}" FontSize="16" VerticalOptions="Center" Margin="3,0,0,0" />
@@ -140,7 +141,7 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="11">
-                    <Label Text="Colour" Style="{StaticResource M3SectionHeader}" Padding="2,0" />
+                    <Label Text="{loc:Tr Form_Colour}" Style="{StaticResource M3SectionHeader}" Padding="2,0" />
                     <FlexLayout Wrap="Wrap" Direction="Row" AlignItems="Start" JustifyContent="Start"
                                 BindableLayout.ItemsSource="{Binding ColorChoices}">
                         <BindableLayout.ItemTemplate>
@@ -170,8 +171,8 @@
                         <TapGestureRecognizer Command="{Binding TogglePinCommand}" />
                     </Grid.GestureRecognizers>
                     <VerticalStackLayout Spacing="2" VerticalOptions="Center">
-                        <Label Text="Pin to Home" FontSize="16" />
-                        <Label Text="Replaces the featured card" Style="{StaticResource M3RowSub}" />
+                        <Label Text="{loc:Tr Form_PinToHome}" FontSize="16" />
+                        <Label Text="{loc:Tr Form_PinToHomeSub}" Style="{StaticResource M3RowSub}" />
                     </VerticalStackLayout>
                     <m:M3Switch Grid.Column="1" IsToggled="{Binding IsPinned}" InputTransparent="True" />
                 </Grid>

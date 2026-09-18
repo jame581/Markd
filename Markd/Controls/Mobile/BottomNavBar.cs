@@ -1,3 +1,4 @@
+using Markd.Localization;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Markd.Controls.Mobile;
@@ -8,12 +9,12 @@ namespace Markd.Controls.Mobile;
 /// </summary>
 public sealed class BottomNavBar : Grid
 {
-    private static readonly (string Route, string Label, string On, string Off)[] Destinations =
+    private static readonly (string Route, string LabelKey, string On, string Off)[] Destinations =
     [
-        ("home", "Home", "TabHomeOn", "TabHome"),
-        ("calendar", "Calendar", "TabCalendarOn", "TabCalendar"),
-        ("categories", "Categories", "TabTagOn", "TabTag"),
-        ("settings", "Settings", "TabGearOn", "TabGear")
+        ("home", "Shell_Home", "TabHomeOn", "TabHome"),
+        ("calendar", "Shell_Calendar", "TabCalendarOn", "TabCalendar"),
+        ("categories", "Shell_Categories", "TabTagOn", "TabTag"),
+        ("settings", "Shell_Settings", "TabGearOn", "TabGear")
     ];
 
     public static readonly BindableProperty SelectedProperty =
@@ -35,7 +36,7 @@ public sealed class BottomNavBar : Grid
         Children.Clear();
         for (var i = 0; i < Destinations.Length; i++)
         {
-            var (route, label, on, off) = Destinations[i];
+            var (route, labelKey, on, off) = Destinations[i];
             var active = route == Selected;
 
             var icon = new SvgIcon { Glyph = active ? on : off, Size = 22, HorizontalOptions = LayoutOptions.Center, VerticalOptions = LayoutOptions.Center };
@@ -56,11 +57,11 @@ public sealed class BottomNavBar : Grid
 
             var text = new Label
             {
-                Text = label,
                 FontSize = 11.5,
                 FontFamily = active ? "FigtreeSemiBold" : "FigtreeMedium",
                 HorizontalOptions = LayoutOptions.Center
             };
+            text.SetBinding(Label.TextProperty, Tr.Bind(labelKey));
             ThemeColors.Bind(text, Label.TextColorProperty, active ? "TextPrimary" : "TextSecondary");
 
             var item = new VerticalStackLayout { Spacing = 4, Children = { pill, text } };
@@ -71,7 +72,7 @@ public sealed class BottomNavBar : Grid
                     await Shell.Current.GoToAsync($"//{route}", false);
             };
             item.GestureRecognizers.Add(tap);
-            SemanticProperties.SetDescription(item, label);
+            item.SetBinding(SemanticProperties.DescriptionProperty, Tr.Bind(labelKey));
             this.Add(item, i);
         }
     }

@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:Markd.ViewModels"
              xmlns:c="clr-namespace:Markd.Controls"
              xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.Pages.CategoryEditorPage"
              x:Name="RootPage"
              x:DataType="vm:CategoryViewModel"
@@ -15,9 +16,9 @@
                 <Label Text="{Binding EditorTitle}" FontFamily="FigtreeSemiBold" FontSize="22" />
 
                 <VerticalStackLayout Spacing="14" Padding="0,0,8,0">
-                    <m:OutlinedField Label="Name">
+                    <m:OutlinedField Label="{loc:Tr Category_Name}">
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                            <Entry Text="{Binding EditorName}" Placeholder="Health" FontSize="16" VerticalOptions="Center" />
+                            <Entry Text="{Binding EditorName}" Placeholder="{loc:Tr Category_NamePlaceholder}" FontSize="16" VerticalOptions="Center" />
                             <Border Grid.Column="1" WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 18"
                                     VerticalOptions="Center"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}">
@@ -30,7 +31,7 @@
                         </Grid>
                     </m:OutlinedField>
 
-                    <Label Text="Colour" Style="{StaticResource M3SectionHeader}" Padding="2,4,0,0" />
+                    <Label Text="{loc:Tr Category_Colour}" Style="{StaticResource M3SectionHeader}" Padding="2,4,0,0" />
                     <FlexLayout Wrap="Wrap" BindableLayout.ItemsSource="{Binding EditorColorChoices}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:ColorChoice">
@@ -57,7 +58,7 @@
                 </VerticalStackLayout>
 
                 <HorizontalStackLayout Spacing="6" HorizontalOptions="End">
-                    <Button Text="Cancel" Style="{StaticResource M3TextButton}" Command="{Binding CancelEditorCommand}" />
+                    <Button Text="{loc:Tr Common_Cancel}" Style="{StaticResource M3TextButton}" Command="{Binding CancelEditorCommand}" />
                     <Button Text="{Binding EditorSaveLabel}" Style="{StaticResource M3FilledButton}" HeightRequest="42"
                             CornerRadius="21" FontSize="14.5" Command="{Binding SaveEditorCommand}" />
                 </HorizontalStackLayout>
