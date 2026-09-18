@@ -30,8 +30,42 @@
     <Color x:Key="TextTertiaryLight">#9A9EA6</Color>
     <Color x:Key="TextTertiaryDark">#5C626C</Color>
 
+    <!-- Platform chrome -->
     <Color x:Key="WindowChromeLight">#EFEEF4</Color>
     <Color x:Key="WindowChromeDark">#141A21</Color>
+    <Color x:Key="NavBarSurfaceLight">#EFEDF6</Color>
+    <Color x:Key="NavBarSurfaceDark">#161C24</Color>
+    <Color x:Key="PrimaryContainerLight">#E7E3FA</Color>
+    <Color x:Key="PrimaryContainerDark">#2E2758</Color>
+    <Color x:Key="OnPrimaryContainerLight">#2E265F</Color>
+    <Color x:Key="OnPrimaryContainerDark">#E3DEFA</Color>
+    <Color x:Key="SurfaceContainerHighLight">#F0EEF7</Color>
+    <Color x:Key="SurfaceContainerHighDark">#232A34</Color>
+    <Color x:Key="OnPrimaryLight">#FFFFFF</Color>
+    <Color x:Key="OnPrimaryDark">#14102E</Color>
+    <Color x:Key="InverseSurfaceLight">#2E3138</Color>
+    <Color x:Key="InverseSurfaceDark">#E7E8EC</Color>
+    <Color x:Key="InverseOnSurfaceLight">#F2F1F6</Color>
+    <Color x:Key="InverseOnSurfaceDark">#1C1E22</Color>
+    <Color x:Key="InversePrimaryLight">#C9BFFF</Color>
+    <Color x:Key="InversePrimaryDark">#5A4FB0</Color>
+
+    <!-- Translucent layers used on the Android tonal cards and on dialog scrims -->
+    <Color x:Key="OnContainerChipLight">#1A2E265F</Color>
+    <Color x:Key="OnContainerChipDark">#1FFFFFFF</Color>
+    <Color x:Key="OnContainerTrackLight">#292E265F</Color>
+    <Color x:Key="OnContainerTrackDark">#29FFFFFF</Color>
+    <Color x:Key="RippleLight">#121C1E22</Color>
+    <Color x:Key="RippleDark">#1AFFFFFF</Color>
+    <Color x:Key="DialogScrimLight">#761C1E28</Color>
+    <Color x:Key="DialogScrimDark">#A806080C</Color>
+    <Color x:Key="DesktopScrim">#700A0C12</Color>
+    <!-- Desktop accent button under the pointer: AccentFill at 108% brightness -->
+    <Color x:Key="AccentFillHoverLight">#786BD9</Color>
+    <Color x:Key="AccentFillHoverDark">#9689FA</Color>
+    <SolidColorBrush x:Key="DesktopShadowBrush" Color="#42000000" />
+    <SolidColorBrush x:Key="AccentGlowBrush" Color="#CC6F63C9" />
+    <Color x:Key="WindowCloseHover">#C42B1C</Color>
 
     <!-- MAUI template keys kept so stock control styles still resolve -->
     <Color x:Key="Primary">#6F63C9</Color>
@@ -55,23 +89,5 @@
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}" />
     <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}" />
     <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}" />
-
-    <!-- Alias design-system names expected by handoff consumers -->
-    <!-- Theme-aware brush aliases -->
-    <SolidColorBrush x:Key="PageBackground" Color="{AppThemeBinding Light={StaticResource PageBackgroundLight}, Dark={StaticResource PageBackgroundDark}}" />
-    <SolidColorBrush x:Key="SurfaceCard" Color="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" />
-
-    <!-- Back-compat: Magenta used in Styles.xaml; alias to Primary/purple palette -->
-    <Color x:Key="Magenta">#6F63C9</Color>
-
-    <!-- Stock gray brushes so unchanged XAML continues to resolve -->
-    <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}" />
-    <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}" />
-    <SolidColorBrush x:Key="Gray300Brush" Color="{StaticResource Gray300}" />
-    <SolidColorBrush x:Key="Gray400Brush" Color="{StaticResource Gray400}" />
-    <SolidColorBrush x:Key="Gray500Brush" Color="{StaticResource Gray500}" />
-    <SolidColorBrush x:Key="Gray600Brush" Color="{StaticResource Gray600}" />
-    <SolidColorBrush x:Key="Gray900Brush" Color="{StaticResource Gray900}" />
-    <SolidColorBrush x:Key="Gray950Brush" Color="{StaticResource Gray950}" />
 
 </ResourceDictionary>
