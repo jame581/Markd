@@ -211,6 +211,15 @@
   <data name="Export_CouldNotCreateFile" xml:space="preserve"><value>Could not create the export file in Downloads.</value></data>
   <data name="Export_CouldNotOpenFile" xml:space="preserve"><value>Could not open the export file.</value></data>
   <data name="Export_LocationPrefix" xml:space="preserve"><value>Downloads/{0}</value></data>
+  <data name="Export_Title" xml:space="preserve"><value>Export</value></data>
+  <data name="Export_Encrypt" xml:space="preserve"><value>Encrypt with password</value></data>
+  <data name="Export_Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Export_ConfirmPassword" xml:space="preserve"><value>Confirm password</value></data>
+  <data name="Export_PasswordWarning" xml:space="preserve"><value>Markd cannot recover a forgotten password. Without it, this backup cannot be restored.</value></data>
+  <data name="Export_PasswordTooShort" xml:space="preserve"><value>Use at least 8 characters.</value></data>
+  <data name="Export_PasswordMismatch" xml:space="preserve"><value>The passwords do not match.</value></data>
+  <data name="Export_SaveTo" xml:space="preserve"><value>Save to…</value></data>
+  <data name="Export_Share" xml:space="preserve"><value>Share…</value></data>
   <data name="Import_Complete" xml:space="preserve"><value>Import complete</value></data>
   <data name="Import_Loaded" xml:space="preserve"><value>Loaded {0}.</value></data>
   <data name="Import_Failed" xml:space="preserve"><value>Import failed</value></data>
@@ -218,6 +227,12 @@
   <data name="Import_ConfirmMessage" xml:space="preserve"><value>Importing a Markd export replaces every occasion, category, milestone and setting on this device.</value></data>
   <data name="Import_ChooseFile" xml:space="preserve"><value>Choose file</value></data>
   <data name="Import_PickerTitle" xml:space="preserve"><value>Select a Markd export</value></data>
+  <data name="Import_PasswordTitle" xml:space="preserve"><value>Enter password</value></data>
+  <data name="Import_PasswordMessage" xml:space="preserve"><value>{0} is encrypted.</value></data>
+  <data name="Import_WrongPassword" xml:space="preserve"><value>Wrong password. Try again.</value></data>
+  <data name="Import_Open" xml:space="preserve"><value>Open</value></data>
+  <data name="Import_Replace" xml:space="preserve"><value>Replace</value></data>
+  <data name="Import_FileTooLarge" xml:space="preserve"><value>This file is too large to be a Markd backup.</value></data>
   <data name="Import_UnsupportedSchema" xml:space="preserve"><value>Unsupported import schema version '{0}'. This app supports schema version 1.</value></data>
   <data name="Import_EmptyFile" xml:space="preserve"><value>The selected file is empty.</value></data>
   <data name="Import_InvalidJson" xml:space="preserve"><value>The selected file is not a valid Markd JSON export.</value></data>

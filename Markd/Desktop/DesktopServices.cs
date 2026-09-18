@@ -81,4 +81,6 @@ public sealed class DesktopFileExportService : IFileExportService
 
         throw result.Exception;
     }
+
+    public Task ShareAsync(string fileName, byte[] data) => ShareSheet.ShareAsync(fileName, data);
 }

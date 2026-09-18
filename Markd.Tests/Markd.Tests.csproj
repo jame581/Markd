@@ -33,6 +33,11 @@
     <Compile Include="..\Markd\Services\ShareService.cs" Link="Services\ShareService.cs" />
     <Compile Include="..\Markd\ViewModels\CalendarViewModel.cs" Link="ViewModels\CalendarViewModel.cs" />
     <Compile Include="..\Markd\Controls\HexColor.cs" Link="Controls\HexColor.cs" />
+    <Compile Include="..\Markd\Services\IPasswordPromptService.cs" Link="Services\IPasswordPromptService.cs" />
+    <Compile Include="..\Markd\Services\IFilePickService.cs" Link="Services\IFilePickService.cs" />
+    <Compile Include="..\Markd\Services\IFileExportService.cs" Link="Services\IFileExportService.cs" />
+    <Compile Include="..\Markd\Services\BackupCoordinator.cs" Link="Services\BackupCoordinator.cs" />
+    <Compile Include="..\Markd\ViewModels\ExportOptionsForm.cs" Link="ViewModels\ExportOptionsForm.cs" />
   </ItemGroup>
 
 </Project>

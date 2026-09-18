@@ -32,4 +32,6 @@ public sealed class DownloadsExportService : IFileExportService
         resolver.Update(uri, values, null, null);
         return string.Format(LocalizationManager.Instance.Culture, Strings.Export_LocationPrefix, fileName);
     }
+
+    public Task ShareAsync(string fileName, byte[] data) => ShareSheet.ShareAsync(fileName, data);
 }
