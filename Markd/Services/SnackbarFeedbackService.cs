@@ -1,6 +1,7 @@
 using CommunityToolkit.Maui.Alerts;
 using CommunityToolkit.Maui.Core;
 using Markd.Controls;
+using Markd.Core.Localization;
 
 namespace Markd.Services;
 
@@ -26,7 +27,7 @@ public sealed class SnackbarFeedbackService : IFeedbackService
     public async Task<bool> ShowUndoAsync(string message)
     {
         var result = new TaskCompletionSource<bool>();
-        await ShowCoreAsync(message, () => result.TrySetResult(true), "UNDO", TimeSpan.FromSeconds(5), result);
+        await ShowCoreAsync(message, () => result.TrySetResult(true), Strings.Common_Undo, TimeSpan.FromSeconds(5), result);
         return await result.Task;
     }
 

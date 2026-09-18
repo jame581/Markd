@@ -1,3 +1,5 @@
+using Markd.Core.Localization;
+
 namespace Markd.Services;
 
 /// <summary>An overflow menu anchored to a view. Returns the chosen item, or null when dismissed.</summary>
@@ -15,7 +17,7 @@ public sealed class ActionSheetMenuService : IActionMenuService
         if (page is null)
             return null;
 
-        var choice = await page.DisplayActionSheetAsync(null, "Cancel", destructiveItem, items.Where(i => i != destructiveItem).ToArray());
-        return choice is null or "Cancel" ? null : choice;
+        var choice = await page.DisplayActionSheetAsync(null, Strings.Common_Cancel, destructiveItem, items.Where(i => i != destructiveItem).ToArray());
+        return choice is null || choice == Strings.Common_Cancel ? null : choice;
     }
 }

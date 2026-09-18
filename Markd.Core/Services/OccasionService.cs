@@ -1,5 +1,6 @@
 using Markd.Core.Data;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Markd.Core.Services
@@ -187,7 +188,7 @@ namespace Markd.Core.Services
                 .FirstOrDefaultAsync(o => o.Id == occasion.Id);
 
             if (existing == null)
-                throw new InvalidOperationException($"Occasion {occasion.Id} was not found.");
+                throw new InvalidOperationException(string.Format(Strings.Occasion_NotFoundById, occasion.Id));
 
             var datesChanged = existing.AnchorDate != occasion.AnchorDate || existing.Direction != occasion.Direction;
 

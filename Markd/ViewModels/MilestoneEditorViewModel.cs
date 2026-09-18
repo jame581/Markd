@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 
 namespace Markd.ViewModels;
 
@@ -24,13 +25,13 @@ public partial class MilestoneEditorViewModel : ObservableObject
 
         if (string.IsNullOrWhiteSpace(Label))
         {
-            ErrorMessage = "Milestone label is required.";
+            ErrorMessage = Strings.Milestone_LabelRequired;
             return null;
         }
 
         if (!int.TryParse(ThresholdDays, out var thresholdDays) || thresholdDays <= 0)
         {
-            ErrorMessage = "Milestone threshold must be a positive number.";
+            ErrorMessage = Strings.Milestone_ThresholdInvalid;
             return null;
         }
 

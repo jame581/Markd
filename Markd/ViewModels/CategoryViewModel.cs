@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 using Markd.Core.Services;
 using Markd.Services;
 using Microsoft.Maui.Devices;
@@ -74,8 +75,8 @@ public class CategoryViewModel : ViewModelBase
     }
 
     public bool IsEditingExisting => _editingId != 0;
-    public string EditorTitle => _editingId == 0 ? "New category" : "Edit category";
-    public string EditorSaveLabel => _editingId == 0 ? "Add" : "Save";
+    public string EditorTitle => _editingId == 0 ? Strings.Category_New : Strings.Category_Edit;
+    public string EditorSaveLabel => _editingId == 0 ? Strings.Common_Add : Strings.Common_Save;
 
     public string EditorName
     {
@@ -170,7 +171,7 @@ public class CategoryViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(EditorName))
         {
-            EditorError = "Category name is required.";
+            EditorError = Strings.Category_NameRequired;
             return;
         }
 
@@ -194,7 +195,9 @@ public class CategoryViewModel : ViewModelBase
         WeakReferenceMessenger.Default.Send(new CategoriesChangedMessage(this));
 
         if (_shellService.Platform != DevicePlatform.Android)
-            await _feedbackService.ShowAsync(isNew ? "Category added" : "Category saved", isNew ? $"{name} is ready to use." : null);
+            await _feedbackService.ShowAsync(
+                isNew ? Strings.Category_AddedTitle : Strings.Category_SavedTitle,
+                isNew ? string.Format(Strings.Category_ReadyDetail, name) : null);
     }
 
     private async Task DeleteAsync(CategoryRow? row)
@@ -208,10 +211,10 @@ public class CategoryViewModel : ViewModelBase
         if (!android)
         {
             var confirmed = await _shellService.DisplayAlertAsync(
-                $"Delete “{category.Name}”?",
-                "Its occasions are kept — they move to Uncategorised.",
-                "Delete",
-                "Cancel",
+                string.Format(Strings.Category_DeleteConfirmTitle, category.Name),
+                Strings.Category_DeleteConfirmMessage,
+                Strings.Common_Delete,
+                Strings.Common_Cancel,
                 destructive: true);
             if (!confirmed)
                 return;
@@ -229,12 +232,12 @@ public class CategoryViewModel : ViewModelBase
 
         if (android)
         {
-            if (await _feedbackService.ShowUndoAsync($"“{category.Name}” deleted"))
+            if (await _feedbackService.ShowUndoAsync(string.Format(Strings.Category_DeletedUndo, category.Name)))
                 await RestoreAsync(snapshot, affectedOccasionIds);
         }
         else
         {
-            await _feedbackService.ShowAsync("Category deleted", $"{category.Name} is gone; its occasions moved to Uncategorised.");
+            await _feedbackService.ShowAsync(Strings.Category_DeletedTitle, string.Format(Strings.Category_DeletedDetail, category.Name));
         }
     }
 
@@ -280,10 +283,7 @@ public sealed class CategoryRow(Category category, int occasionCount)
     public string? ColorHex => Category.ColorHex;
     public Color DotColor => Controls.HexColor.Parse(Category.ColorHex);
     public int OccasionCount { get; } = occasionCount;
-    public string CountLabel => OccasionCount switch
-    {
-        0 => "Empty · nothing filed here",
-        1 => "1 occasion",
-        _ => $"{OccasionCount} occasions"
-    };
+    public string CountLabel => OccasionCount == 0
+        ? Strings.Category_RowEmpty
+        : Plural.Format("Occasion_Count", OccasionCount);
 }

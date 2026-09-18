@@ -144,9 +144,9 @@ public class OccasionFormViewModel : ViewModelBase
     }
 
     public bool IsNew => OccasionId == 0;
-    public string Header => IsNew ? "New occasion" : "Edit occasion";
-    public string Subtitle => IsNew ? "Pick a date, give it a name" : "Changes save when you press Save";
-    public string SaveLabel => IsNew ? "Create occasion" : "Save changes";
+    public string Header => IsNew ? Strings.Home_NewOccasion : Strings.Detail_EditOccasion;
+    public string Subtitle => IsNew ? Strings.Form_SubtitleNew : Strings.Form_SubtitleEdit;
+    public string SaveLabel => IsNew ? Strings.Form_CreateOccasion : Strings.Form_SaveChanges;
 
     public bool IsSinceSelected
     {
@@ -177,11 +177,11 @@ public class OccasionFormViewModel : ViewModelBase
             if (Direction == OccasionDirection.Since)
             {
                 if (days < 0)
-                    return $"days until the counter starts on {date}";
-                return days == 0 ? $"the counter starts today, {date}" : $"days since {date} — the counter starts here";
+                    return string.Format(Strings.Form_PreviewUntilStarts, date);
+                return days == 0 ? string.Format(Strings.Form_PreviewStartsToday, date) : string.Format(Strings.Form_PreviewSinceStarts, date);
             }
 
-            return days >= 0 ? $"days until {date}" : $"days since {date}";
+            return days >= 0 ? string.Format(Strings.Form_PreviewUntil, date) : string.Format(Strings.Form_PreviewSince, date);
         }
     }
 
@@ -212,7 +212,7 @@ public class OccasionFormViewModel : ViewModelBase
             var occasion = await _occasionService.GetByIdAsync(id);
             if (occasion == null)
             {
-                ErrorMessage = "Occasion not found.";
+                ErrorMessage = Strings.Occasion_NotFound;
                 return;
             }
 
@@ -243,7 +243,7 @@ public class OccasionFormViewModel : ViewModelBase
 
         if (string.IsNullOrWhiteSpace(Title))
         {
-            ErrorMessage = "Title is required.";
+            ErrorMessage = Strings.Form_TitleRequired;
             return;
         }
 
@@ -276,9 +276,12 @@ public class OccasionFormViewModel : ViewModelBase
             if (_shellService.Platform != DevicePlatform.Android)
             {
                 var anchor = OccasionMath.FormatShortDate(AnchorDate);
+                var detail = Direction == OccasionDirection.Since
+                    ? string.Format(Strings.Form_SavedSince, saved.Title, anchor)
+                    : string.Format(Strings.Form_SavedUntil, saved.Title, anchor);
                 await _feedbackService.ShowAsync(
-                    isNew ? "Occasion created" : "Changes saved",
-                    $"{saved.Title} · counting {(Direction == OccasionDirection.Since ? "since" : "until")} {anchor}");
+                    isNew ? Strings.Form_OccasionCreatedTitle : Strings.Form_ChangesSavedTitle,
+                    detail);
             }
         }
         catch (Exception ex)

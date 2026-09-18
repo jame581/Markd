@@ -1,5 +1,7 @@
+using System.Globalization;
 using CommunityToolkit.Maui;
 using Markd.Core;
+using Markd.Core.Localization;
 using Markd.Pages;
 using Markd.Services;
 using Markd.ViewModels;
@@ -14,14 +16,20 @@ namespace Markd
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
+
+            // Notification actions are registered before the database (and its saved language) is available,
+            // so they follow the device language until the app opens and reschedules with the saved setting.
+            var startupCulture = LanguageSetting.Resolve(LanguageSetting.System, CultureInfo.CurrentUICulture);
+            string Text(string key) => Strings.ResourceManager.GetString(key, startupCulture) ?? key;
+
             builder
                 .UseMauiApp<App>()
                 .UseLocalNotification(config => config.AddCategory(new NotificationCategory(NotificationCategoryType.Event)
                 {
                     ActionList =
                     [
-                        new NotificationAction(NotificationService.OpenActionId) { Title = "Open", Android = { LaunchAppWhenTapped = true } },
-                        new NotificationAction(NotificationService.SnoozeActionId) { Title = "Snooze" }
+                        new NotificationAction(NotificationService.OpenActionId) { Title = Text("Notification_Open"), Android = { LaunchAppWhenTapped = true } },
+                        new NotificationAction(NotificationService.SnoozeActionId) { Title = Text("Notification_Snooze") }
                     ]
                 }))
                 .UseMauiCommunityToolkit()

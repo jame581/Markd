@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 using Markd.Core.Services;
 using Markd.ViewModels;
 #if ANDROID || IOS
@@ -188,15 +189,16 @@ namespace Markd.Services
         private static NotificationRequest CreateRequest(Occasion occasion, Milestone milestone, DateTime when)
         {
             var since = occasion.Direction == OccasionDirection.Since;
+            var culture = LocalizationManager.Instance.Culture;
+            var titleKey = since ? "Notification_TitleSince" : "Notification_TitleUntil";
+            var titlePattern = Strings.ResourceManager.GetString($"{titleKey}_{Plural.Select(milestone.ThresholdDays, culture)}", culture) ?? titleKey;
             var request = new NotificationRequest
             {
                 NotificationId = milestone.Id,
-                Title = since
-                    ? $"{milestone.ThresholdDays} days {occasion.Emoji}".Trim()
-                    : $"{milestone.ThresholdDays} days to go {occasion.Emoji}".Trim(),
+                Title = string.Format(culture, titlePattern, milestone.ThresholdDays, occasion.Emoji).Trim(),
                 Description = since
-                    ? $"{occasion.Title} hit “{milestone.Label}” today. Tap to see the count."
-                    : $"{occasion.Title}: “{milestone.Label}” — {milestone.ThresholdDays} days left.",
+                    ? string.Format(culture, Strings.Notification_DescriptionSince, occasion.Title, milestone.Label)
+                    : string.Format(culture, Strings.Notification_DescriptionUntil, occasion.Title, milestone.Label, Plural.Format("Notification_DaysLeft", milestone.ThresholdDays, culture)),
                 CategoryType = NotificationCategoryType.Event,
                 ReturningData = occasion.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
                 Schedule = new NotificationRequestSchedule { NotifyTime = when }

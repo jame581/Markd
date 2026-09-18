@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Markd.Core.Localization;
 using Markd.Core.Services;
 using Markd.Services;
 
@@ -97,8 +98,8 @@ public class OccasionListViewModel : ViewModelBase
             Fill(UnpinnedGroups, summaries.Where(s => !s.IsPinned));
 
             HomeSubtitle = summaries.Count == 0
-                ? "Nothing tracked yet"
-                : $"{Plural(summaries.Count, "occasion")} · {Plural(categoryCount, "category", "categories")}";
+                ? Strings.Home_NothingTracked
+                : string.Format(Strings.Home_Subtitle, Plural.Format("Home_OccasionCount", summaries.Count), Plural.Format("Home_CategoryCount", categoryCount));
 
             _hasLoaded = true;
             OnPropertyChanged(nameof(HasOccasions));
@@ -157,9 +158,6 @@ public class OccasionListViewModel : ViewModelBase
         foreach (var group in groups)
             target.Add(new OccasionGroup(group.Key, group));
     }
-
-    private static string Plural(int count, string singular, string? plural = null) =>
-        count == 1 ? $"1 {singular}" : $"{count} {plural ?? singular + "s"}";
 
     private Task AddAsync() => _shellService.GoToAsync(nameof(OccasionFormPage));
 

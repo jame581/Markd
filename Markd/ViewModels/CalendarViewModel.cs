@@ -131,8 +131,8 @@ public class CalendarViewModel : ViewModelBase
         MonthTitle = char.ToUpper(monthText[0], culture) + monthText[1..];
         var marked = marks.Count(mark => mark.Date.Year == month.Year && mark.Date.Month == month.Month);
         MonthSummary = marked == 0
-            ? "No anchors or milestones fall in this month."
-            : $"{marked} {(marked == 1 ? "date" : "dates")} marked — solid dots are anchor dates, faded dots are milestones.";
+            ? Strings.Calendar_NothingMarked
+            : Plural.Format("Calendar_MonthSummary", marked);
     }
 
     /// <summary>Four occasions ranked by days to their next milestone; occasions with nothing ahead go last.</summary>

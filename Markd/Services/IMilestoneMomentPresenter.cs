@@ -1,4 +1,5 @@
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 
 namespace Markd.Services;
 
@@ -10,17 +11,19 @@ public sealed record MilestoneMoment(Occasion Occasion, Milestone Milestone, Mil
     {
         get
         {
-            var lead = Occasion.Direction == OccasionDirection.Since
-                ? $"{Milestone.ThresholdDays} days since {Occasion.Title}."
-                : $"{Milestone.ThresholdDays} days to go until {Occasion.Title}.";
+            var culture = LocalizationManager.Instance.Culture;
+            var leadKey = Occasion.Direction == OccasionDirection.Since ? "Milestone_Sentence_Since" : "Milestone_Sentence_Until";
+            var leadPattern = Strings.ResourceManager.GetString($"{leadKey}_{Plural.Select(Milestone.ThresholdDays, culture)}", culture) ?? leadKey;
+            var lead = string.Format(culture, leadPattern, Milestone.ThresholdDays, Occasion.Title);
 
             if (Next is null)
-                return $"{lead} That was the last milestone you're tracking.";
+                return $"{lead} {Strings.Milestone_Sentence_LastTracked}";
 
             var away = Occasion.Direction == OccasionDirection.Since
                 ? Next.ThresholdDays - Days
                 : Days - Next.ThresholdDays;
-            return $"{lead} Next up is {Next.Label}, {away} {(away == 1 ? "day" : "days")} out.";
+            var nextPattern = Strings.ResourceManager.GetString($"Milestone_Sentence_NextUp_{Plural.Select(away, culture)}", culture) ?? "Milestone_Sentence_NextUp";
+            return $"{lead} {string.Format(culture, nextPattern, Next.Label, away)}";
         }
     }
 }

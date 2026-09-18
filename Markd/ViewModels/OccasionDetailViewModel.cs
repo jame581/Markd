@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 using Markd.Core.Services;
 using Markd.Services;
 using Microsoft.Maui.Devices;
@@ -73,10 +74,10 @@ public class OccasionDetailViewModel : ViewModelBase
         : $"{OccasionMath.DirectionLabel(CurrentOccasion)} {OccasionMath.FormatLongDate(date)}";
     public string DirectionLabel => CurrentOccasion is null ? string.Empty : OccasionMath.DirectionLabel(CurrentOccasion);
     public string DirectionChipText => DirectionLabel.ToUpperInvariant();
-    public string NotesText => string.IsNullOrWhiteSpace(CurrentOccasion?.Notes) ? "No notes yet." : CurrentOccasion!.Notes!.Trim();
+    public string NotesText => string.IsNullOrWhiteSpace(CurrentOccasion?.Notes) ? Strings.Detail_NoNotes : CurrentOccasion!.Notes!.Trim();
     public bool HasNotes => !string.IsNullOrWhiteSpace(CurrentOccasion?.Notes);
-    public string PinButtonText => IsPinned ? "Unpin" : "Pin";
-    public string PinToHomeText => IsPinned ? "Unpin" : "Pin to Home";
+    public string PinButtonText => IsPinned ? Strings.Detail_UnpinAction : Strings.Detail_PinAction;
+    public string PinToHomeText => IsPinned ? Strings.Detail_UnpinAction : Strings.Form_PinToHome;
 
     public int Days
     {
@@ -92,7 +93,9 @@ public class OccasionDetailViewModel : ViewModelBase
     }
 
     public int DisplayDays => Math.Abs(Days);
-    public string UnitLabel => CurrentOccasion is null ? "days" : OccasionMath.UnitLabel(CurrentOccasion, Days);
+    public string UnitLabel => CurrentOccasion is null
+        ? Strings.ResourceManager.GetString("Occasion_UnitDays_Many", LocalizationManager.Instance.Culture) ?? "Occasion_UnitDays_Many"
+        : OccasionMath.UnitLabel(CurrentOccasion, Days);
 
     /// <summary>Live breakdown, e.g. "3y 11mo 4d 08h 41min 09s", refreshed once per second while the timer runs.</summary>
     public string TimeBreakdown
@@ -103,7 +106,7 @@ public class OccasionDetailViewModel : ViewModelBase
 
     public ObservableCollection<MilestoneViewState> MilestoneStates { get; } = new();
     public bool HasMilestones => MilestoneStates.Count > 0;
-    public string MilestoneCountText => $"{MilestoneStates.Count} tracked";
+    public string MilestoneCountText => Plural.Format("Detail_MilestoneCount", MilestoneStates.Count);
 
     public NextMilestoneInfo? NextMilestone
     {
@@ -122,9 +125,9 @@ public class OccasionDetailViewModel : ViewModelBase
     }
 
     public bool HasNextMilestone => NextMilestone is not null;
-    public string NextMilestoneHeading => NextMilestone is null ? "No milestone ahead" : $"Next · {NextMilestone.Label}";
+    public string NextMilestoneHeading => NextMilestone is null ? Strings.Occasion_NoMilestoneAhead : string.Format(Strings.Occasion_NextMilestone, NextMilestone.Label);
     public string NextMilestoneStatus => NextMilestone?.DaysToGoText ?? "—";
-    public string NextMilestoneShort => NextMilestone is null ? "—" : $"{NextMilestone.DaysAway} days";
+    public string NextMilestoneShort => NextMilestone is null ? "—" : Plural.Format("Unit_Days", NextMilestone.DaysAway);
     public double NextMilestoneProgress => NextMilestone?.Progress ?? 1;
 
     public IAsyncRelayCommand EditCommand { get; }
@@ -141,7 +144,7 @@ public class OccasionDetailViewModel : ViewModelBase
         if (model == null)
         {
             CurrentOccasion = null;
-            ErrorMessage = "Occasion not found.";
+            ErrorMessage = Strings.Occasion_NotFound;
             return;
         }
 
@@ -210,10 +213,10 @@ public class OccasionDetailViewModel : ViewModelBase
         {
             var milestones = occasion.Milestones.Count;
             var confirmed = await _shellService.DisplayAlertAsync(
-                $"Delete “{occasion.Title}”?",
-                $"Its counter, notes and {milestones} {(milestones == 1 ? "milestone is" : "milestones are")} deleted with it. This cannot be undone.",
-                "Delete",
-                "Cancel",
+                string.Format(Strings.Detail_DeleteConfirmTitle, occasion.Title),
+                Plural.Format("Detail_DeleteConfirmMessage", milestones),
+                Strings.Common_Delete,
+                Strings.Common_Cancel,
                 destructive: true);
             if (!confirmed)
                 return;
@@ -227,7 +230,7 @@ public class OccasionDetailViewModel : ViewModelBase
 
         if (android)
         {
-            if (await _feedbackService.ShowUndoAsync($"“{occasion.Title}” deleted"))
+            if (await _feedbackService.ShowUndoAsync(string.Format(Strings.Detail_OccasionDeletedUndo, occasion.Title)))
             {
                 var restored = await _occasionService.RestoreAsync(snapshot);
                 WeakReferenceMessenger.Default.Send(new OccasionsChangedMessage(restored.Id, this));
@@ -235,7 +238,7 @@ public class OccasionDetailViewModel : ViewModelBase
         }
         else
         {
-            await _feedbackService.ShowAsync("Occasion deleted", $"{occasion.Title} has been removed.");
+            await _feedbackService.ShowAsync(Strings.Detail_OccasionDeletedTitle, string.Format(Strings.Detail_OccasionDeletedDetail, occasion.Title));
         }
     }
 
@@ -262,8 +265,8 @@ public class OccasionDetailViewModel : ViewModelBase
         if (_shellService.Platform != DevicePlatform.Android)
         {
             await _feedbackService.ShowAsync(
-                wasPinned ? "Unpinned" : "Pinned to Home",
-                wasPinned ? $"{occasion.Title} is no longer featured." : $"{occasion.Title} now leads the Home screen.");
+                wasPinned ? Strings.Detail_UnpinnedTitle : Strings.Detail_PinnedTitle,
+                wasPinned ? string.Format(Strings.Detail_UnpinnedDetail, occasion.Title) : string.Format(Strings.Detail_PinnedDetail, occasion.Title));
         }
     }
 
@@ -288,10 +291,10 @@ public class OccasionDetailViewModel : ViewModelBase
         if (_shellService.Platform != DevicePlatform.Android)
         {
             await _feedbackService.ShowAsync(
-                "Milestone added",
+                Strings.Detail_MilestoneAddedTitle,
                 alreadyReached
-                    ? $"{occasion.Title} passed {result.Label} already."
-                    : $"{result.Label} at {result.ThresholdDays} days.");
+                    ? string.Format(Strings.Detail_MilestoneAlreadyPassed, occasion.Title, result.Label)
+                    : string.Format(Strings.Detail_MilestoneAtDays, result.Label, result.ThresholdDays));
         }
     }
 
@@ -306,7 +309,12 @@ public class OccasionDetailViewModel : ViewModelBase
         // iOS confirms; Android offers undo; the desktop removes on the hover affordance and says so.
         if (platform != DevicePlatform.Android && platform != DevicePlatform.WinUI)
         {
-            var confirmed = await _shellService.DisplayAlertAsync("Remove milestone", $"Remove “{milestone.Label}”?", "Remove", "Cancel", destructive: true);
+            var confirmed = await _shellService.DisplayAlertAsync(
+                Strings.Detail_RemoveMilestone,
+                string.Format(Strings.Detail_RemoveMilestoneConfirm, milestone.Label),
+                Strings.Common_Remove,
+                Strings.Common_Cancel,
+                destructive: true);
             if (!confirmed)
                 return;
         }
@@ -317,7 +325,7 @@ public class OccasionDetailViewModel : ViewModelBase
 
         if (platform == DevicePlatform.Android)
         {
-            if (await _feedbackService.ShowUndoAsync($"“{milestone.Label}” removed"))
+            if (await _feedbackService.ShowUndoAsync(string.Format(Strings.Detail_MilestoneRemovedUndo, milestone.Label)))
             {
                 var restored = await _occasionService.AddMilestoneAsync(occasion.Id, milestone.ThresholdDays, milestone.Label);
                 if (milestone.Notified)
@@ -330,7 +338,7 @@ public class OccasionDetailViewModel : ViewModelBase
         }
         else if (platform == DevicePlatform.WinUI)
         {
-            await _feedbackService.ShowAsync("Milestone removed", $"“{milestone.Label}” is no longer tracked.");
+            await _feedbackService.ShowAsync(Strings.Detail_MilestoneRemovedTitle, string.Format(Strings.Detail_MilestoneRemovedDetail, milestone.Label));
         }
     }
 
@@ -382,7 +390,7 @@ public class OccasionDetailViewModel : ViewModelBase
             : Days - milestone.ThresholdDays;
 
         var statusText = reached
-            ? $"reached {OccasionMath.FormatShortDate(OccasionDates.GetMilestoneDate(occasion, milestone))}"
+            ? string.Format(Strings.Detail_MilestoneReachedOn, OccasionMath.FormatShortDate(OccasionDates.GetMilestoneDate(occasion, milestone)))
             : OccasionMath.FormatDaysAway(daysAway);
 
         return new MilestoneViewState(milestone, reached, statusText, daysAway);
@@ -414,7 +422,7 @@ public sealed class MilestoneViewState
 
     public Milestone Milestone { get; }
     public string Label => Milestone.Label;
-    public string ThresholdText => $"{Milestone.ThresholdDays}d";
+    public string ThresholdText => $"{Milestone.ThresholdDays}{Strings.Abbr_Day}";
     public string StatusText { get; }
     public int DaysAway { get; }
     public bool IsReached { get; }

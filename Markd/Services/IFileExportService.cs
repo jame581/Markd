@@ -1,3 +1,5 @@
+using Markd.Core.Localization;
+
 namespace Markd.Services;
 
 /// <summary>Writes an export file somewhere the user can find it. Returns a short description of where, or null if cancelled.</summary>
@@ -13,7 +15,7 @@ public sealed class ShareFileExportService : IFileExportService
     {
         var path = Path.Combine(FileSystem.CacheDirectory, fileName);
         await File.WriteAllBytesAsync(path, data);
-        await Share.Default.RequestAsync(new ShareFileRequest { Title = "Markd export", File = new ShareFile(path) });
+        await Share.Default.RequestAsync(new ShareFileRequest { Title = Strings.Export_ShareTitle, File = new ShareFile(path) });
         return fileName;
     }
 }

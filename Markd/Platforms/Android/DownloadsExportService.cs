@@ -1,6 +1,7 @@
 using Android.Content;
 using Android.OS;
 using Android.Provider;
+using Markd.Core.Localization;
 using Markd.Services;
 
 namespace Markd.Platforms.Android;
@@ -21,14 +22,14 @@ public sealed class DownloadsExportService : IFileExportService
         values.Put(MediaStore.IMediaColumns.IsPending, 1);
 
         var uri = resolver.Insert(MediaStore.Downloads.ExternalContentUri, values)
-            ?? throw new IOException("Could not create the export file in Downloads.");
+            ?? throw new IOException(Strings.Export_CouldNotCreateFile);
 
-        await using (var stream = resolver.OpenOutputStream(uri) ?? throw new IOException("Could not open the export file."))
+        await using (var stream = resolver.OpenOutputStream(uri) ?? throw new IOException(Strings.Export_CouldNotOpenFile))
             await stream.WriteAsync(data);
 
         values.Clear();
         values.Put(MediaStore.IMediaColumns.IsPending, 0);
         resolver.Update(uri, values, null, null);
-        return $"Downloads/{fileName}";
+        return string.Format(Strings.Export_LocationPrefix, fileName);
     }
 }

@@ -32,7 +32,7 @@ namespace Markd.Core.Services
         public async Task<ExportModel> ParseImportPackageAsync(byte[] package, string? passphrase = null)
         {
             if (package == null || package.Length == 0)
-                throw new InvalidOperationException("The selected file is empty.");
+                throw new InvalidOperationException(Strings.Import_EmptyFile);
 
             if (package.Length >= Magic.Length && package.Take(Magic.Length).SequenceEqual(Magic))
             {
@@ -43,7 +43,7 @@ namespace Markd.Core.Services
                 var ciphertext = package.Skip(idx).ToArray();
 
                 if (string.IsNullOrEmpty(passphrase))
-                    throw new InvalidOperationException("This import file is encrypted and requires a passphrase.");
+                    throw new InvalidOperationException(Strings.Import_PassphraseRequired);
 
                 const int iterations = 200_000;
                 const int iterationsLocal = iterations;
@@ -58,7 +58,7 @@ namespace Markd.Core.Services
                 }
                 catch (CryptographicException ex)
                 {
-                    throw new InvalidOperationException("The import file could not be decrypted. Check the passphrase or file contents.", ex);
+                    throw new InvalidOperationException(Strings.Import_DecryptFailed, ex);
                 }
 
                 return ParseAndValidateImportJson(Encoding.UTF8.GetString(plain));
@@ -185,11 +185,11 @@ namespace Markd.Core.Services
             }
             catch (JsonException ex)
             {
-                throw new InvalidOperationException("The selected file is not a valid Markd JSON export.", ex);
+                throw new InvalidOperationException(Strings.Import_InvalidJson, ex);
             }
 
             if (model == null)
-                throw new InvalidOperationException("The selected file is not a valid Markd JSON export.");
+                throw new InvalidOperationException(Strings.Import_InvalidJson);
 
             ValidateModel(model);
             return model;
@@ -198,19 +198,19 @@ namespace Markd.Core.Services
         private static void ValidateModel(ExportModel model)
         {
             if (string.IsNullOrWhiteSpace(model.SchemaVersion))
-                throw new InvalidOperationException("The selected file is missing a schema version.");
+                throw new InvalidOperationException(Strings.Import_MissingSchemaVersion);
 
             if (!string.Equals(model.SchemaVersion, "1", StringComparison.Ordinal))
-                throw new InvalidOperationException($"Unsupported import schema version '{model.SchemaVersion}'. This app supports schema version 1.");
+                throw new InvalidOperationException(string.Format(Strings.Import_UnsupportedSchema, model.SchemaVersion));
 
             if (model.Categories.Any(c => string.IsNullOrWhiteSpace(c.Name)))
-                throw new InvalidOperationException("The selected file contains a category with a missing name.");
+                throw new InvalidOperationException(Strings.Import_MissingCategoryName);
 
             if (model.Occasions.Any(o => string.IsNullOrWhiteSpace(o.Title)))
-                throw new InvalidOperationException("The selected file contains an occasion with a missing title.");
+                throw new InvalidOperationException(Strings.Import_MissingOccasionTitle);
 
             if (model.Milestones.Any(m => string.IsNullOrWhiteSpace(m.Label)))
-                throw new InvalidOperationException("The selected file contains a milestone with a missing label.");
+                throw new InvalidOperationException(Strings.Import_MissingMilestoneLabel);
         }
 
         private static string? GetSqliteDataSource(string connectionString)

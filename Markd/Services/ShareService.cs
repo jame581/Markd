@@ -1,4 +1,5 @@
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 
 namespace Markd.Services;
 
@@ -25,14 +26,15 @@ public sealed class ShareService : IShareService
 {
     public Task ShareOccasionAsync(OccasionShareRequest request)
     {
-        var action = request.Occasion.Direction == OccasionDirection.Since ? "since" : "until";
-        var title = $"Share {request.Occasion.Title}";
+        var title = string.Format(Strings.Share_Title, request.Occasion.Title);
+        var dateText = request.Occasion.AnchorDate.ToLocalTime().ToString("dd MMM yyyy");
+        var daysPhrase = FormatDaysPhrase(request.Occasion.Direction, request.Days, dateText);
         var text = $"{request.Occasion.Emoji} {request.Occasion.Title}\n" +
-                   $"{request.Days} days {action} {request.Occasion.AnchorDate.ToLocalTime():dd MMM yyyy}\n" +
+                   $"{daysPhrase}\n" +
                    $"{request.TimeBreakdown}";
 
         if (!string.IsNullOrWhiteSpace(request.NextMilestoneLabel))
-            text += $"\nNext milestone: {request.NextMilestoneLabel} · {request.NextMilestoneStatus}";
+            text += $"\n{string.Format(Strings.Share_NextMilestone, request.NextMilestoneLabel, request.NextMilestoneStatus)}";
 
         if (!string.IsNullOrWhiteSpace(request.Occasion.Notes))
             text += $"\n\n{request.Occasion.Notes.Trim()}";
@@ -47,13 +49,14 @@ public sealed class ShareService : IShareService
 
     public Task ShareMilestoneAsync(MilestoneShareRequest request)
     {
-        var action = request.Occasion.Direction == OccasionDirection.Since ? "since" : "until";
-        var title = $"Share {request.MilestoneLabel}";
+        var title = string.Format(Strings.Share_Title, request.MilestoneLabel);
+        var dateText = request.Occasion.AnchorDate.ToLocalTime().ToString("dd MMM yyyy");
+        var daysPhrase = FormatDaysPhrase(request.Occasion.Direction, request.ThresholdDays, dateText);
         var text = $"{request.Occasion.Emoji} {request.Occasion.Title}\n" +
-                   $"{request.MilestoneLabel} · {request.ThresholdDays} days {action} {request.Occasion.AnchorDate.ToLocalTime():dd MMM yyyy}";
+                   $"{request.MilestoneLabel} · {daysPhrase}";
 
         if (!string.IsNullOrWhiteSpace(request.NextMilestoneLabel))
-            text += $"\nNext milestone: {request.NextMilestoneLabel}";
+            text += $"\n{string.Format(Strings.Share_NextMilestoneShort, request.NextMilestoneLabel)}";
 
         return Share.Default.RequestAsync(new ShareTextRequest
         {
@@ -61,5 +64,13 @@ public sealed class ShareService : IShareService
             Subject = request.MilestoneLabel,
             Text = text
         });
+    }
+
+    private static string FormatDaysPhrase(OccasionDirection direction, int days, string dateText)
+    {
+        var culture = LocalizationManager.Instance.Culture;
+        var baseKey = direction == OccasionDirection.Since ? "Share_DaysSince" : "Share_DaysUntil";
+        var pattern = Strings.ResourceManager.GetString($"{baseKey}_{Plural.Select(days, culture)}", culture) ?? baseKey;
+        return string.Format(culture, pattern, days, dateText);
     }
 }

@@ -1,5 +1,6 @@
 using Markd.Core.Data;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 using Microsoft.EntityFrameworkCore;
 
 namespace Markd.Core.Services
@@ -28,7 +29,7 @@ namespace Markd.Core.Services
         public async Task<Category> UpdateAsync(Category category)
         {
             var existing = await db.Categories.FindAsync(category.Id)
-                ?? throw new InvalidOperationException($"Category {category.Id} was not found.");
+                ?? throw new InvalidOperationException(string.Format(Strings.Category_NotFoundById, category.Id));
 
             existing.Name = category.Name;
             existing.Emoji = category.Emoji;

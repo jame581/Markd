@@ -156,7 +156,7 @@ public class SettingsViewModel : ViewModelBase
         }
     }
 
-    public string VersionText => $"Version {AppInfo.Current.VersionString} · build {AppInfo.Current.BuildString}";
+    public string VersionText => string.Format(Strings.Settings_Version, AppInfo.Current.VersionString, AppInfo.Current.BuildString);
 
     public async Task LoadAsync()
     {
@@ -231,27 +231,27 @@ public class SettingsViewModel : ViewModelBase
             var data = await _exportService.CreateExportJsonAsync();
             var location = await _fileExportService.SaveAsync($"markd-export-{DateTime.Now:yyyyMMdd-HHmmss}.json", data);
             if (location is not null)
-                await _feedbackService.ShowAsync("Export saved", location);
+                await _feedbackService.ShowAsync(Strings.Export_Saved, location);
         }
         catch (Exception ex)
         {
-            await _feedbackService.ShowAsync("Export failed", ex.Message);
+            await _feedbackService.ShowAsync(Strings.Export_Failed, ex.Message);
         }
     }
 
     private async Task ImportAsync()
     {
         var confirmed = await _shellService.DisplayAlertAsync(
-            "Replace current data?",
-            "Importing a Markd export replaces every occasion, category, milestone and setting on this device.",
-            "Choose file",
-            "Cancel");
+            Strings.Import_ConfirmTitle,
+            Strings.Import_ConfirmMessage,
+            Strings.Import_ChooseFile,
+            Strings.Common_Cancel);
         if (!confirmed)
             return;
 
         try
         {
-            var file = await FilePicker.Default.PickAsync(new PickOptions { PickerTitle = "Select a Markd export" });
+            var file = await FilePicker.Default.PickAsync(new PickOptions { PickerTitle = Strings.Import_PickerTitle });
             if (file is null)
                 return;
 
@@ -266,21 +266,21 @@ public class SettingsViewModel : ViewModelBase
             WeakReferenceMessenger.Default.Send(new OccasionsChangedMessage(null, this));
             await LoadAsync();
             await _notificationService.RescheduleAsync();
-            await _feedbackService.ShowAsync("Import complete", $"Loaded {file.FileName}.");
+            await _feedbackService.ShowAsync(Strings.Import_Complete, string.Format(Strings.Import_Loaded, file.FileName));
         }
         catch (Exception ex)
         {
-            await _feedbackService.ShowAsync("Import failed", ex.Message);
+            await _feedbackService.ShowAsync(Strings.Import_Failed, ex.Message);
         }
     }
 
     private async Task EraseAllAsync()
     {
         var confirmed = await _shellService.DisplayAlertAsync(
-            "Erase all occasions?",
-            "Every occasion and milestone on this device is permanently removed. Categories and settings stay.",
-            "Erase all",
-            "Cancel",
+            Strings.Settings_EraseConfirmTitle,
+            Strings.Settings_EraseConfirmMessage,
+            Strings.Settings_EraseAllShort,
+            Strings.Common_Cancel,
             destructive: true);
         if (!confirmed)
             return;
@@ -290,7 +290,7 @@ public class SettingsViewModel : ViewModelBase
         await _notificationService.RescheduleAsync();
 
         if (_shellService.Platform != DevicePlatform.Android)
-            await _feedbackService.ShowAsync("All occasions erased", "Markd is back to a clean slate.");
+            await _feedbackService.ShowAsync(Strings.Settings_ErasedTitle, Strings.Settings_ErasedDetail);
     }
 
     protected override void OnLanguageChanged()
