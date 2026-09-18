@@ -2,11 +2,16 @@ using Microsoft.Maui.Devices;
 
 namespace Markd.Services;
 
+/// <summary>
+/// Navigation and dialogs for view models. Routes are Shell-style strings
+/// ("OccasionDetailPage?id=5", "..", "//calendar"); the desktop shell interprets the same routes.
+/// </summary>
 public interface IAppShellService
 {
     DevicePlatform Platform { get; }
     Task GoToAsync(string route);
     Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel);
+    Task ShowMessageAsync(string title, string message, string close);
 }
 
 public sealed class AppShellService : IAppShellService
@@ -17,4 +22,7 @@ public sealed class AppShellService : IAppShellService
 
     public Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel) =>
         Shell.Current.DisplayAlertAsync(title, message, accept, cancel);
+
+    public Task ShowMessageAsync(string title, string message, string close) =>
+        Shell.Current.DisplayAlertAsync(title, message, close);
 }

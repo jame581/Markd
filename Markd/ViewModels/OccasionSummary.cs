@@ -1,32 +1,56 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using Markd.Core.Domain;
 
 namespace Markd.ViewModels;
 
 /// <summary>
-/// Lightweight DTO used by the dashboard list — holds the occasion plus the pre-computed
-/// days value so the item template can display it without an extra service call.
+/// Precomputed row for Home lists: the occasion plus its count, wording and next milestone,
+/// so item templates never call services. <see cref="IsSelected"/> drives the desktop list pane.
 /// </summary>
-public record OccasionSummary(Occasion Occasion, int Days)
+public sealed class OccasionSummary : ObservableObject
 {
-    public DateTime LocalAnchorDate => Occasion.AnchorDate.ToLocalTime().Date;
+    private bool _isSelected;
+
+    public OccasionSummary(Occasion occasion, int days)
+    {
+        Occasion = occasion;
+        Days = days;
+        Next = OccasionMath.GetNextMilestone(occasion, days);
+    }
+
+    public Occasion Occasion { get; }
+    public int Days { get; }
+    public NextMilestoneInfo? Next { get; }
+
+    public int Id => Occasion.Id;
+    public string Title => Occasion.Title;
+    public string? Emoji => Occasion.Emoji;
+    public string? ColorHex => Occasion.ColorHex;
+    public bool IsPinned => Occasion.IsPinned;
+    public string? Notes => Occasion.Notes;
+    public string CategoryName => Occasion.Category?.Name ?? OccasionGroup.UncategorisedName;
 
     public int DisplayDays => Math.Abs(Days);
+    public string UnitLabel => OccasionMath.UnitLabel(Occasion, Days);
+    public string AnchorLabel => OccasionMath.AnchorPhrase(Occasion);
+    public string DirectionLabel => OccasionMath.DirectionLabel(Occasion);
 
-    public string CountLabel => Occasion.Direction == OccasionDirection.Since
-        ? "DAYS"
-        : Days >= 0 ? "TO GO" : "AGO";
+    public bool HasNext => Next is not null;
+    public string NextHeading => Next is null ? "No milestone ahead" : $"Next · {Next.Label}";
+    public string NextStatus => Next?.DaysToGoText ?? "—";
+    public double NextProgress => Next?.Progress ?? 1;
 
-    public string AnchorLabel => Occasion.Direction == OccasionDirection.Since
-        ? $"since {LocalAnchorDate:dd MMM yyyy}"
-        : Days >= 0
-            ? $"until {LocalAnchorDate:dd MMM yyyy}"
-            : $"was {LocalAnchorDate:dd MMM yyyy}";
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
+}
 
-    /// <summary>
-    /// Human-readable time label shown on the list card.
-    /// e.g. "365 days since" or "12 days until"
-    /// </summary>
-    public string TimeLabel => Occasion.Direction == OccasionDirection.Since
-        ? $"{Days} days since"
-        : Days >= 0 ? $"in {Days} days" : $"{Math.Abs(Days)} days ago";
+public sealed class OccasionGroup(string categoryName, IEnumerable<OccasionSummary> items) : List<OccasionSummary>(items)
+{
+    public const string UncategorisedName = "Uncategorised";
+
+    public string CategoryName { get; } = categoryName;
+    public string CountLabel => Count == 1 ? "1 occasion" : $"{Count} occasions";
 }

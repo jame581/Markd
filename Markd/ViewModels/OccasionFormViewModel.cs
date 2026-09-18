@@ -1,16 +1,22 @@
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Markd.Core.Domain;
 using Markd.Core.Services;
+using Markd.Services;
+using Microsoft.Maui.Devices;
 
 namespace Markd.ViewModels;
 
 public class OccasionFormViewModel : ViewModelBase
 {
-    private static readonly Category NoneCategory = new() { Id = 0, Name = "Uncategorized" };
+    private static readonly Category NoneCategory = new() { Id = 0, Name = OccasionGroup.UncategorisedName };
 
     private readonly IOccasionService _occasionService;
     private readonly ICategoryService _categoryService;
+    private readonly IAppShellService _shellService;
+    private readonly IFeedbackService _feedbackService;
     private string _title = string.Empty;
     private string? _emoji;
     private string? _colorHex;
@@ -20,20 +26,38 @@ public class OccasionFormViewModel : ViewModelBase
     private bool _isPinned;
     private Category? _selectedCategory;
 
-    public OccasionFormViewModel(IOccasionService occasionService, ICategoryService categoryService)
+    public OccasionFormViewModel(
+        IOccasionService occasionService,
+        ICategoryService categoryService,
+        IAppShellService shellService,
+        IFeedbackService feedbackService)
     {
         _occasionService = occasionService;
         _categoryService = categoryService;
+        _shellService = shellService;
+        _feedbackService = feedbackService;
         SaveCommand = new AsyncRelayCommand(SaveAsync);
-        SelectColorCommand = new RelayCommand<string?>(hex => ColorHex = hex);
+        CancelCommand = new AsyncRelayCommand(() => _shellService.GoToAsync(".."));
+        SelectColorCommand = new RelayCommand<string?>(SelectColor);
+        SelectEmojiCommand = new RelayCommand<string?>(value => Emoji = value);
+        SetDirectionCommand = new RelayCommand<string?>(value =>
+            Direction = value == nameof(OccasionDirection.Until) ? OccasionDirection.Until : OccasionDirection.Since);
+        TogglePinCommand = new RelayCommand(() => IsPinned = !IsPinned);
+
+        foreach (var hex in ColorSwatches)
+            ColorChoices.Add(new ColorChoice(hex));
     }
 
     public int OccasionId { get; private set; }
     public IAsyncRelayCommand SaveCommand { get; }
+    public IAsyncRelayCommand CancelCommand { get; }
     public IRelayCommand<string?> SelectColorCommand { get; }
+    public IRelayCommand<string?> SelectEmojiCommand { get; }
+    public IRelayCommand<string?> SetDirectionCommand { get; }
+    public IRelayCommand TogglePinCommand { get; }
     public ObservableCollection<Category> Categories { get; } = new();
 
-    /// <summary>Preset color palette for the swatch picker.</summary>
+    /// <summary>The twelve identity swatches.</summary>
     public static IReadOnlyList<string> ColorSwatches { get; } =
     [
         "#E53935", "#F4511E", "#F6BF26", "#33B679",
@@ -41,10 +65,27 @@ public class OccasionFormViewModel : ViewModelBase
         "#8E24AA", "#795548", "#616161", "#000000"
     ];
 
+    /// <summary>Quick picks for the icon; the first six are the desktop's inline row.</summary>
+    public static IReadOnlyList<string> EmojiChoices { get; } =
+    [
+        "💕", "🌱", "✈️", "👶", "🏃", "🎉",
+        "🎂", "💍", "🏠", "🎓", "💼", "🐶",
+        "🐱", "🌿", "☕", "🚭", "🍷", "💪",
+        "📚", "🎵", "⚽", "🧘", "🌍", "⭐"
+    ];
+
+    public static IReadOnlyList<string> QuickEmojiChoices { get; } = EmojiChoices.Take(6).ToList();
+
+    public ObservableCollection<ColorChoice> ColorChoices { get; } = new();
+
     public string Title
     {
         get => _title;
-        set => SetProperty(ref _title, value);
+        set
+        {
+            if (SetProperty(ref _title, value) && !string.IsNullOrWhiteSpace(value))
+                ErrorMessage = null;
+        }
     }
 
     public string? Emoji
@@ -62,13 +103,25 @@ public class OccasionFormViewModel : ViewModelBase
     public DateTime AnchorDate
     {
         get => _anchorDate;
-        set => SetProperty(ref _anchorDate, value);
+        set
+        {
+            if (SetProperty(ref _anchorDate, value.Date))
+                RaisePreview();
+        }
     }
 
     public OccasionDirection Direction
     {
         get => _direction;
-        set => SetProperty(ref _direction, value);
+        set
+        {
+            if (SetProperty(ref _direction, value))
+            {
+                OnPropertyChanged(nameof(IsSinceSelected));
+                OnPropertyChanged(nameof(IsUntilSelected));
+                RaisePreview();
+            }
+        }
     }
 
     public string? Notes
@@ -89,7 +142,48 @@ public class OccasionFormViewModel : ViewModelBase
         set => SetProperty(ref _selectedCategory, value);
     }
 
-    public string Header => OccasionId == 0 ? "New Occasion" : "Edit Occasion";
+    public bool IsNew => OccasionId == 0;
+    public string Header => IsNew ? "New occasion" : "Edit occasion";
+    public string Subtitle => IsNew ? "Pick a date, give it a name" : "Changes save when you press Save";
+    public string SaveLabel => IsNew ? "Create occasion" : "Save changes";
+
+    public bool IsSinceSelected
+    {
+        get => Direction == OccasionDirection.Since;
+        set { if (value) Direction = OccasionDirection.Since; }
+    }
+
+    public bool IsUntilSelected
+    {
+        get => Direction == OccasionDirection.Until;
+        set { if (value) Direction = OccasionDirection.Until; }
+    }
+
+    public string AnchorDateText => OccasionMath.FormatShortDate(AnchorDate);
+
+    /// <summary>The count the occasion will read, shown live in the preview card.</summary>
+    public int PreviewDays => Math.Abs(PreviewSignedDays);
+
+    public string PreviewCaption
+    {
+        get
+        {
+            var date = AnchorDateText;
+            var days = PreviewSignedDays;
+            if (Direction == OccasionDirection.Since)
+            {
+                if (days < 0)
+                    return $"days until the counter starts on {date}";
+                return days == 0 ? $"the counter starts today, {date}" : $"days since {date} — the counter starts here";
+            }
+
+            return days >= 0 ? $"days until {date}" : $"days since {date}";
+        }
+    }
+
+    private int PreviewSignedDays => Direction == OccasionDirection.Since
+        ? (DateTime.Today - AnchorDate.Date).Days
+        : (AnchorDate.Date - DateTime.Today).Days;
 
     public async Task InitializeAsync(int id)
     {
@@ -101,37 +195,41 @@ public class OccasionFormViewModel : ViewModelBase
         if (id == 0)
         {
             Title = string.Empty;
-            Emoji = null;
+            Emoji = "🎉";
             ColorHex = null;
             AnchorDate = DateTime.Today;
             Direction = OccasionDirection.Since;
             Notes = null;
             IsPinned = false;
             SelectedCategory = NoneCategory;
-            OnPropertyChanged(nameof(Header));
-            return;
         }
-
-        var occasion = await _occasionService.GetByIdAsync(id);
-        if (occasion == null)
+        else
         {
-            ErrorMessage = "Occasion not found.";
-            return;
+            var occasion = await _occasionService.GetByIdAsync(id);
+            if (occasion == null)
+            {
+                ErrorMessage = "Occasion not found.";
+                return;
+            }
+
+            Title = occasion.Title;
+            Emoji = occasion.Emoji;
+            ColorHex = occasion.ColorHex;
+            AnchorDate = OccasionDates.ToLocalDate(occasion.AnchorDate);
+            Direction = occasion.Direction;
+            Notes = occasion.Notes;
+            IsPinned = occasion.IsPinned;
+            SelectedCategory = occasion.CategoryId.HasValue
+                ? Categories.FirstOrDefault(c => c.Id == occasion.CategoryId.Value) ?? NoneCategory
+                : NoneCategory;
         }
 
-        Title = occasion.Title;
-        Emoji = occasion.Emoji;
-        ColorHex = occasion.ColorHex;
-        AnchorDate = occasion.AnchorDate.ToLocalTime().Date;
-        Direction = occasion.Direction;
-        Notes = occasion.Notes;
-        IsPinned = occasion.IsPinned;
-
-        SelectedCategory = occasion.CategoryId.HasValue
-            ? Categories.FirstOrDefault(c => c.Id == occasion.CategoryId.Value)
-            : NoneCategory;
-
+        UpdateColorSelection();
+        OnPropertyChanged(nameof(IsNew));
         OnPropertyChanged(nameof(Header));
+        OnPropertyChanged(nameof(Subtitle));
+        OnPropertyChanged(nameof(SaveLabel));
+        RaisePreview();
     }
 
     private async Task SaveAsync()
@@ -156,19 +254,28 @@ public class OccasionFormViewModel : ViewModelBase
                 Title = Title.Trim(),
                 Emoji = string.IsNullOrWhiteSpace(Emoji) ? null : Emoji.Trim(),
                 ColorHex = string.IsNullOrWhiteSpace(ColorHex) ? null : ColorHex.Trim(),
-                AnchorDate = AnchorDate.ToUniversalTime(),
+                AnchorDate = DateTime.SpecifyKind(AnchorDate.Date, DateTimeKind.Local).ToUniversalTime(),
                 Direction = Direction,
                 Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
                 IsPinned = IsPinned,
                 CategoryId = SelectedCategory is { Id: > 0 } category ? category.Id : null
             };
 
-            if (OccasionId == 0)
-                await _occasionService.CreateAsync(occasion);
-            else
-                await _occasionService.UpdateAsync(occasion);
+            var isNew = OccasionId == 0;
+            var saved = isNew
+                ? await _occasionService.CreateAsync(occasion)
+                : await _occasionService.UpdateAsync(occasion);
 
-            await Shell.Current.GoToAsync("..");
+            WeakReferenceMessenger.Default.Send(new OccasionsChangedMessage(saved.Id, this));
+            await _shellService.GoToAsync("..");
+
+            if (_shellService.Platform != DevicePlatform.Android)
+            {
+                var anchor = OccasionMath.FormatShortDate(AnchorDate);
+                await _feedbackService.ShowAsync(
+                    isNew ? "Occasion created" : "Changes saved",
+                    $"{saved.Title} · counting {(Direction == OccasionDirection.Since ? "since" : "until")} {anchor}");
+            }
         }
         catch (Exception ex)
         {
@@ -180,13 +287,31 @@ public class OccasionFormViewModel : ViewModelBase
         }
     }
 
+    private void SelectColor(string? hex)
+    {
+        ColorHex = hex;
+        UpdateColorSelection();
+    }
+
+    private void UpdateColorSelection()
+    {
+        foreach (var choice in ColorChoices)
+            choice.IsSelected = string.Equals(choice.Hex, ColorHex, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void RaisePreview()
+    {
+        OnPropertyChanged(nameof(AnchorDateText));
+        OnPropertyChanged(nameof(PreviewDays));
+        OnPropertyChanged(nameof(PreviewCaption));
+    }
+
     private async Task LoadCategoriesAsync()
     {
         Categories.Clear();
         Categories.Add(NoneCategory);
 
-        var categories = await _categoryService.GetAllAsync();
-        foreach (var category in categories)
+        foreach (var category in await _categoryService.GetAllAsync())
             Categories.Add(category);
     }
 }

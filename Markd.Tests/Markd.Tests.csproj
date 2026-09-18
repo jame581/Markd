@@ -1,14 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="xunit.v3" Version="4.0.0" />
+    <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.100" />
   </ItemGroup>
@@ -19,9 +23,16 @@
 
   <ItemGroup>
     <Compile Include="..\Markd\ViewModels\ViewModelBase.cs" Link="ViewModels\ViewModelBase.cs" />
+    <Compile Include="..\Markd\ViewModels\OccasionMath.cs" Link="ViewModels\OccasionMath.cs" />
+    <Compile Include="..\Markd\ViewModels\OccasionSummary.cs" Link="ViewModels\OccasionSummary.cs" />
+    <Compile Include="..\Markd\ViewModels\Messages.cs" Link="ViewModels\Messages.cs" />
+    <Compile Include="..\Markd\Services\IFeedbackService.cs" Link="Services\IFeedbackService.cs" />
     <Compile Include="..\Markd\ViewModels\OccasionDetailViewModel.cs" Link="ViewModels\OccasionDetailViewModel.cs" />
+    <Compile Include="..\Markd\ViewModels\MilestoneEditorViewModel.cs" Link="ViewModels\MilestoneEditorViewModel.cs" />
     <Compile Include="..\Markd\Services\AppShellService.cs" Link="Services\AppShellService.cs" />
     <Compile Include="..\Markd\Services\ShareService.cs" Link="Services\ShareService.cs" />
+    <Compile Include="..\Markd\ViewModels\CalendarViewModel.cs" Link="ViewModels\CalendarViewModel.cs" />
+    <Compile Include="..\Markd\Controls\HexColor.cs" Link="Controls\HexColor.cs" />
   </ItemGroup>
 
 </Project>

@@ -10,47 +10,53 @@ public static class OccasionDetailViewModelTests
 {
     public static async Task RunAsync()
     {
-        await LoadAsync_BuildsReachedAndUpcomingMilestoneStates_FromNotifiedFlag();
+        await LoadAsync_BuildsReachedAndUpcomingMilestoneStates();
         await AddMilestoneCommand_AddsMilestoneAndReloadsOccasion();
         await EditCommand_NavigatesToOccasionFormRoute();
         await PinCommand_PinsUnpinnedOccasion();
-        await RemoveMilestoneCommand_ConfirmsBeforeRemovingOnNonAndroid();
-        await RemoveMilestoneCommand_SkipsConfirmationOnAndroid();
+        await PinCommand_RaisesPinStateForTheSameTrackedInstance();
+        await LoadAsync_AfterAnEdit_RaisesTheNewTitle();
+        await RemoveMilestoneCommand_ConfirmsBeforeRemovingOnIos();
+        await RemoveMilestoneCommand_RemovesAndToastsOnWindows();
+        await RemoveMilestoneCommand_OffersUndoOnAndroid();
         await ShareCommand_SharesOccasionWithNextMilestoneContext();
-        await DeleteCommand_DeletesOccasionAndNavigatesBack();
+        await DeleteCommand_ConfirmsOnWindowsAndNavigatesBack();
+        await DeleteCommand_OnAndroid_DeletesWithoutConfirmAndUndoRestores();
 
         Console.WriteLine("Occasion detail smoke verification passed.");
     }
 
-    private static async Task LoadAsync_BuildsReachedAndUpcomingMilestoneStates_FromNotifiedFlag()
+    private static OccasionDetailViewModel Create(
+        FakeOccasionService services,
+        FakeAppShellService shell,
+        FakeShareService? share = null,
+        FakeFeedbackService? feedback = null,
+        MilestoneEditorResult? editorResult = null) =>
+        new(services, shell, new FakeMilestoneEditorService(editorResult), share ?? new FakeShareService(), feedback ?? new FakeFeedbackService());
+
+    private static async Task LoadAsync_BuildsReachedAndUpcomingMilestoneStates()
     {
         var occasion = SampleOccasions.OurAnniversary();
-        var services = new FakeOccasionService(occasion);
-        var shell = new FakeAppShellService(DevicePlatform.WinUI);
-        var share = new FakeShareService();
-        var viewModel = new OccasionDetailViewModel(services, shell, share);
+        var viewModel = Create(new FakeOccasionService(occasion), new FakeAppShellService(DevicePlatform.WinUI));
 
         await viewModel.LoadAsync(occasion.Id);
 
         Ensure(viewModel.MilestoneStates.Count == 3, "Expected three milestone states.");
         Ensure(viewModel.MilestoneStates[0].IsReached, "Expected the first milestone to be reached.");
         Ensure(!viewModel.MilestoneStates[1].IsReached, "Expected the second milestone to be upcoming.");
-        Ensure(viewModel.MilestoneStates[0].StatusText.Contains("Reached", StringComparison.Ordinal), "Reached milestone text missing.");
-        Ensure(viewModel.MilestoneStates[1].StatusText.Contains("away", StringComparison.Ordinal), "Upcoming milestone text missing.");
+        Ensure(viewModel.MilestoneStates[0].StatusText.StartsWith("reached ", StringComparison.Ordinal), "Reached milestone text missing.");
+        Ensure(viewModel.MilestoneStates[1].StatusText == "26 days away", "Upcoming milestone text missing.");
+        Ensure(viewModel.NextMilestoneHeading == "Next · Four years", "Next milestone heading was wrong.");
+        Ensure(viewModel.DisplayDays == 1435 && viewModel.UnitLabel == "days", "Count or unit was wrong.");
     }
 
     private static async Task AddMilestoneCommand_AddsMilestoneAndReloadsOccasion()
     {
         var occasion = SampleOccasions.SoberDays();
         var services = new FakeOccasionService(occasion);
-        var shell = new FakeAppShellService(DevicePlatform.WinUI);
-        var share = new FakeShareService();
-        var viewModel = new OccasionDetailViewModel(services, shell, share);
+        var viewModel = Create(services, new FakeAppShellService(DevicePlatform.WinUI), editorResult: new MilestoneEditorResult("Seven hundred", 700));
 
         await viewModel.LoadAsync(occasion.Id);
-        viewModel.NewMilestoneLabel = "Seven hundred";
-        viewModel.NewMilestoneThresholdDays = "700";
-
         await viewModel.AddMilestoneCommand.ExecuteAsync(null);
 
         Ensure(services.GetOccasion(occasion.Id).Milestones.Any(milestone => milestone.Label == "Seven hundred"), "Milestone was not added to the store.");
@@ -60,10 +66,8 @@ public static class OccasionDetailViewModelTests
     private static async Task EditCommand_NavigatesToOccasionFormRoute()
     {
         var occasion = SampleOccasions.TripToLisbon();
-        var services = new FakeOccasionService(occasion);
         var shell = new FakeAppShellService(DevicePlatform.WinUI);
-        var share = new FakeShareService();
-        var viewModel = new OccasionDetailViewModel(services, shell, share);
+        var viewModel = Create(new FakeOccasionService(occasion), shell);
 
         await viewModel.LoadAsync(occasion.Id);
         await viewModel.EditCommand.ExecuteAsync(null);
@@ -75,9 +79,7 @@ public static class OccasionDetailViewModelTests
     {
         var occasion = SampleOccasions.EllasAge();
         var services = new FakeOccasionService(occasion);
-        var shell = new FakeAppShellService(DevicePlatform.WinUI);
-        var share = new FakeShareService();
-        var viewModel = new OccasionDetailViewModel(services, shell, share);
+        var viewModel = Create(services, new FakeAppShellService(DevicePlatform.WinUI));
 
         await viewModel.LoadAsync(occasion.Id);
         await viewModel.PinCommand.ExecuteAsync(null);
@@ -86,43 +88,87 @@ public static class OccasionDetailViewModelTests
         Ensure(viewModel.PinButtonText == "Unpin", "Pinned occasion did not surface unpin text.");
     }
 
-    private static async Task RemoveMilestoneCommand_ConfirmsBeforeRemovingOnNonAndroid()
+    private static async Task PinCommand_RaisesPinStateForTheSameTrackedInstance()
+    {
+        var occasion = SampleOccasions.EllasAge();
+        var viewModel = Create(new FakeOccasionService(occasion), new FakeAppShellService(DevicePlatform.WinUI));
+        await viewModel.LoadAsync(occasion.Id);
+        var raised = new List<string?>();
+        viewModel.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        await viewModel.PinCommand.ExecuteAsync(null);
+
+        Ensure(raised.Contains(nameof(OccasionDetailViewModel.IsPinned)), "Pinning did not raise IsPinned.");
+        Ensure(raised.Contains(nameof(OccasionDetailViewModel.PinToHomeText)), "Pinning did not raise PinToHomeText.");
+    }
+
+    private static async Task LoadAsync_AfterAnEdit_RaisesTheNewTitle()
+    {
+        var occasion = SampleOccasions.TripToLisbon();
+        var services = new FakeOccasionService(occasion);
+        var viewModel = Create(services, new FakeAppShellService(DevicePlatform.WinUI));
+        await viewModel.LoadAsync(occasion.Id);
+        var raised = new List<string?>();
+        viewModel.PropertyChanged += (_, e) => raised.Add(e.PropertyName);
+
+        services.GetOccasion(occasion.Id).Title = "Lisbon, finally";
+        await viewModel.LoadAsync(occasion.Id);
+
+        Ensure(raised.Contains(nameof(OccasionDetailViewModel.Title)) && viewModel.Title == "Lisbon, finally", "Reload after an edit did not raise the new title.");
+    }
+
+    private static async Task RemoveMilestoneCommand_ConfirmsBeforeRemovingOnIos()
     {
         var occasion = SampleOccasions.OurAnniversary();
         var services = new FakeOccasionService(occasion);
-        var shell = new FakeAppShellService(DevicePlatform.WinUI) { NextConfirmationResult = true };
-        var share = new FakeShareService();
-        var viewModel = new OccasionDetailViewModel(services, shell, share);
+        var shell = new FakeAppShellService(DevicePlatform.iOS) { NextConfirmationResult = true };
+        var viewModel = Create(services, shell);
 
         await viewModel.LoadAsync(occasion.Id);
         await viewModel.RemoveMilestoneCommand.ExecuteAsync(viewModel.MilestoneStates[1].Milestone);
 
-        Ensure(shell.ConfirmationRequests.Count == 1, "Non-Android milestone removal should confirm.");
+        Ensure(shell.ConfirmationRequests.Count == 1, "iOS milestone removal should confirm.");
         Ensure(!services.GetOccasion(occasion.Id).Milestones.Any(milestone => milestone.Label == "Four years"), "Milestone was not removed after confirmation.");
     }
 
-    private static async Task RemoveMilestoneCommand_SkipsConfirmationOnAndroid()
+    private static async Task RemoveMilestoneCommand_RemovesAndToastsOnWindows()
+    {
+        var occasion = SampleOccasions.OurAnniversary();
+        var services = new FakeOccasionService(occasion);
+        var shell = new FakeAppShellService(DevicePlatform.WinUI);
+        var feedback = new FakeFeedbackService();
+        var viewModel = Create(services, shell, feedback: feedback);
+
+        await viewModel.LoadAsync(occasion.Id);
+        await viewModel.RemoveMilestoneCommand.ExecuteAsync(viewModel.MilestoneStates[1].Milestone);
+
+        Ensure(shell.ConfirmationRequests.Count == 0, "Desktop milestone removal uses the hover affordance, not a dialog.");
+        Ensure(feedback.Messages.Contains("Milestone removed"), "Desktop milestone removal should raise a toast.");
+        Ensure(!services.GetOccasion(occasion.Id).Milestones.Any(milestone => milestone.Label == "Four years"), "Milestone was not removed.");
+    }
+
+    private static async Task RemoveMilestoneCommand_OffersUndoOnAndroid()
     {
         var occasion = SampleOccasions.OurAnniversary();
         var services = new FakeOccasionService(occasion);
         var shell = new FakeAppShellService(DevicePlatform.Android);
-        var share = new FakeShareService();
-        var viewModel = new OccasionDetailViewModel(services, shell, share);
+        var feedback = new FakeFeedbackService { UndoResult = true };
+        var viewModel = Create(services, shell, feedback: feedback);
 
         await viewModel.LoadAsync(occasion.Id);
-        await viewModel.RemoveMilestoneCommand.ExecuteAsync(viewModel.MilestoneStates[1].Milestone);
+        await viewModel.RemoveMilestoneCommand.ExecuteAsync(viewModel.MilestoneStates[0].Milestone);
 
         Ensure(shell.ConfirmationRequests.Count == 0, "Android milestone removal should skip confirmation.");
-        Ensure(!services.GetOccasion(occasion.Id).Milestones.Any(milestone => milestone.Label == "Four years"), "Android milestone removal did not persist.");
+        Ensure(feedback.UndoOffers == 1, "Android milestone removal should offer undo.");
+        var restored = services.GetOccasion(occasion.Id).Milestones.SingleOrDefault(milestone => milestone.Label == "Four digits");
+        Ensure(restored is { Notified: true }, "Undo should restore the milestone with its notified flag.");
     }
 
     private static async Task ShareCommand_SharesOccasionWithNextMilestoneContext()
     {
         var occasion = SampleOccasions.OurAnniversary();
-        var services = new FakeOccasionService(occasion);
-        var shell = new FakeAppShellService(DevicePlatform.WinUI);
         var share = new FakeShareService();
-        var viewModel = new OccasionDetailViewModel(services, shell, share);
+        var viewModel = Create(new FakeOccasionService(occasion), new FakeAppShellService(DevicePlatform.WinUI), share);
 
         await viewModel.LoadAsync(occasion.Id);
         await viewModel.ShareCommand.ExecuteAsync(null);
@@ -132,19 +178,39 @@ public static class OccasionDetailViewModelTests
         Ensure(share.LastOccasionShare.NextMilestoneLabel == "Four years", "Share request missed the next milestone context.");
     }
 
-    private static async Task DeleteCommand_DeletesOccasionAndNavigatesBack()
+    private static async Task DeleteCommand_ConfirmsOnWindowsAndNavigatesBack()
     {
         var occasion = SampleOccasions.TripToLisbon();
         var services = new FakeOccasionService(occasion);
         var shell = new FakeAppShellService(DevicePlatform.WinUI) { NextConfirmationResult = true };
-        var share = new FakeShareService();
-        var viewModel = new OccasionDetailViewModel(services, shell, share);
+        var feedback = new FakeFeedbackService();
+        var viewModel = Create(services, shell, feedback: feedback);
 
         await viewModel.LoadAsync(occasion.Id);
         await viewModel.DeleteCommand.ExecuteAsync(null);
 
         Ensure(services.FindOccasion(occasion.Id) is null, "Delete command did not remove the occasion.");
         Ensure(shell.LastRoute == "..", "Delete command did not navigate back.");
+        Ensure(shell.ConfirmationRequests.Count == 1, "Desktop delete should be confirmed.");
+        Ensure(feedback.Messages.Contains("Occasion deleted"), "Desktop delete should raise a toast.");
+    }
+
+    private static async Task DeleteCommand_OnAndroid_DeletesWithoutConfirmAndUndoRestores()
+    {
+        var occasion = SampleOccasions.SoberDays();
+        var services = new FakeOccasionService(occasion);
+        var shell = new FakeAppShellService(DevicePlatform.Android);
+        var feedback = new FakeFeedbackService { UndoResult = true };
+        var viewModel = Create(services, shell, feedback: feedback);
+
+        await viewModel.LoadAsync(occasion.Id);
+        await viewModel.DeleteCommand.ExecuteAsync(null);
+
+        Ensure(shell.ConfirmationRequests.Count == 0, "Android delete is reversible, not confirmed.");
+        Ensure(shell.LastRoute == "..", "Android delete did not navigate back.");
+        Ensure(services.FindOccasion(occasion.Id) is null, "Android delete did not remove the original record.");
+        var restored = (await services.GetAllAsync()).SingleOrDefault(o => o.Title == "Sober days");
+        Ensure(restored is not null && restored.Milestones.Count == 2, "Undo did not restore the occasion with its milestones.");
     }
 
     private sealed class FakeOccasionService : IOccasionService
@@ -163,7 +229,8 @@ public static class OccasionDetailViewModelTests
 
         public Task<List<Occasion>> GetAllAsync() => Task.FromResult(_occasions.Select(CloneOccasion).ToList());
 
-        public Task<Occasion?> GetByIdAsync(int id) => Task.FromResult(FindOccasion(id) is { } occasion ? CloneOccasion(occasion) : null);
+        // Like the app's long-lived EF context, reads hand back the same tracked instance.
+        public Task<Occasion?> GetByIdAsync(int id) => Task.FromResult(FindOccasion(id));
 
         public Task<Occasion> CreateAsync(Occasion occasion)
         {
@@ -189,6 +256,20 @@ public static class OccasionDetailViewModelTests
         {
             _occasions.RemoveAll(occasion => occasion.Id == id);
             return Task.CompletedTask;
+        }
+
+        public Task<Occasion> RestoreAsync(Occasion snapshot)
+        {
+            var restored = CloneOccasion(snapshot);
+            restored.Id = _occasions.Count == 0 ? 100 : _occasions.Max(occasion => occasion.Id) + 100;
+            foreach (var milestone in restored.Milestones)
+            {
+                milestone.Id = _nextMilestoneId++;
+                milestone.OccasionId = restored.Id;
+            }
+
+            _occasions.Add(restored);
+            return Task.FromResult(CloneOccasion(restored));
         }
 
         public Task DeleteAllAsync()
@@ -237,14 +318,7 @@ public static class OccasionDetailViewModelTests
         public Task<IReadOnlyList<CalendarMark>> GetCalendarMarksAsync(int year, int month) =>
             Task.FromResult<IReadOnlyList<CalendarMark>>([]);
 
-        public int GetDays(Occasion occasion)
-        {
-            var anchor = occasion.AnchorDate.Date;
-            var today = DateTime.UtcNow.Date;
-            return occasion.Direction == OccasionDirection.Since
-                ? (today - anchor).Days
-                : (anchor - today).Days;
-        }
+        public int GetDays(Occasion occasion) => OccasionDates.GetDays(occasion, DateTime.Now);
 
         public Task<List<(Occasion, Milestone)>> GetPendingMilestonesAsync() =>
             Task.FromResult(new List<(Occasion, Milestone)>());
@@ -304,6 +378,28 @@ public static class OccasionDetailViewModelTests
             ConfirmationRequests.Add((title, message, accept, cancel));
             return Task.FromResult(NextConfirmationResult);
         }
+
+        public Task ShowMessageAsync(string title, string message, string close) => Task.CompletedTask;
+    }
+
+    private sealed class FakeFeedbackService : IFeedbackService
+    {
+        public bool UndoResult { get; init; }
+        public int UndoOffers { get; private set; }
+        public List<string> Messages { get; } = [];
+
+        public Task ShowAsync(string title, string? detail = null)
+        {
+            Messages.Add(title);
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> ShowUndoAsync(string message)
+        {
+            UndoOffers++;
+            Messages.Add(message);
+            return Task.FromResult(UndoResult);
+        }
     }
 
     private sealed class FakeShareService : IShareService
@@ -324,6 +420,13 @@ public static class OccasionDetailViewModelTests
         }
     }
 
+    private sealed class FakeMilestoneEditorService(MilestoneEditorResult? result) : IMilestoneEditorService
+    {
+        public Task<MilestoneEditorResult?> PromptAsync() => Task.FromResult(result);
+    }
+
+    private static DateTime LocalMidnightUtc(int dayOffset) => DateTime.Today.AddDays(dayOffset).ToUniversalTime();
+
     private static class SampleOccasions
     {
         public static Occasion OurAnniversary() =>
@@ -333,7 +436,7 @@ public static class OccasionDetailViewModelTests
                 Title = "Our anniversary",
                 Emoji = "💕",
                 ColorHex = "#8E24AA",
-                AnchorDate = new DateTime(2022, 10, 14, 0, 0, 0, DateTimeKind.Utc),
+                AnchorDate = LocalMidnightUtc(-1435),
                 Direction = OccasionDirection.Since,
                 IsPinned = true,
                 Notes = "Dinner plans locked in.",
@@ -352,7 +455,7 @@ public static class OccasionDetailViewModelTests
                 Title = "Sober days",
                 Emoji = "🌱",
                 ColorHex = "#0B8043",
-                AnchorDate = new DateTime(2025, 3, 3, 0, 0, 0, DateTimeKind.Utc),
+                AnchorDate = LocalMidnightUtc(-564),
                 Direction = OccasionDirection.Since,
                 Notes = "One day at a time.",
                 Milestones =
@@ -369,7 +472,7 @@ public static class OccasionDetailViewModelTests
                 Title = "Trip to Lisbon",
                 Emoji = "✈️",
                 ColorHex = "#039BE5",
-                AnchorDate = new DateTime(2026, 12, 19, 0, 0, 0, DateTimeKind.Utc),
+                AnchorDate = LocalMidnightUtc(92),
                 Direction = OccasionDirection.Until,
                 Notes = "Double-check passports.",
                 Milestones =
@@ -385,7 +488,7 @@ public static class OccasionDetailViewModelTests
                 Title = "Ella's age",
                 Emoji = "👶",
                 ColorHex = "#F6BF26",
-                AnchorDate = new DateTime(2024, 2, 6, 0, 0, 0, DateTimeKind.Utc),
+                AnchorDate = LocalMidnightUtc(-955),
                 Direction = OccasionDirection.Since,
                 Notes = "First kindergarten visit this month.",
                 Milestones =
