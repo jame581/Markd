@@ -54,6 +54,8 @@ namespace Markd.Core.Tests
                 var exporter = new ExportService(src);
                 var package = await exporter.CreateExportPackageAsync(pass);
 
+                Assert.True(MarkdPackage.IsEncrypted(package));
+
                 var tgtPath = Path.Combine(Path.GetTempPath(), $"markd_tgt_enc_{Guid.NewGuid():N}.db");
                 using (var tgt = CreateSqliteContext(tgtPath))
                 {
@@ -68,6 +70,25 @@ namespace Markd.Core.Tests
                     Assert.Equal("Dark", importedSettings.Theme);
                 }
             }
+        }
+
+        [Fact]
+        public async Task EncryptedImport_WrongPassphrase_ThrowsWrongPassword()
+        {
+            var srcPath = Path.Combine(Path.GetTempPath(), $"markd_src_wrongpass_{Guid.NewGuid():N}.db");
+            using var src = CreateSqliteContext(srcPath);
+            src.Categories.Add(new Markd.Core.Domain.Category { Name = "Friends", Emoji = "🙂" });
+            await src.SaveChangesAsync();
+
+            var exporter = new ExportService(src);
+            var package = await exporter.CreateExportPackageAsync("s3cr3t-passphrase");
+
+            var tgtPath = Path.Combine(Path.GetTempPath(), $"markd_tgt_wrongpass_{Guid.NewGuid():N}.db");
+            using var tgt = CreateSqliteContext(tgtPath);
+            var importer = new ImportService(tgt);
+
+            var ex = await Assert.ThrowsAsync<MarkdPackageException>(() => importer.ParseImportPackageAsync(package, "not the right passphrase"));
+            Assert.Equal(PackageError.WrongPassword, ex.Error);
         }
 
         [Fact]

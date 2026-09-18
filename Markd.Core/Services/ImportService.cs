@@ -22,8 +22,6 @@ namespace Markd.Core.Services
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        private static readonly byte[] Magic = Encoding.ASCII.GetBytes("MARKD1");
-
         public ImportService(MarkdDbContext db)
         {
             _db = db;
@@ -34,37 +32,18 @@ namespace Markd.Core.Services
             if (package == null || package.Length == 0)
                 throw new InvalidOperationException(Strings.Import_EmptyFile);
 
-            if (package.Length >= Magic.Length && package.Take(Magic.Length).SequenceEqual(Magic))
+            if (!MarkdPackage.IsEncrypted(package))
+                return ParseAndValidateImportJson(Encoding.UTF8.GetString(package));
+
+            var plain = await Task.Run(() => MarkdPackage.Decrypt(package, passphrase));
+            try
             {
-                var idx = Magic.Length;
-                var salt = package.Skip(idx).Take(16).ToArray(); idx += 16;
-                var nonce = package.Skip(idx).Take(12).ToArray(); idx += 12;
-                var tag = package.Skip(idx).Take(16).ToArray(); idx += 16;
-                var ciphertext = package.Skip(idx).ToArray();
-
-                if (string.IsNullOrEmpty(passphrase))
-                    throw new InvalidOperationException(Strings.Import_PassphraseRequired);
-
-                const int iterations = 200_000;
-                const int iterationsLocal = iterations;
-                using var kdf = new Rfc2898DeriveBytes(passphrase, salt, iterationsLocal, HashAlgorithmName.SHA256);
-                var key = kdf.GetBytes(32);
-
-                var plain = new byte[ciphertext.Length];
-                try
-                {
-                    using var aes = new AesGcm(key);
-                    aes.Decrypt(nonce, ciphertext, tag, plain, null);
-                }
-                catch (CryptographicException ex)
-                {
-                    throw new InvalidOperationException(Strings.Import_DecryptFailed, ex);
-                }
-
                 return ParseAndValidateImportJson(Encoding.UTF8.GetString(plain));
             }
-
-            return ParseAndValidateImportJson(Encoding.UTF8.GetString(package));
+            finally
+            {
+                CryptographicOperations.ZeroMemory(plain);
+            }
         }
 
         public async Task ApplyImportAsync(ExportModel model)

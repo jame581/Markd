@@ -20,9 +20,6 @@ namespace Markd.Core.Services
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase
         };
 
-        // Container format: ASCII "MARKD1" (6 bytes) + salt(16) + nonce(12) + tag(16) + ciphertext
-        private static readonly byte[] Magic = Encoding.ASCII.GetBytes("MARKD1");
-
         public ExportService(MarkdDbContext db)
         {
             _db = db;
@@ -41,30 +38,15 @@ namespace Markd.Core.Services
             if (string.IsNullOrEmpty(passphrase))
                 return plain;
 
-            // Derive key using PBKDF2 (Rfc2898) with a strong iteration count. Prefer Argon2 externally when available.
-            var salt = RandomNumberGenerator.GetBytes(16);
-            const int iterations = 200_000; // reasonable default on modern devices
-            const int iterationsLocal = iterations; // preserve original iterations constant name
-            using var kdf = new Rfc2898DeriveBytes(passphrase, salt, iterationsLocal, HashAlgorithmName.SHA256);
-            var key = kdf.GetBytes(32);
-
-            // Encrypt with AES-GCM
-            var nonce = RandomNumberGenerator.GetBytes(12);
-            var ciphertext = new byte[plain.Length];
-            var tag = new byte[16];
-
-            using (var aes = new AesGcm(key))
+            try
             {
-                aes.Encrypt(nonce, plain, ciphertext, tag, null);
+                // Key derivation takes about a second on a slow phone; keep it off the UI thread.
+                return await Task.Run(() => MarkdPackage.Encrypt(plain, passphrase));
             }
-
-            using var ms = new MemoryStream();
-            ms.Write(Magic, 0, Magic.Length);
-            ms.Write(salt, 0, salt.Length);
-            ms.Write(nonce, 0, nonce.Length);
-            ms.Write(tag, 0, tag.Length);
-            ms.Write(ciphertext, 0, ciphertext.Length);
-            return ms.ToArray();
+            finally
+            {
+                CryptographicOperations.ZeroMemory(plain);
+            }
         }
 
         private async Task<ExportModel> BuildExportModelAsync()

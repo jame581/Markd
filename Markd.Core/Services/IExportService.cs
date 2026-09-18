@@ -6,7 +6,7 @@ namespace Markd.Core.Services
     public interface IExportService
     {
         /// <summary>
-        /// Create an export package as bytes. If passphrase is provided the package is encrypted (AES-GCM) using a PBKDF2-derived key.
+        /// Create an export package as bytes. If passphrase is provided the package is encrypted, format v2 (see <see cref="MarkdPackage"/>).
         /// </summary>
         /// <param name="passphrase">Optional passphrase for encryption. If null or empty, plaintext JSON is returned.</param>
         /// <returns>Byte array containing the export package (either plaintext JSON UTF-8 or an encrypted container).</returns>
