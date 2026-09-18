@@ -308,7 +308,9 @@ Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolk
   <data name="Detail_PinnedDetail" xml:space="preserve"><value>{0} now leads the Home screen.</value></data>
   <data name="Detail_MilestoneAddedTitle" xml:space="preserve"><value>Milestone added</value></data>
   <data name="Detail_MilestoneAlreadyPassed" xml:space="preserve"><value>{0} passed {1} already.</value></data>
-  <data name="Detail_MilestoneAtDays" xml:space="preserve"><value>{0} at {1} days.</value></data>
+  <data name="Detail_MilestoneAtDays_One" xml:space="preserve"><value>{0} at {1} day.</value></data>
+  <data name="Detail_MilestoneAtDays_Few" xml:space="preserve"><value>{0} at {1} days.</value></data>
+  <data name="Detail_MilestoneAtDays_Many" xml:space="preserve"><value>{0} at {1} days.</value></data>
   <data name="Detail_RemoveMilestoneConfirm" xml:space="preserve"><value>Remove “{0}”?</value></data>
   <data name="Detail_MilestoneRemovedUndo" xml:space="preserve"><value>“{0}” removed</value></data>
   <data name="Detail_MilestoneRemovedTitle" xml:space="preserve"><value>Milestone removed</value></data>

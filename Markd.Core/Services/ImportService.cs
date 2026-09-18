@@ -201,7 +201,7 @@ namespace Markd.Core.Services
                 throw new InvalidOperationException(Strings.Import_MissingSchemaVersion);
 
             if (!string.Equals(model.SchemaVersion, "1", StringComparison.Ordinal))
-                throw new InvalidOperationException(string.Format(Strings.Import_UnsupportedSchema, model.SchemaVersion));
+                throw new InvalidOperationException(string.Format(LocalizationManager.Instance.Culture, Strings.Import_UnsupportedSchema, model.SchemaVersion));
 
             if (model.Categories.Any(c => string.IsNullOrWhiteSpace(c.Name)))
                 throw new InvalidOperationException(Strings.Import_MissingCategoryName);

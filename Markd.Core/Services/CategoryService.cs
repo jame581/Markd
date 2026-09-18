@@ -29,7 +29,7 @@ namespace Markd.Core.Services
         public async Task<Category> UpdateAsync(Category category)
         {
             var existing = await db.Categories.FindAsync(category.Id)
-                ?? throw new InvalidOperationException(string.Format(Strings.Category_NotFoundById, category.Id));
+                ?? throw new InvalidOperationException(string.Format(LocalizationManager.Instance.Culture, Strings.Category_NotFoundById, category.Id));
 
             existing.Name = category.Name;
             existing.Emoji = category.Emoji;

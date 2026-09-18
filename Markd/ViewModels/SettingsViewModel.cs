@@ -112,9 +112,18 @@ public class SettingsViewModel : ViewModelBase
                 return;
 
             if (LanguageService.Apply(value.Value))
-                WeakReferenceMessenger.Default.Send(new LanguageChangedMessage());
+            {
+                // Sent on the next UI tick: this setter can run inside the WinUI Picker's selection callback, and
+                // OnLanguageChanged swaps the Picker's ItemsSource — reentering that callback crashes WinUI.
+                if (Application.Current?.Dispatcher is { } dispatcher)
+                    dispatcher.Dispatch(() => WeakReferenceMessenger.Default.Send(new LanguageChangedMessage()));
+                else
+                    WeakReferenceMessenger.Default.Send(new LanguageChangedMessage());
+            }
 
-            ScheduleSave(reschedule: true);
+            // The language itself switches synchronously above; only notifying about it is deferred.
+            // requestPermission: false — a language change should never pop the OS notification-permission prompt.
+            ScheduleSave(reschedule: true, requestPermission: false);
         }
     }
 
@@ -156,7 +165,7 @@ public class SettingsViewModel : ViewModelBase
         }
     }
 
-    public string VersionText => string.Format(Strings.Settings_Version, AppInfo.Current.VersionString, AppInfo.Current.BuildString);
+    public string VersionText => string.Format(LocalizationManager.Instance.Culture, Strings.Settings_Version, AppInfo.Current.VersionString, AppInfo.Current.BuildString);
 
     public async Task LoadAsync()
     {
@@ -191,15 +200,15 @@ public class SettingsViewModel : ViewModelBase
         TimeOptions.Insert(index, text);
     }
 
-    private void ScheduleSave(bool reschedule = false)
+    private void ScheduleSave(bool reschedule = false, bool requestPermission = true)
     {
         if (_isLoading)
             return;
 
-        _ = SaveAsync(reschedule);
+        _ = SaveAsync(reschedule, requestPermission);
     }
 
-    private async Task SaveAsync(bool reschedule)
+    private async Task SaveAsync(bool reschedule, bool requestPermission = true)
     {
         await _saveGate.WaitAsync();
         try
@@ -221,7 +230,7 @@ public class SettingsViewModel : ViewModelBase
         }
 
         if (reschedule)
-            await _notificationService.RescheduleAsync(requestPermission: NotificationsEnabled);
+            await _notificationService.RescheduleAsync(requestPermission: requestPermission && NotificationsEnabled);
     }
 
     private async Task ExportAsync()
@@ -266,7 +275,7 @@ public class SettingsViewModel : ViewModelBase
             WeakReferenceMessenger.Default.Send(new OccasionsChangedMessage(null, this));
             await LoadAsync();
             await _notificationService.RescheduleAsync();
-            await _feedbackService.ShowAsync(Strings.Import_Complete, string.Format(Strings.Import_Loaded, file.FileName));
+            await _feedbackService.ShowAsync(Strings.Import_Complete, string.Format(LocalizationManager.Instance.Culture, Strings.Import_Loaded, file.FileName));
         }
         catch (Exception ex)
         {

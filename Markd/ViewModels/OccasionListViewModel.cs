@@ -88,7 +88,7 @@ public class OccasionListViewModel : ViewModelBase
             var summaries = occasions
                 .Select(o => new OccasionSummary(o, _occasionService.GetDays(o)))
                 .OrderByDescending(s => s.IsPinned)
-                .ThenBy(s => s.Title, StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(s => s.Title, StringComparer.Create(LocalizationManager.Instance.Culture, ignoreCase: true))
                 .ToList();
 
             AllSummaries = summaries;
@@ -99,7 +99,7 @@ public class OccasionListViewModel : ViewModelBase
 
             HomeSubtitle = summaries.Count == 0
                 ? Strings.Home_NothingTracked
-                : string.Format(Strings.Home_Subtitle, Plural.Format("Home_OccasionCount", summaries.Count), Plural.Format("Home_CategoryCount", categoryCount));
+                : string.Format(LocalizationManager.Instance.Culture, Strings.Home_Subtitle, Plural.Format("Home_OccasionCount", summaries.Count), Plural.Format("Home_CategoryCount", categoryCount));
 
             _hasLoaded = true;
             OnPropertyChanged(nameof(HasOccasions));
@@ -153,7 +153,7 @@ public class OccasionListViewModel : ViewModelBase
         var groups = summaries
             .GroupBy(s => s.CategoryName)
             .OrderBy(g => g.Key == OccasionGroup.UncategorisedName)
-            .ThenBy(g => g.Key, StringComparer.CurrentCultureIgnoreCase);
+            .ThenBy(g => g.Key, StringComparer.Create(LocalizationManager.Instance.Culture, ignoreCase: true));
 
         foreach (var group in groups)
             target.Add(new OccasionGroup(group.Key, group));

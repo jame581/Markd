@@ -37,7 +37,7 @@ public sealed class OccasionSummary : ObservableObject
     public string DirectionLabel => OccasionMath.DirectionLabel(Occasion);
 
     public bool HasNext => Next is not null;
-    public string NextHeading => Next is null ? Strings.Occasion_NoMilestoneAhead : string.Format(Strings.Occasion_NextMilestone, Next.Label);
+    public string NextHeading => Next is null ? Strings.Occasion_NoMilestoneAhead : string.Format(LocalizationManager.Instance.Culture, Strings.Occasion_NextMilestone, Next.Label);
     public string NextStatus => Next?.DaysToGoText ?? "—";
     public double NextProgress => Next?.Progress ?? 1;
 

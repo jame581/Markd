@@ -308,7 +308,9 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Detail_PinnedDetail" xml:space="preserve"><value>Událost „{0}“ je nyní zvýrazněna na hlavní stránce.</value></data>
   <data name="Detail_MilestoneAddedTitle" xml:space="preserve"><value>Milník přidán</value></data>
   <data name="Detail_MilestoneAlreadyPassed" xml:space="preserve"><value>{0} má milník „{1}“ už za sebou.</value></data>
-  <data name="Detail_MilestoneAtDays" xml:space="preserve"><value>{0} v {1}. dni.</value></data>
+  <data name="Detail_MilestoneAtDays_One" xml:space="preserve"><value>„{0}“ při {1} dni.</value></data>
+  <data name="Detail_MilestoneAtDays_Few" xml:space="preserve"><value>„{0}“ při {1} dnech.</value></data>
+  <data name="Detail_MilestoneAtDays_Many" xml:space="preserve"><value>„{0}“ při {1} dnech.</value></data>
   <data name="Detail_RemoveMilestoneConfirm" xml:space="preserve"><value>Odebrat „{0}“?</value></data>
   <data name="Detail_MilestoneRemovedUndo" xml:space="preserve"><value>„{0}“ odebrán</value></data>
   <data name="Detail_MilestoneRemovedTitle" xml:space="preserve"><value>Milník odebrán</value></data>

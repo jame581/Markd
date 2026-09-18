@@ -142,7 +142,7 @@ public class CalendarViewModel : ViewModelBase
         var ranked = occasions
             .Select(o => (Occasion: o, Next: OccasionMath.GetNextMilestone(o, _occasionService.GetDays(o))))
             .OrderBy(x => x.Next?.DaysAway ?? int.MaxValue)
-            .ThenBy(x => x.Occasion.Title, StringComparer.CurrentCultureIgnoreCase)
+            .ThenBy(x => x.Occasion.Title, StringComparer.Create(LocalizationManager.Instance.Culture, ignoreCase: true))
             .Take(4);
 
         foreach (var (occasion, next) in ranked)

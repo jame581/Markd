@@ -27,7 +27,7 @@ public sealed class ShareService : IShareService
 {
     public Task ShareOccasionAsync(OccasionShareRequest request)
     {
-        var title = string.Format(Strings.Share_Title, request.Occasion.Title);
+        var title = string.Format(LocalizationManager.Instance.Culture, Strings.Share_Title, request.Occasion.Title);
         var dateText = OccasionMath.FormatShortDate(OccasionDates.ToLocalDate(request.Occasion.AnchorDate));
         var daysPhrase = FormatDaysPhrase(request.Occasion.Direction, request.Days, dateText);
         var text = $"{request.Occasion.Emoji} {request.Occasion.Title}\n" +
@@ -35,7 +35,7 @@ public sealed class ShareService : IShareService
                    $"{request.TimeBreakdown}";
 
         if (!string.IsNullOrWhiteSpace(request.NextMilestoneLabel))
-            text += $"\n{string.Format(Strings.Share_NextMilestone, request.NextMilestoneLabel, request.NextMilestoneStatus)}";
+            text += $"\n{string.Format(LocalizationManager.Instance.Culture, Strings.Share_NextMilestone, request.NextMilestoneLabel, request.NextMilestoneStatus)}";
 
         if (!string.IsNullOrWhiteSpace(request.Occasion.Notes))
             text += $"\n\n{request.Occasion.Notes.Trim()}";
@@ -50,14 +50,14 @@ public sealed class ShareService : IShareService
 
     public Task ShareMilestoneAsync(MilestoneShareRequest request)
     {
-        var title = string.Format(Strings.Share_Title, request.MilestoneLabel);
+        var title = string.Format(LocalizationManager.Instance.Culture, Strings.Share_Title, request.MilestoneLabel);
         var dateText = OccasionMath.FormatShortDate(OccasionDates.ToLocalDate(request.Occasion.AnchorDate));
         var daysPhrase = FormatDaysPhrase(request.Occasion.Direction, request.ThresholdDays, dateText);
         var text = $"{request.Occasion.Emoji} {request.Occasion.Title}\n" +
                    $"{request.MilestoneLabel} · {daysPhrase}";
 
         if (!string.IsNullOrWhiteSpace(request.NextMilestoneLabel))
-            text += $"\n{string.Format(Strings.Share_NextMilestoneShort, request.NextMilestoneLabel)}";
+            text += $"\n{string.Format(LocalizationManager.Instance.Culture, Strings.Share_NextMilestoneShort, request.NextMilestoneLabel)}";
 
         return Share.Default.RequestAsync(new ShareTextRequest
         {

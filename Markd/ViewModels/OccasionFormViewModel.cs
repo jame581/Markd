@@ -172,16 +172,17 @@ public class OccasionFormViewModel : ViewModelBase
     {
         get
         {
+            var culture = LocalizationManager.Instance.Culture;
             var date = AnchorDateText;
             var days = PreviewSignedDays;
             if (Direction == OccasionDirection.Since)
             {
                 if (days < 0)
-                    return string.Format(Strings.Form_PreviewUntilStarts, date);
-                return days == 0 ? string.Format(Strings.Form_PreviewStartsToday, date) : string.Format(Strings.Form_PreviewSinceStarts, date);
+                    return string.Format(culture, Strings.Form_PreviewUntilStarts, date);
+                return days == 0 ? string.Format(culture, Strings.Form_PreviewStartsToday, date) : string.Format(culture, Strings.Form_PreviewSinceStarts, date);
             }
 
-            return days >= 0 ? string.Format(Strings.Form_PreviewUntil, date) : string.Format(Strings.Form_PreviewSince, date);
+            return days >= 0 ? string.Format(culture, Strings.Form_PreviewUntil, date) : string.Format(culture, Strings.Form_PreviewSince, date);
         }
     }
 
@@ -277,8 +278,8 @@ public class OccasionFormViewModel : ViewModelBase
             {
                 var anchor = OccasionMath.FormatShortDate(AnchorDate);
                 var detail = Direction == OccasionDirection.Since
-                    ? string.Format(Strings.Form_SavedSince, saved.Title, anchor)
-                    : string.Format(Strings.Form_SavedUntil, saved.Title, anchor);
+                    ? string.Format(LocalizationManager.Instance.Culture, Strings.Form_SavedSince, saved.Title, anchor)
+                    : string.Format(LocalizationManager.Instance.Culture, Strings.Form_SavedUntil, saved.Title, anchor);
                 await _feedbackService.ShowAsync(
                     isNew ? Strings.Form_OccasionCreatedTitle : Strings.Form_ChangesSavedTitle,
                     detail);

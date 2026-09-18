@@ -125,7 +125,7 @@ public class OccasionDetailViewModel : ViewModelBase
     }
 
     public bool HasNextMilestone => NextMilestone is not null;
-    public string NextMilestoneHeading => NextMilestone is null ? Strings.Occasion_NoMilestoneAhead : string.Format(Strings.Occasion_NextMilestone, NextMilestone.Label);
+    public string NextMilestoneHeading => NextMilestone is null ? Strings.Occasion_NoMilestoneAhead : string.Format(LocalizationManager.Instance.Culture, Strings.Occasion_NextMilestone, NextMilestone.Label);
     public string NextMilestoneStatus => NextMilestone?.DaysToGoText ?? "—";
     public string NextMilestoneShort => NextMilestone is null ? "—" : Plural.Format("Unit_Days", NextMilestone.DaysAway);
     public double NextMilestoneProgress => NextMilestone?.Progress ?? 1;
@@ -213,7 +213,7 @@ public class OccasionDetailViewModel : ViewModelBase
         {
             var milestones = occasion.Milestones.Count;
             var confirmed = await _shellService.DisplayAlertAsync(
-                string.Format(Strings.Detail_DeleteConfirmTitle, occasion.Title),
+                string.Format(LocalizationManager.Instance.Culture, Strings.Detail_DeleteConfirmTitle, occasion.Title),
                 Plural.Format("Detail_DeleteConfirmMessage", milestones),
                 Strings.Common_Delete,
                 Strings.Common_Cancel,
@@ -230,7 +230,7 @@ public class OccasionDetailViewModel : ViewModelBase
 
         if (android)
         {
-            if (await _feedbackService.ShowUndoAsync(string.Format(Strings.Detail_OccasionDeletedUndo, occasion.Title)))
+            if (await _feedbackService.ShowUndoAsync(string.Format(LocalizationManager.Instance.Culture, Strings.Detail_OccasionDeletedUndo, occasion.Title)))
             {
                 var restored = await _occasionService.RestoreAsync(snapshot);
                 WeakReferenceMessenger.Default.Send(new OccasionsChangedMessage(restored.Id, this));
@@ -238,7 +238,7 @@ public class OccasionDetailViewModel : ViewModelBase
         }
         else
         {
-            await _feedbackService.ShowAsync(Strings.Detail_OccasionDeletedTitle, string.Format(Strings.Detail_OccasionDeletedDetail, occasion.Title));
+            await _feedbackService.ShowAsync(Strings.Detail_OccasionDeletedTitle, string.Format(LocalizationManager.Instance.Culture, Strings.Detail_OccasionDeletedDetail, occasion.Title));
         }
     }
 
@@ -266,7 +266,9 @@ public class OccasionDetailViewModel : ViewModelBase
         {
             await _feedbackService.ShowAsync(
                 wasPinned ? Strings.Detail_UnpinnedTitle : Strings.Detail_PinnedTitle,
-                wasPinned ? string.Format(Strings.Detail_UnpinnedDetail, occasion.Title) : string.Format(Strings.Detail_PinnedDetail, occasion.Title));
+                wasPinned
+                    ? string.Format(LocalizationManager.Instance.Culture, Strings.Detail_UnpinnedDetail, occasion.Title)
+                    : string.Format(LocalizationManager.Instance.Culture, Strings.Detail_PinnedDetail, occasion.Title));
         }
     }
 
@@ -293,8 +295,8 @@ public class OccasionDetailViewModel : ViewModelBase
             await _feedbackService.ShowAsync(
                 Strings.Detail_MilestoneAddedTitle,
                 alreadyReached
-                    ? string.Format(Strings.Detail_MilestoneAlreadyPassed, occasion.Title, result.Label)
-                    : string.Format(Strings.Detail_MilestoneAtDays, result.Label, result.ThresholdDays));
+                    ? string.Format(LocalizationManager.Instance.Culture, Strings.Detail_MilestoneAlreadyPassed, occasion.Title, result.Label)
+                    : FormatMilestoneAtDays(result.Label, result.ThresholdDays));
         }
     }
 
@@ -311,7 +313,7 @@ public class OccasionDetailViewModel : ViewModelBase
         {
             var confirmed = await _shellService.DisplayAlertAsync(
                 Strings.Detail_RemoveMilestone,
-                string.Format(Strings.Detail_RemoveMilestoneConfirm, milestone.Label),
+                string.Format(LocalizationManager.Instance.Culture, Strings.Detail_RemoveMilestoneConfirm, milestone.Label),
                 Strings.Common_Remove,
                 Strings.Common_Cancel,
                 destructive: true);
@@ -325,7 +327,7 @@ public class OccasionDetailViewModel : ViewModelBase
 
         if (platform == DevicePlatform.Android)
         {
-            if (await _feedbackService.ShowUndoAsync(string.Format(Strings.Detail_MilestoneRemovedUndo, milestone.Label)))
+            if (await _feedbackService.ShowUndoAsync(string.Format(LocalizationManager.Instance.Culture, Strings.Detail_MilestoneRemovedUndo, milestone.Label)))
             {
                 var restored = await _occasionService.AddMilestoneAsync(occasion.Id, milestone.ThresholdDays, milestone.Label);
                 if (milestone.Notified)
@@ -338,7 +340,7 @@ public class OccasionDetailViewModel : ViewModelBase
         }
         else if (platform == DevicePlatform.WinUI)
         {
-            await _feedbackService.ShowAsync(Strings.Detail_MilestoneRemovedTitle, string.Format(Strings.Detail_MilestoneRemovedDetail, milestone.Label));
+            await _feedbackService.ShowAsync(Strings.Detail_MilestoneRemovedTitle, string.Format(LocalizationManager.Instance.Culture, Strings.Detail_MilestoneRemovedDetail, milestone.Label));
         }
     }
 
@@ -382,6 +384,15 @@ public class OccasionDetailViewModel : ViewModelBase
         });
     }
 
+    /// <summary>Formats "{label} at {days} day(s)." with the day count pluralized correctly.</summary>
+    private static string FormatMilestoneAtDays(string label, int thresholdDays)
+    {
+        var culture = LocalizationManager.Instance.Culture;
+        var key = $"Detail_MilestoneAtDays_{Plural.Select(thresholdDays, culture)}";
+        var pattern = Strings.ResourceManager.GetString(key, culture) ?? $"[{key}]";
+        return string.Format(culture, pattern, label, thresholdDays);
+    }
+
     private MilestoneViewState CreateMilestoneState(Occasion occasion, Milestone milestone)
     {
         var reached = milestone.Notified || OccasionDates.IsMilestoneReached(occasion, milestone, Days);
@@ -390,7 +401,7 @@ public class OccasionDetailViewModel : ViewModelBase
             : Days - milestone.ThresholdDays;
 
         var statusText = reached
-            ? string.Format(Strings.Detail_MilestoneReachedOn, OccasionMath.FormatShortDate(OccasionDates.GetMilestoneDate(occasion, milestone)))
+            ? string.Format(LocalizationManager.Instance.Culture, Strings.Detail_MilestoneReachedOn, OccasionMath.FormatShortDate(OccasionDates.GetMilestoneDate(occasion, milestone)))
             : OccasionMath.FormatDaysAway(daysAway);
 
         return new MilestoneViewState(milestone, reached, statusText, daysAway);

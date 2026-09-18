@@ -188,7 +188,7 @@ namespace Markd.Core.Services
                 .FirstOrDefaultAsync(o => o.Id == occasion.Id);
 
             if (existing == null)
-                throw new InvalidOperationException(string.Format(Strings.Occasion_NotFoundById, occasion.Id));
+                throw new InvalidOperationException(string.Format(LocalizationManager.Instance.Culture, Strings.Occasion_NotFoundById, occasion.Id));
 
             var datesChanged = existing.AnchorDate != occasion.AnchorDate || existing.Direction != occasion.Direction;
 

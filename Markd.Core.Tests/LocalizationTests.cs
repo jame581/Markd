@@ -100,6 +100,33 @@ public class LocalizationManagerTests
     [Fact]
     public void Indexer_MissingKey_IsVisible() =>
         Assert.Equal("[No_Such_Key]", LocalizationManager.Instance["No_Such_Key"]);
+
+    [Fact]
+    public void CultureChanged_FiresOnce_ForRealChange_NotForNoOp()
+    {
+        var manager = LocalizationManager.Instance;
+        var original = manager.Culture;
+        var raised = 0;
+        EventHandler handler = (_, _) => raised++;
+        manager.CultureChanged += handler;
+        try
+        {
+            var target = Equals(original, CultureInfo.GetCultureInfo("cs-CZ"))
+                ? CultureInfo.GetCultureInfo("en-GB")
+                : CultureInfo.GetCultureInfo("cs-CZ");
+
+            manager.SetCulture(target);
+            Assert.Equal(1, raised);
+
+            manager.SetCulture(target); // no-op: culture is already `target`, so no event should fire
+            Assert.Equal(1, raised);
+        }
+        finally
+        {
+            manager.CultureChanged -= handler;
+            manager.SetCulture(original);
+        }
+    }
 }
 
 public partial class ResourceParityTests

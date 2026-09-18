@@ -30,6 +30,6 @@ public sealed class DownloadsExportService : IFileExportService
         values.Clear();
         values.Put(MediaStore.IMediaColumns.IsPending, 0);
         resolver.Update(uri, values, null, null);
-        return string.Format(Strings.Export_LocationPrefix, fileName);
+        return string.Format(LocalizationManager.Instance.Culture, Strings.Export_LocationPrefix, fileName);
     }
 }

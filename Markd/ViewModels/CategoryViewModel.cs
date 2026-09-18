@@ -197,7 +197,7 @@ public class CategoryViewModel : ViewModelBase
         if (_shellService.Platform != DevicePlatform.Android)
             await _feedbackService.ShowAsync(
                 isNew ? Strings.Category_AddedTitle : Strings.Category_SavedTitle,
-                isNew ? string.Format(Strings.Category_ReadyDetail, name) : null);
+                isNew ? string.Format(LocalizationManager.Instance.Culture, Strings.Category_ReadyDetail, name) : null);
     }
 
     private async Task DeleteAsync(CategoryRow? row)
@@ -211,7 +211,7 @@ public class CategoryViewModel : ViewModelBase
         if (!android)
         {
             var confirmed = await _shellService.DisplayAlertAsync(
-                string.Format(Strings.Category_DeleteConfirmTitle, category.Name),
+                string.Format(LocalizationManager.Instance.Culture, Strings.Category_DeleteConfirmTitle, category.Name),
                 Strings.Category_DeleteConfirmMessage,
                 Strings.Common_Delete,
                 Strings.Common_Cancel,
@@ -232,12 +232,12 @@ public class CategoryViewModel : ViewModelBase
 
         if (android)
         {
-            if (await _feedbackService.ShowUndoAsync(string.Format(Strings.Category_DeletedUndo, category.Name)))
+            if (await _feedbackService.ShowUndoAsync(string.Format(LocalizationManager.Instance.Culture, Strings.Category_DeletedUndo, category.Name)))
                 await RestoreAsync(snapshot, affectedOccasionIds);
         }
         else
         {
-            await _feedbackService.ShowAsync(Strings.Category_DeletedTitle, string.Format(Strings.Category_DeletedDetail, category.Name));
+            await _feedbackService.ShowAsync(Strings.Category_DeletedTitle, string.Format(LocalizationManager.Instance.Culture, Strings.Category_DeletedDetail, category.Name));
         }
     }
 
