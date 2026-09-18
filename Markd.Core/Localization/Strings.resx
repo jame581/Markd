@@ -106,7 +106,6 @@
   <data name="Detail_DeleteOccasion" xml:space="preserve"><value>Delete occasion</value></data>
   <data name="Detail_ShareMilestone" xml:space="preserve"><value>Share milestone</value></data>
   <data name="Detail_RemoveMilestone" xml:space="preserve"><value>Remove milestone</value></data>
-  <data name="Form_Days" xml:space="preserve"><value>days</value></data>
   <data name="Form_Title" xml:space="preserve"><value>Title</value></data>
   <data name="Form_TitlePlaceholder" xml:space="preserve"><value>What are you marking?</value></data>
   <data name="Form_Category" xml:space="preserve"><value>Category</value></data>

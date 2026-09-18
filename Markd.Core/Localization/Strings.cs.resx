@@ -106,7 +106,6 @@
   <data name="Detail_DeleteOccasion" xml:space="preserve"><value>Smazat událost</value></data>
   <data name="Detail_ShareMilestone" xml:space="preserve"><value>Sdílet milník</value></data>
   <data name="Detail_RemoveMilestone" xml:space="preserve"><value>Odebrat milník</value></data>
-  <data name="Form_Days" xml:space="preserve"><value>dní</value></data>
   <data name="Form_Title" xml:space="preserve"><value>Název</value></data>
   <data name="Form_TitlePlaceholder" xml:space="preserve"><value>Co si značíte?</value></data>
   <data name="Form_Category" xml:space="preserve"><value>Kategorie</value></data>
@@ -120,7 +119,7 @@
   <data name="Form_PinToHome" xml:space="preserve"><value>Připnout na hlavní stránku</value></data>
   <data name="Form_PinToHomeSub" xml:space="preserve"><value>Nahradí zvýrazněnou kartu</value></data>
   <data name="Category_Title" xml:space="preserve"><value>Kategorie</value></data>
-  <data name="Category_Empty" xml:space="preserve"><value>Zatím žádné kategorie. Pomocí Nová kategorie seskupte události podle svého.</value></data>
+  <data name="Category_Empty" xml:space="preserve"><value>Zatím žádné kategorie. Tlačítkem Nová kategorie si seskupíte události podle svého.</value></data>
   <data name="Category_Footnote" xml:space="preserve"><value>Podržením nebo klepnutím na nabídku zobrazíte akce řádku. Události ze smazané kategorie se přesunou do Bez kategorie — nikdy se s ní nesmažou.</value></data>
   <data name="Category_New" xml:space="preserve"><value>Nová kategorie</value></data>
   <data name="Category_Name" xml:space="preserve"><value>Název</value></data>

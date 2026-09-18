@@ -30,7 +30,7 @@
                         <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
                             <Label Text="{Binding PreviewDays}" Style="{StaticResource M3OnContainer}"
                                    FontFamily="FigtreeExtraBold" FontSize="46" CharacterSpacing="-0.48" LineHeight="0.9" />
-                            <Label Text="{loc:Tr Form_Days}" Style="{StaticResource M3OnContainer}"
+                            <Label Text="{Binding PreviewDaysUnit}" Style="{StaticResource M3OnContainer}"
                                    FontFamily="FigtreeSemiBold" FontSize="17" Opacity="0.72"
                                    VerticalOptions="End" Margin="0,0,0,7" />
                         </HorizontalStackLayout>

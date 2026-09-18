@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 using Markd.Core.Services;
 using Markd.Services;
 using Microsoft.Maui.Devices;
@@ -164,6 +165,9 @@ public class OccasionFormViewModel : ViewModelBase
     /// <summary>The count the occasion will read, shown live in the preview card.</summary>
     public int PreviewDays => Math.Abs(PreviewSignedDays);
 
+    /// <summary>The plural-correct unit word next to <see cref="PreviewDays"/> (e.g. "day"/"days", "den"/"dny"/"dní").</summary>
+    public string PreviewDaysUnit => Plural.Format("Occasion_UnitDays", PreviewDays);
+
     public string PreviewCaption
     {
         get
@@ -303,6 +307,7 @@ public class OccasionFormViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(AnchorDateText));
         OnPropertyChanged(nameof(PreviewDays));
+        OnPropertyChanged(nameof(PreviewDaysUnit));
         OnPropertyChanged(nameof(PreviewCaption));
     }
 
