@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             x:Class="Markd.Desktop.Views.CalendarView"
+             x:DataType="vm:CalendarViewModel">
+    <ScrollView>
+        <Grid x:Name="Columns" Padding="26,18,26,40" ColumnDefinitions="*,320" RowDefinitions="Auto,Auto" ColumnSpacing="20" RowSpacing="16">
+
+            <!-- Month card -->
+            <Border Style="{StaticResource DeskCard}" StrokeShape="RoundRectangle 14" Padding="22,18,22,18" VerticalOptions="Start">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="4">
+                        <Label Text="{Binding MonthTitle}" FontFamily="FigtreeBold" FontSize="17" VerticalOptions="Center" />
+                        <dc:DeskButton Grid.Column="1" Variant="Outline" Glyph="WinChevronLeft" GlyphSize="13" WidthRequest="30" HeightRequest="30"
+                                       CornerRadius="7" ToolTipProperties.Text="Previous month" Command="{Binding PreviousMonthCommand}" />
+                        <dc:DeskButton Grid.Column="2" Variant="Outline" Text="Today" FontFamily="FigtreeMedium" FontSize="12.5" HeightRequest="30"
+                                       CornerRadius="7" Command="{Binding TodayCommand}" />
+                        <dc:DeskButton Grid.Column="3" Variant="Outline" Glyph="WinChevronRight" GlyphSize="13" WidthRequest="30" HeightRequest="30"
+                                       CornerRadius="7" ToolTipProperties.Text="Next month" Command="{Binding NextMonthCommand}" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*,*,*,*,*,*" ColumnSpacing="6">
+                        <Label Text="Mon" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="1" Text="Tue" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="2" Text="Wed" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="3" Text="Thu" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="4" Text="Fri" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="5" Text="Sat" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="6" Text="Sun" Style="{StaticResource CalendarWeekday}" />
+                    </Grid>
+
+                    <!-- Only the weeks the month spans; 42px cells, radius 10 -->
+                    <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding Weeks}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:CalendarWeek">
+                                <Grid ColumnDefinitions="*,*,*,*,*,*,*" ColumnSpacing="6" BindableLayout.ItemsSource="{Binding Days}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:CalendarDayCell">
+                                            <Border Grid.Column="{Binding Column}" HeightRequest="42" StrokeShape="RoundRectangle 10" StrokeThickness="1"
+                                                    Padding="7,5" IsVisible="{Binding IsInMonth}"
+                                                    BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundLight}, Dark={StaticResource PageBackgroundDark}}">
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding IsToday}" Value="True">
+                                                        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource AccentTintLight}, Dark={StaticResource AccentTintDark}}" />
+                                                        <Setter Property="Stroke" Value="{StaticResource AccentBorderColor}" />
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                                <Grid RowDefinitions="Auto,*">
+                                                    <Label Text="{Binding DayText}" FontFamily="FigtreeMedium" FontSize="12.5">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding IsToday}" Value="True">
+                                                                <Setter Property="FontFamily" Value="FigtreeBold" />
+                                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                    <HorizontalStackLayout Grid.Row="1" Spacing="3" VerticalOptions="End" BindableLayout.ItemsSource="{Binding DesktopDots}">
+                                                        <BindableLayout.ItemTemplate>
+                                                            <DataTemplate x:DataType="vm:CalendarDot">
+                                                                <Ellipse WidthRequest="6" HeightRequest="6" Fill="{Binding Color}" />
+                                                            </DataTemplate>
+                                                        </BindableLayout.ItemTemplate>
+                                                    </HorizontalStackLayout>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <BoxView HeightRequest="1" Margin="0,2,0,0" />
+                    <Label Text="Solid dots are anchor dates; faded dots are milestone dates." FontSize="12" Style="{StaticResource SecondaryText}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Coming up + This month -->
+            <VerticalStackLayout x:Name="SideColumn" Grid.Column="1" Spacing="12" VerticalOptions="Start">
+                <Border Style="{StaticResource DeskCard}" StrokeShape="RoundRectangle 14" Padding="20,16,20,12">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Coming up" Style="{StaticResource DeskCardHeader}" Margin="0,0,0,4" />
+                        <Label Text="Nothing ahead yet — add milestones to an occasion." FontSize="13" IsVisible="{Binding HasComingUp, Converter={StaticResource InvertBool}}"
+                               Style="{StaticResource SecondaryText}" />
+                        <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding ComingUp}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CalendarComingUpItem">
+                                    <dc:HoverSurface CornerRadius="8" Padding="8" Margin="-8,0" HoverKey="SurfaceCardPressed"
+                                                     Command="{Binding Source={x:Reference SideColumn}, Path=BindingContext.OpenOccasionCommand, x:DataType=VerticalStackLayout}"
+                                                     CommandParameter="{Binding .}">
+                                        <Grid ColumnDefinitions="30,*,Auto" ColumnSpacing="11" InputTransparent="True" CascadeInputTransparent="True">
+                                            <c:EmojiAvatar Emoji="{Binding Emoji}" ColorHex="{Binding ColorHex}" Size="30" EmojiSize="15" CornerRadius="8" />
+                                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                                <Label Text="{Binding Label}" FontFamily="FigtreeSemiBold" FontSize="13" LineBreakMode="TailTruncation" />
+                                                <Label Text="{Binding Sub}" FontSize="11.5" LineBreakMode="TailTruncation" Style="{StaticResource SecondaryText}" />
+                                            </VerticalStackLayout>
+                                            <Label Grid.Column="2" Text="{Binding RemainText}" FontFamily="PlexMonoMedium" FontSize="13" VerticalOptions="Center"
+                                                   TextColor="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
+                                        </Grid>
+                                    </dc:HoverSurface>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Style="{StaticResource DeskCard}" StrokeShape="RoundRectangle 14" Padding="20,16,20,18">
+                    <VerticalStackLayout Spacing="9">
+                        <Label Text="This month" Style="{StaticResource DeskCardHeader}" />
+                        <Label Text="{Binding MonthSummary}" FontSize="13" LineHeight="1.35" Style="{StaticResource SecondaryText}" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </Grid>
+    </ScrollView>
+</ContentView>

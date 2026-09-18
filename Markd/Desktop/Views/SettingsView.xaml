@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             x:Class="Markd.Desktop.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+    <ContentView.Resources>
+        <Style x:Key="SettingCard" TargetType="Border" BasedOn="{StaticResource DeskCard}">
+            <Setter Property="Padding" Value="18,14" />
+            <Setter Property="MinimumHeightRequest" Value="66" />
+        </Style>
+        <Style x:Key="SettingIcon" TargetType="Border">
+            <Setter Property="WidthRequest" Value="34" />
+            <Setter Property="HeightRequest" Value="34" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 9" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource AccentTintLight}, Dark={StaticResource AccentTintDark}}" />
+        </Style>
+        <Style x:Key="SettingGlyph" TargetType="c:SvgIcon">
+            <Setter Property="Size" Value="17" />
+            <Setter Property="HorizontalOptions" Value="Center" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
+        </Style>
+        <Style x:Key="SettingTitle" TargetType="Label">
+            <Setter Property="FontFamily" Value="FigtreeMedium" />
+            <Setter Property="FontSize" Value="14" />
+        </Style>
+        <Style x:Key="SettingSub" TargetType="Label" BasedOn="{StaticResource SecondaryText}">
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+    </ContentView.Resources>
+
+    <ScrollView>
+        <dc:CappedColumn MaxColumnWidth="732">
+            <VerticalStackLayout x:Name="Sections" Padding="26,18,26,40" Spacing="22">
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Appearance" Style="{StaticResource DeskCardHeader}" />
+                    <Border Style="{StaticResource SettingCard}">
+                        <Grid ColumnDefinitions="34,*,Auto" ColumnSpacing="14">
+                            <Border Style="{StaticResource SettingIcon}"><c:SvgIcon Glyph="WinSun" Style="{StaticResource SettingGlyph}" /></Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Theme" Style="{StaticResource SettingTitle}" />
+                                <Label Text="Applies immediately — no save needed" Style="{StaticResource SettingSub}" />
+                            </VerticalStackLayout>
+                            <!-- Segmented System / Light / Dark -->
+                            <Border Grid.Column="2" HeightRequest="32" StrokeShape="RoundRectangle 8" StrokeThickness="1" Padding="2" VerticalOptions="Center">
+                                <HorizontalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding ThemeOptions}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ThemeOption">
+                                            <dc:HoverSurface CornerRadius="6" Padding="13,0" HoverKey="SurfaceCardPressed" SelectedKey="AccentFill"
+                                                             IsSelected="{Binding IsSelected}" SemanticProperties.Description="{Binding Value}"
+                                                             Command="{Binding Source={x:Reference Sections}, Path=BindingContext.SelectThemeCommand, x:DataType=VerticalStackLayout}"
+                                                             CommandParameter="{Binding .}">
+                                                <Label Text="{Binding Value}" FontFamily="FigtreeSemiBold" FontSize="12.5" VerticalOptions="Center" InputTransparent="True"
+                                                       Style="{StaticResource SecondaryText}">
+                                                    <Label.Triggers>
+                                                        <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                            <Setter Property="TextColor" Value="{StaticResource White}" />
+                                                        </DataTrigger>
+                                                    </Label.Triggers>
+                                                </Label>
+                                            </dc:HoverSurface>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </HorizontalStackLayout>
+                            </Border>
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource SettingCard}">
+                        <Grid ColumnDefinitions="34,*,Auto" ColumnSpacing="14">
+                            <Border Style="{StaticResource SettingIcon}"><c:SvgIcon Glyph="WinGlobe" Style="{StaticResource SettingGlyph}" /></Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Language" Style="{StaticResource SettingTitle}" />
+                                <Label Text="English · Čeština" Style="{StaticResource SettingSub}" />
+                            </VerticalStackLayout>
+                            <Border Grid.Column="2" Style="{StaticResource DeskInput}" MinimumHeightRequest="32" HeightRequest="34" Padding="2,0"
+                                    WidthRequest="150" VerticalOptions="Center">
+                                <Picker ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}" FontSize="13" />
+                            </Border>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Notifications" Style="{StaticResource DeskCardHeader}" />
+                    <Border Style="{StaticResource SettingCard}">
+                        <Grid ColumnDefinitions="34,*,Auto" ColumnSpacing="14">
+                            <Border Style="{StaticResource SettingIcon}"><c:SvgIcon Glyph="WinBell" Style="{StaticResource SettingGlyph}" /></Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Milestone alerts" Style="{StaticResource SettingTitle}" />
+                                <Label Text="Shows the milestone moment when one is reached" Style="{StaticResource SettingSub}" />
+                            </VerticalStackLayout>
+                            <dc:DeskToggle Grid.Column="2" IsToggled="{Binding NotificationsEnabled}" AutomationId="alerts-toggle" />
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource SettingCard}">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding NotificationsEnabled}" Value="False">
+                                <Setter Property="Opacity" Value="0.45" />
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Grid ColumnDefinitions="34,*,Auto" ColumnSpacing="14">
+                            <Border Style="{StaticResource SettingIcon}"><c:SvgIcon Glyph="WinClock" Style="{StaticResource SettingGlyph}" /></Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="Daily check time" Style="{StaticResource SettingTitle}" />
+                                <Label Text="When Markd looks for milestones due today" Style="{StaticResource SettingSub}" />
+                            </VerticalStackLayout>
+                            <Border Grid.Column="2" Style="{StaticResource DeskInput}" MinimumHeightRequest="32" HeightRequest="34" Padding="2,0"
+                                    WidthRequest="150" VerticalOptions="Center">
+                                <Picker ItemsSource="{Binding TimeOptions}" SelectedItem="{Binding SelectedTimeOption}" FontFamily="PlexMonoMedium"
+                                        FontSize="13" IsEnabled="{Binding NotificationsEnabled}" />
+                            </Border>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Your data" Style="{StaticResource DeskCardHeader}" />
+                    <Border Style="{StaticResource SettingCard}">
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                            <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                <Label Text="Local database" Style="{StaticResource SettingTitle}" />
+                                <Label Text="markd.db · stays on this PC, never uploaded" Style="{StaticResource SettingSub}" />
+                            </VerticalStackLayout>
+                            <Button Grid.Column="1" Text="Export as JSON" Style="{StaticResource DeskTonalButton}" HeightRequest="32" FontSize="12.5"
+                                    Padding="13,0" Command="{Binding ExportCommand}" />
+                            <Button Grid.Column="2" Text="Import" Style="{StaticResource DeskTonalButton}" HeightRequest="32" FontSize="12.5"
+                                    Padding="13,0" Command="{Binding ImportCommand}" />
+                        </Grid>
+                    </Border>
+                    <Border Style="{StaticResource SettingCard}">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                <Label Text="Erase all occasions" Style="{StaticResource SettingTitle}" />
+                                <Label Text="Every occasion and milestone. Categories and settings stay." Style="{StaticResource SettingSub}" />
+                            </VerticalStackLayout>
+                            <Button Grid.Column="1" Text="Erase all" Style="{StaticResource DeskDangerButton}" HeightRequest="32" FontSize="12.5"
+                                    Padding="13,0" Command="{Binding EraseAllCommand}" />
+                        </Grid>
+                    </Border>
+                    <Label Text="Markd keeps one SQLite file on this PC. Nothing is uploaded, so nothing syncs — export before you move to another machine."
+                           FontSize="12.5" LineHeight="1.35" Margin="2,2,0,0" Style="{StaticResource SecondaryText}" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </dc:CappedColumn>
+    </ScrollView>
+</ContentView>

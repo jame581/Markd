@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             x:Class="Markd.Desktop.Dialogs.MilestoneEditorDialog"
+             x:DataType="vm:MilestoneEditorViewModel">
+    <Border Style="{StaticResource DeskCard}" WidthRequest="440">
+        <VerticalStackLayout>
+            <VerticalStackLayout Padding="26,24,26,20" Spacing="16">
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Add milestone" Style="{StaticResource DeskDialogTitle}" />
+                    <Label Text="Markd marks the day the count reaches this number." Style="{StaticResource DeskSubtitle}" />
+                </VerticalStackLayout>
+                <Grid ColumnDefinitions="110,*" ColumnSpacing="12">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Days" Style="{StaticResource DeskFieldLabel}" />
+                        <Border Style="{StaticResource DeskInput}">
+                            <Entry x:Name="DaysEntry" Text="{Binding ThresholdDays}" Keyboard="Numeric" Placeholder="1000"
+                                   FontFamily="PlexMonoMedium" FontSize="14" Completed="OnCompleted" />
+                        </Border>
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="6">
+                        <Label Text="What to call it" Style="{StaticResource DeskFieldLabel}" />
+                        <Border Style="{StaticResource DeskInput}">
+                            <Entry Text="{Binding Label}" Placeholder="Four digits" Completed="OnCompleted" />
+                        </Border>
+                    </VerticalStackLayout>
+                </Grid>
+                <Label Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={StaticResource HasText}}"
+                       FontFamily="FigtreeMedium" FontSize="13" Style="{StaticResource DangerText}" />
+            </VerticalStackLayout>
+            <BoxView HeightRequest="1" />
+            <Grid Padding="26,18,26,22" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="9"
+                  BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundLight}, Dark={StaticResource PageBackgroundDark}}">
+                <Button Grid.Column="1" Text="Cancel" Style="{StaticResource DeskTonalButton}" Clicked="OnCancelClicked" />
+                <Button Grid.Column="2" Text="Add milestone" Style="{StaticResource DeskPrimaryButton}" Clicked="OnAddClicked" />
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

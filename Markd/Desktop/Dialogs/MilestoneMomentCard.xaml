@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:services="clr-namespace:Markd.Services"
+             xmlns:c="clr-namespace:Markd.Controls"
+             x:Class="Markd.Desktop.Dialogs.MilestoneMomentCard"
+             x:DataType="services:MilestoneMoment">
+    <!-- Centred overlay card, radius 26, accent rings expanding behind the occasion emoji -->
+    <Border Style="{StaticResource DeskFeaturedCard}" StrokeShape="RoundRectangle 26" WidthRequest="460" Padding="36,34,36,30">
+        <VerticalStackLayout Spacing="10">
+            <Grid WidthRequest="150" HeightRequest="118" HorizontalOptions="Center">
+                <Border x:Name="RingA" Style="{StaticResource MomentRing}" />
+                <Border x:Name="RingB" Style="{StaticResource MomentRing}" />
+                <Border x:Name="RingC" Style="{StaticResource MomentRing}" />
+                <c:EmojiAvatar Emoji="{Binding Occasion.Emoji}" ColorHex="{Binding Occasion.ColorHex}" Size="72" EmojiSize="34"
+                               LightAlpha="0.16" DarkAlpha="0.28" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Grid>
+            <Label Text="MILESTONE REACHED" FontFamily="FigtreeSemiBold" FontSize="11" CharacterSpacing="2.24" HorizontalOptions="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
+            <Label Text="{Binding Number}" FontFamily="FigtreeExtraBold" FontSize="46" CharacterSpacing="-1.28" HorizontalOptions="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
+            <Label Text="{Binding Milestone.Label}" FontFamily="FigtreeSemiBold" FontSize="17" HorizontalTextAlignment="Center" />
+            <Label Text="{Binding Sentence}" FontSize="14" LineHeight="1.4" HorizontalTextAlignment="Center" MaximumWidthRequest="340"
+                   Style="{StaticResource SecondaryText}" />
+            <HorizontalStackLayout Spacing="9" HorizontalOptions="Center" Margin="0,14,0,0">
+                <Button Text="Not now" Style="{StaticResource DeskTonalButton}" HeightRequest="38" Clicked="OnNotNowClicked" />
+                <Button Text="Share this" Style="{StaticResource DeskPrimaryButton}" HeightRequest="38" Clicked="OnShareClicked" />
+            </HorizontalStackLayout>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

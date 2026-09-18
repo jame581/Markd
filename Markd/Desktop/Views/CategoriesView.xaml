@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             x:Class="Markd.Desktop.Views.CategoriesView"
+             x:DataType="vm:CategoryViewModel">
+    <ScrollView>
+        <dc:CappedColumn MaxColumnWidth="812">
+            <VerticalStackLayout x:Name="Rows" Padding="26,18,26,40" Spacing="10">
+                <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding Rows}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:CategoryRow">
+                            <!-- 56px row, radius 12: avatar, name, count, colour dot, hover-revealed Edit / Delete -->
+                            <dc:HoverSurface x:Name="Row" HeightRequest="56" CornerRadius="12" NormalKey="SurfaceCard" HoverKey="SurfaceCard"
+                                             StrokeKey="CardBorder" SemanticProperties.Description="{Binding Name}">
+                                <Grid Padding="12,0,10,0" ColumnDefinitions="36,*,Auto,32,32" ColumnSpacing="12">
+                                    <c:EmojiAvatar Emoji="{Binding Emoji}" ColorHex="{Binding ColorHex}" Size="36" EmojiSize="17" CornerRadius="10"
+                                                   VerticalOptions="Center" />
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center" InputTransparent="True">
+                                        <Label Text="{Binding Name}" Style="{StaticResource DeskRowTitle}" />
+                                        <Label Text="{Binding CountLabel}" Style="{StaticResource DeskRowSub}" />
+                                    </VerticalStackLayout>
+                                    <Ellipse Grid.Column="2" WidthRequest="11" HeightRequest="11" Fill="{Binding DotColor}" VerticalOptions="Center"
+                                             Margin="0,0,6,0" />
+                                    <dc:DeskButton Grid.Column="3" Variant="Subtle" Glyph="WinPencil" GlyphSize="14" WidthRequest="32" HeightRequest="32"
+                                                   CornerRadius="7" ContentKey="TextSecondary" ToolTipProperties.Text="Edit category"
+                                                   IsVisible="{Binding IsHovered, Source={x:Reference Row}, x:DataType=dc:HoverSurface}"
+                                                   Command="{Binding Source={x:Reference Rows}, Path=BindingContext.EditCommand, x:DataType=VerticalStackLayout}"
+                                                   CommandParameter="{Binding .}" />
+                                    <dc:DeskButton Grid.Column="4" Variant="Subtle" Glyph="WinTrash" GlyphSize="14" WidthRequest="32" HeightRequest="32"
+                                                   CornerRadius="7" ContentKey="TextTertiary" HoverContentKey="Danger" ToolTipProperties.Text="Delete category"
+                                                   IsVisible="{Binding IsHovered, Source={x:Reference Row}, x:DataType=dc:HoverSurface}"
+                                                   Command="{Binding Source={x:Reference Rows}, Path=BindingContext.DeleteCommand, x:DataType=VerticalStackLayout}"
+                                                   CommandParameter="{Binding .}" />
+                                </Grid>
+                            </dc:HoverSurface>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+                <Label Text="No categories yet. Group occasions however you think about them." FontSize="13.5" Margin="4,4,0,4"
+                       IsVisible="{Binding IsEmpty}" Style="{StaticResource SecondaryText}" />
+
+                <!-- New category row -->
+                <dc:HoverSurface HeightRequest="56" CornerRadius="12" HoverKey="SurfaceCardPressed" StrokeKey="CardBorder"
+                                 StrokeDashArray="4,3" AutomationId="new-category" Command="{Binding NewCommand}">
+                    <Grid Padding="12,0" ColumnDefinitions="36,*" ColumnSpacing="12" InputTransparent="True" CascadeInputTransparent="True">
+                        <Border WidthRequest="36" HeightRequest="36" StrokeShape="RoundRectangle 10" VerticalOptions="Center"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}">
+                            <c:SvgIcon Glyph="WinPlus" Size="16" Color="White" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Border>
+                        <Label Grid.Column="1" Text="New category" FontFamily="FigtreeSemiBold" FontSize="15" VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
+                    </Grid>
+                </dc:HoverSurface>
+
+                <Label Text="Deleting a category keeps its occasions — they move to Uncategorised." FontSize="12.5" Margin="4,6,0,0"
+                       Style="{StaticResource SecondaryText}" />
+            </VerticalStackLayout>
+        </dc:CappedColumn>
+    </ScrollView>
+</ContentView>

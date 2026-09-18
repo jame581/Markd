@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             x:Class="Markd.Desktop.DesktopShellPage"
+             Shell.NavBarIsVisible="False">
+
+    <Grid x:Name="Root" RowDefinitions="1,*">
+        <!-- 1px rule under the title bar -->
+        <BoxView HeightRequest="1" />
+
+        <Grid Grid.Row="1" ColumnDefinitions="56,*">
+
+            <!-- Nav rail: 56px on the WindowChrome ground, five 38px items, the theme toggle pushed to the bottom -->
+            <Grid BackgroundColor="{AppThemeBinding Light={StaticResource WindowChromeLight}, Dark={StaticResource WindowChromeDark}}">
+                <Grid Padding="9,8,9,12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto" RowSpacing="4">
+                    <dc:RailItem x:Name="HomeItem" Glyph="WinHome" Section="home" AutomationId="rail-home"
+                                 ToolTipProperties.Text="Home" SemanticProperties.Description="Home" Clicked="OnRailItemClicked" />
+                    <dc:RailItem x:Name="CalendarItem" Grid.Row="1" Glyph="WinCalendar" Section="calendar" AutomationId="rail-calendar"
+                                 ToolTipProperties.Text="Calendar" SemanticProperties.Description="Calendar" Clicked="OnRailItemClicked" />
+                    <dc:RailItem x:Name="CategoriesItem" Grid.Row="2" Glyph="WinTag" Section="categories" AutomationId="rail-categories"
+                                 ToolTipProperties.Text="Categories" SemanticProperties.Description="Categories" Clicked="OnRailItemClicked" />
+                    <dc:RailItem x:Name="SettingsItem" Grid.Row="3" Glyph="WinGear" Section="settings" AutomationId="rail-settings"
+                                 ToolTipProperties.Text="Settings" SemanticProperties.Description="Settings" Clicked="OnRailItemClicked" />
+                    <dc:RailItem x:Name="AboutItem" Grid.Row="4" Glyph="WinInfo" Section="about" AutomationId="rail-about"
+                                 ToolTipProperties.Text="About" SemanticProperties.Description="About" Clicked="OnRailItemClicked" />
+                    <dc:RailItem x:Name="ThemeItem" Grid.Row="6" HeightRequest="36" AutomationId="rail-theme" Clicked="OnThemeClicked" />
+                </Grid>
+                <BoxView WidthRequest="1" HorizontalOptions="End" />
+            </Grid>
+
+            <Grid Grid.Column="1" RowDefinitions="Auto,1,*">
+                <!-- Header strip: title 24/700, subtitle 13, "+ New occasion" on Home -->
+                <Grid Padding="26,20,26,14" ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                    <VerticalStackLayout Spacing="4" VerticalOptions="End">
+                        <HorizontalStackLayout x:Name="BackCrumb" Spacing="6" IsVisible="False" Margin="0,0,0,2">
+                            <HorizontalStackLayout.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnBackTapped" />
+                            </HorizontalStackLayout.GestureRecognizers>
+                            <c:SvgIcon Glyph="WinChevronLeft" Size="13" VerticalOptions="Center"
+                                       Color="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            <Label x:Name="BackLabel" FontFamily="FigtreeMedium" FontSize="12.5" VerticalOptions="Center"
+                                   Style="{StaticResource SecondaryText}" />
+                        </HorizontalStackLayout>
+                        <Label x:Name="TitleLabel" Style="{StaticResource DeskPageTitle}" LineBreakMode="TailTruncation" />
+                        <Label x:Name="SubtitleLabel" Style="{StaticResource DeskSubtitle}" />
+                    </VerticalStackLayout>
+                    <dc:DeskButton x:Name="NewOccasionButton" Grid.Column="1" Variant="Accent" Glyph="WinPlus" Text="New occasion"
+                                   AutomationId="new-occasion" VerticalOptions="End" Clicked="OnNewOccasionClicked" />
+                </Grid>
+                <BoxView x:Name="HeaderRule" Grid.Row="1" />
+
+                <Grid x:Name="SectionHost" Grid.Row="2" />
+            </Grid>
+        </Grid>
+
+        <!-- Modal overlays (dialogs, the occasion form, the milestone moment) stack here -->
+        <Grid x:Name="OverlayRoot" Grid.RowSpan="2" IsVisible="False" />
+
+        <!-- Toast: bottom-right, above everything -->
+        <Grid x:Name="ToastHost" Grid.RowSpan="2" HorizontalOptions="End" VerticalOptions="End" Margin="0,0,20,20" />
+    </Grid>
+</ContentPage>

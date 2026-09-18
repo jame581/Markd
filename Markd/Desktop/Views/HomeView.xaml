@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             x:Class="Markd.Desktop.Views.HomeView"
+             x:DataType="vm:OccasionListViewModel">
+    <Grid>
+        <Grid x:Name="Panes" ColumnDefinitions="380,1,*">
+
+            <!-- List pane: occasion rows grouped by category, pinned first then alphabetical -->
+            <ScrollView x:Name="ListPane">
+                <VerticalStackLayout x:Name="ListStack" Padding="26,18,14,40" Spacing="20" BindableLayout.ItemsSource="{Binding OccasionGroups}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:OccasionGroup">
+                            <VerticalStackLayout Spacing="7">
+                                <Label Text="{Binding CategoryName}" Style="{StaticResource Overline}" Padding="4,0,0,0" />
+                                <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding .}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:OccasionSummary">
+                                            <dc:HoverSurface HeightRequest="64" CornerRadius="12" NormalKey="SurfaceCard" HoverKey="SurfaceCardPressed"
+                                                             StrokeKey="CardBorder" SelectedStrokeKey="AccentBorderColor"
+                                                             IsSelected="{Binding IsSelected}" Clicked="OnOccasionClicked"
+                                                             SemanticProperties.Description="{Binding Title}">
+                                                <Grid Padding="14,0,16,0" ColumnDefinitions="30,*,Auto" ColumnSpacing="12" InputTransparent="True" CascadeInputTransparent="True">
+                                                    <c:EmojiAvatar Emoji="{Binding Emoji}" ColorHex="{Binding ColorHex}" Size="30" EmojiSize="15" CornerRadius="8"
+                                                                   VerticalOptions="Center" />
+                                                    <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                        <Label Text="{Binding Title}" Style="{StaticResource DeskRowTitle}" />
+                                                        <Label Text="{Binding AnchorLabel}" Style="{StaticResource DeskRowSub}" />
+                                                    </VerticalStackLayout>
+                                                    <VerticalStackLayout Grid.Column="2" Spacing="3" VerticalOptions="Center">
+                                                        <Label Text="{Binding DisplayDays}" FontFamily="FigtreeBold" FontSize="19" HorizontalOptions="End" />
+                                                        <Label Text="{Binding UnitLabel}" FontFamily="FigtreeMedium" FontSize="10.5" CharacterSpacing="0.84"
+                                                               TextTransform="Uppercase" HorizontalOptions="End" Style="{StaticResource TertiaryText}" />
+                                                    </VerticalStackLayout>
+                                                </Grid>
+                                            </dc:HoverSurface>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <BoxView x:Name="PaneDivider" Grid.Column="1" Margin="0,18,0,0" />
+
+            <!-- Detail pane: featured card, notes, milestones, actions -->
+            <ScrollView x:Name="DetailPane" Grid.Column="2" x:DataType="vm:OccasionDetailViewModel">
+                <dc:CappedColumn MaxColumnWidth="900">
+                    <VerticalStackLayout Padding="24,18,26,40" Spacing="18">
+
+                        <Border Style="{StaticResource DeskFeaturedCard}" Padding="26,22">
+                            <VerticalStackLayout>
+                                <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" ColumnSpacing="10">
+                                    <c:EmojiAvatar Emoji="{Binding Emoji}" ColorHex="{Binding ColorHex}" Size="28" EmojiSize="15" CornerRadius="8"
+                                                   VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{Binding Title}" FontFamily="FigtreeSemiBold" FontSize="17" MaximumWidthRequest="460"
+                                           LineBreakMode="TailTruncation" VerticalOptions="Center" />
+                                    <Border Grid.Column="2" IsVisible="{Binding IsPinned}" Padding="8,5" StrokeShape="RoundRectangle 6" VerticalOptions="Center"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource AccentTintLight}, Dark={StaticResource AccentTintDark}}">
+                                        <Label Text="PINNED" FontFamily="FigtreeSemiBold" FontSize="11" CharacterSpacing="1.28"
+                                               TextColor="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
+                                    </Border>
+                                    <dc:DeskButton Grid.Column="4" Variant="Subtle" Glyph="WinPencil" GlyphSize="15" WidthRequest="32" HeightRequest="32"
+                                                   CornerRadius="7" ContentKey="TextSecondary" ToolTipProperties.Text="Edit occasion"
+                                                   AutomationId="detail-edit" Command="{Binding EditCommand}" />
+                                </Grid>
+                                <Label Text="{Binding AnchorLong}" FontSize="12.5" Margin="0,4,0,0" Style="{StaticResource SecondaryText}" />
+
+                                <Label Margin="0,14,0,0">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding DisplayDays}" FontFamily="FigtreeExtraBold" FontSize="62" CharacterSpacing="-1.86"
+                                                  TextColor="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
+                                            <Span Text="  " FontSize="19" />
+                                            <Span Text="{Binding UnitLabel}" FontFamily="FigtreeSemiBold" FontSize="19"
+                                                  TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                                <Label Text="{Binding TimeBreakdown}" Style="{StaticResource BreakdownLabel}" Margin="0,2,0,0" />
+
+                                <BoxView HeightRequest="1" Margin="0,18,0,15" />
+
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <Label Text="{Binding NextMilestoneHeading}" FontFamily="FigtreeSemiBold" FontSize="13" LineBreakMode="NoWrap" />
+                                    <Label Grid.Column="1" Text="{Binding NextMilestoneStatus}" FontFamily="PlexMonoMedium" FontSize="12.5" LineBreakMode="NoWrap"
+                                           Style="{StaticResource SecondaryText}" />
+                                </Grid>
+                                <c:ProgressTrack Progress="{Binding NextMilestoneProgress}" HeightRequest="5" Margin="0,9,0,0"
+                                                 TrackColor="{AppThemeBinding Light={StaticResource SurfaceCardPressedLight}, Dark={StaticResource SurfaceCardPressedDark}}" />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border Style="{StaticResource DeskCard}" Padding="20,16,20,18">
+                            <VerticalStackLayout Spacing="9">
+                                <Label Text="Notes" Style="{StaticResource DeskCardHeader}" />
+                                <Label Text="{Binding NotesText}" FontSize="15" LineHeight="1.3">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding HasNotes}" Value="False">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextTertiaryLight}, Dark={StaticResource TextTertiaryDark}}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Border Style="{StaticResource DeskCard}" Padding="20,12,14,10">
+                            <VerticalStackLayout>
+                                <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="9" Margin="0,0,0,6">
+                                    <Label Text="Milestones" Style="{StaticResource DeskCardHeader}" />
+                                    <Label Grid.Column="1" Text="{Binding MilestoneCountText}" FontFamily="PlexMonoMedium" FontSize="11.5"
+                                           VerticalOptions="Center" Style="{StaticResource TertiaryText}" />
+                                    <dc:DeskButton Grid.Column="3" Variant="Subtle" Glyph="WinPlus" GlyphSize="13" Text="Add" HeightRequest="30" CornerRadius="6"
+                                                   ContentKey="AccentText" AutomationId="milestone-add" Command="{Binding AddMilestoneCommand}" />
+                                </Grid>
+                                <Label Text="No milestones yet. Add one to mark a day worth noticing." FontSize="13.5" Margin="0,6,0,10"
+                                       IsVisible="{Binding HasMilestones, Converter={StaticResource InvertBool}}" Style="{StaticResource TertiaryText}" />
+                                <VerticalStackLayout BindableLayout.ItemsSource="{Binding MilestoneStates}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:MilestoneViewState">
+                                            <Grid RowDefinitions="1,48">
+                                                <BoxView />
+                                                <dc:HoverSurface x:Name="MilestoneRow" Grid.Row="1" CornerRadius="8" HoverKey="PageBackground" Margin="-6,0,0,0">
+                                                    <Grid Padding="6,0,4,0" ColumnDefinitions="24,*,Auto,28" ColumnSpacing="12">
+                                                        <Border WidthRequest="24" HeightRequest="24" StrokeShape="RoundRectangle 12" VerticalOptions="Center"
+                                                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceCardPressedLight}, Dark={StaticResource SurfaceCardPressedDark}}">
+                                                            <Border.Triggers>
+                                                                <DataTrigger TargetType="Border" Binding="{Binding IsReached}" Value="True">
+                                                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}" />
+                                                                </DataTrigger>
+                                                            </Border.Triggers>
+                                                            <Grid>
+                                                                <c:SvgIcon Glyph="WinCheck" Size="13" Color="White" IsVisible="{Binding IsReached}"
+                                                                           HorizontalOptions="Center" VerticalOptions="Center" />
+                                                                <c:SvgIcon Glyph="WinFlag" Size="12" IsVisible="{Binding IsUpcoming}" HorizontalOptions="Center" VerticalOptions="Center"
+                                                                           Color="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                                            </Grid>
+                                                        </Border>
+                                                        <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                                            <Label Text="{Binding Label}" FontFamily="FigtreeSemiBold" FontSize="15" LineBreakMode="TailTruncation" />
+                                                            <Label Text="{Binding StatusText}" FontSize="12.5" Style="{StaticResource TertiaryText}" />
+                                                        </VerticalStackLayout>
+                                                        <Label Grid.Column="2" Text="{Binding ThresholdText}" FontFamily="PlexMonoMedium" FontSize="13"
+                                                               VerticalOptions="Center" Style="{StaticResource SecondaryText}" />
+                                                        <dc:DeskButton Grid.Column="3" Variant="Subtle" Glyph="WinClose" GlyphSize="12" WidthRequest="28" HeightRequest="28"
+                                                                       CornerRadius="6" ContentKey="TextTertiary" HoverContentKey="Danger" ToolTipProperties.Text="Remove milestone"
+                                                                       IsVisible="{Binding IsHovered, Source={x:Reference MilestoneRow}, x:DataType=dc:HoverSurface}"
+                                                                       Clicked="OnRemoveMilestoneClicked" />
+                                                    </Grid>
+                                                </dc:HoverSurface>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <!-- Unpin + Share side by side, Delete on its own line -->
+                        <VerticalStackLayout Spacing="10">
+                            <HorizontalStackLayout Spacing="9">
+                                <Button Text="{Binding PinToHomeText}" Style="{StaticResource DeskPrimaryButton}" Command="{Binding PinCommand}" />
+                                <Button Text="Share" Style="{StaticResource DeskTonalButton}" Command="{Binding ShareCommand}" />
+                            </HorizontalStackLayout>
+                            <Button Text="Delete occasion" Style="{StaticResource DeskDangerButton}" HorizontalOptions="Start"
+                                    AutomationId="detail-delete" Command="{Binding DeleteCommand}" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </dc:CappedColumn>
+            </ScrollView>
+        </Grid>
+
+        <!-- Empty state: the detail pane is hidden entirely -->
+        <ScrollView x:Name="EmptyState" IsVisible="False">
+            <Border Style="{StaticResource DeskCard}" StrokeShape="RoundRectangle 16" Padding="40,56" Margin="26,18,26,40"
+                    MaximumWidthRequest="640" HorizontalOptions="Center" VerticalOptions="Start">
+                <VerticalStackLayout Spacing="18">
+                    <Border WidthRequest="96" HeightRequest="96" StrokeShape="RoundRectangle 24" HorizontalOptions="Center"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource AccentTintLight}, Dark={StaticResource AccentTintDark}}">
+                        <c:SvgIcon Glyph="WinEmpty" Size="44" HorizontalOptions="Center" VerticalOptions="Center"
+                                   Color="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
+                    </Border>
+                    <VerticalStackLayout Spacing="7" MaximumWidthRequest="420">
+                        <Label Text="Nothing marked yet" FontFamily="FigtreeBold" FontSize="21" HorizontalTextAlignment="Center" />
+                        <Label Text="Pick a date that matters — a first day, a last day, a day you're waiting for. Markd counts from there."
+                               FontSize="14.5" LineHeight="1.4" HorizontalTextAlignment="Center" Style="{StaticResource SecondaryText}" />
+                    </VerticalStackLayout>
+                    <Button Text="Create your first occasion" Style="{StaticResource DeskPrimaryButton}" HeightRequest="40" FontSize="14"
+                            HorizontalOptions="Center" Command="{Binding AddCommand}" />
+                    <Label Text="No account. No ads. Everything stays on this PC." FontSize="12.5" HorizontalTextAlignment="Center"
+                           Style="{StaticResource TertiaryText}" />
+                </VerticalStackLayout>
+            </Border>
+        </ScrollView>
+    </Grid>
+</ContentView>

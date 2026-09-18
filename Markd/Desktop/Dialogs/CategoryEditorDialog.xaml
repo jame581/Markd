@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             x:Class="Markd.Desktop.Dialogs.CategoryEditorDialog"
+             x:DataType="vm:CategoryViewModel">
+    <Border Style="{StaticResource DeskCard}" WidthRequest="480">
+        <VerticalStackLayout>
+            <VerticalStackLayout Padding="26,24,26,20" Spacing="16">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                    <c:EmojiAvatar Emoji="{Binding EditorEmoji}" ColorHex="{Binding EditorColorHex}" Size="44" EmojiSize="21" CornerRadius="12" />
+                    <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                        <Label Text="{Binding EditorTitle}" Style="{StaticResource DeskDialogTitle}" />
+                        <Label Text="Emoji and colour mark the category wherever it appears." Style="{StaticResource DeskSubtitle}" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Name" Style="{StaticResource DeskFieldLabel}" />
+                    <Border Style="{StaticResource DeskInput}">
+                        <Entry x:Name="NameEntry" Text="{Binding EditorName}" Placeholder="Family, Health, Travel…" Completed="OnCompleted" />
+                    </Border>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Emoji" Style="{StaticResource DeskFieldLabel}" />
+                    <dc:EmojiPalette Choices="{x:Static vm:CategoryViewModel.EmojiChoices}" SelectedEmoji="{Binding EditorEmoji}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Colour" Style="{StaticResource DeskFieldLabel}" />
+                    <dc:SwatchGrid Choices="{Binding EditorColorChoices}" SelectCommand="{Binding SelectEditorColorCommand}" />
+                </VerticalStackLayout>
+
+                <Label Text="{Binding EditorError}" IsVisible="{Binding EditorError, Converter={StaticResource HasText}}"
+                       FontFamily="FigtreeMedium" FontSize="13" Style="{StaticResource DangerText}" />
+            </VerticalStackLayout>
+            <BoxView HeightRequest="1" />
+            <Grid Padding="26,18,26,22" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="9"
+                  BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundLight}, Dark={StaticResource PageBackgroundDark}}">
+                <Button Grid.Column="1" Text="Cancel" Style="{StaticResource DeskTonalButton}" Command="{Binding CancelEditorCommand}" />
+                <Button Grid.Column="2" Text="{Binding EditorSaveLabel}" Style="{StaticResource DeskPrimaryButton}" Command="{Binding SaveEditorCommand}" />
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

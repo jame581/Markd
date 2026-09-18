@@ -74,5 +74,12 @@
 	  <ProjectReference Include="..\Markd.Core\Markd.Core.csproj" />
 	</ItemGroup>
 
+	<!-- The desktop shell (rail, two panes, overlays) only exists on Windows. -->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) != 'windows'">
+	  <Compile Remove="Desktop\**" />
+	  <MauiXaml Remove="Desktop\**" />
+	  <None Include="Desktop\**" />
+	</ItemGroup>
+
 
 </Project>
