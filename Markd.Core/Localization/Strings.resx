@@ -234,7 +234,7 @@
   <data name="Notification_TitleUntil_Few" xml:space="preserve"><value>{0} days to go {1}</value></data>
   <data name="Notification_TitleUntil_Many" xml:space="preserve"><value>{0} days to go {1}</value></data>
   <data name="Notification_DescriptionSince" xml:space="preserve"><value>{0} hit “{1}” today. Tap to see the count.</value></data>
-  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0}: “{1}” — {2}</value></data>
+  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0}: “{1}” — {2}.</value></data>
   <data name="Notification_DaysLeft_One" xml:space="preserve"><value>{0} day left</value></data>
   <data name="Notification_DaysLeft_Few" xml:space="preserve"><value>{0} days left</value></data>
   <data name="Notification_DaysLeft_Many" xml:space="preserve"><value>{0} days left</value></data>
