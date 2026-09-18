@@ -5,3 +5,6 @@ public sealed record OccasionsChangedMessage(int? OccasionId = null, object? Sou
 
 /// <summary>Sent after categories change.</summary>
 public sealed record CategoriesChangedMessage(object? Source = null);
+
+/// <summary>Sent after the UI language changes so every view model re-renders its computed text.</summary>
+public sealed record LanguageChangedMessage;

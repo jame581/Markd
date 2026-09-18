@@ -11,4 +11,35 @@
   <data name="Unit_Days_One" xml:space="preserve"><value>{0} day</value></data>
   <data name="Unit_Days_Few" xml:space="preserve"><value>{0} days</value></data>
   <data name="Unit_Days_Many" xml:space="preserve"><value>{0} days</value></data>
+  <data name="Settings_Title" xml:space="preserve"><value>Settings</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Settings_LanguageSystem" xml:space="preserve"><value>Match system</value></data>
+  <data name="Settings_Theme" xml:space="preserve"><value>Theme</value></data>
+  <data name="Settings_ThemeSystem" xml:space="preserve"><value>Match system</value></data>
+  <data name="Settings_ThemeLight" xml:space="preserve"><value>Light</value></data>
+  <data name="Settings_ThemeDark" xml:space="preserve"><value>Dark</value></data>
+  <data name="Settings_Export" xml:space="preserve"><value>Export as JSON</value></data>
+  <data name="Settings_Import" xml:space="preserve"><value>Import from JSON</value></data>
+  <data name="Settings_Appearance" xml:space="preserve"><value>Appearance</value></data>
+  <data name="Settings_Notifications" xml:space="preserve"><value>Notifications</value></data>
+  <data name="Settings_MilestoneAlerts" xml:space="preserve"><value>Milestone alerts</value></data>
+  <data name="Settings_MilestoneAlertsSub" xml:space="preserve"><value>On the morning a milestone lands</value></data>
+  <data name="Settings_MilestoneAlertsSubDesktop" xml:space="preserve"><value>Shows the milestone moment when one is reached</value></data>
+  <data name="Settings_TimeOfDay" xml:space="preserve"><value>Time of day</value></data>
+  <data name="Settings_YourData" xml:space="preserve"><value>Your data</value></data>
+  <data name="Settings_ExportSub" xml:space="preserve"><value>Writes one file to Downloads</value></data>
+  <data name="Settings_ImportSub" xml:space="preserve"><value>Replaces everything on this phone</value></data>
+  <data name="Settings_EraseAll" xml:space="preserve"><value>Erase all occasions</value></data>
+  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd keeps one SQLite file on this device. Nothing is uploaded, so nothing syncs — export before you switch phones.</value></data>
+  <data name="Settings_AboutMarkd" xml:space="preserve"><value>About Markd</value></data>
+  <data name="Settings_ThemeSub" xml:space="preserve"><value>Applies immediately — no save needed</value></data>
+  <data name="Settings_LanguageSub" xml:space="preserve"><value>English · Čeština</value></data>
+  <data name="Settings_DailyCheckTime" xml:space="preserve"><value>Daily check time</value></data>
+  <data name="Settings_DailyCheckTimeSub" xml:space="preserve"><value>When Markd looks for milestones due today</value></data>
+  <data name="Settings_LocalDatabase" xml:space="preserve"><value>Local database</value></data>
+  <data name="Settings_LocalDatabaseSub" xml:space="preserve"><value>markd.db · stays on this PC, never uploaded</value></data>
+  <data name="Settings_ImportShort" xml:space="preserve"><value>Import</value></data>
+  <data name="Settings_EraseAllShort" xml:space="preserve"><value>Erase all</value></data>
+  <data name="Settings_EraseAllSub" xml:space="preserve"><value>Every occasion and milestone. Categories and settings stay.</value></data>
+  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd keeps one SQLite file on this PC. Nothing is uploaded, so nothing syncs — export before you move to another machine.</value></data>
 </root>

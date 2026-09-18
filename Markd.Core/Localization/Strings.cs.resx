@@ -11,4 +11,35 @@
   <data name="Unit_Days_One" xml:space="preserve"><value>{0} den</value></data>
   <data name="Unit_Days_Few" xml:space="preserve"><value>{0} dny</value></data>
   <data name="Unit_Days_Many" xml:space="preserve"><value>{0} dní</value></data>
+  <data name="Settings_Title" xml:space="preserve"><value>Nastavení</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Jazyk</value></data>
+  <data name="Settings_LanguageSystem" xml:space="preserve"><value>Podle systému</value></data>
+  <data name="Settings_Theme" xml:space="preserve"><value>Motiv</value></data>
+  <data name="Settings_ThemeSystem" xml:space="preserve"><value>Podle systému</value></data>
+  <data name="Settings_ThemeLight" xml:space="preserve"><value>Světlý</value></data>
+  <data name="Settings_ThemeDark" xml:space="preserve"><value>Tmavý</value></data>
+  <data name="Settings_Export" xml:space="preserve"><value>Exportovat jako JSON</value></data>
+  <data name="Settings_Import" xml:space="preserve"><value>Importovat z JSON</value></data>
+  <data name="Settings_Appearance" xml:space="preserve"><value>Vzhled</value></data>
+  <data name="Settings_Notifications" xml:space="preserve"><value>Oznámení</value></data>
+  <data name="Settings_MilestoneAlerts" xml:space="preserve"><value>Upozornění na milníky</value></data>
+  <data name="Settings_MilestoneAlertsSub" xml:space="preserve"><value>Ráno v den, kdy milník nastane</value></data>
+  <data name="Settings_MilestoneAlertsSubDesktop" xml:space="preserve"><value>Zobrazí okamžik milníku, jakmile nastane</value></data>
+  <data name="Settings_TimeOfDay" xml:space="preserve"><value>Čas</value></data>
+  <data name="Settings_YourData" xml:space="preserve"><value>Vaše data</value></data>
+  <data name="Settings_ExportSub" xml:space="preserve"><value>Uloží jeden soubor do Stažených souborů</value></data>
+  <data name="Settings_ImportSub" xml:space="preserve"><value>Nahradí vše v telefonu</value></data>
+  <data name="Settings_EraseAll" xml:space="preserve"><value>Smazat všechny události</value></data>
+  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd uchovává jeden soubor SQLite v tomto zařízení. Nic se nenahrává, takže se nic nesynchronizuje — před výměnou telefonu proveďte export.</value></data>
+  <data name="Settings_AboutMarkd" xml:space="preserve"><value>O aplikaci Markd</value></data>
+  <data name="Settings_ThemeSub" xml:space="preserve"><value>Použije se okamžitě — není třeba nic ukládat</value></data>
+  <data name="Settings_LanguageSub" xml:space="preserve"><value>Angličtina · Čeština</value></data>
+  <data name="Settings_DailyCheckTime" xml:space="preserve"><value>Čas denní kontroly</value></data>
+  <data name="Settings_DailyCheckTimeSub" xml:space="preserve"><value>Kdy Markd hledá milníky splatné dnes</value></data>
+  <data name="Settings_LocalDatabase" xml:space="preserve"><value>Místní databáze</value></data>
+  <data name="Settings_LocalDatabaseSub" xml:space="preserve"><value>markd.db · zůstává v tomto počítači, nikam se nenahrává</value></data>
+  <data name="Settings_ImportShort" xml:space="preserve"><value>Importovat</value></data>
+  <data name="Settings_EraseAllShort" xml:space="preserve"><value>Smazat vše</value></data>
+  <data name="Settings_EraseAllSub" xml:space="preserve"><value>Všechny události a milníky. Kategorie a nastavení zůstanou zachovány.</value></data>
+  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd uchovává jeden soubor SQLite v tomto počítači. Nic se nenahrává, takže se nic nesynchronizuje — před přechodem na jiný počítač proveďte export.</value></data>
 </root>

@@ -27,6 +27,7 @@ namespace Markd
             // Apply the saved theme before the first page renders. SQLite access is synchronous under the hood.
             var settings = _services.GetRequiredService<IAppSettingsService>().GetAsync().GetAwaiter().GetResult();
             ThemeService.Apply(settings.Theme);
+            LanguageService.Apply(settings.Language);
 
 #if WINDOWS
             var window = Desktop.DesktopWindow.Create(_services);

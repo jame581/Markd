@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 using Markd.Core.Services;
 using Markd.Services;
 using Microsoft.Maui.Devices;
@@ -26,7 +27,7 @@ public class SettingsViewModel : ViewModelBase
     private AppSettings _settings = new();
     private bool _isLoading;
     private string _selectedTheme = "System";
-    private string _selectedLanguage = "English";
+    private LanguageOption? _selectedLanguage;
     private bool _notificationsEnabled = true;
     private TimeSpan _notificationTimeOfDay = new(9, 0, 0);
 
@@ -51,9 +52,9 @@ public class SettingsViewModel : ViewModelBase
 
         ThemeOptions =
         [
-            new ThemeOption("System", "Match system"),
-            new ThemeOption("Light", "Light"),
-            new ThemeOption("Dark", "Dark")
+            new ThemeOption("System", "Settings_ThemeSystem"),
+            new ThemeOption("Light", "Settings_ThemeLight"),
+            new ThemeOption("Dark", "Settings_ThemeDark")
         ];
 
         SelectThemeCommand = new RelayCommand<ThemeOption?>(option => { if (option is not null) SelectedTheme = option.Value; });
@@ -65,7 +66,15 @@ public class SettingsViewModel : ViewModelBase
     }
 
     public IReadOnlyList<ThemeOption> ThemeOptions { get; }
-    public List<string> Languages { get; } = ["English", "Čeština"];
+
+    public IReadOnlyList<LanguageOption> Languages { get; private set; } = BuildLanguages();
+
+    private static IReadOnlyList<LanguageOption> BuildLanguages() =>
+    [
+        new(LanguageSetting.System, Strings.Settings_LanguageSystem),
+        new(LanguageSetting.English, "English"),
+        new(LanguageSetting.Czech, "Čeština")
+    ];
 
     /// <summary>Half-hour slots for the desktop time dropdown, plus the saved time if it falls between them.</summary>
     public ObservableCollection<string> TimeOptions { get; } =
@@ -94,13 +103,18 @@ public class SettingsViewModel : ViewModelBase
         }
     }
 
-    public string SelectedLanguage
+    public LanguageOption? SelectedLanguage
     {
         get => _selectedLanguage;
         set
         {
-            if (SetProperty(ref _selectedLanguage, value))
-                ScheduleSave();
+            if (value is null || !SetProperty(ref _selectedLanguage, value))
+                return;
+
+            if (LanguageService.Apply(value.Value))
+                WeakReferenceMessenger.Default.Send(new LanguageChangedMessage());
+
+            ScheduleSave(reschedule: true);
         }
     }
 
@@ -157,7 +171,7 @@ public class SettingsViewModel : ViewModelBase
             SelectedTheme = string.IsNullOrWhiteSpace(_settings.Theme) ? "System" : _settings.Theme;
             foreach (var option in ThemeOptions)
                 option.IsSelected = option.Value == SelectedTheme;
-            SelectedLanguage = _settings.Language == "cs" ? "Čeština" : "English";
+            SelectedLanguage = Languages.FirstOrDefault(l => l.Value == _settings.Language) ?? Languages[0];
             NotificationsEnabled = _settings.NotificationsEnabled;
             NotificationTimeOfDay = _settings.NotificationTimeOfDay;
         }
@@ -191,7 +205,7 @@ public class SettingsViewModel : ViewModelBase
         try
         {
             _settings.Theme = SelectedTheme;
-            _settings.Language = SelectedLanguage == "Čeština" ? "cs" : "en";
+            _settings.Language = SelectedLanguage?.Value ?? LanguageSetting.System;
             _settings.NotificationsEnabled = NotificationsEnabled;
             _settings.NotificationTimeOfDay = NotificationTimeOfDay;
             await _settingsService.SaveAsync(_settings);
@@ -277,18 +291,46 @@ public class SettingsViewModel : ViewModelBase
         if (_shellService.Platform != DevicePlatform.Android)
             await _feedbackService.ShowAsync("All occasions erased", "Markd is back to a clean slate.");
     }
+
+    protected override void OnLanguageChanged()
+    {
+        var selected = SelectedLanguage?.Value;
+        // This can run inside LoadAsync (SelectedLanguage is set there); restore, never force false,
+        // or the rest of LoadAsync would start saving half-loaded values.
+        var wasLoading = _isLoading;
+        _isLoading = true;
+        try
+        {
+            Languages = BuildLanguages();
+            OnPropertyChanged(nameof(Languages));
+            _selectedLanguage = Languages.First(l => l.Value == (selected ?? LanguageSetting.System));
+            OnPropertyChanged(nameof(SelectedLanguage));
+            foreach (var option in ThemeOptions)
+                option.RefreshLabel();
+        }
+        finally
+        {
+            _isLoading = wasLoading;
+        }
+
+        base.OnLanguageChanged();
+    }
 }
 
-public sealed class ThemeOption(string value, string label) : ObservableObject
+public sealed class ThemeOption(string value, string labelKey) : ObservableObject
 {
     private bool _isSelected;
 
     public string Value { get; } = value;
-    public string Label { get; } = label;
+    public string Label => LocalizationManager.Instance[labelKey];
 
     public bool IsSelected
     {
         get => _isSelected;
         set => SetProperty(ref _isSelected, value);
     }
+
+    public void RefreshLabel() => OnPropertyChanged(nameof(Label));
 }
+
+public sealed record LanguageOption(string Value, string Label);

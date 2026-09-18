@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Markd.ViewModels"
              xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.SettingsPage"
              x:Name="RootPage"
              x:DataType="vm:SettingsViewModel"
@@ -21,13 +22,13 @@
     </ContentPage.Resources>
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <m:MediumTopAppBar Title="Settings" />
+        <m:MediumTopAppBar Title="{loc:Tr Settings_Title}" />
 
         <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
             <VerticalStackLayout Padding="8,0,8,24" Spacing="14">
 
                 <VerticalStackLayout>
-                    <Label Text="Appearance" Style="{StaticResource M3SectionHeader}" Padding="16,8,16,10" />
+                    <Label Text="{loc:Tr Settings_Appearance}" Style="{StaticResource M3SectionHeader}" Padding="16,8,16,10" />
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding ThemeOptions}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:ThemeOption">
@@ -59,20 +60,20 @@
                 <BoxView Style="{StaticResource SectionDivider}" />
 
                 <VerticalStackLayout>
-                    <Label Text="Notifications" Style="{StaticResource M3SectionHeader}" Padding="16,4,16,10" />
+                    <Label Text="{loc:Tr Settings_Notifications}" Style="{StaticResource M3SectionHeader}" Padding="16,4,16,10" />
                     <Grid Style="{StaticResource RowGrid}" ColumnDefinitions="*,Auto" Padding="16,12">
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleNotificationsCommand}" />
                         </Grid.GestureRecognizers>
                         <VerticalStackLayout Spacing="3" VerticalOptions="Center">
-                            <Label Text="Milestone alerts" FontSize="16" />
-                            <Label Text="On the morning a milestone lands" Style="{StaticResource M3RowSub}" />
+                            <Label Text="{loc:Tr Settings_MilestoneAlerts}" FontSize="16" />
+                            <Label Text="{loc:Tr Settings_MilestoneAlertsSub}" Style="{StaticResource M3RowSub}" />
                         </VerticalStackLayout>
                         <m:M3Switch Grid.Column="1" IsToggled="{Binding NotificationsEnabled}" InputTransparent="True" />
                     </Grid>
                     <Grid Style="{StaticResource RowGrid}">
                         <VerticalStackLayout Spacing="3" VerticalOptions="Center">
-                            <Label Text="Time of day" FontSize="16" />
+                            <Label Text="{loc:Tr Settings_TimeOfDay}" FontSize="16" />
                             <Label Text="{Binding NotificationTimeText}" Style="{StaticResource M3RowSub}" />
                         </VerticalStackLayout>
                         <TimePicker Time="{Binding NotificationTimeOfDay}" Opacity="0.02" TextColor="Transparent" />
@@ -82,20 +83,22 @@
                 <BoxView Style="{StaticResource SectionDivider}" />
 
                 <VerticalStackLayout>
-                    <Label Text="Your data" Style="{StaticResource M3SectionHeader}" Padding="16,4,16,10" />
+                    <Label Text="{loc:Tr Settings_YourData}" Style="{StaticResource M3SectionHeader}" Padding="16,4,16,10" />
                     <Grid Style="{StaticResource RowGrid}" ColumnDefinitions="*,Auto">
-                        <Label Text="Language" Style="{StaticResource M3ListText}" />
-                        <Label Grid.Column="1" Text="{Binding SelectedLanguage}" Style="{StaticResource M3RowSub}" FontSize="15" VerticalOptions="Center" />
-                        <Picker Grid.ColumnSpan="2" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"
-                                Title="Language" Opacity="0.02" TextColor="Transparent" TitleColor="Transparent" />
+                        <Label Text="{loc:Tr Settings_Language}" Style="{StaticResource M3ListText}" />
+                        <Label Grid.Column="1" Text="{Binding SelectedLanguage.Label}" Style="{StaticResource M3RowSub}" FontSize="15" VerticalOptions="Center" />
+                        <Picker Grid.ColumnSpan="2" ItemsSource="{Binding Languages}"
+                                ItemDisplayBinding="{Binding Label, x:DataType=vm:LanguageOption}"
+                                SelectedItem="{Binding SelectedLanguage}"
+                                Title="{loc:Tr Settings_Language}" Opacity="0.02" TextColor="Transparent" TitleColor="Transparent" />
                     </Grid>
                     <Grid Style="{StaticResource RowGrid}">
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ExportCommand}" />
                         </Grid.GestureRecognizers>
                         <VerticalStackLayout Spacing="3">
-                            <Label Text="Export as JSON" FontSize="16" />
-                            <Label Text="Writes one file to Downloads" Style="{StaticResource M3RowSub}" />
+                            <Label Text="{loc:Tr Settings_Export}" FontSize="16" />
+                            <Label Text="{loc:Tr Settings_ExportSub}" Style="{StaticResource M3RowSub}" />
                         </VerticalStackLayout>
                     </Grid>
                     <Grid Style="{StaticResource RowGrid}">
@@ -103,17 +106,17 @@
                             <TapGestureRecognizer Command="{Binding ImportCommand}" />
                         </Grid.GestureRecognizers>
                         <VerticalStackLayout Spacing="3">
-                            <Label Text="Import from JSON" FontSize="16" />
-                            <Label Text="Replaces everything on this phone" Style="{StaticResource M3RowSub}" />
+                            <Label Text="{loc:Tr Settings_Import}" FontSize="16" />
+                            <Label Text="{loc:Tr Settings_ImportSub}" Style="{StaticResource M3RowSub}" />
                         </VerticalStackLayout>
                     </Grid>
                     <Grid Style="{StaticResource RowGrid}">
                         <Grid.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding EraseAllCommand}" />
                         </Grid.GestureRecognizers>
-                        <Label Text="Erase all occasions" FontSize="16" Style="{StaticResource DangerText}" />
+                        <Label Text="{loc:Tr Settings_EraseAll}" FontSize="16" Style="{StaticResource DangerText}" />
                     </Grid>
-                    <Label Text="Markd keeps one SQLite file on this device. Nothing is uploaded, so nothing syncs — export before you switch phones."
+                    <Label Text="{loc:Tr Settings_DataFootnotePhone}"
                            Style="{StaticResource M3RowSub}" FontSize="12.5" Padding="16,8,16,0" />
                 </VerticalStackLayout>
 
@@ -124,7 +127,7 @@
                         <TapGestureRecognizer Command="{Binding OpenAboutCommand}" />
                     </Grid.GestureRecognizers>
                     <VerticalStackLayout Spacing="3">
-                        <Label Text="About Markd" FontSize="16" />
+                        <Label Text="{loc:Tr Settings_AboutMarkd}" FontSize="16" />
                         <Label Text="{Binding VersionText}" Style="{StaticResource M3RowSub}" />
                     </VerticalStackLayout>
                 </Grid>
