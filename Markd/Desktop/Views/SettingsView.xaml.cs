@@ -1,3 +1,4 @@
+using Markd.Core.Localization;
 using Markd.ViewModels;
 
 namespace Markd.Desktop.Views;
@@ -12,16 +13,13 @@ public partial class SettingsView : ContentView, IDesktopSection
         InitializeComponent();
         _viewModel = ServiceHelper.GetRequiredService<SettingsViewModel>();
         BindingContext = _viewModel;
+        LocalizationManager.Instance.CultureChanged += (_, _) => HeaderChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public event EventHandler? HeaderChanged
-    {
-        add { }
-        remove { }
-    }
+    public event EventHandler? HeaderChanged;
 
-    public string Title => "Settings";
-    public string Subtitle => "Appearance, notifications and your local data";
+    public string Title => Strings.Settings_Title;
+    public string Subtitle => Strings.Settings_SubtitleDesktop;
     public bool ShowsNewOccasion => false;
     public bool HasHeaderRule => true;
     public string? BackLabel => null;

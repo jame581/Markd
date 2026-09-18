@@ -1,3 +1,4 @@
+using Markd.Core.Localization;
 using Markd.Core.Services;
 using Markd.Desktop.Controls;
 using Markd.Desktop.Dialogs;
@@ -30,6 +31,7 @@ public partial class DesktopShellPage : ContentPage
         _settingsService = settingsService;
         UpdateThemeItem();
         Application.Current!.RequestedThemeChanged += (_, _) => UpdateThemeItem();
+        LocalizationManager.Instance.CultureChanged += (_, _) => UpdateThemeItem();
         Loaded += async (_, _) =>
         {
             if (_current is null)
@@ -248,7 +250,7 @@ public partial class DesktopShellPage : ContentPage
     {
         var dark = Application.Current?.RequestedTheme == AppTheme.Dark;
         ThemeItem.Glyph = dark ? "WinSun" : "WinMoon";
-        var label = dark ? "Light theme" : "Dark theme";
+        var label = dark ? Strings.Desk_LightTheme : Strings.Desk_DarkTheme;
         ToolTipProperties.SetText(ThemeItem, label);
         SemanticProperties.SetDescription(ThemeItem, label);
     }

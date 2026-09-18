@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using Markd.Core.Localization;
 using Markd.Desktop.Dialogs;
 using Markd.ViewModels;
 
@@ -18,16 +19,13 @@ public partial class CategoriesView : ContentView, IDesktopSection
         _viewModel = ServiceHelper.GetRequiredService<CategoryViewModel>();
         _viewModel.PropertyChanged += OnViewModelPropertyChanged;
         BindingContext = _viewModel;
+        LocalizationManager.Instance.CultureChanged += (_, _) => HeaderChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    public event EventHandler? HeaderChanged
-    {
-        add { }
-        remove { }
-    }
+    public event EventHandler? HeaderChanged;
 
-    public string Title => "Categories";
-    public string Subtitle => "Group occasions however you think about them";
+    public string Title => Strings.Category_Title;
+    public string Subtitle => Strings.Category_SubtitleDesktop;
     public bool ShowsNewOccasion => false;
     public bool HasHeaderRule => true;
     public string? BackLabel => null;

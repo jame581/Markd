@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:Markd.ViewModels"
              xmlns:c="clr-namespace:Markd.Controls"
              xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.Desktop.Views.HomeView"
              x:DataType="vm:OccasionListViewModel">
     <Grid>
@@ -62,11 +63,11 @@
                                            LineBreakMode="TailTruncation" VerticalOptions="Center" />
                                     <Border Grid.Column="2" IsVisible="{Binding IsPinned}" Padding="8,5" StrokeShape="RoundRectangle 6" VerticalOptions="Center"
                                             BackgroundColor="{AppThemeBinding Light={StaticResource AccentTintLight}, Dark={StaticResource AccentTintDark}}">
-                                        <Label Text="PINNED" FontFamily="FigtreeSemiBold" FontSize="11" CharacterSpacing="1.28"
+                                        <Label Text="{loc:Tr Home_Pinned}" FontFamily="FigtreeSemiBold" FontSize="11" CharacterSpacing="1.28"
                                                TextColor="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
                                     </Border>
                                     <dc:DeskButton Grid.Column="4" Variant="Subtle" Glyph="WinPencil" GlyphSize="15" WidthRequest="32" HeightRequest="32"
-                                                   CornerRadius="7" ContentKey="TextSecondary" ToolTipProperties.Text="Edit occasion"
+                                                   CornerRadius="7" ContentKey="TextSecondary" ToolTipProperties.Text="{loc:Tr Detail_EditOccasion}"
                                                    AutomationId="detail-edit" Command="{Binding EditCommand}" />
                                 </Grid>
                                 <Label Text="{Binding AnchorLong}" FontSize="12.5" Margin="0,4,0,0" Style="{StaticResource SecondaryText}" />
@@ -98,7 +99,7 @@
 
                         <Border Style="{StaticResource DeskCard}" Padding="20,16,20,18">
                             <VerticalStackLayout Spacing="9">
-                                <Label Text="Notes" Style="{StaticResource DeskCardHeader}" />
+                                <Label Text="{loc:Tr Form_Notes}" Style="{StaticResource DeskCardHeader}" />
                                 <Label Text="{Binding NotesText}" FontSize="15" LineHeight="1.3">
                                     <Label.Triggers>
                                         <DataTrigger TargetType="Label" Binding="{Binding HasNotes}" Value="False">
@@ -112,13 +113,13 @@
                         <Border Style="{StaticResource DeskCard}" Padding="20,12,14,10">
                             <VerticalStackLayout>
                                 <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="9" Margin="0,0,0,6">
-                                    <Label Text="Milestones" Style="{StaticResource DeskCardHeader}" />
+                                    <Label Text="{loc:Tr Detail_Milestones}" Style="{StaticResource DeskCardHeader}" />
                                     <Label Grid.Column="1" Text="{Binding MilestoneCountText}" FontFamily="PlexMonoMedium" FontSize="11.5"
                                            VerticalOptions="Center" Style="{StaticResource TertiaryText}" />
-                                    <dc:DeskButton Grid.Column="3" Variant="Subtle" Glyph="WinPlus" GlyphSize="13" Text="Add" HeightRequest="30" CornerRadius="6"
+                                    <dc:DeskButton Grid.Column="3" Variant="Subtle" Glyph="WinPlus" GlyphSize="13" Text="{loc:Tr Detail_AddMilestone}" HeightRequest="30" CornerRadius="6"
                                                    ContentKey="AccentText" AutomationId="milestone-add" Command="{Binding AddMilestoneCommand}" />
                                 </Grid>
-                                <Label Text="No milestones yet. Add one to mark a day worth noticing." FontSize="13.5" Margin="0,6,0,10"
+                                <Label Text="{loc:Tr Detail_NoMilestonesDesktop}" FontSize="13.5" Margin="0,6,0,10"
                                        IsVisible="{Binding HasMilestones, Converter={StaticResource InvertBool}}" Style="{StaticResource TertiaryText}" />
                                 <VerticalStackLayout BindableLayout.ItemsSource="{Binding MilestoneStates}">
                                     <BindableLayout.ItemTemplate>
@@ -148,7 +149,7 @@
                                                         <Label Grid.Column="2" Text="{Binding ThresholdText}" FontFamily="PlexMonoMedium" FontSize="13"
                                                                VerticalOptions="Center" Style="{StaticResource SecondaryText}" />
                                                         <dc:DeskButton Grid.Column="3" Variant="Subtle" Glyph="WinClose" GlyphSize="12" WidthRequest="28" HeightRequest="28"
-                                                                       CornerRadius="6" ContentKey="TextTertiary" HoverContentKey="Danger" ToolTipProperties.Text="Remove milestone"
+                                                                       CornerRadius="6" ContentKey="TextTertiary" HoverContentKey="Danger" ToolTipProperties.Text="{loc:Tr Detail_RemoveMilestone}"
                                                                        IsVisible="{Binding IsHovered, Source={x:Reference MilestoneRow}, x:DataType=dc:HoverSurface}"
                                                                        Clicked="OnRemoveMilestoneClicked" />
                                                     </Grid>
@@ -164,9 +165,9 @@
                         <VerticalStackLayout Spacing="10">
                             <HorizontalStackLayout Spacing="9">
                                 <Button Text="{Binding PinToHomeText}" Style="{StaticResource DeskPrimaryButton}" Command="{Binding PinCommand}" />
-                                <Button Text="Share" Style="{StaticResource DeskTonalButton}" Command="{Binding ShareCommand}" />
+                                <Button Text="{loc:Tr Detail_Share}" Style="{StaticResource DeskTonalButton}" Command="{Binding ShareCommand}" />
                             </HorizontalStackLayout>
-                            <Button Text="Delete occasion" Style="{StaticResource DeskDangerButton}" HorizontalOptions="Start"
+                            <Button Text="{loc:Tr Detail_DeleteOccasion}" Style="{StaticResource DeskDangerButton}" HorizontalOptions="Start"
                                     AutomationId="detail-delete" Command="{Binding DeleteCommand}" />
                         </VerticalStackLayout>
                     </VerticalStackLayout>
@@ -185,13 +186,13 @@
                                    Color="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
                     </Border>
                     <VerticalStackLayout Spacing="7" MaximumWidthRequest="420">
-                        <Label Text="Nothing marked yet" FontFamily="FigtreeBold" FontSize="21" HorizontalTextAlignment="Center" />
-                        <Label Text="Pick a date that matters — a first day, a last day, a day you're waiting for. Markd counts from there."
+                        <Label Text="{loc:Tr Home_EmptyTitle}" FontFamily="FigtreeBold" FontSize="21" HorizontalTextAlignment="Center" />
+                        <Label Text="{loc:Tr Home_EmptyHintDesktop}"
                                FontSize="14.5" LineHeight="1.4" HorizontalTextAlignment="Center" Style="{StaticResource SecondaryText}" />
                     </VerticalStackLayout>
-                    <Button Text="Create your first occasion" Style="{StaticResource DeskPrimaryButton}" HeightRequest="40" FontSize="14"
+                    <Button Text="{loc:Tr Home_AddFirstDesktop}" Style="{StaticResource DeskPrimaryButton}" HeightRequest="40" FontSize="14"
                             HorizontalOptions="Center" Command="{Binding AddCommand}" />
-                    <Label Text="No account. No ads. Everything stays on this PC." FontSize="12.5" HorizontalTextAlignment="Center"
+                    <Label Text="{loc:Tr Home_EmptyFootnoteDesktop}" FontSize="12.5" HorizontalTextAlignment="Center"
                            Style="{StaticResource TertiaryText}" />
                 </VerticalStackLayout>
             </Border>

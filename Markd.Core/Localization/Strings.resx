@@ -106,6 +106,8 @@
   <data name="Detail_DeleteOccasion" xml:space="preserve"><value>Delete occasion</value></data>
   <data name="Detail_ShareMilestone" xml:space="preserve"><value>Share milestone</value></data>
   <data name="Detail_RemoveMilestone" xml:space="preserve"><value>Remove milestone</value></data>
+  <data name="Detail_EditOccasion" xml:space="preserve"><value>Edit occasion</value></data>
+  <data name="Detail_NoMilestonesDesktop" xml:space="preserve"><value>No milestones yet. Add one to mark a day worth noticing.</value></data>
   <data name="Form_Title" xml:space="preserve"><value>Title</value></data>
   <data name="Form_TitlePlaceholder" xml:space="preserve"><value>What are you marking?</value></data>
   <data name="Form_Category" xml:space="preserve"><value>Category</value></data>
@@ -118,6 +120,13 @@
   <data name="Form_Colour" xml:space="preserve"><value>Colour</value></data>
   <data name="Form_PinToHome" xml:space="preserve"><value>Pin to Home</value></data>
   <data name="Form_PinToHomeSub" xml:space="preserve"><value>Replaces the featured card</value></data>
+  <data name="Form_Emoji" xml:space="preserve"><value>Emoji</value></data>
+  <data name="Form_Direction" xml:space="preserve"><value>Direction</value></data>
+  <data name="Form_CountingSince" xml:space="preserve"><value>Counting since</value></data>
+  <data name="Form_CountingUntil" xml:space="preserve"><value>Counting until</value></data>
+  <data name="Form_Pin" xml:space="preserve"><value>Pin</value></data>
+  <data name="Form_PinToTopDesktop" xml:space="preserve"><value>Pin to the top of Home</value></data>
+  <data name="Form_ChooseEmoji" xml:space="preserve"><value>Choose an emoji</value></data>
   <data name="Category_Title" xml:space="preserve"><value>Categories</value></data>
   <data name="Category_Empty" xml:space="preserve"><value>No categories yet. Use New category to group occasions however you think about them.</value></data>
   <data name="Category_Footnote" xml:space="preserve"><value>Long-press or tap the overflow for row actions. Occasions filed under a deleted category move to Uncategorised — they're never removed with it.</value></data>
@@ -127,10 +136,23 @@
   <data name="Category_Colour" xml:space="preserve"><value>Colour</value></data>
   <data name="Category_Rename" xml:space="preserve"><value>Rename</value></data>
   <data name="Category_ChangeColour" xml:space="preserve"><value>Change colour</value></data>
+  <data name="Category_Edit" xml:space="preserve"><value>Edit category</value></data>
+  <data name="Category_Delete" xml:space="preserve"><value>Delete category</value></data>
+  <data name="Category_EmptyDesktop" xml:space="preserve"><value>No categories yet. Group occasions however you think about them.</value></data>
+  <data name="Category_FootnoteDesktop" xml:space="preserve"><value>Deleting a category keeps its occasions — they move to Uncategorised.</value></data>
+  <data name="Category_SubtitleDesktop" xml:space="preserve"><value>Group occasions however you think about them</value></data>
+  <data name="Category_EditorHint" xml:space="preserve"><value>Emoji and colour mark the category wherever it appears.</value></data>
+  <data name="Category_NamePlaceholderDesktop" xml:space="preserve"><value>Family, Health, Travel…</value></data>
   <data name="Calendar_Title" xml:space="preserve"><value>Calendar</value></data>
   <data name="Calendar_ComingUp" xml:space="preserve"><value>Coming up</value></data>
   <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Nothing to count toward yet — add an occasion and its milestones show up here.</value></data>
   <data name="Calendar_DotsLegend" xml:space="preserve"><value>Solid dots are anchor dates · faded dots are milestones.</value></data>
+  <data name="Calendar_PreviousMonth" xml:space="preserve"><value>Previous month</value></data>
+  <data name="Calendar_NextMonth" xml:space="preserve"><value>Next month</value></data>
+  <data name="Calendar_DotsLegendDesktop" xml:space="preserve"><value>Solid dots are anchor dates; faded dots are milestone dates.</value></data>
+  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Nothing ahead yet — add milestones to an occasion.</value></data>
+  <data name="Calendar_ThisMonth" xml:space="preserve"><value>This month</value></data>
+  <data name="Calendar_SubtitleDesktop" xml:space="preserve"><value>Anchor dates and milestones across the month</value></data>
   <data name="About_Title" xml:space="preserve"><value>About</value></data>
   <data name="About_Description" xml:space="preserve"><value>An open-source tracker for the dates you count from and toward. No ads, no paywall, no account.</value></data>
   <data name="About_Licence" xml:space="preserve"><value>Licence</value></data>
@@ -138,6 +160,15 @@
   <data name="About_Translations" xml:space="preserve"><value>Translations</value></data>
   <data name="About_Acknowledgements" xml:space="preserve"><value>Acknowledgements</value></data>
   <data name="About_Footer" xml:space="preserve"><value>Built with .NET MAUI · SQLite stays on device</value></data>
+  <data name="About_LicenceValue" xml:space="preserve"><value>MIT — free forever</value></data>
+  <data name="About_LicenceLink" xml:space="preserve"><value>Read the licence</value></data>
+  <data name="About_SourceValue" xml:space="preserve"><value>Open source on GitHub</value></data>
+  <data name="About_SourceLink" xml:space="preserve"><value>View the repository</value></data>
+  <data name="About_TranslationsLink" xml:space="preserve"><value>Help translate on GitHub</value></data>
+  <data name="About_AckValue" xml:space="preserve"><value>Fonts and libraries</value></data>
+  <data name="About_AckLink" xml:space="preserve"><value>Show credits</value></data>
+  <data name="About_FooterDesktop" xml:space="preserve"><value>Built with .NET MAUI · EF Core + SQLite · CommunityToolkit · Figtree &amp; IBM Plex Mono</value></data>
+  <data name="About_SubtitleDesktop" xml:space="preserve"><value>Version, licence and credits</value></data>
   <data name="Shell_Home" xml:space="preserve"><value>Home</value></data>
   <data name="Shell_Calendar" xml:space="preserve"><value>Calendar</value></data>
   <data name="Shell_Categories" xml:space="preserve"><value>Categories</value></data>
@@ -152,5 +183,16 @@
   <data name="Milestone_Reached" xml:space="preserve"><value>MILESTONE REACHED</value></data>
   <data name="Milestone_NotNow" xml:space="preserve"><value>Not now</value></data>
   <data name="Milestone_ShareThis" xml:space="preserve"><value>Share this</value></data>
+  <data name="Milestone_AddHintDesktop" xml:space="preserve"><value>Markd marks the day the count reaches this number.</value></data>
+  <data name="Milestone_WhatToCallIt" xml:space="preserve"><value>What to call it</value></data>
+  <data name="Milestone_NamePlaceholderDesktop" xml:space="preserve"><value>Four digits</value></data>
   <data name="Emoji_PickTitle" xml:space="preserve"><value>Pick an icon</value></data>
+  <data name="Desk_LightTheme" xml:space="preserve"><value>Light theme</value></data>
+  <data name="Desk_DarkTheme" xml:space="preserve"><value>Dark theme</value></data>
+  <data name="Desk_MoreIcons" xml:space="preserve"><value>More icons</value></data>
+  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Pick a date that matters — a first day, a last day, a day you're waiting for. Markd counts from there.</value></data>
+  <data name="Home_AddFirstDesktop" xml:space="preserve"><value>Create your first occasion</value></data>
+  <data name="Home_EmptyFootnoteDesktop" xml:space="preserve"><value>No account. No ads. Everything stays on this PC.</value></data>
+  <data name="Home_AllOccasions" xml:space="preserve"><value>All occasions</value></data>
+  <data name="Settings_SubtitleDesktop" xml:space="preserve"><value>Appearance, notifications and your local data</value></data>
 </root>

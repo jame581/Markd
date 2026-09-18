@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:services="clr-namespace:Markd.Services"
              xmlns:c="clr-namespace:Markd.Controls"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.Desktop.Dialogs.MilestoneMomentCard"
              x:DataType="services:MilestoneMoment">
     <!-- Centred overlay card, radius 26, accent rings expanding behind the occasion emoji -->
@@ -15,7 +16,7 @@
                 <c:EmojiAvatar Emoji="{Binding Occasion.Emoji}" ColorHex="{Binding Occasion.ColorHex}" Size="72" EmojiSize="34"
                                LightAlpha="0.16" DarkAlpha="0.28" HorizontalOptions="Center" VerticalOptions="Center" />
             </Grid>
-            <Label Text="MILESTONE REACHED" FontFamily="FigtreeSemiBold" FontSize="11" CharacterSpacing="2.24" HorizontalOptions="Center"
+            <Label Text="{loc:Tr Milestone_Reached}" FontFamily="FigtreeSemiBold" FontSize="11" CharacterSpacing="2.24" HorizontalOptions="Center"
                    TextColor="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
             <Label Text="{Binding Number}" FontFamily="FigtreeExtraBold" FontSize="46" CharacterSpacing="-1.28" HorizontalOptions="Center"
                    TextColor="{AppThemeBinding Light={StaticResource AccentTextLight}, Dark={StaticResource AccentTextDark}}" />
@@ -23,8 +24,8 @@
             <Label Text="{Binding Sentence}" FontSize="14" LineHeight="1.4" HorizontalTextAlignment="Center" MaximumWidthRequest="340"
                    Style="{StaticResource SecondaryText}" />
             <HorizontalStackLayout Spacing="9" HorizontalOptions="Center" Margin="0,14,0,0">
-                <Button Text="Not now" Style="{StaticResource DeskTonalButton}" HeightRequest="38" Clicked="OnNotNowClicked" />
-                <Button Text="Share this" Style="{StaticResource DeskPrimaryButton}" HeightRequest="38" Clicked="OnShareClicked" />
+                <Button Text="{loc:Tr Milestone_NotNow}" Style="{StaticResource DeskTonalButton}" HeightRequest="38" Clicked="OnNotNowClicked" />
+                <Button Text="{loc:Tr Milestone_ShareThis}" Style="{StaticResource DeskPrimaryButton}" HeightRequest="38" Clicked="OnShareClicked" />
             </HorizontalStackLayout>
         </VerticalStackLayout>
     </Border>

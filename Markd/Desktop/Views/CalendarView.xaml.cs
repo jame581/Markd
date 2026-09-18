@@ -1,3 +1,4 @@
+using Markd.Core.Localization;
 using Markd.ViewModels;
 
 namespace Markd.Desktop.Views;
@@ -14,12 +15,13 @@ public partial class CalendarView : ContentView, IDesktopSection
         _viewModel = ServiceHelper.GetRequiredService<CalendarViewModel>();
         BindingContext = _viewModel;
         SizeChanged += (_, _) => UpdateLayout();
+        LocalizationManager.Instance.CultureChanged += (_, _) => HeaderChanged?.Invoke(this, EventArgs.Empty);
     }
 
     public event EventHandler? HeaderChanged;
 
-    public string Title => "Calendar";
-    public string Subtitle => "Anchor dates and milestones across the month";
+    public string Title => Strings.Calendar_Title;
+    public string Subtitle => Strings.Calendar_SubtitleDesktop;
     public bool ShowsNewOccasion => false;
     public bool HasHeaderRule => true;
     public string? BackLabel => null;

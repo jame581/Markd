@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:c="clr-namespace:Markd.Controls"
              xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.Desktop.DesktopShellPage"
              Shell.NavBarIsVisible="False">
 
@@ -16,15 +17,15 @@
             <Grid BackgroundColor="{AppThemeBinding Light={StaticResource WindowChromeLight}, Dark={StaticResource WindowChromeDark}}">
                 <Grid Padding="9,8,9,12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto" RowSpacing="4">
                     <dc:RailItem x:Name="HomeItem" Glyph="WinHome" Section="home" AutomationId="rail-home"
-                                 ToolTipProperties.Text="Home" SemanticProperties.Description="Home" Clicked="OnRailItemClicked" />
+                                 ToolTipProperties.Text="{loc:Tr Shell_Home}" SemanticProperties.Description="{loc:Tr Shell_Home}" Clicked="OnRailItemClicked" />
                     <dc:RailItem x:Name="CalendarItem" Grid.Row="1" Glyph="WinCalendar" Section="calendar" AutomationId="rail-calendar"
-                                 ToolTipProperties.Text="Calendar" SemanticProperties.Description="Calendar" Clicked="OnRailItemClicked" />
+                                 ToolTipProperties.Text="{loc:Tr Shell_Calendar}" SemanticProperties.Description="{loc:Tr Shell_Calendar}" Clicked="OnRailItemClicked" />
                     <dc:RailItem x:Name="CategoriesItem" Grid.Row="2" Glyph="WinTag" Section="categories" AutomationId="rail-categories"
-                                 ToolTipProperties.Text="Categories" SemanticProperties.Description="Categories" Clicked="OnRailItemClicked" />
+                                 ToolTipProperties.Text="{loc:Tr Shell_Categories}" SemanticProperties.Description="{loc:Tr Shell_Categories}" Clicked="OnRailItemClicked" />
                     <dc:RailItem x:Name="SettingsItem" Grid.Row="3" Glyph="WinGear" Section="settings" AutomationId="rail-settings"
-                                 ToolTipProperties.Text="Settings" SemanticProperties.Description="Settings" Clicked="OnRailItemClicked" />
+                                 ToolTipProperties.Text="{loc:Tr Shell_Settings}" SemanticProperties.Description="{loc:Tr Shell_Settings}" Clicked="OnRailItemClicked" />
                     <dc:RailItem x:Name="AboutItem" Grid.Row="4" Glyph="WinInfo" Section="about" AutomationId="rail-about"
-                                 ToolTipProperties.Text="About" SemanticProperties.Description="About" Clicked="OnRailItemClicked" />
+                                 ToolTipProperties.Text="{loc:Tr About_Title}" SemanticProperties.Description="{loc:Tr About_Title}" Clicked="OnRailItemClicked" />
                     <dc:RailItem x:Name="ThemeItem" Grid.Row="6" HeightRequest="36" AutomationId="rail-theme" Clicked="OnThemeClicked" />
                 </Grid>
                 <BoxView WidthRequest="1" HorizontalOptions="End" />
@@ -46,7 +47,7 @@
                         <Label x:Name="TitleLabel" Style="{StaticResource DeskPageTitle}" LineBreakMode="TailTruncation" />
                         <Label x:Name="SubtitleLabel" Style="{StaticResource DeskSubtitle}" />
                     </VerticalStackLayout>
-                    <dc:DeskButton x:Name="NewOccasionButton" Grid.Column="1" Variant="Accent" Glyph="WinPlus" Text="New occasion"
+                    <dc:DeskButton x:Name="NewOccasionButton" Grid.Column="1" Variant="Accent" Glyph="WinPlus" Text="{loc:Tr Home_NewOccasion}"
                                    AutomationId="new-occasion" VerticalOptions="End" Clicked="OnNewOccasionClicked" />
                 </Grid>
                 <BoxView x:Name="HeaderRule" Grid.Row="1" />

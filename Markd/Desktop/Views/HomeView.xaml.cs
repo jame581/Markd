@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Messaging;
+using Markd.Core.Localization;
 using Markd.ViewModels;
 
 namespace Markd.Desktop.Views;
@@ -47,15 +48,16 @@ public partial class HomeView : ContentView, IDesktopSection
         });
 
         SizeChanged += (_, _) => UpdateLayout();
+        LocalizationManager.Instance.CultureChanged += (_, _) => RaiseHeaderChanged();
     }
 
     public event EventHandler? HeaderChanged;
 
-    public string Title => _showingNarrowDetail ? _detail.Title : "Home";
+    public string Title => _showingNarrowDetail ? _detail.Title : Strings.Shell_Home;
     public string Subtitle => _showingNarrowDetail ? _detail.CategoryName : _list.HomeSubtitle;
     public bool ShowsNewOccasion => !_showingNarrowDetail && _list.HasOccasions;
     public bool HasHeaderRule => false;
-    public string? BackLabel => _showingNarrowDetail ? "All occasions" : null;
+    public string? BackLabel => _showingNarrowDetail ? Strings.Home_AllOccasions : null;
 
     public async Task ShowAsync()
     {

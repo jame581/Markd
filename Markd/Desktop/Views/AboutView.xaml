@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Markd.ViewModels"
              xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.Desktop.Views.AboutView"
              x:DataType="vm:AboutViewModel">
     <ContentView.Resources>
@@ -30,7 +31,7 @@
                         <VerticalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
                             <Label Text="Markd" FontFamily="FigtreeBold" FontSize="24" />
                             <Label Text="{Binding VersionText}" FontFamily="PlexMonoMedium" FontSize="13" Style="{StaticResource SecondaryText}" />
-                            <Label Text="An open-source tracker for the dates you count from and toward. No ads, no paywall, no account."
+                            <Label Text="{loc:Tr About_Description}"
                                    FontSize="14" LineHeight="1.4" Style="{StaticResource SecondaryText}" />
                         </VerticalStackLayout>
                     </Grid>
@@ -39,43 +40,43 @@
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                     <Border Style="{StaticResource DeskCard}" Padding="20,18">
                         <VerticalStackLayout Spacing="7">
-                            <Label Text="Licence" Style="{StaticResource DeskCardHeader}" />
-                            <Label Text="MIT — free forever" Style="{StaticResource AboutValue}" />
-                            <Label Text="Read the licence" Style="{StaticResource AboutLink}">
+                            <Label Text="{loc:Tr About_Licence}" Style="{StaticResource DeskCardHeader}" />
+                            <Label Text="{loc:Tr About_LicenceValue}" Style="{StaticResource AboutValue}" />
+                            <Label Text="{loc:Tr About_LicenceLink}" Style="{StaticResource AboutLink}">
                                 <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenLicenceCommand}" /></Label.GestureRecognizers>
                             </Label>
                         </VerticalStackLayout>
                     </Border>
                     <Border Grid.Column="1" Style="{StaticResource DeskCard}" Padding="20,18">
                         <VerticalStackLayout Spacing="7">
-                            <Label Text="Source code" Style="{StaticResource DeskCardHeader}" />
-                            <Label Text="Open source on GitHub" Style="{StaticResource AboutValue}" />
-                            <Label Text="View the repository" Style="{StaticResource AboutLink}">
+                            <Label Text="{loc:Tr About_SourceCode}" Style="{StaticResource DeskCardHeader}" />
+                            <Label Text="{loc:Tr About_SourceValue}" Style="{StaticResource AboutValue}" />
+                            <Label Text="{loc:Tr About_SourceLink}" Style="{StaticResource AboutLink}">
                                 <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenSourceCommand}" /></Label.GestureRecognizers>
                             </Label>
                         </VerticalStackLayout>
                     </Border>
                     <Border Grid.Row="1" Style="{StaticResource DeskCard}" Padding="20,18">
                         <VerticalStackLayout Spacing="7">
-                            <Label Text="Translations" Style="{StaticResource DeskCardHeader}" />
-                            <Label Text="English · Čeština" Style="{StaticResource AboutValue}" />
-                            <Label Text="Help translate on GitHub" Style="{StaticResource AboutLink}">
+                            <Label Text="{loc:Tr About_Translations}" Style="{StaticResource DeskCardHeader}" />
+                            <Label Text="{loc:Tr Settings_LanguageSub}" Style="{StaticResource AboutValue}" />
+                            <Label Text="{loc:Tr About_TranslationsLink}" Style="{StaticResource AboutLink}">
                                 <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenSourceCommand}" /></Label.GestureRecognizers>
                             </Label>
                         </VerticalStackLayout>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource DeskCard}" Padding="20,18">
                         <VerticalStackLayout Spacing="7">
-                            <Label Text="Acknowledgements" Style="{StaticResource DeskCardHeader}" />
-                            <Label Text="Fonts and libraries" Style="{StaticResource AboutValue}" />
-                            <Label Text="Show credits" Style="{StaticResource AboutLink}">
+                            <Label Text="{loc:Tr About_Acknowledgements}" Style="{StaticResource DeskCardHeader}" />
+                            <Label Text="{loc:Tr About_AckValue}" Style="{StaticResource AboutValue}" />
+                            <Label Text="{loc:Tr About_AckLink}" Style="{StaticResource AboutLink}">
                                 <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding ShowAcknowledgementsCommand}" /></Label.GestureRecognizers>
                             </Label>
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
 
-                <Label Text="Built with .NET MAUI · EF Core + SQLite · CommunityToolkit · Figtree &amp; IBM Plex Mono" FontSize="12.5" Margin="2,4,0,0"
+                <Label Text="{loc:Tr About_FooterDesktop}" FontSize="12.5" Margin="2,4,0,0"
                        Style="{StaticResource TertiaryText}" />
             </VerticalStackLayout>
         </dc:CappedColumn>

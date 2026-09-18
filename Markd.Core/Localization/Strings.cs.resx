@@ -106,6 +106,8 @@
   <data name="Detail_DeleteOccasion" xml:space="preserve"><value>Smazat událost</value></data>
   <data name="Detail_ShareMilestone" xml:space="preserve"><value>Sdílet milník</value></data>
   <data name="Detail_RemoveMilestone" xml:space="preserve"><value>Odebrat milník</value></data>
+  <data name="Detail_EditOccasion" xml:space="preserve"><value>Upravit událost</value></data>
+  <data name="Detail_NoMilestonesDesktop" xml:space="preserve"><value>Zatím žádné milníky. Přidejte jeden a označte den, který stojí za pozornost.</value></data>
   <data name="Form_Title" xml:space="preserve"><value>Název</value></data>
   <data name="Form_TitlePlaceholder" xml:space="preserve"><value>Co si značíte?</value></data>
   <data name="Form_Category" xml:space="preserve"><value>Kategorie</value></data>
@@ -118,6 +120,13 @@
   <data name="Form_Colour" xml:space="preserve"><value>Barva</value></data>
   <data name="Form_PinToHome" xml:space="preserve"><value>Připnout na hlavní stránku</value></data>
   <data name="Form_PinToHomeSub" xml:space="preserve"><value>Nahradí zvýrazněnou kartu</value></data>
+  <data name="Form_Emoji" xml:space="preserve"><value>Emoji</value></data>
+  <data name="Form_Direction" xml:space="preserve"><value>Směr</value></data>
+  <data name="Form_CountingSince" xml:space="preserve"><value>Počítá se od</value></data>
+  <data name="Form_CountingUntil" xml:space="preserve"><value>Počítá se do</value></data>
+  <data name="Form_Pin" xml:space="preserve"><value>Připnutí</value></data>
+  <data name="Form_PinToTopDesktop" xml:space="preserve"><value>Připnout na začátek Domů</value></data>
+  <data name="Form_ChooseEmoji" xml:space="preserve"><value>Vybrat emoji</value></data>
   <data name="Category_Title" xml:space="preserve"><value>Kategorie</value></data>
   <data name="Category_Empty" xml:space="preserve"><value>Zatím žádné kategorie. Tlačítkem Nová kategorie si seskupíte události podle svého.</value></data>
   <data name="Category_Footnote" xml:space="preserve"><value>Podržením nebo klepnutím na nabídku zobrazíte akce řádku. Události ze smazané kategorie se přesunou do Bez kategorie — nikdy se s ní nesmažou.</value></data>
@@ -127,10 +136,23 @@
   <data name="Category_Colour" xml:space="preserve"><value>Barva</value></data>
   <data name="Category_Rename" xml:space="preserve"><value>Přejmenovat</value></data>
   <data name="Category_ChangeColour" xml:space="preserve"><value>Změnit barvu</value></data>
+  <data name="Category_Edit" xml:space="preserve"><value>Upravit kategorii</value></data>
+  <data name="Category_Delete" xml:space="preserve"><value>Smazat kategorii</value></data>
+  <data name="Category_EmptyDesktop" xml:space="preserve"><value>Zatím žádné kategorie. Seskupte události podle svého.</value></data>
+  <data name="Category_FootnoteDesktop" xml:space="preserve"><value>Smazáním kategorie její události zůstanou zachované — přesunou se do Bez kategorie.</value></data>
+  <data name="Category_SubtitleDesktop" xml:space="preserve"><value>Seskupte události podle svého</value></data>
+  <data name="Category_EditorHint" xml:space="preserve"><value>Emoji a barva označují kategorii všude, kde se zobrazí.</value></data>
+  <data name="Category_NamePlaceholderDesktop" xml:space="preserve"><value>Rodina, Zdraví, Cestování…</value></data>
   <data name="Calendar_Title" xml:space="preserve"><value>Kalendář</value></data>
   <data name="Calendar_ComingUp" xml:space="preserve"><value>Blíží se</value></data>
   <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Zatím není k čemu se blížit — přidejte událost a její milníky se zobrazí zde.</value></data>
   <data name="Calendar_DotsLegend" xml:space="preserve"><value>Plné tečky jsou výchozí data · vybledlé tečky jsou milníky.</value></data>
+  <data name="Calendar_PreviousMonth" xml:space="preserve"><value>Předchozí měsíc</value></data>
+  <data name="Calendar_NextMonth" xml:space="preserve"><value>Další měsíc</value></data>
+  <data name="Calendar_DotsLegendDesktop" xml:space="preserve"><value>Plné tečky jsou výchozí data; vybledlé tečky jsou milníky.</value></data>
+  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Zatím nic nečeká — přidejte milníky k některé události.</value></data>
+  <data name="Calendar_ThisMonth" xml:space="preserve"><value>Tento měsíc</value></data>
+  <data name="Calendar_SubtitleDesktop" xml:space="preserve"><value>Výchozí data a milníky v průběhu měsíce</value></data>
   <data name="About_Title" xml:space="preserve"><value>O aplikaci</value></data>
   <data name="About_Description" xml:space="preserve"><value>Open-source aplikace pro sledování dat, od kterých a ke kterým počítáte. Žádné reklamy, žádné poplatky, žádný účet.</value></data>
   <data name="About_Licence" xml:space="preserve"><value>Licence</value></data>
@@ -138,6 +160,15 @@
   <data name="About_Translations" xml:space="preserve"><value>Překlady</value></data>
   <data name="About_Acknowledgements" xml:space="preserve"><value>Poděkování</value></data>
   <data name="About_Footer" xml:space="preserve"><value>Vytvořeno s .NET MAUI · SQLite zůstává v zařízení</value></data>
+  <data name="About_LicenceValue" xml:space="preserve"><value>MIT — navždy zdarma</value></data>
+  <data name="About_LicenceLink" xml:space="preserve"><value>Přečíst licenci</value></data>
+  <data name="About_SourceValue" xml:space="preserve"><value>Otevřený zdrojový kód na GitHubu</value></data>
+  <data name="About_SourceLink" xml:space="preserve"><value>Zobrazit repozitář</value></data>
+  <data name="About_TranslationsLink" xml:space="preserve"><value>Pomozte s překladem na GitHubu</value></data>
+  <data name="About_AckValue" xml:space="preserve"><value>Písma a knihovny</value></data>
+  <data name="About_AckLink" xml:space="preserve"><value>Zobrazit poděkování</value></data>
+  <data name="About_FooterDesktop" xml:space="preserve"><value>Vytvořeno s .NET MAUI · EF Core + SQLite · CommunityToolkit · Figtree &amp; IBM Plex Mono</value></data>
+  <data name="About_SubtitleDesktop" xml:space="preserve"><value>Verze, licence a poděkování</value></data>
   <data name="Shell_Home" xml:space="preserve"><value>Domů</value></data>
   <data name="Shell_Calendar" xml:space="preserve"><value>Kalendář</value></data>
   <data name="Shell_Categories" xml:space="preserve"><value>Kategorie</value></data>
@@ -152,5 +183,16 @@
   <data name="Milestone_Reached" xml:space="preserve"><value>MILNÍK DOSAŽEN</value></data>
   <data name="Milestone_NotNow" xml:space="preserve"><value>Teď ne</value></data>
   <data name="Milestone_ShareThis" xml:space="preserve"><value>Sdílet</value></data>
+  <data name="Milestone_AddHintDesktop" xml:space="preserve"><value>Markd označí den, kdy počet dosáhne tohoto čísla.</value></data>
+  <data name="Milestone_WhatToCallIt" xml:space="preserve"><value>Jak to nazvat</value></data>
+  <data name="Milestone_NamePlaceholderDesktop" xml:space="preserve"><value>Čtyři číslice</value></data>
   <data name="Emoji_PickTitle" xml:space="preserve"><value>Vyberte ikonu</value></data>
+  <data name="Desk_LightTheme" xml:space="preserve"><value>Světlý motiv</value></data>
+  <data name="Desk_DarkTheme" xml:space="preserve"><value>Tmavý motiv</value></data>
+  <data name="Desk_MoreIcons" xml:space="preserve"><value>Další ikony</value></data>
+  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Vyberte datum, na kterém záleží — první den, poslední den, den, na který čekáte. Markd od něj počítá.</value></data>
+  <data name="Home_AddFirstDesktop" xml:space="preserve"><value>Vytvořit první událost</value></data>
+  <data name="Home_EmptyFootnoteDesktop" xml:space="preserve"><value>Žádný účet. Žádné reklamy. Vše zůstává v tomto počítači.</value></data>
+  <data name="Home_AllOccasions" xml:space="preserve"><value>Všechny události</value></data>
+  <data name="Settings_SubtitleDesktop" xml:space="preserve"><value>Vzhled, oznámení a vaše místní data</value></data>
 </root>

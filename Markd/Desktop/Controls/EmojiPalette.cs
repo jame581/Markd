@@ -1,3 +1,5 @@
+using Markd.Localization;
+
 namespace Markd.Desktop.Controls;
 
 /// <summary>
@@ -69,7 +71,7 @@ public sealed class EmojiPalette : VerticalStackLayout
                 HeightRequest = Cell,
                 ContentKey = "TextSecondary"
             };
-            ToolTipProperties.SetText(_toggle, "More icons");
+            _toggle.SetBinding(ToolTipProperties.TextProperty, Tr.Bind("Desk_MoreIcons"));
             _toggle.Clicked += (_, _) => SetExpanded(!_more.IsVisible);
             EnsureColumns(_quick, quick.Count + 1);
             _quick.Add(_toggle, quick.Count, 0);

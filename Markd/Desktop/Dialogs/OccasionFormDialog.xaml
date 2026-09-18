@@ -5,6 +5,7 @@
              xmlns:domain="clr-namespace:Markd.Core.Domain;assembly=Markd.Core"
              xmlns:c="clr-namespace:Markd.Controls"
              xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.Desktop.Dialogs.OccasionFormDialog"
              x:DataType="vm:OccasionFormViewModel">
     <!-- New / edit occasion as a ContentDialog: 560 wide, radius 12, over a scrim -->
@@ -36,18 +37,18 @@
                     <VerticalStackLayout Spacing="10">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                             <VerticalStackLayout Spacing="6">
-                                <Label Text="Emoji" Style="{StaticResource DeskFieldLabel}" />
+                                <Label Text="{loc:Tr Form_Emoji}" Style="{StaticResource DeskFieldLabel}" />
                                 <dc:HoverSurface WidthRequest="38" HeightRequest="38" CornerRadius="8" NormalKey="PageBackground" HoverKey="SurfaceCardPressed"
                                                  StrokeKey="CardBorder" SelectedKey="AccentTint" SelectedStrokeKey="AccentBorderColor"
                                                  IsSelected="{Binding IsVisible, Source={x:Reference EmojiPanel}, x:DataType=dc:EmojiPalette}"
-                                                 ToolTipProperties.Text="Choose an emoji" Clicked="OnEmojiButtonClicked">
+                                                 ToolTipProperties.Text="{loc:Tr Form_ChooseEmoji}" Clicked="OnEmojiButtonClicked">
                                     <Label Text="{Binding Emoji}" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" InputTransparent="True" />
                                 </dc:HoverSurface>
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="6">
-                                <Label Text="Title" Style="{StaticResource DeskFieldLabel}" />
+                                <Label Text="{loc:Tr Form_Title}" Style="{StaticResource DeskFieldLabel}" />
                                 <Border Style="{StaticResource DeskInput}">
-                                    <Entry x:Name="TitleEntry" Text="{Binding Title}" Placeholder="What are you marking?" FontSize="14"
+                                    <Entry x:Name="TitleEntry" Text="{Binding Title}" Placeholder="{loc:Tr Form_TitlePlaceholder}" FontSize="14"
                                            Completed="OnTitleCompleted" />
                                 </Border>
                             </VerticalStackLayout>
@@ -59,7 +60,7 @@
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Category" Style="{StaticResource DeskFieldLabel}" />
+                            <Label Text="{loc:Tr Form_Category}" Style="{StaticResource DeskFieldLabel}" />
                             <Border Style="{StaticResource DeskInput}" Padding="4,0">
                                 <Picker ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" FontSize="14"
                                         ItemDisplayBinding="{Binding Name, x:DataType=domain:Category}" />
@@ -68,12 +69,12 @@
 
                         <!-- Direction: a two-item segmented control, never a dropdown -->
                         <VerticalStackLayout Grid.Column="1" Spacing="6">
-                            <Label Text="Direction" Style="{StaticResource DeskFieldLabel}" />
+                            <Label Text="{loc:Tr Form_Direction}" Style="{StaticResource DeskFieldLabel}" />
                             <Border Style="{StaticResource DeskInput}" Padding="3">
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="3">
                                     <dc:HoverSurface CornerRadius="6" HoverKey="SurfaceCardPressed" SelectedKey="AccentFill"
                                                      IsSelected="{Binding IsSinceSelected}" Command="{Binding SetDirectionCommand}" CommandParameter="Since">
-                                        <Label Text="Counting since" FontFamily="FigtreeSemiBold" FontSize="12.5" HorizontalOptions="Center" VerticalOptions="Center"
+                                        <Label Text="{loc:Tr Form_CountingSince}" FontFamily="FigtreeSemiBold" FontSize="12.5" HorizontalOptions="Center" VerticalOptions="Center"
                                                InputTransparent="True" Style="{StaticResource SecondaryText}">
                                             <Label.Triggers>
                                                 <DataTrigger TargetType="Label" Binding="{Binding IsSinceSelected}" Value="True">
@@ -84,7 +85,7 @@
                                     </dc:HoverSurface>
                                     <dc:HoverSurface Grid.Column="1" CornerRadius="6" HoverKey="SurfaceCardPressed" SelectedKey="AccentFill"
                                                      IsSelected="{Binding IsUntilSelected}" Command="{Binding SetDirectionCommand}" CommandParameter="Until">
-                                        <Label Text="Counting until" FontFamily="FigtreeSemiBold" FontSize="12.5" HorizontalOptions="Center" VerticalOptions="Center"
+                                        <Label Text="{loc:Tr Form_CountingUntil}" FontFamily="FigtreeSemiBold" FontSize="12.5" HorizontalOptions="Center" VerticalOptions="Center"
                                                InputTransparent="True" Style="{StaticResource SecondaryText}">
                                             <Label.Triggers>
                                                 <DataTrigger TargetType="Label" Binding="{Binding IsUntilSelected}" Value="True">
@@ -100,32 +101,32 @@
 
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="14">
                         <VerticalStackLayout Spacing="6">
-                            <Label Text="Date" Style="{StaticResource DeskFieldLabel}" />
+                            <Label Text="{loc:Tr Form_Date}" Style="{StaticResource DeskFieldLabel}" />
                             <Border Style="{StaticResource DeskInput}" Padding="4,0">
                                 <DatePicker Date="{Binding AnchorDate}" Format="d MMM yyyy" FontFamily="PlexMonoMedium" FontSize="13.5" />
                             </Border>
                         </VerticalStackLayout>
                         <VerticalStackLayout Grid.Column="1" Spacing="6">
-                            <Label Text="Pin" Style="{StaticResource DeskFieldLabel}" />
+                            <Label Text="{loc:Tr Form_Pin}" Style="{StaticResource DeskFieldLabel}" />
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12" MinimumHeightRequest="38">
                                 <dc:DeskToggle IsToggled="{Binding IsPinned}" />
                                 <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
-                                    <Label Text="Pin to the top of Home" FontFamily="FigtreeMedium" FontSize="13.5" />
-                                    <Label Text="Replaces the featured card" FontSize="12" Style="{StaticResource SecondaryText}" />
+                                    <Label Text="{loc:Tr Form_PinToTopDesktop}" FontFamily="FigtreeMedium" FontSize="13.5" />
+                                    <Label Text="{loc:Tr Form_PinToHomeSub}" FontSize="12" Style="{StaticResource SecondaryText}" />
                                 </VerticalStackLayout>
                             </Grid>
                         </VerticalStackLayout>
                     </Grid>
 
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="Notes" Style="{StaticResource DeskFieldLabel}" />
+                        <Label Text="{loc:Tr Form_Notes}" Style="{StaticResource DeskFieldLabel}" />
                         <Border Style="{StaticResource DeskInput}" Padding="10,2">
-                            <Editor Text="{Binding Notes}" Placeholder="Why this day matters" HeightRequest="80" FontSize="14" />
+                            <Editor Text="{Binding Notes}" Placeholder="{loc:Tr Form_NotesPlaceholder}" HeightRequest="80" FontSize="14" />
                         </Border>
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="6">
-                        <Label Text="Colour" Style="{StaticResource DeskFieldLabel}" />
+                        <Label Text="{loc:Tr Form_Colour}" Style="{StaticResource DeskFieldLabel}" />
                         <dc:SwatchGrid Choices="{Binding ColorChoices}" SelectCommand="{Binding SelectColorCommand}" Margin="-4,0,0,0" />
                     </VerticalStackLayout>
                 </VerticalStackLayout>
@@ -143,7 +144,7 @@
                 <BoxView />
                 <Grid Grid.Row="1" Padding="26,14,26,18" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="9"
                       BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundLight}, Dark={StaticResource PageBackgroundDark}}">
-                    <Button Grid.Column="1" Text="Cancel" Style="{StaticResource DeskTonalButton}" HeightRequest="38" Command="{Binding CancelCommand}" />
+                    <Button Grid.Column="1" Text="{loc:Tr Common_Cancel}" Style="{StaticResource DeskTonalButton}" HeightRequest="38" Command="{Binding CancelCommand}" />
                     <Button Grid.Column="2" Text="{Binding SaveLabel}" Style="{StaticResource DeskPrimaryButton}" HeightRequest="38"
                             AutomationId="form-save" Command="{Binding SaveCommand}" />
                 </Grid>
