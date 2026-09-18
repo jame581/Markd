@@ -105,6 +105,34 @@ namespace Markd.Core.Tests
         }
 
         [Fact]
+        public async Task ApplyImportAsync_FailureKeepsDataAndLeavesNothingPending()
+        {
+            var dbPath = Path.Combine(Path.GetTempPath(), $"markd_fail_{Guid.NewGuid():N}.db");
+            using var db = CreateSqliteContext(dbPath);
+            db.Occasions.Add(new Markd.Core.Domain.Occasion { Title = "Keep me", AnchorDate = new DateTime(2020, 1, 1) });
+            await db.SaveChangesAsync();
+
+            // Two pinned occasions break the single-pin index halfway through the import.
+            var model = new ExportModel
+            {
+                Occasions =
+                [
+                    new OccasionDto { SourceId = 1, Title = "First", IsPinned = true, AnchorDate = new DateTime(2021, 1, 1) },
+                    new OccasionDto { SourceId = 2, Title = "Second", IsPinned = true, AnchorDate = new DateTime(2022, 1, 1) }
+                ]
+            };
+
+            var importer = new ImportService(db);
+            await Assert.ThrowsAnyAsync<Exception>(() => importer.ApplyImportAsync(model));
+
+            // The app keeps one context for its whole session: a failed import must not leave
+            // rolled-back entities behind for the next SaveChanges to write.
+            Assert.False(db.ChangeTracker.HasChanges());
+            await db.SaveChangesAsync();
+            Assert.Equal(["Keep me"], await db.Occasions.Select(o => o.Title).ToListAsync());
+        }
+
+        [Fact]
         public async Task ParseImportPackageAsync_UnsupportedSchema_ThrowsClearError()
         {
             var dbPath = Path.Combine(Path.GetTempPath(), $"markd_schema_{Guid.NewGuid():N}.db");

@@ -27,9 +27,15 @@ namespace Markd.Core.Services
 
         public async Task<Category> UpdateAsync(Category category)
         {
-            db.Categories.Update(category);
+            var existing = await db.Categories.FindAsync(category.Id)
+                ?? throw new InvalidOperationException($"Category {category.Id} was not found.");
+
+            existing.Name = category.Name;
+            existing.Emoji = category.Emoji;
+            existing.ColorHex = category.ColorHex;
+
             await db.SaveChangesAsync();
-            return category;
+            return existing;
         }
 
         public async Task DeleteAsync(int id)

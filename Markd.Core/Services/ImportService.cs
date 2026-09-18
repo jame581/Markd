@@ -166,20 +166,11 @@ namespace Markd.Core.Services
             }
             catch (Exception)
             {
+                // The rollback restores the data. Copying the backup over the file here would race the open
+                // connection, so the backup stays on disk for manual recovery only. The app keeps one context for
+                // its whole session, so the rolled-back entities must also leave the change tracker.
                 await transaction.RollbackAsync();
-                // Attempt to restore backup
-                if (backupPath != null && File.Exists(backupPath))
-                {
-                    try
-                    {
-                        File.Copy(backupPath!, dataSource!, overwrite: true);
-                    }
-                    catch
-                    {
-                        // ignore restore errors
-                    }
-                }
-
+                _db.ChangeTracker.Clear();
                 throw;
             }
         }
