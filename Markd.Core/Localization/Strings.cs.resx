@@ -43,4 +43,53 @@
   <data name="Settings_EraseAllShort" xml:space="preserve"><value>Smazat vše</value></data>
   <data name="Settings_EraseAllSub" xml:space="preserve"><value>Všechny události a milníky. Kategorie a nastavení zůstanou zachovány.</value></data>
   <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd uchovává jeden soubor SQLite v tomto počítači. Nic se nenahrává, takže se nic nesynchronizuje — před přechodem na jiný počítač proveďte export.</value></data>
+  <data name="Abbr_Year" xml:space="preserve"><value>r</value></data>
+  <data name="Abbr_Month" xml:space="preserve"><value>m</value></data>
+  <data name="Abbr_Day" xml:space="preserve"><value>d</value></data>
+  <data name="Abbr_Hour" xml:space="preserve"><value>h</value></data>
+  <data name="Abbr_Minute" xml:space="preserve"><value>min</value></data>
+  <data name="Abbr_Second" xml:space="preserve"><value>s</value></data>
+  <data name="Format_ShortDate" xml:space="preserve"><value>d. M. yyyy</value></data>
+  <data name="Format_LongDate" xml:space="preserve"><value>dddd d. MMMM yyyy</value></data>
+  <data name="Occasion_Today" xml:space="preserve"><value>Dnes</value></data>
+  <data name="Occasion_DaysAway_One" xml:space="preserve"><value>za {0} den</value></data>
+  <data name="Occasion_DaysAway_Few" xml:space="preserve"><value>za {0} dny</value></data>
+  <data name="Occasion_DaysAway_Many" xml:space="preserve"><value>za {0} dní</value></data>
+  <data name="Occasion_DaysPast_One" xml:space="preserve"><value>před {0} dnem</value></data>
+  <data name="Occasion_DaysPast_Few" xml:space="preserve"><value>před {0} dny</value></data>
+  <data name="Occasion_DaysPast_Many" xml:space="preserve"><value>před {0} dny</value></data>
+  <data name="Occasion_DaysToGo_One" xml:space="preserve"><value>zbývá {0} den</value></data>
+  <data name="Occasion_DaysToGo_Few" xml:space="preserve"><value>zbývají {0} dny</value></data>
+  <data name="Occasion_DaysToGo_Many" xml:space="preserve"><value>zbývá {0} dní</value></data>
+  <data name="Occasion_Since" xml:space="preserve"><value>Od</value></data>
+  <data name="Occasion_Until" xml:space="preserve"><value>Do</value></data>
+  <data name="Occasion_SincePhrase" xml:space="preserve"><value>od {0}</value></data>
+  <data name="Occasion_UntilPhrase" xml:space="preserve"><value>do {0}</value></data>
+  <data name="Occasion_UnitToGo" xml:space="preserve"><value>zbývá</value></data>
+  <data name="Occasion_UnitDaysAgo_One" xml:space="preserve"><value>den zpět</value></data>
+  <data name="Occasion_UnitDaysAgo_Few" xml:space="preserve"><value>dny zpět</value></data>
+  <data name="Occasion_UnitDaysAgo_Many" xml:space="preserve"><value>dní zpět</value></data>
+  <data name="Occasion_UnitDays_One" xml:space="preserve"><value>den</value></data>
+  <data name="Occasion_UnitDays_Few" xml:space="preserve"><value>dny</value></data>
+  <data name="Occasion_UnitDays_Many" xml:space="preserve"><value>dní</value></data>
+  <data name="Occasion_NoMilestoneAhead" xml:space="preserve"><value>Žádný další milník</value></data>
+  <data name="Occasion_NextMilestone" xml:space="preserve"><value>Další · {0}</value></data>
+  <data name="Occasion_Uncategorised" xml:space="preserve"><value>Bez kategorie</value></data>
+  <data name="Occasion_Count_One" xml:space="preserve"><value>{0} událost</value></data>
+  <data name="Occasion_Count_Few" xml:space="preserve"><value>{0} události</value></data>
+  <data name="Occasion_Count_Many" xml:space="preserve"><value>{0} událostí</value></data>
+  <data name="Calendar_Initial_Mon" xml:space="preserve"><value>P</value></data>
+  <data name="Calendar_Initial_Tue" xml:space="preserve"><value>Ú</value></data>
+  <data name="Calendar_Initial_Wed" xml:space="preserve"><value>S</value></data>
+  <data name="Calendar_Initial_Thu" xml:space="preserve"><value>Č</value></data>
+  <data name="Calendar_Initial_Fri" xml:space="preserve"><value>P</value></data>
+  <data name="Calendar_Initial_Sat" xml:space="preserve"><value>S</value></data>
+  <data name="Calendar_Initial_Sun" xml:space="preserve"><value>N</value></data>
+  <data name="Calendar_Short_Mon" xml:space="preserve"><value>Po</value></data>
+  <data name="Calendar_Short_Tue" xml:space="preserve"><value>Út</value></data>
+  <data name="Calendar_Short_Wed" xml:space="preserve"><value>St</value></data>
+  <data name="Calendar_Short_Thu" xml:space="preserve"><value>Čt</value></data>
+  <data name="Calendar_Short_Fri" xml:space="preserve"><value>Pá</value></data>
+  <data name="Calendar_Short_Sat" xml:space="preserve"><value>So</value></data>
+  <data name="Calendar_Short_Sun" xml:space="preserve"><value>Ne</value></data>
 </root>

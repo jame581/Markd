@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:Markd.ViewModels"
              xmlns:c="clr-namespace:Markd.Controls"
              xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.CalendarPage"
              x:Name="RootPage"
              x:DataType="vm:CalendarViewModel"
@@ -32,13 +33,13 @@
                                     <Setter Property="HorizontalTextAlignment" Value="Center" />
                                 </Style>
                             </Grid.Resources>
-                            <Label Grid.Column="0" Text="M" />
-                            <Label Grid.Column="1" Text="T" />
-                            <Label Grid.Column="2" Text="W" />
-                            <Label Grid.Column="3" Text="T" />
-                            <Label Grid.Column="4" Text="F" />
-                            <Label Grid.Column="5" Text="S" />
-                            <Label Grid.Column="6" Text="S" />
+                            <Label Grid.Column="0" Text="{loc:Tr Calendar_Initial_Mon}" />
+                            <Label Grid.Column="1" Text="{loc:Tr Calendar_Initial_Tue}" />
+                            <Label Grid.Column="2" Text="{loc:Tr Calendar_Initial_Wed}" />
+                            <Label Grid.Column="3" Text="{loc:Tr Calendar_Initial_Thu}" />
+                            <Label Grid.Column="4" Text="{loc:Tr Calendar_Initial_Fri}" />
+                            <Label Grid.Column="5" Text="{loc:Tr Calendar_Initial_Sat}" />
+                            <Label Grid.Column="6" Text="{loc:Tr Calendar_Initial_Sun}" />
                         </Grid>
 
                         <VerticalStackLayout Spacing="3" BindableLayout.ItemsSource="{Binding Weeks}">

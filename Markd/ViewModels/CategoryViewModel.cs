@@ -267,6 +267,8 @@ public class CategoryViewModel : ViewModelBase
         if (_hasLoaded)
             Application.Current?.Dispatcher.Dispatch(async () => await LoadAsync());
     }
+
+    protected override void OnLanguageChanged() => ReloadIfLoaded();
 }
 
 public sealed class CategoryRow(Category category, int occasionCount)

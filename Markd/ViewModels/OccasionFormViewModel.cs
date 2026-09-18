@@ -11,7 +11,7 @@ namespace Markd.ViewModels;
 
 public class OccasionFormViewModel : ViewModelBase
 {
-    private static readonly Category NoneCategory = new() { Id = 0, Name = OccasionGroup.UncategorisedName };
+    private readonly Category _noneCategory = new() { Id = 0, Name = OccasionGroup.UncategorisedName };
 
     private readonly IOccasionService _occasionService;
     private readonly ICategoryService _categoryService;
@@ -201,7 +201,7 @@ public class OccasionFormViewModel : ViewModelBase
             Direction = OccasionDirection.Since;
             Notes = null;
             IsPinned = false;
-            SelectedCategory = NoneCategory;
+            SelectedCategory = _noneCategory;
         }
         else
         {
@@ -220,8 +220,8 @@ public class OccasionFormViewModel : ViewModelBase
             Notes = occasion.Notes;
             IsPinned = occasion.IsPinned;
             SelectedCategory = occasion.CategoryId.HasValue
-                ? Categories.FirstOrDefault(c => c.Id == occasion.CategoryId.Value) ?? NoneCategory
-                : NoneCategory;
+                ? Categories.FirstOrDefault(c => c.Id == occasion.CategoryId.Value) ?? _noneCategory
+                : _noneCategory;
         }
 
         UpdateColorSelection();
@@ -309,9 +309,19 @@ public class OccasionFormViewModel : ViewModelBase
     private async Task LoadCategoriesAsync()
     {
         Categories.Clear();
-        Categories.Add(NoneCategory);
+        Categories.Add(_noneCategory);
 
         foreach (var category in await _categoryService.GetAllAsync())
             Categories.Add(category);
+    }
+
+    protected override void OnLanguageChanged()
+    {
+        _noneCategory.Name = OccasionGroup.UncategorisedName;
+        var index = Categories.IndexOf(_noneCategory);
+        if (index >= 0)
+            Categories[index] = _noneCategory;
+
+        base.OnLanguageChanged();
     }
 }

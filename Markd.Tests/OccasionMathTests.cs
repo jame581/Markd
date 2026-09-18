@@ -4,6 +4,7 @@ using Xunit;
 
 namespace Markd.Tests;
 
+[Collection(nameof(GlobalCultureCollection))]
 public class OccasionMathTests
 {
     private static readonly TimeZoneInfo Zone =
@@ -130,5 +131,62 @@ public class OccasionMathTests
         var occasion = new Occasion { AnchorDate = AnniversaryAnchor, Direction = OccasionDirection.Since };
 
         Assert.Equal("since 14 Oct 2022", OccasionMath.AnchorPhrase(occasion, Zone));
+    }
+
+    [Fact]
+    public void FormatBreakdown_Czech_UsesCzechUnits()
+    {
+        using var _ = new CultureScope("cs-CZ");
+        var occasion = new Occasion { AnchorDate = AnniversaryAnchor, Direction = OccasionDirection.Since };
+
+        Assert.Equal("3r 11m 4d 08h 41min 09s", OccasionMath.FormatBreakdown(occasion, new DateTime(2026, 9, 18, 8, 41, 9), Zone));
+    }
+
+    [Fact]
+    public void Dates_FollowCulture()
+    {
+        var date = new DateTime(2022, 10, 14);
+        Assert.Equal("14 Oct 2022", OccasionMath.FormatShortDate(date));
+
+        using var _ = new CultureScope("cs-CZ");
+        Assert.Equal("14. 10. 2022", OccasionMath.FormatShortDate(date));
+        Assert.Equal("pátek 14. října 2022", OccasionMath.FormatLongDate(date));
+    }
+
+    [Theory]
+    [InlineData(0, "Dnes")]
+    [InlineData(1, "za 1 den")]
+    [InlineData(3, "za 3 dny")]
+    [InlineData(12, "za 12 dní")]
+    [InlineData(-1, "před 1 dnem")]
+    [InlineData(-6, "před 6 dny")]
+    public void FormatDaysAway_Czech(int days, string expected)
+    {
+        using var _ = new CultureScope("cs-CZ");
+        Assert.Equal(expected, OccasionMath.FormatDaysAway(days));
+    }
+
+    [Theory]
+    [InlineData(1, "1 day to go")]
+    [InlineData(5, "5 days to go")]
+    public void DaysToGo_English(int days, string expected) =>
+        Assert.Equal(expected, new NextMilestoneInfo(new Milestone { Label = "x" }, days, 0.5).DaysToGoText);
+
+    [Theory]
+    [InlineData(1, "zbývá 1 den")]
+    [InlineData(2, "zbývají 2 dny")]
+    [InlineData(5, "zbývá 5 dní")]
+    public void DaysToGo_Czech(int days, string expected)
+    {
+        using var _ = new CultureScope("cs-CZ");
+        Assert.Equal(expected, new NextMilestoneInfo(new Milestone { Label = "x" }, days, 0.5).DaysToGoText);
+    }
+
+    [Fact]
+    public void AnchorPhrase_Czech()
+    {
+        using var _ = new CultureScope("cs-CZ");
+        var occasion = new Occasion { AnchorDate = AnniversaryAnchor, Direction = OccasionDirection.Since };
+        Assert.Equal("od 14. 10. 2022", OccasionMath.AnchorPhrase(occasion, Zone));
     }
 }

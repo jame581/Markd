@@ -117,6 +117,8 @@ public class OccasionListViewModel : ViewModelBase
 
     public OccasionSummary? FindSummary(int id) => AllSummaries.FirstOrDefault(s => s.Id == id);
 
+    protected override void OnLanguageChanged() => ReloadIfLoaded();
+
     /// <summary>Starts the once-per-second breakdown on the featured card.</summary>
     public void StartTimer()
     {

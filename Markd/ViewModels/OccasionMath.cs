@@ -1,5 +1,5 @@
-using System.Globalization;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 
 namespace Markd.ViewModels;
 
@@ -8,8 +8,8 @@ public sealed record NextMilestoneInfo(Milestone Milestone, int DaysAway, double
 {
     public string Label => Milestone.Label;
     public string DaysAwayText => OccasionMath.FormatDaysAway(DaysAway);
-    public string DaysToGoText => DaysAway == 1 ? "1 day to go" : $"{DaysAway} days to go";
-    public string ShortText => $"{DaysAway}d";
+    public string DaysToGoText => Plural.Format("Occasion_DaysToGo", DaysAway);
+    public string ShortText => $"{DaysAway}{Strings.Abbr_Day}";
 }
 
 /// <summary>
@@ -17,8 +17,6 @@ public sealed record NextMilestoneInfo(Milestone Milestone, int DaysAway, double
 /// </summary>
 public static class OccasionMath
 {
-    private static readonly CultureInfo DateCulture = CultureInfo.InvariantCulture;
-
     /// <summary>
     /// Calendar-accurate "3y 10mo 14d 08h 41min 09s", dropping leading zero units.
     /// Since counts from the anchor to now; Until counts from now to the anchor (prefixed "-" once passed).
@@ -32,7 +30,7 @@ public static class OccasionMath
         {
             // An Until occasion reads zero for the whole of its day rather than "-0d …".
             if (occasion.Direction == OccasionDirection.Until && anchor.Date == nowLocal.Date)
-                return "0d 00h 00min 00s";
+                return Clock(0, TimeSpan.Zero, string.Empty);
 
             (from, to) = (to, from);
             prefix = occasion.Direction == OccasionDirection.Until ? "-" : string.Empty;
@@ -51,12 +49,13 @@ public static class OccasionMath
         cursor = cursor.AddDays(days);
 
         var rest = to - cursor;
-        var clock = $"{rest.Hours:D2}h {rest.Minutes:D2}min {rest.Seconds:D2}s";
-
-        if (years > 0) return $"{prefix}{years}y {months}mo {days}d {clock}";
-        if (months > 0) return $"{prefix}{months}mo {days}d {clock}";
-        return $"{prefix}{days}d {clock}";
+        if (years > 0) return $"{prefix}{years}{Strings.Abbr_Year} {months}{Strings.Abbr_Month} {Clock(days, rest, string.Empty)}";
+        if (months > 0) return $"{prefix}{months}{Strings.Abbr_Month} {Clock(days, rest, string.Empty)}";
+        return Clock(days, rest, prefix);
     }
+
+    private static string Clock(int days, TimeSpan rest, string prefix) =>
+        $"{prefix}{days}{Strings.Abbr_Day} {rest.Hours:D2}{Strings.Abbr_Hour} {rest.Minutes:D2}{Strings.Abbr_Minute} {rest.Seconds:D2}{Strings.Abbr_Second}";
 
     /// <summary>
     /// Next milestone not yet reached, with progress measured from the previous milestone
@@ -88,32 +87,34 @@ public static class OccasionMath
 
     public static string FormatDaysAway(int daysAway) => daysAway switch
     {
-        0 => "Today",
-        1 => "1 day away",
-        > 1 => $"{daysAway} days away",
-        _ => $"{Math.Abs(daysAway)} days past"
+        0 => Strings.Occasion_Today,
+        > 0 => Plural.Format("Occasion_DaysAway", daysAway),
+        _ => Plural.Format("Occasion_DaysPast", Math.Abs(daysAway))
     };
 
-    public static string FormatShortDate(DateTime date) => date.ToString("d MMM yyyy", DateCulture);
+    public static string FormatShortDate(DateTime date) => date.ToString(Strings.Format_ShortDate, LocalizationManager.Instance.Culture);
 
-    public static string FormatLongDate(DateTime date) => date.ToString("dddd, d MMMM yyyy", DateCulture);
+    public static string FormatLongDate(DateTime date) => date.ToString(Strings.Format_LongDate, LocalizationManager.Instance.Culture);
 
     /// <summary>"since 14 Oct 2022" / "until 19 Dec 2026".</summary>
-    public static string AnchorPhrase(Occasion occasion, TimeZoneInfo? zone = null) =>
-        (occasion.Direction == OccasionDirection.Since ? "since " : "until ")
-        + FormatShortDate(OccasionDates.ToLocalDate(occasion.AnchorDate, zone));
+    public static string AnchorPhrase(Occasion occasion, TimeZoneInfo? zone = null) => string.Format(
+        occasion.Direction == OccasionDirection.Since ? Strings.Occasion_SincePhrase : Strings.Occasion_UntilPhrase,
+        FormatShortDate(OccasionDates.ToLocalDate(occasion.AnchorDate, zone)));
 
     /// <summary>Unit under a count: "days"; "to go" for a future Until or a Since that has not started; "days ago" for a passed Until.</summary>
     public static string UnitLabel(Occasion occasion, int days) => occasion.Direction switch
     {
-        OccasionDirection.Until when days >= 0 => "to go",
-        OccasionDirection.Until => "days ago",
-        OccasionDirection.Since when days < 0 => "to go",
-        _ => "days"
+        OccasionDirection.Until when days >= 0 => Strings.Occasion_UnitToGo,
+        OccasionDirection.Until => PluralWord("Occasion_UnitDaysAgo", days),
+        OccasionDirection.Since when days < 0 => Strings.Occasion_UnitToGo,
+        _ => PluralWord("Occasion_UnitDays", days)
     };
 
     public static string DirectionLabel(Occasion occasion) =>
-        occasion.Direction == OccasionDirection.Since ? "Since" : "Until";
+        occasion.Direction == OccasionDirection.Since ? Strings.Occasion_Since : Strings.Occasion_Until;
+
+    private static string PluralWord(string baseKey, long n) =>
+        Strings.ResourceManager.GetString($"{baseKey}_{Plural.Select(n)}", LocalizationManager.Instance.Culture) ?? baseKey;
 
     private static int InitialRemaining(Occasion occasion, TimeZoneInfo? zone)
     {

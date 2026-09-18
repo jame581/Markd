@@ -358,6 +358,8 @@ public class OccasionDetailViewModel : ViewModelBase
             NextMilestone?.Label));
     }
 
+    protected override void OnLanguageChanged() => OnOccasionsChanged(new OccasionsChangedMessage());
+
     private void OnOccasionsChanged(OccasionsChangedMessage message)
     {
         if (ReferenceEquals(message.Source, this) || CurrentOccasion is null || (message.OccasionId is { } id && id != CurrentOccasion.Id))

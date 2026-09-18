@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 
 namespace Markd.ViewModels;
 
@@ -36,7 +37,7 @@ public sealed class OccasionSummary : ObservableObject
     public string DirectionLabel => OccasionMath.DirectionLabel(Occasion);
 
     public bool HasNext => Next is not null;
-    public string NextHeading => Next is null ? "No milestone ahead" : $"Next · {Next.Label}";
+    public string NextHeading => Next is null ? Strings.Occasion_NoMilestoneAhead : string.Format(Strings.Occasion_NextMilestone, Next.Label);
     public string NextStatus => Next?.DaysToGoText ?? "—";
     public double NextProgress => Next?.Progress ?? 1;
 
@@ -49,8 +50,8 @@ public sealed class OccasionSummary : ObservableObject
 
 public sealed class OccasionGroup(string categoryName, IEnumerable<OccasionSummary> items) : List<OccasionSummary>(items)
 {
-    public const string UncategorisedName = "Uncategorised";
+    public static string UncategorisedName => Strings.Occasion_Uncategorised;
 
     public string CategoryName { get; } = categoryName;
-    public string CountLabel => Count == 1 ? "1 occasion" : $"{Count} occasions";
+    public string CountLabel => Plural.Format("Occasion_Count", Count);
 }

@@ -43,4 +43,53 @@
   <data name="Settings_EraseAllShort" xml:space="preserve"><value>Erase all</value></data>
   <data name="Settings_EraseAllSub" xml:space="preserve"><value>Every occasion and milestone. Categories and settings stay.</value></data>
   <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd keeps one SQLite file on this PC. Nothing is uploaded, so nothing syncs — export before you move to another machine.</value></data>
+  <data name="Abbr_Year" xml:space="preserve"><value>y</value></data>
+  <data name="Abbr_Month" xml:space="preserve"><value>mo</value></data>
+  <data name="Abbr_Day" xml:space="preserve"><value>d</value></data>
+  <data name="Abbr_Hour" xml:space="preserve"><value>h</value></data>
+  <data name="Abbr_Minute" xml:space="preserve"><value>min</value></data>
+  <data name="Abbr_Second" xml:space="preserve"><value>s</value></data>
+  <data name="Format_ShortDate" xml:space="preserve"><value>d MMM yyyy</value></data>
+  <data name="Format_LongDate" xml:space="preserve"><value>dddd, d MMMM yyyy</value></data>
+  <data name="Occasion_Today" xml:space="preserve"><value>Today</value></data>
+  <data name="Occasion_DaysAway_One" xml:space="preserve"><value>{0} day away</value></data>
+  <data name="Occasion_DaysAway_Few" xml:space="preserve"><value>{0} days away</value></data>
+  <data name="Occasion_DaysAway_Many" xml:space="preserve"><value>{0} days away</value></data>
+  <data name="Occasion_DaysPast_One" xml:space="preserve"><value>{0} day past</value></data>
+  <data name="Occasion_DaysPast_Few" xml:space="preserve"><value>{0} days past</value></data>
+  <data name="Occasion_DaysPast_Many" xml:space="preserve"><value>{0} days past</value></data>
+  <data name="Occasion_DaysToGo_One" xml:space="preserve"><value>{0} day to go</value></data>
+  <data name="Occasion_DaysToGo_Few" xml:space="preserve"><value>{0} days to go</value></data>
+  <data name="Occasion_DaysToGo_Many" xml:space="preserve"><value>{0} days to go</value></data>
+  <data name="Occasion_Since" xml:space="preserve"><value>Since</value></data>
+  <data name="Occasion_Until" xml:space="preserve"><value>Until</value></data>
+  <data name="Occasion_SincePhrase" xml:space="preserve"><value>since {0}</value></data>
+  <data name="Occasion_UntilPhrase" xml:space="preserve"><value>until {0}</value></data>
+  <data name="Occasion_UnitToGo" xml:space="preserve"><value>to go</value></data>
+  <data name="Occasion_UnitDaysAgo_One" xml:space="preserve"><value>day ago</value></data>
+  <data name="Occasion_UnitDaysAgo_Few" xml:space="preserve"><value>days ago</value></data>
+  <data name="Occasion_UnitDaysAgo_Many" xml:space="preserve"><value>days ago</value></data>
+  <data name="Occasion_UnitDays_One" xml:space="preserve"><value>day</value></data>
+  <data name="Occasion_UnitDays_Few" xml:space="preserve"><value>days</value></data>
+  <data name="Occasion_UnitDays_Many" xml:space="preserve"><value>days</value></data>
+  <data name="Occasion_NoMilestoneAhead" xml:space="preserve"><value>No milestone ahead</value></data>
+  <data name="Occasion_NextMilestone" xml:space="preserve"><value>Next · {0}</value></data>
+  <data name="Occasion_Uncategorised" xml:space="preserve"><value>Uncategorised</value></data>
+  <data name="Occasion_Count_One" xml:space="preserve"><value>{0} occasion</value></data>
+  <data name="Occasion_Count_Few" xml:space="preserve"><value>{0} occasions</value></data>
+  <data name="Occasion_Count_Many" xml:space="preserve"><value>{0} occasions</value></data>
+  <data name="Calendar_Initial_Mon" xml:space="preserve"><value>M</value></data>
+  <data name="Calendar_Initial_Tue" xml:space="preserve"><value>T</value></data>
+  <data name="Calendar_Initial_Wed" xml:space="preserve"><value>W</value></data>
+  <data name="Calendar_Initial_Thu" xml:space="preserve"><value>T</value></data>
+  <data name="Calendar_Initial_Fri" xml:space="preserve"><value>F</value></data>
+  <data name="Calendar_Initial_Sat" xml:space="preserve"><value>S</value></data>
+  <data name="Calendar_Initial_Sun" xml:space="preserve"><value>S</value></data>
+  <data name="Calendar_Short_Mon" xml:space="preserve"><value>Mon</value></data>
+  <data name="Calendar_Short_Tue" xml:space="preserve"><value>Tue</value></data>
+  <data name="Calendar_Short_Wed" xml:space="preserve"><value>Wed</value></data>
+  <data name="Calendar_Short_Thu" xml:space="preserve"><value>Thu</value></data>
+  <data name="Calendar_Short_Fri" xml:space="preserve"><value>Fri</value></data>
+  <data name="Calendar_Short_Sat" xml:space="preserve"><value>Sat</value></data>
+  <data name="Calendar_Short_Sun" xml:space="preserve"><value>Sun</value></data>
 </root>

@@ -3,6 +3,7 @@ using System.Globalization;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 using Markd.Core.Services;
 using Markd.Services;
 
@@ -35,12 +36,15 @@ public class CalendarViewModel : ViewModelBase
         });
     }
 
+    protected override void OnLanguageChanged()
+    {
+        if (_hasLoaded)
+            Application.Current?.Dispatcher.Dispatch(async () => await LoadCurrentMonthAsync());
+    }
+
     /// <summary>Monday-first weeks; only the weeks the month actually spans.</summary>
     public ObservableCollection<CalendarWeek> Weeks { get; } = new();
     public ObservableCollection<CalendarComingUpItem> ComingUp { get; } = new();
-
-    public static IReadOnlyList<string> WeekdayInitials { get; } = ["M", "T", "W", "T", "F", "S", "S"];
-    public static IReadOnlyList<string> WeekdayShort { get; } = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
     public string MonthTitle
     {
@@ -122,7 +126,9 @@ public class CalendarViewModel : ViewModelBase
             }
         }
 
-        MonthTitle = first.ToDateTime(TimeOnly.MinValue).ToString("MMMM yyyy", CultureInfo.InvariantCulture);
+        var culture = LocalizationManager.Instance.Culture;
+        var monthText = first.ToDateTime(TimeOnly.MinValue).ToString("MMMM yyyy", culture);
+        MonthTitle = char.ToUpper(monthText[0], culture) + monthText[1..];
         var marked = marks.Count(mark => mark.Date.Year == month.Year && mark.Date.Month == month.Month);
         MonthSummary = marked == 0
             ? "No anchors or milestones fall in this month."

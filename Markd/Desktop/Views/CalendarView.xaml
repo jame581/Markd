@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:Markd.ViewModels"
              xmlns:c="clr-namespace:Markd.Controls"
              xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             xmlns:loc="clr-namespace:Markd.Localization"
              x:Class="Markd.Desktop.Views.CalendarView"
              x:DataType="vm:CalendarViewModel">
     <ScrollView>
@@ -23,13 +24,13 @@
                     </Grid>
 
                     <Grid ColumnDefinitions="*,*,*,*,*,*,*" ColumnSpacing="6">
-                        <Label Text="Mon" Style="{StaticResource CalendarWeekday}" />
-                        <Label Grid.Column="1" Text="Tue" Style="{StaticResource CalendarWeekday}" />
-                        <Label Grid.Column="2" Text="Wed" Style="{StaticResource CalendarWeekday}" />
-                        <Label Grid.Column="3" Text="Thu" Style="{StaticResource CalendarWeekday}" />
-                        <Label Grid.Column="4" Text="Fri" Style="{StaticResource CalendarWeekday}" />
-                        <Label Grid.Column="5" Text="Sat" Style="{StaticResource CalendarWeekday}" />
-                        <Label Grid.Column="6" Text="Sun" Style="{StaticResource CalendarWeekday}" />
+                        <Label Text="{loc:Tr Calendar_Short_Mon}" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="1" Text="{loc:Tr Calendar_Short_Tue}" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="2" Text="{loc:Tr Calendar_Short_Wed}" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="3" Text="{loc:Tr Calendar_Short_Thu}" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="4" Text="{loc:Tr Calendar_Short_Fri}" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="5" Text="{loc:Tr Calendar_Short_Sat}" Style="{StaticResource CalendarWeekday}" />
+                        <Label Grid.Column="6" Text="{loc:Tr Calendar_Short_Sun}" Style="{StaticResource CalendarWeekday}" />
                     </Grid>
 
                     <!-- Only the weeks the month spans; 42px cells, radius 10 -->
