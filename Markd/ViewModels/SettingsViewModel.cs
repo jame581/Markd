@@ -280,7 +280,8 @@ public class SettingsViewModel : ViewModelBase
             "Erase all occasions?",
             "Every occasion and milestone on this device is permanently removed. Categories and settings stay.",
             "Erase all",
-            "Cancel");
+            "Cancel",
+            destructive: true);
         if (!confirmed)
             return;
 

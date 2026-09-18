@@ -211,7 +211,8 @@ public class CategoryViewModel : ViewModelBase
                 $"Delete “{category.Name}”?",
                 "Its occasions are kept — they move to Uncategorised.",
                 "Delete",
-                "Cancel");
+                "Cancel",
+                destructive: true);
             if (!confirmed)
                 return;
         }

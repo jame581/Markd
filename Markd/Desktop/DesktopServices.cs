@@ -29,8 +29,8 @@ public sealed class DesktopShellService(IServiceProvider services) : IAppShellSe
 
     public Task GoToAsync(string route) => Shell.NavigateAsync(route);
 
-    public Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel) =>
-        Shell.ConfirmAsync(title, message, accept, cancel);
+    public Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel, bool destructive = false) =>
+        Shell.ConfirmAsync(title, message, accept, cancel, destructive);
 
     public Task ShowMessageAsync(string title, string message, string close) =>
         Shell.ConfirmAsync(title, message, close, null);

@@ -119,9 +119,9 @@ public partial class DesktopShellPage : ContentPage
         return layer;
     }
 
-    public async Task<bool> ConfirmAsync(string title, string message, string accept, string? cancel)
+    public async Task<bool> ConfirmAsync(string title, string message, string accept, string? cancel, bool destructive = false)
     {
-        var dialog = new ConfirmDialog(title, message, accept, cancel);
+        var dialog = new ConfirmDialog(title, message, accept, cancel, destructive);
         var layer = ShowOverlay(dialog, dialog.Cancel);
         var result = await dialog.Result;
         await layer.CloseAsync();

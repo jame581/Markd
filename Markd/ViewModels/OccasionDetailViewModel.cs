@@ -213,7 +213,8 @@ public class OccasionDetailViewModel : ViewModelBase
                 $"Delete “{occasion.Title}”?",
                 $"Its counter, notes and {milestones} {(milestones == 1 ? "milestone is" : "milestones are")} deleted with it. This cannot be undone.",
                 "Delete",
-                "Cancel");
+                "Cancel",
+                destructive: true);
             if (!confirmed)
                 return;
         }
@@ -305,7 +306,7 @@ public class OccasionDetailViewModel : ViewModelBase
         // iOS confirms; Android offers undo; the desktop removes on the hover affordance and says so.
         if (platform != DevicePlatform.Android && platform != DevicePlatform.WinUI)
         {
-            var confirmed = await _shellService.DisplayAlertAsync("Remove milestone", $"Remove “{milestone.Label}”?", "Remove", "Cancel");
+            var confirmed = await _shellService.DisplayAlertAsync("Remove milestone", $"Remove “{milestone.Label}”?", "Remove", "Cancel", destructive: true);
             if (!confirmed)
                 return;
         }

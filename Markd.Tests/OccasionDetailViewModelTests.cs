@@ -365,7 +365,7 @@ public static class OccasionDetailViewModelTests
         public DevicePlatform Platform { get; } = platform;
         public bool NextConfirmationResult { get; set; } = true;
         public string? LastRoute { get; private set; }
-        public List<(string Title, string Message, string Accept, string Cancel)> ConfirmationRequests { get; } = [];
+        public List<(string Title, string Message, string Accept, string Cancel, bool Destructive)> ConfirmationRequests { get; } = [];
 
         public Task GoToAsync(string route)
         {
@@ -373,9 +373,9 @@ public static class OccasionDetailViewModelTests
             return Task.CompletedTask;
         }
 
-        public Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel)
+        public Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel, bool destructive = false)
         {
-            ConfirmationRequests.Add((title, message, accept, cancel));
+            ConfirmationRequests.Add((title, message, accept, cancel, destructive));
             return Task.FromResult(NextConfirmationResult);
         }
 
