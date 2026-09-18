@@ -52,9 +52,9 @@ public class SettingsViewModel : ViewModelBase
 
         ThemeOptions =
         [
-            new ThemeOption("System", "Settings_ThemeSystem"),
-            new ThemeOption("Light", "Settings_ThemeLight"),
-            new ThemeOption("Dark", "Settings_ThemeDark")
+            new ThemeOption("System", "Settings_ThemeSystem", "Settings_ThemeSystemShort"),
+            new ThemeOption("Light", "Settings_ThemeLight", "Settings_ThemeLight"),
+            new ThemeOption("Dark", "Settings_ThemeDark", "Settings_ThemeDark")
         ];
 
         SelectThemeCommand = new RelayCommand<ThemeOption?>(option => { if (option is not null) SelectedTheme = option.Value; });
@@ -317,12 +317,15 @@ public class SettingsViewModel : ViewModelBase
     }
 }
 
-public sealed class ThemeOption(string value, string labelKey) : ObservableObject
+public sealed class ThemeOption(string value, string labelKey, string shortLabelKey) : ObservableObject
 {
     private bool _isSelected;
 
     public string Value { get; } = value;
     public string Label => LocalizationManager.Instance[labelKey];
+
+    /// <summary>Short form for tight layouts, e.g. the desktop segmented control.</summary>
+    public string ShortLabel => LocalizationManager.Instance[shortLabelKey];
 
     public bool IsSelected
     {
@@ -330,7 +333,11 @@ public sealed class ThemeOption(string value, string labelKey) : ObservableObjec
         set => SetProperty(ref _isSelected, value);
     }
 
-    public void RefreshLabel() => OnPropertyChanged(nameof(Label));
+    public void RefreshLabel()
+    {
+        OnPropertyChanged(nameof(Label));
+        OnPropertyChanged(nameof(ShortLabel));
+    }
 }
 
 public sealed record LanguageOption(string Value, string Label);

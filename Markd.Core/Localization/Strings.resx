@@ -18,6 +18,7 @@
   <data name="Settings_ThemeSystem" xml:space="preserve"><value>Match system</value></data>
   <data name="Settings_ThemeLight" xml:space="preserve"><value>Light</value></data>
   <data name="Settings_ThemeDark" xml:space="preserve"><value>Dark</value></data>
+  <data name="Settings_ThemeSystemShort" xml:space="preserve"><value>System</value></data>
   <data name="Settings_Export" xml:space="preserve"><value>Export as JSON</value></data>
   <data name="Settings_Import" xml:space="preserve"><value>Import from JSON</value></data>
   <data name="Settings_Appearance" xml:space="preserve"><value>Appearance</value></data>

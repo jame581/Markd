@@ -18,6 +18,7 @@
   <data name="Settings_ThemeSystem" xml:space="preserve"><value>Podle systému</value></data>
   <data name="Settings_ThemeLight" xml:space="preserve"><value>Světlý</value></data>
   <data name="Settings_ThemeDark" xml:space="preserve"><value>Tmavý</value></data>
+  <data name="Settings_ThemeSystemShort" xml:space="preserve"><value>Systém</value></data>
   <data name="Settings_Export" xml:space="preserve"><value>Exportovat jako JSON</value></data>
   <data name="Settings_Import" xml:space="preserve"><value>Importovat z JSON</value></data>
   <data name="Settings_Appearance" xml:space="preserve"><value>Vzhled</value></data>
@@ -33,7 +34,7 @@
   <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd uchovává jeden soubor SQLite v tomto zařízení. Nic se nenahrává, takže se nic nesynchronizuje — před výměnou telefonu proveďte export.</value></data>
   <data name="Settings_AboutMarkd" xml:space="preserve"><value>O aplikaci Markd</value></data>
   <data name="Settings_ThemeSub" xml:space="preserve"><value>Použije se okamžitě — není třeba nic ukládat</value></data>
-  <data name="Settings_LanguageSub" xml:space="preserve"><value>Angličtina · Čeština</value></data>
+  <data name="Settings_LanguageSub" xml:space="preserve"><value>English · Čeština</value></data>
   <data name="Settings_DailyCheckTime" xml:space="preserve"><value>Čas denní kontroly</value></data>
   <data name="Settings_DailyCheckTimeSub" xml:space="preserve"><value>Kdy Markd hledá milníky splatné dnes</value></data>
   <data name="Settings_LocalDatabase" xml:space="preserve"><value>Místní databáze</value></data>

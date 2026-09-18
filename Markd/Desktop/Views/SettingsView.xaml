@@ -53,10 +53,10 @@
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="vm:ThemeOption">
                                             <dc:HoverSurface CornerRadius="6" Padding="13,0" HoverKey="SurfaceCardPressed" SelectedKey="AccentFill"
-                                                             IsSelected="{Binding IsSelected}" SemanticProperties.Description="{Binding Value}"
+                                                             IsSelected="{Binding IsSelected}" SemanticProperties.Description="{Binding Label}"
                                                              Command="{Binding Source={x:Reference Sections}, Path=BindingContext.SelectThemeCommand, x:DataType=VerticalStackLayout}"
                                                              CommandParameter="{Binding .}">
-                                                <Label Text="{Binding Value}" FontFamily="FigtreeSemiBold" FontSize="12.5" VerticalOptions="Center" InputTransparent="True"
+                                                <Label Text="{Binding ShortLabel}" FontFamily="FigtreeSemiBold" FontSize="12.5" VerticalOptions="Center" InputTransparent="True"
                                                        Style="{StaticResource SecondaryText}">
                                                     <Label.Triggers>
                                                         <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
