@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -175,16 +176,25 @@ public class OccasionFormViewModel : ViewModelBase
             var culture = LocalizationManager.Instance.Culture;
             var date = AnchorDateText;
             var days = PreviewSignedDays;
+            var n = PreviewDays;
             if (Direction == OccasionDirection.Since)
             {
                 if (days < 0)
-                    return string.Format(culture, Strings.Form_PreviewUntilStarts, date);
-                return days == 0 ? string.Format(culture, Strings.Form_PreviewStartsToday, date) : string.Format(culture, Strings.Form_PreviewSinceStarts, date);
+                    return FormatPreviewCaption($"Form_PreviewUntilStarts_{Plural.Select(n, culture)}", date, culture);
+                return days == 0
+                    ? string.Format(culture, Strings.Form_PreviewStartsToday, date)
+                    : FormatPreviewCaption($"Form_PreviewSinceStarts_{Plural.Select(n, culture)}", date, culture);
             }
 
-            return days >= 0 ? string.Format(culture, Strings.Form_PreviewUntil, date) : string.Format(culture, Strings.Form_PreviewSince, date);
+            return days >= 0
+                ? FormatPreviewCaption($"Form_PreviewUntil_{Plural.Select(n, culture)}", date, culture)
+                : FormatPreviewCaption($"Form_PreviewSince_{Plural.Select(n, culture)}", date, culture);
         }
     }
+
+    /// <summary>Formats a preview caption pattern (looked up by <paramref name="key"/>) with the anchor date.</summary>
+    private static string FormatPreviewCaption(string key, string date, CultureInfo culture) =>
+        string.Format(culture, Strings.ResourceManager.GetString(key, culture) ?? key, date);
 
     private int PreviewSignedDays => Direction == OccasionDirection.Since
         ? (DateTime.Today - AnchorDate.Date).Days

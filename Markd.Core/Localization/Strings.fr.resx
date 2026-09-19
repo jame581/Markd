@@ -337,11 +337,19 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Form_CreateOccasion" xml:space="preserve"><value>Créer l'événement</value></data>
   <data name="Form_SaveChanges" xml:space="preserve"><value>Enregistrer les modifications</value></data>
   <data name="Form_TitleRequired" xml:space="preserve"><value>Le titre est obligatoire.</value></data>
-  <data name="Form_PreviewUntilStarts" xml:space="preserve"><value>jours avant le début du décompte, le {0}</value></data>
+  <data name="Form_PreviewUntilStarts_One" xml:space="preserve"><value>jour avant le début du décompte, le {0}</value></data>
+  <data name="Form_PreviewUntilStarts_Few" xml:space="preserve"><value>jours avant le début du décompte, le {0}</value></data>
+  <data name="Form_PreviewUntilStarts_Many" xml:space="preserve"><value>jours avant le début du décompte, le {0}</value></data>
   <data name="Form_PreviewStartsToday" xml:space="preserve"><value>le décompte commence aujourd'hui, {0}</value></data>
-  <data name="Form_PreviewSinceStarts" xml:space="preserve"><value>jours depuis le {0} – le décompte commence ici</value></data>
-  <data name="Form_PreviewUntil" xml:space="preserve"><value>jours jusqu'au {0}</value></data>
-  <data name="Form_PreviewSince" xml:space="preserve"><value>jours depuis le {0}</value></data>
+  <data name="Form_PreviewSinceStarts_One" xml:space="preserve"><value>jour depuis le {0} – le décompte commence ici</value></data>
+  <data name="Form_PreviewSinceStarts_Few" xml:space="preserve"><value>jours depuis le {0} – le décompte commence ici</value></data>
+  <data name="Form_PreviewSinceStarts_Many" xml:space="preserve"><value>jours depuis le {0} – le décompte commence ici</value></data>
+  <data name="Form_PreviewUntil_One" xml:space="preserve"><value>jour jusqu'au {0}</value></data>
+  <data name="Form_PreviewUntil_Few" xml:space="preserve"><value>jours jusqu'au {0}</value></data>
+  <data name="Form_PreviewUntil_Many" xml:space="preserve"><value>jours jusqu'au {0}</value></data>
+  <data name="Form_PreviewSince_One" xml:space="preserve"><value>jour depuis le {0}</value></data>
+  <data name="Form_PreviewSince_Few" xml:space="preserve"><value>jours depuis le {0}</value></data>
+  <data name="Form_PreviewSince_Many" xml:space="preserve"><value>jours depuis le {0}</value></data>
   <data name="Form_OccasionCreatedTitle" xml:space="preserve"><value>Événement créé</value></data>
   <data name="Form_ChangesSavedTitle" xml:space="preserve"><value>Modifications enregistrées</value></data>
   <data name="Form_SavedSince" xml:space="preserve"><value>{0} · décompte depuis le {1}</value></data>
