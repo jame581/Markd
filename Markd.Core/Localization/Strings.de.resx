@@ -31,9 +31,9 @@
   <data name="Settings_ExportSub" xml:space="preserve"><value>In einem Ordner, in Google Drive oder OneDrive speichern oder teilen.</value></data>
   <data name="Settings_ImportSub" xml:space="preserve"><value>Ersetzt alles auf diesem Smartphone</value></data>
   <data name="Settings_EraseAll" xml:space="preserve"><value>Alle Anlässe löschen</value></data>
-  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd speichert eine einzige SQLite-Datei auf diesem Gerät. Nichts wird hochgeladen, also wird nichts synchronisiert – exportieren Sie Ihre Daten, bevor Sie das Smartphone wechseln.</value></data>
+  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd speichert eine einzige SQLite-Datei auf diesem Gerät. Nichts wird hochgeladen, also wird nichts synchronisiert. Exportieren Sie Ihre Daten, bevor Sie das Smartphone wechseln.</value></data>
   <data name="Settings_AboutMarkd" xml:space="preserve"><value>Über Markd</value></data>
-  <data name="Settings_ThemeSub" xml:space="preserve"><value>Gilt sofort – kein Speichern nötig</value></data>
+  <data name="Settings_ThemeSub" xml:space="preserve"><value>Gilt sofort, kein Speichern nötig</value></data>
   <data name="Settings_LanguageSub" xml:space="preserve"><value>English · Čeština · Deutsch · Français</value></data>
   <data name="Settings_DailyCheckTime" xml:space="preserve"><value>Tägliche Prüfung</value></data>
   <data name="Settings_DailyCheckTimeSub" xml:space="preserve"><value>Wann Markd nach heute fälligen Meilensteinen sucht</value></data>
@@ -41,7 +41,7 @@
   <data name="Settings_ImportShort" xml:space="preserve"><value>Importieren</value></data>
   <data name="Settings_EraseAllShort" xml:space="preserve"><value>Alle löschen</value></data>
   <data name="Settings_EraseAllSub" xml:space="preserve"><value>Alle Anlässe und Meilensteine. Kategorien und Einstellungen bleiben erhalten.</value></data>
-  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd speichert eine einzige SQLite-Datei auf diesem PC. Nichts wird hochgeladen, also wird nichts synchronisiert – exportieren Sie Ihre Daten, bevor Sie auf einen anderen Rechner wechseln.</value></data>
+  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd speichert eine einzige SQLite-Datei auf diesem PC. Nichts wird hochgeladen, also wird nichts synchronisiert. Exportieren Sie Ihre Daten, bevor Sie auf einen anderen Rechner wechseln.</value></data>
   <data name="Abbr_Year" xml:space="preserve"><value>J</value></data>
   <data name="Abbr_Month" xml:space="preserve"><value>M</value></data>
   <data name="Abbr_Day" xml:space="preserve"><value>T</value></data>
@@ -79,13 +79,6 @@
   <data name="Occasion_Count_One" xml:space="preserve"><value>{0} Anlass</value></data>
   <data name="Occasion_Count_Few" xml:space="preserve"><value>{0} Anlässe</value></data>
   <data name="Occasion_Count_Many" xml:space="preserve"><value>{0} Anlässe</value></data>
-  <data name="Calendar_Initial_Mon" xml:space="preserve"><value>M</value></data>
-  <data name="Calendar_Initial_Tue" xml:space="preserve"><value>D</value></data>
-  <data name="Calendar_Initial_Wed" xml:space="preserve"><value>M</value></data>
-  <data name="Calendar_Initial_Thu" xml:space="preserve"><value>D</value></data>
-  <data name="Calendar_Initial_Fri" xml:space="preserve"><value>F</value></data>
-  <data name="Calendar_Initial_Sat" xml:space="preserve"><value>S</value></data>
-  <data name="Calendar_Initial_Sun" xml:space="preserve"><value>S</value></data>
   <data name="Calendar_Short_Mon" xml:space="preserve"><value>Mo</value></data>
   <data name="Calendar_Short_Tue" xml:space="preserve"><value>Di</value></data>
   <data name="Calendar_Short_Wed" xml:space="preserve"><value>Mi</value></data>
@@ -95,7 +88,7 @@
   <data name="Calendar_Short_Sun" xml:space="preserve"><value>So</value></data>
   <data name="Home_Pinned" xml:space="preserve"><value>ANGEHEFTET</value></data>
   <data name="Home_EmptyTitle" xml:space="preserve"><value>Noch nichts markiert</value></data>
-  <data name="Home_EmptyHint" xml:space="preserve"><value>Wählen Sie ein Datum, das zählt – einen ersten Tag, einen letzten Tag, einen Tag, auf den Sie hinfiebern – und Markd behält die Zahl für Sie im Blick.</value></data>
+  <data name="Home_EmptyHint" xml:space="preserve"><value>Wählen Sie ein Datum, das zählt: einen ersten Tag, einen letzten Tag, einen Tag, auf den Sie hinfiebern. Markd behält die Zahl für Sie im Blick.</value></data>
   <data name="Home_AddFirst" xml:space="preserve"><value>Ersten Anlass hinzufügen</value></data>
   <data name="Home_EmptyFootnote" xml:space="preserve"><value>Kein Konto. Keine Werbung. Alles bleibt auf diesem Smartphone.</value></data>
   <data name="Home_NewOccasion" xml:space="preserve"><value>Neuer Anlass</value></data>
@@ -130,7 +123,7 @@
   <data name="Form_ChooseEmoji" xml:space="preserve"><value>Emoji auswählen</value></data>
   <data name="Category_Title" xml:space="preserve"><value>Kategorien</value></data>
   <data name="Category_Empty" xml:space="preserve"><value>Noch keine Kategorien. Mit „Neue Kategorie“ gruppieren Sie Anlässe ganz nach Ihrer Vorstellung.</value></data>
-  <data name="Category_Footnote" xml:space="preserve"><value>Für Zeilenaktionen lange drücken oder auf das Menü tippen. Anlässe einer gelöschten Kategorie werden nie mitgelöscht – sie landen unter „Ohne Kategorie“.</value></data>
+  <data name="Category_Footnote" xml:space="preserve"><value>Für Zeilenaktionen lange drücken oder auf das Menü tippen. Anlässe einer gelöschten Kategorie werden nie mitgelöscht. Sie landen unter „Ohne Kategorie“.</value></data>
   <data name="Category_New" xml:space="preserve"><value>Neue Kategorie</value></data>
   <data name="Category_Name" xml:space="preserve"><value>Name</value></data>
   <data name="Category_NamePlaceholder" xml:space="preserve"><value>Gesundheit</value></data>
@@ -140,28 +133,28 @@
   <data name="Category_Edit" xml:space="preserve"><value>Kategorie bearbeiten</value></data>
   <data name="Category_Delete" xml:space="preserve"><value>Kategorie löschen</value></data>
   <data name="Category_EmptyDesktop" xml:space="preserve"><value>Noch keine Kategorien. Gruppieren Sie Anlässe ganz nach Ihrer Vorstellung.</value></data>
-  <data name="Category_FootnoteDesktop" xml:space="preserve"><value>Beim Löschen einer Kategorie bleiben ihre Anlässe erhalten – sie landen unter „Ohne Kategorie“.</value></data>
+  <data name="Category_FootnoteDesktop" xml:space="preserve"><value>Beim Löschen einer Kategorie bleiben ihre Anlässe erhalten. Sie landen unter „Ohne Kategorie“.</value></data>
   <data name="Category_SubtitleDesktop" xml:space="preserve"><value>Gruppieren Sie Anlässe ganz nach Ihrer Vorstellung</value></data>
   <data name="Category_EditorHint" xml:space="preserve"><value>Emoji und Farbe kennzeichnen die Kategorie überall, wo sie erscheint.</value></data>
   <data name="Category_NamePlaceholderDesktop" xml:space="preserve"><value>Familie, Gesundheit, Reisen…</value></data>
   <data name="Calendar_Title" xml:space="preserve"><value>Kalender</value></data>
   <data name="Calendar_ComingUp" xml:space="preserve"><value>Demnächst</value></data>
-  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Noch nichts in Sicht – fügen Sie einen Anlass hinzu, dann erscheinen seine Meilensteine hier.</value></data>
+  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Noch nichts in Sicht. Fügen Sie einen Anlass hinzu, dann erscheinen seine Meilensteine hier.</value></data>
   <data name="Calendar_DotsLegend" xml:space="preserve"><value>Volle Punkte sind Stichtage · blasse Punkte sind Meilensteine.</value></data>
   <data name="Calendar_PreviousMonth" xml:space="preserve"><value>Vorheriger Monat</value></data>
   <data name="Calendar_NextMonth" xml:space="preserve"><value>Nächster Monat</value></data>
   <data name="Calendar_DotsLegendDesktop" xml:space="preserve"><value>Volle Punkte sind Stichtage; blasse Punkte sind Meilensteine.</value></data>
-  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Noch nichts in Sicht – fügen Sie einem Anlass Meilensteine hinzu.</value></data>
+  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Noch nichts in Sicht. Fügen Sie einem Anlass Meilensteine hinzu.</value></data>
   <data name="Calendar_ThisMonth" xml:space="preserve"><value>Dieser Monat</value></data>
   <data name="Calendar_SubtitleDesktop" xml:space="preserve"><value>Stichtage und Meilensteine im Monatsüberblick</value></data>
   <data name="About_Title" xml:space="preserve"><value>Info</value></data>
-  <data name="About_Description" xml:space="preserve"><value>Ein Open-Source-Tracker für die Tage, die Sie zählen – seit einem Datum oder bis zu einem Datum. Keine Werbung, keine Bezahlschranke, kein Konto.</value></data>
+  <data name="About_Description" xml:space="preserve"><value>Ein Open-Source-Tracker für die Tage, die Sie zählen: seit einem Datum oder bis zu einem Datum. Keine Werbung, keine Bezahlschranke, kein Konto.</value></data>
   <data name="About_Licence" xml:space="preserve"><value>Lizenz</value></data>
   <data name="About_SourceCode" xml:space="preserve"><value>Quellcode</value></data>
   <data name="About_Translations" xml:space="preserve"><value>Übersetzungen</value></data>
   <data name="About_Acknowledgements" xml:space="preserve"><value>Danksagungen</value></data>
   <data name="About_Footer" xml:space="preserve"><value>Entwickelt mit .NET MAUI · SQLite bleibt auf dem Gerät</value></data>
-  <data name="About_LicenceValue" xml:space="preserve"><value>MIT – für immer kostenlos</value></data>
+  <data name="About_LicenceValue" xml:space="preserve"><value>MIT, für immer kostenlos</value></data>
   <data name="About_LicenceLink" xml:space="preserve"><value>Lizenz lesen</value></data>
   <data name="About_SourceValue" xml:space="preserve"><value>Open Source auf GitHub</value></data>
   <data name="About_SourceLink" xml:space="preserve"><value>Repository ansehen</value></data>
@@ -191,7 +184,7 @@
   <data name="Desk_LightTheme" xml:space="preserve"><value>Helles Design</value></data>
   <data name="Desk_DarkTheme" xml:space="preserve"><value>Dunkles Design</value></data>
   <data name="Desk_MoreIcons" xml:space="preserve"><value>Weitere Symbole</value></data>
-  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Wählen Sie ein Datum, das zählt – einen ersten Tag, einen letzten Tag, einen Tag, auf den Sie warten. Markd zählt ab da.</value></data>
+  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Wählen Sie ein Datum, das zählt: einen ersten Tag, einen letzten Tag, einen Tag, auf den Sie warten. Markd zählt ab da.</value></data>
   <data name="Home_AddFirstDesktop" xml:space="preserve"><value>Ersten Anlass erstellen</value></data>
   <data name="Home_EmptyFootnoteDesktop" xml:space="preserve"><value>Kein Konto. Keine Werbung. Alles bleibt auf diesem PC.</value></data>
   <data name="Home_AllOccasions" xml:space="preserve"><value>Alle Anlässe</value></data>
@@ -252,7 +245,7 @@
   <data name="Notification_TitleUntil_Few" xml:space="preserve"><value>Noch {0} Tage {1}</value></data>
   <data name="Notification_TitleUntil_Many" xml:space="preserve"><value>Noch {0} Tage {1}</value></data>
   <data name="Notification_DescriptionSince" xml:space="preserve"><value>{0}: Meilenstein „{1}“ heute erreicht. Tippen Sie, um den Zähler zu sehen.</value></data>
-  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0}: „{1}“ – {2}.</value></data>
+  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0}: „{1}“ ({2}).</value></data>
   <data name="Notification_DaysLeft_One" xml:space="preserve"><value>noch {0} Tag</value></data>
   <data name="Notification_DaysLeft_Few" xml:space="preserve"><value>noch {0} Tage</value></data>
   <data name="Notification_DaysLeft_Many" xml:space="preserve"><value>noch {0} Tage</value></data>
@@ -264,7 +257,7 @@
   <data name="Category_SavedTitle" xml:space="preserve"><value>Kategorie gespeichert</value></data>
   <data name="Category_ReadyDetail" xml:space="preserve"><value>Die Kategorie „{0}“ ist einsatzbereit.</value></data>
   <data name="Category_DeleteConfirmTitle" xml:space="preserve"><value>„{0}“ löschen?</value></data>
-  <data name="Category_DeleteConfirmMessage" xml:space="preserve"><value>Ihre Anlässe bleiben erhalten – sie landen unter „Ohne Kategorie“.</value></data>
+  <data name="Category_DeleteConfirmMessage" xml:space="preserve"><value>Ihre Anlässe bleiben erhalten und landen unter „Ohne Kategorie“.</value></data>
   <data name="Category_DeletedUndo" xml:space="preserve"><value>„{0}“ gelöscht</value></data>
   <data name="Category_DeletedTitle" xml:space="preserve"><value>Kategorie gelöscht</value></data>
   <data name="Category_DeletedDetail" xml:space="preserve"><value>Die Kategorie „{0}“ wurde gelöscht; ihre Anlässe stehen jetzt unter „Ohne Kategorie“.</value></data>
@@ -285,9 +278,9 @@
 
 Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityToolkit.Maui und Plugin.LocalNotification.</value></data>
   <data name="Calendar_NothingMarked" xml:space="preserve"><value>In diesem Monat gibt es keine Stichtage oder Meilensteine.</value></data>
-  <data name="Calendar_MonthSummary_One" xml:space="preserve"><value>{0} Datum markiert – volle Punkte sind Stichtage, blasse Punkte sind Meilensteine.</value></data>
-  <data name="Calendar_MonthSummary_Few" xml:space="preserve"><value>{0} Daten markiert – volle Punkte sind Stichtage, blasse Punkte sind Meilensteine.</value></data>
-  <data name="Calendar_MonthSummary_Many" xml:space="preserve"><value>{0} Daten markiert – volle Punkte sind Stichtage, blasse Punkte sind Meilensteine.</value></data>
+  <data name="Calendar_MonthSummary_One" xml:space="preserve"><value>{0} Datum markiert. Volle Punkte sind Stichtage, blasse Punkte sind Meilensteine.</value></data>
+  <data name="Calendar_MonthSummary_Few" xml:space="preserve"><value>{0} Daten markiert. Volle Punkte sind Stichtage, blasse Punkte sind Meilensteine.</value></data>
+  <data name="Calendar_MonthSummary_Many" xml:space="preserve"><value>{0} Daten markiert. Volle Punkte sind Stichtage, blasse Punkte sind Meilensteine.</value></data>
   <data name="Home_Subtitle" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="Home_OccasionCount_One" xml:space="preserve"><value>{0} Anlass</value></data>
   <data name="Home_OccasionCount_Few" xml:space="preserve"><value>{0} Anlässe</value></data>
@@ -341,9 +334,9 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Form_PreviewUntilStarts_Few" xml:space="preserve"><value>Tage bis zum Zählbeginn am {0}</value></data>
   <data name="Form_PreviewUntilStarts_Many" xml:space="preserve"><value>Tage bis zum Zählbeginn am {0}</value></data>
   <data name="Form_PreviewStartsToday" xml:space="preserve"><value>Zählung beginnt heute, {0}</value></data>
-  <data name="Form_PreviewSinceStarts_One" xml:space="preserve"><value>Tag seit {0} – ab hier wird gezählt</value></data>
-  <data name="Form_PreviewSinceStarts_Few" xml:space="preserve"><value>Tage seit {0} – ab hier wird gezählt</value></data>
-  <data name="Form_PreviewSinceStarts_Many" xml:space="preserve"><value>Tage seit {0} – ab hier wird gezählt</value></data>
+  <data name="Form_PreviewSinceStarts_One" xml:space="preserve"><value>Tag seit {0}, ab hier wird gezählt</value></data>
+  <data name="Form_PreviewSinceStarts_Few" xml:space="preserve"><value>Tage seit {0}, ab hier wird gezählt</value></data>
+  <data name="Form_PreviewSinceStarts_Many" xml:space="preserve"><value>Tage seit {0}, ab hier wird gezählt</value></data>
   <data name="Form_PreviewUntil_One" xml:space="preserve"><value>Tag bis {0}</value></data>
   <data name="Form_PreviewUntil_Few" xml:space="preserve"><value>Tage bis {0}</value></data>
   <data name="Form_PreviewUntil_Many" xml:space="preserve"><value>Tage bis {0}</value></data>

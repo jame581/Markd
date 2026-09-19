@@ -31,9 +31,9 @@
   <data name="Settings_ExportSub" xml:space="preserve"><value>Uložte do složky, na Google Disk nebo OneDrive, nebo ji nasdílejte.</value></data>
   <data name="Settings_ImportSub" xml:space="preserve"><value>Nahradí vše v telefonu</value></data>
   <data name="Settings_EraseAll" xml:space="preserve"><value>Smazat všechny události</value></data>
-  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd uchovává jeden soubor SQLite v tomto zařízení. Nic se nenahrává, takže se nic nesynchronizuje — před výměnou telefonu proveďte export.</value></data>
+  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd uchovává jeden soubor SQLite v tomto zařízení. Nic se nenahrává, takže se nic nesynchronizuje. Před výměnou telefonu proveďte export.</value></data>
   <data name="Settings_AboutMarkd" xml:space="preserve"><value>O aplikaci Markd</value></data>
-  <data name="Settings_ThemeSub" xml:space="preserve"><value>Použije se okamžitě — není třeba nic ukládat</value></data>
+  <data name="Settings_ThemeSub" xml:space="preserve"><value>Použije se okamžitě, není třeba nic ukládat</value></data>
   <data name="Settings_LanguageSub" xml:space="preserve"><value>English · Čeština · Deutsch · Français</value></data>
   <data name="Settings_DailyCheckTime" xml:space="preserve"><value>Čas denní kontroly</value></data>
   <data name="Settings_DailyCheckTimeSub" xml:space="preserve"><value>Kdy Markd zjišťuje, které milníky připadají na dnešek</value></data>
@@ -41,7 +41,7 @@
   <data name="Settings_ImportShort" xml:space="preserve"><value>Importovat</value></data>
   <data name="Settings_EraseAllShort" xml:space="preserve"><value>Smazat vše</value></data>
   <data name="Settings_EraseAllSub" xml:space="preserve"><value>Všechny události a milníky. Kategorie a nastavení zůstanou zachovány.</value></data>
-  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd uchovává jeden soubor SQLite v tomto počítači. Nic se nenahrává, takže se nic nesynchronizuje — před přechodem na jiný počítač proveďte export.</value></data>
+  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd uchovává jeden soubor SQLite v tomto počítači. Nic se nenahrává, takže se nic nesynchronizuje. Před přechodem na jiný počítač proveďte export.</value></data>
   <data name="Abbr_Year" xml:space="preserve"><value>r</value></data>
   <data name="Abbr_Month" xml:space="preserve"><value>m</value></data>
   <data name="Abbr_Day" xml:space="preserve"><value>d</value></data>
@@ -79,13 +79,6 @@
   <data name="Occasion_Count_One" xml:space="preserve"><value>{0} událost</value></data>
   <data name="Occasion_Count_Few" xml:space="preserve"><value>{0} události</value></data>
   <data name="Occasion_Count_Many" xml:space="preserve"><value>{0} událostí</value></data>
-  <data name="Calendar_Initial_Mon" xml:space="preserve"><value>P</value></data>
-  <data name="Calendar_Initial_Tue" xml:space="preserve"><value>Ú</value></data>
-  <data name="Calendar_Initial_Wed" xml:space="preserve"><value>S</value></data>
-  <data name="Calendar_Initial_Thu" xml:space="preserve"><value>Č</value></data>
-  <data name="Calendar_Initial_Fri" xml:space="preserve"><value>P</value></data>
-  <data name="Calendar_Initial_Sat" xml:space="preserve"><value>S</value></data>
-  <data name="Calendar_Initial_Sun" xml:space="preserve"><value>N</value></data>
   <data name="Calendar_Short_Mon" xml:space="preserve"><value>Po</value></data>
   <data name="Calendar_Short_Tue" xml:space="preserve"><value>Út</value></data>
   <data name="Calendar_Short_Wed" xml:space="preserve"><value>St</value></data>
@@ -95,7 +88,7 @@
   <data name="Calendar_Short_Sun" xml:space="preserve"><value>Ne</value></data>
   <data name="Home_Pinned" xml:space="preserve"><value>PŘIPNUTO</value></data>
   <data name="Home_EmptyTitle" xml:space="preserve"><value>Zatím nic není označeno</value></data>
-  <data name="Home_EmptyHint" xml:space="preserve"><value>Vyberte datum, na kterém záleží — první den, poslední den, den, ke kterému se blížíte — a Markd za vás počítá dny.</value></data>
+  <data name="Home_EmptyHint" xml:space="preserve"><value>Vyberte datum, na kterém záleží: první den, poslední den, den, ke kterému se blížíte. Markd za vás počítá dny.</value></data>
   <data name="Home_AddFirst" xml:space="preserve"><value>Přidat první událost</value></data>
   <data name="Home_EmptyFootnote" xml:space="preserve"><value>Žádný účet. Žádné reklamy. Vše zůstává v tomto telefonu.</value></data>
   <data name="Home_NewOccasion" xml:space="preserve"><value>Nová událost</value></data>
@@ -130,7 +123,7 @@
   <data name="Form_ChooseEmoji" xml:space="preserve"><value>Vybrat emoji</value></data>
   <data name="Category_Title" xml:space="preserve"><value>Kategorie</value></data>
   <data name="Category_Empty" xml:space="preserve"><value>Zatím žádné kategorie. Tlačítkem „Nová kategorie“ si seskupíte události podle svého.</value></data>
-  <data name="Category_Footnote" xml:space="preserve"><value>Akce řádku zobrazíte podržením nebo klepnutím na tlačítko nabídky. Události ze smazané kategorie se nikdy nesmažou — jen zůstanou bez kategorie.</value></data>
+  <data name="Category_Footnote" xml:space="preserve"><value>Akce řádku zobrazíte podržením nebo klepnutím na tlačítko nabídky. Události ze smazané kategorie se nikdy nesmažou, jen zůstanou bez kategorie.</value></data>
   <data name="Category_New" xml:space="preserve"><value>Nová kategorie</value></data>
   <data name="Category_Name" xml:space="preserve"><value>Název</value></data>
   <data name="Category_NamePlaceholder" xml:space="preserve"><value>Zdraví</value></data>
@@ -146,22 +139,22 @@
   <data name="Category_NamePlaceholderDesktop" xml:space="preserve"><value>Rodina, Zdraví, Cestování…</value></data>
   <data name="Calendar_Title" xml:space="preserve"><value>Kalendář</value></data>
   <data name="Calendar_ComingUp" xml:space="preserve"><value>Blíží se</value></data>
-  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Zatím není co odpočítávat — přidejte událost a její milníky se zobrazí zde.</value></data>
+  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Zatím není co odpočítávat. Přidejte událost a její milníky se zobrazí zde.</value></data>
   <data name="Calendar_DotsLegend" xml:space="preserve"><value>Plné tečky jsou výchozí data · vybledlé tečky jsou milníky.</value></data>
   <data name="Calendar_PreviousMonth" xml:space="preserve"><value>Předchozí měsíc</value></data>
   <data name="Calendar_NextMonth" xml:space="preserve"><value>Další měsíc</value></data>
-  <data name="Calendar_DotsLegendDesktop" xml:space="preserve"><value>Plné tečky jsou výchozí data; vybledlé tečky jsou milníky.</value></data>
-  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Zatím se nic neblíží — přidejte milníky k některé události.</value></data>
+  <data name="Calendar_DotsLegendDesktop" xml:space="preserve"><value>Plné tečky jsou výchozí data, vybledlé tečky jsou milníky.</value></data>
+  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Zatím se nic neblíží. Přidejte milníky k některé události.</value></data>
   <data name="Calendar_ThisMonth" xml:space="preserve"><value>Tento měsíc</value></data>
   <data name="Calendar_SubtitleDesktop" xml:space="preserve"><value>Výchozí data a milníky v průběhu měsíce</value></data>
   <data name="About_Title" xml:space="preserve"><value>O aplikaci</value></data>
-  <data name="About_Description" xml:space="preserve"><value>Open-source aplikace pro sledování dat, od kterých a ke kterým počítáte. Žádné reklamy, žádné placené funkce, žádný účet.</value></data>
+  <data name="About_Description" xml:space="preserve"><value>Open-source aplikace pro sledování času a událostí, kolik dní uběhlo / kolik dní zbývá. Žádné reklamy, žádné placené funkce, žádný účet.</value></data>
   <data name="About_Licence" xml:space="preserve"><value>Licence</value></data>
   <data name="About_SourceCode" xml:space="preserve"><value>Zdrojový kód</value></data>
   <data name="About_Translations" xml:space="preserve"><value>Překlady</value></data>
   <data name="About_Acknowledgements" xml:space="preserve"><value>Poděkování</value></data>
   <data name="About_Footer" xml:space="preserve"><value>Vytvořeno s .NET MAUI · SQLite zůstává v zařízení</value></data>
-  <data name="About_LicenceValue" xml:space="preserve"><value>MIT — navždy zdarma</value></data>
+  <data name="About_LicenceValue" xml:space="preserve"><value>MIT, navždy zdarma</value></data>
   <data name="About_LicenceLink" xml:space="preserve"><value>Přečíst licenci</value></data>
   <data name="About_SourceValue" xml:space="preserve"><value>Otevřený zdrojový kód na GitHubu</value></data>
   <data name="About_SourceLink" xml:space="preserve"><value>Zobrazit repozitář</value></data>
@@ -191,7 +184,7 @@
   <data name="Desk_LightTheme" xml:space="preserve"><value>Světlý motiv</value></data>
   <data name="Desk_DarkTheme" xml:space="preserve"><value>Tmavý motiv</value></data>
   <data name="Desk_MoreIcons" xml:space="preserve"><value>Další ikony</value></data>
-  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Vyberte datum, na kterém záleží — první den, poslední den, den, na který čekáte. Markd od něj počítá.</value></data>
+  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Vyberte datum, na kterém záleží: první den, poslední den, den, na který čekáte. Markd od něj počítá.</value></data>
   <data name="Home_AddFirstDesktop" xml:space="preserve"><value>Vytvořit první událost</value></data>
   <data name="Home_EmptyFootnoteDesktop" xml:space="preserve"><value>Žádný účet. Žádné reklamy. Vše zůstává v tomto počítači.</value></data>
   <data name="Home_AllOccasions" xml:space="preserve"><value>Všechny události</value></data>
@@ -252,7 +245,7 @@
   <data name="Notification_TitleUntil_Few" xml:space="preserve"><value>Zbývají {0} dny {1}</value></data>
   <data name="Notification_TitleUntil_Many" xml:space="preserve"><value>Zbývá {0} dní {1}</value></data>
   <data name="Notification_DescriptionSince" xml:space="preserve"><value>{0}: dnes dosažen milník „{1}“. Klepnutím zobrazíte počet dní.</value></data>
-  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0}: „{1}“ — {2}.</value></data>
+  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0}: „{1}“ ({2}).</value></data>
   <data name="Notification_DaysLeft_One" xml:space="preserve"><value>zbývá {0} den</value></data>
   <data name="Notification_DaysLeft_Few" xml:space="preserve"><value>zbývají {0} dny</value></data>
   <data name="Notification_DaysLeft_Many" xml:space="preserve"><value>zbývá {0} dní</value></data>
@@ -264,10 +257,10 @@
   <data name="Category_SavedTitle" xml:space="preserve"><value>Kategorie uložena</value></data>
   <data name="Category_ReadyDetail" xml:space="preserve"><value>Kategorie „{0}“ je připravena k použití.</value></data>
   <data name="Category_DeleteConfirmTitle" xml:space="preserve"><value>Smazat „{0}“?</value></data>
-  <data name="Category_DeleteConfirmMessage" xml:space="preserve"><value>Její události zůstanou zachovány — přesunou se mezi události bez kategorie.</value></data>
+  <data name="Category_DeleteConfirmMessage" xml:space="preserve"><value>Události zůstanou zachovány, přesunou se mezi události bez kategorie.</value></data>
   <data name="Category_DeletedUndo" xml:space="preserve"><value>„{0}“ smazána</value></data>
   <data name="Category_DeletedTitle" xml:space="preserve"><value>Kategorie smazána</value></data>
-  <data name="Category_DeletedDetail" xml:space="preserve"><value>Kategorie „{0}“ byla smazána; její události jsou nyní bez kategorie.</value></data>
+  <data name="Category_DeletedDetail" xml:space="preserve"><value>Kategorie „{0}“ byla smazána, její události jsou nyní bez kategorie.</value></data>
   <data name="Category_RowEmpty" xml:space="preserve"><value>Prázdná · nic tu není</value></data>
   <data name="Milestone_LabelRequired" xml:space="preserve"><value>Zadejte název milníku.</value></data>
   <data name="Milestone_ThresholdInvalid" xml:space="preserve"><value>Počet dní milníku musí být kladné číslo.</value></data>
@@ -285,9 +278,9 @@
 
 Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, CommunityToolkit.Maui a Plugin.LocalNotification.</value></data>
   <data name="Calendar_NothingMarked" xml:space="preserve"><value>V tomto měsíci není žádné výchozí datum ani milník.</value></data>
-  <data name="Calendar_MonthSummary_One" xml:space="preserve"><value>{0} datum označeno — plné tečky jsou výchozí data, vybledlé tečky jsou milníky.</value></data>
-  <data name="Calendar_MonthSummary_Few" xml:space="preserve"><value>{0} data označena — plné tečky jsou výchozí data, vybledlé tečky jsou milníky.</value></data>
-  <data name="Calendar_MonthSummary_Many" xml:space="preserve"><value>{0} dat označeno — plné tečky jsou výchozí data, vybledlé tečky jsou milníky.</value></data>
+  <data name="Calendar_MonthSummary_One" xml:space="preserve"><value>{0} datum označeno. Plné tečky jsou výchozí data, vybledlé tečky jsou milníky.</value></data>
+  <data name="Calendar_MonthSummary_Few" xml:space="preserve"><value>{0} data označena. Plné tečky jsou výchozí data, vybledlé tečky jsou milníky.</value></data>
+  <data name="Calendar_MonthSummary_Many" xml:space="preserve"><value>{0} dat označeno. Plné tečky jsou výchozí data, vybledlé tečky jsou milníky.</value></data>
   <data name="Home_Subtitle" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="Home_OccasionCount_One" xml:space="preserve"><value>{0} událost</value></data>
   <data name="Home_OccasionCount_Few" xml:space="preserve"><value>{0} události</value></data>
@@ -341,9 +334,9 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Form_PreviewUntilStarts_Few" xml:space="preserve"><value>do zahájení počítání {0}</value></data>
   <data name="Form_PreviewUntilStarts_Many" xml:space="preserve"><value>do zahájení počítání {0}</value></data>
   <data name="Form_PreviewStartsToday" xml:space="preserve"><value>počítání začíná dnes, {0}</value></data>
-  <data name="Form_PreviewSinceStarts_One" xml:space="preserve"><value>od {0} — odtud se počítá</value></data>
-  <data name="Form_PreviewSinceStarts_Few" xml:space="preserve"><value>od {0} — odtud se počítá</value></data>
-  <data name="Form_PreviewSinceStarts_Many" xml:space="preserve"><value>od {0} — odtud se počítá</value></data>
+  <data name="Form_PreviewSinceStarts_One" xml:space="preserve"><value>od {0}, odtud se počítá</value></data>
+  <data name="Form_PreviewSinceStarts_Few" xml:space="preserve"><value>od {0}, odtud se počítá</value></data>
+  <data name="Form_PreviewSinceStarts_Many" xml:space="preserve"><value>od {0}, odtud se počítá</value></data>
   <data name="Form_PreviewUntil_One" xml:space="preserve"><value>do {0}</value></data>
   <data name="Form_PreviewUntil_Few" xml:space="preserve"><value>do {0}</value></data>
   <data name="Form_PreviewUntil_Many" xml:space="preserve"><value>do {0}</value></data>

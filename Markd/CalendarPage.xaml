@@ -33,13 +33,13 @@
                                     <Setter Property="HorizontalTextAlignment" Value="Center" />
                                 </Style>
                             </Grid.Resources>
-                            <Label Grid.Column="0" Text="{loc:Tr Calendar_Initial_Mon}" />
-                            <Label Grid.Column="1" Text="{loc:Tr Calendar_Initial_Tue}" />
-                            <Label Grid.Column="2" Text="{loc:Tr Calendar_Initial_Wed}" />
-                            <Label Grid.Column="3" Text="{loc:Tr Calendar_Initial_Thu}" />
-                            <Label Grid.Column="4" Text="{loc:Tr Calendar_Initial_Fri}" />
-                            <Label Grid.Column="5" Text="{loc:Tr Calendar_Initial_Sat}" />
-                            <Label Grid.Column="6" Text="{loc:Tr Calendar_Initial_Sun}" />
+                            <Label Grid.Column="0" Text="{loc:Tr Calendar_Short_Mon}" />
+                            <Label Grid.Column="1" Text="{loc:Tr Calendar_Short_Tue}" />
+                            <Label Grid.Column="2" Text="{loc:Tr Calendar_Short_Wed}" />
+                            <Label Grid.Column="3" Text="{loc:Tr Calendar_Short_Thu}" />
+                            <Label Grid.Column="4" Text="{loc:Tr Calendar_Short_Fri}" />
+                            <Label Grid.Column="5" Text="{loc:Tr Calendar_Short_Sat}" />
+                            <Label Grid.Column="6" Text="{loc:Tr Calendar_Short_Sun}" />
                         </Grid>
 
                         <VerticalStackLayout Spacing="3" BindableLayout.ItemsSource="{Binding Weeks}">

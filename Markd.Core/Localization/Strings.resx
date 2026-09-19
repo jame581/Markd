@@ -31,9 +31,9 @@
   <data name="Settings_ExportSub" xml:space="preserve"><value>Save to a folder, Google Drive or OneDrive, or share it.</value></data>
   <data name="Settings_ImportSub" xml:space="preserve"><value>Replaces everything on this phone</value></data>
   <data name="Settings_EraseAll" xml:space="preserve"><value>Erase all occasions</value></data>
-  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd keeps one SQLite file on this device. Nothing is uploaded, so nothing syncs — export before you switch phones.</value></data>
+  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd keeps one SQLite file on this device. Nothing is uploaded, so nothing syncs. Export before you switch phones.</value></data>
   <data name="Settings_AboutMarkd" xml:space="preserve"><value>About Markd</value></data>
-  <data name="Settings_ThemeSub" xml:space="preserve"><value>Applies immediately — no save needed</value></data>
+  <data name="Settings_ThemeSub" xml:space="preserve"><value>Applies immediately, no save needed</value></data>
   <data name="Settings_LanguageSub" xml:space="preserve"><value>English · Čeština · Deutsch · Français</value></data>
   <data name="Settings_DailyCheckTime" xml:space="preserve"><value>Daily check time</value></data>
   <data name="Settings_DailyCheckTimeSub" xml:space="preserve"><value>When Markd looks for milestones due today</value></data>
@@ -41,7 +41,7 @@
   <data name="Settings_ImportShort" xml:space="preserve"><value>Import</value></data>
   <data name="Settings_EraseAllShort" xml:space="preserve"><value>Erase all</value></data>
   <data name="Settings_EraseAllSub" xml:space="preserve"><value>Every occasion and milestone. Categories and settings stay.</value></data>
-  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd keeps one SQLite file on this PC. Nothing is uploaded, so nothing syncs — export before you move to another machine.</value></data>
+  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd keeps one SQLite file on this PC. Nothing is uploaded, so nothing syncs. Export before you move to another machine.</value></data>
   <data name="Abbr_Year" xml:space="preserve"><value>y</value></data>
   <data name="Abbr_Month" xml:space="preserve"><value>mo</value></data>
   <data name="Abbr_Day" xml:space="preserve"><value>d</value></data>
@@ -79,13 +79,6 @@
   <data name="Occasion_Count_One" xml:space="preserve"><value>{0} occasion</value></data>
   <data name="Occasion_Count_Few" xml:space="preserve"><value>{0} occasions</value></data>
   <data name="Occasion_Count_Many" xml:space="preserve"><value>{0} occasions</value></data>
-  <data name="Calendar_Initial_Mon" xml:space="preserve"><value>M</value></data>
-  <data name="Calendar_Initial_Tue" xml:space="preserve"><value>T</value></data>
-  <data name="Calendar_Initial_Wed" xml:space="preserve"><value>W</value></data>
-  <data name="Calendar_Initial_Thu" xml:space="preserve"><value>T</value></data>
-  <data name="Calendar_Initial_Fri" xml:space="preserve"><value>F</value></data>
-  <data name="Calendar_Initial_Sat" xml:space="preserve"><value>S</value></data>
-  <data name="Calendar_Initial_Sun" xml:space="preserve"><value>S</value></data>
   <data name="Calendar_Short_Mon" xml:space="preserve"><value>Mon</value></data>
   <data name="Calendar_Short_Tue" xml:space="preserve"><value>Tue</value></data>
   <data name="Calendar_Short_Wed" xml:space="preserve"><value>Wed</value></data>
@@ -95,7 +88,7 @@
   <data name="Calendar_Short_Sun" xml:space="preserve"><value>Sun</value></data>
   <data name="Home_Pinned" xml:space="preserve"><value>PINNED</value></data>
   <data name="Home_EmptyTitle" xml:space="preserve"><value>Nothing marked yet</value></data>
-  <data name="Home_EmptyHint" xml:space="preserve"><value>Pick a date that matters — a first day, a last day, a day you're counting toward — and Markd keeps the number for you.</value></data>
+  <data name="Home_EmptyHint" xml:space="preserve"><value>Pick a date that matters (a first day, a last day, a day you're counting toward) and Markd keeps the number for you.</value></data>
   <data name="Home_AddFirst" xml:space="preserve"><value>Add your first occasion</value></data>
   <data name="Home_EmptyFootnote" xml:space="preserve"><value>No account. No ads. Everything stays on this phone.</value></data>
   <data name="Home_NewOccasion" xml:space="preserve"><value>New occasion</value></data>
@@ -130,7 +123,7 @@
   <data name="Form_ChooseEmoji" xml:space="preserve"><value>Choose an emoji</value></data>
   <data name="Category_Title" xml:space="preserve"><value>Categories</value></data>
   <data name="Category_Empty" xml:space="preserve"><value>No categories yet. Use New category to group occasions however you think about them.</value></data>
-  <data name="Category_Footnote" xml:space="preserve"><value>Long-press or tap the overflow for row actions. Occasions filed under a deleted category move to Uncategorised — they're never removed with it.</value></data>
+  <data name="Category_Footnote" xml:space="preserve"><value>Long-press or tap the overflow for row actions. Occasions filed under a deleted category move to Uncategorised. They're never removed with it.</value></data>
   <data name="Category_New" xml:space="preserve"><value>New category</value></data>
   <data name="Category_Name" xml:space="preserve"><value>Name</value></data>
   <data name="Category_NamePlaceholder" xml:space="preserve"><value>Health</value></data>
@@ -140,18 +133,18 @@
   <data name="Category_Edit" xml:space="preserve"><value>Edit category</value></data>
   <data name="Category_Delete" xml:space="preserve"><value>Delete category</value></data>
   <data name="Category_EmptyDesktop" xml:space="preserve"><value>No categories yet. Group occasions however you think about them.</value></data>
-  <data name="Category_FootnoteDesktop" xml:space="preserve"><value>Deleting a category keeps its occasions — they move to Uncategorised.</value></data>
+  <data name="Category_FootnoteDesktop" xml:space="preserve"><value>Deleting a category keeps its occasions. They move to Uncategorised.</value></data>
   <data name="Category_SubtitleDesktop" xml:space="preserve"><value>Group occasions however you think about them</value></data>
   <data name="Category_EditorHint" xml:space="preserve"><value>Emoji and colour mark the category wherever it appears.</value></data>
   <data name="Category_NamePlaceholderDesktop" xml:space="preserve"><value>Family, Health, Travel…</value></data>
   <data name="Calendar_Title" xml:space="preserve"><value>Calendar</value></data>
   <data name="Calendar_ComingUp" xml:space="preserve"><value>Coming up</value></data>
-  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Nothing to count toward yet — add an occasion and its milestones show up here.</value></data>
+  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Nothing to count toward yet. Add an occasion and its milestones show up here.</value></data>
   <data name="Calendar_DotsLegend" xml:space="preserve"><value>Solid dots are anchor dates · faded dots are milestones.</value></data>
   <data name="Calendar_PreviousMonth" xml:space="preserve"><value>Previous month</value></data>
   <data name="Calendar_NextMonth" xml:space="preserve"><value>Next month</value></data>
   <data name="Calendar_DotsLegendDesktop" xml:space="preserve"><value>Solid dots are anchor dates; faded dots are milestone dates.</value></data>
-  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Nothing ahead yet — add milestones to an occasion.</value></data>
+  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Nothing ahead yet. Add milestones to an occasion.</value></data>
   <data name="Calendar_ThisMonth" xml:space="preserve"><value>This month</value></data>
   <data name="Calendar_SubtitleDesktop" xml:space="preserve"><value>Anchor dates and milestones across the month</value></data>
   <data name="About_Title" xml:space="preserve"><value>About</value></data>
@@ -161,7 +154,7 @@
   <data name="About_Translations" xml:space="preserve"><value>Translations</value></data>
   <data name="About_Acknowledgements" xml:space="preserve"><value>Acknowledgements</value></data>
   <data name="About_Footer" xml:space="preserve"><value>Built with .NET MAUI · SQLite stays on device</value></data>
-  <data name="About_LicenceValue" xml:space="preserve"><value>MIT — free forever</value></data>
+  <data name="About_LicenceValue" xml:space="preserve"><value>MIT, free forever</value></data>
   <data name="About_LicenceLink" xml:space="preserve"><value>Read the licence</value></data>
   <data name="About_SourceValue" xml:space="preserve"><value>Open source on GitHub</value></data>
   <data name="About_SourceLink" xml:space="preserve"><value>View the repository</value></data>
@@ -191,7 +184,7 @@
   <data name="Desk_LightTheme" xml:space="preserve"><value>Light theme</value></data>
   <data name="Desk_DarkTheme" xml:space="preserve"><value>Dark theme</value></data>
   <data name="Desk_MoreIcons" xml:space="preserve"><value>More icons</value></data>
-  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Pick a date that matters — a first day, a last day, a day you're waiting for. Markd counts from there.</value></data>
+  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Pick a date that matters: a first day, a last day, a day you're waiting for. Markd counts from there.</value></data>
   <data name="Home_AddFirstDesktop" xml:space="preserve"><value>Create your first occasion</value></data>
   <data name="Home_EmptyFootnoteDesktop" xml:space="preserve"><value>No account. No ads. Everything stays on this PC.</value></data>
   <data name="Home_AllOccasions" xml:space="preserve"><value>All occasions</value></data>
@@ -252,7 +245,7 @@
   <data name="Notification_TitleUntil_Few" xml:space="preserve"><value>{0} days to go {1}</value></data>
   <data name="Notification_TitleUntil_Many" xml:space="preserve"><value>{0} days to go {1}</value></data>
   <data name="Notification_DescriptionSince" xml:space="preserve"><value>{0} hit “{1}” today. Tap to see the count.</value></data>
-  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0}: “{1}” — {2}.</value></data>
+  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0}: “{1}” ({2}).</value></data>
   <data name="Notification_DaysLeft_One" xml:space="preserve"><value>{0} day left</value></data>
   <data name="Notification_DaysLeft_Few" xml:space="preserve"><value>{0} days left</value></data>
   <data name="Notification_DaysLeft_Many" xml:space="preserve"><value>{0} days left</value></data>
@@ -264,7 +257,7 @@
   <data name="Category_SavedTitle" xml:space="preserve"><value>Category saved</value></data>
   <data name="Category_ReadyDetail" xml:space="preserve"><value>{0} is ready to use.</value></data>
   <data name="Category_DeleteConfirmTitle" xml:space="preserve"><value>Delete “{0}”?</value></data>
-  <data name="Category_DeleteConfirmMessage" xml:space="preserve"><value>Its occasions are kept — they move to Uncategorised.</value></data>
+  <data name="Category_DeleteConfirmMessage" xml:space="preserve"><value>Its occasions are kept and move to Uncategorised.</value></data>
   <data name="Category_DeletedUndo" xml:space="preserve"><value>“{0}” deleted</value></data>
   <data name="Category_DeletedTitle" xml:space="preserve"><value>Category deleted</value></data>
   <data name="Category_DeletedDetail" xml:space="preserve"><value>{0} is gone; its occasions moved to Uncategorised.</value></data>
@@ -285,9 +278,9 @@
 
 Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolkit.Maui and Plugin.LocalNotification.</value></data>
   <data name="Calendar_NothingMarked" xml:space="preserve"><value>No anchors or milestones fall in this month.</value></data>
-  <data name="Calendar_MonthSummary_One" xml:space="preserve"><value>{0} date marked — solid dots are anchor dates, faded dots are milestones.</value></data>
-  <data name="Calendar_MonthSummary_Few" xml:space="preserve"><value>{0} dates marked — solid dots are anchor dates, faded dots are milestones.</value></data>
-  <data name="Calendar_MonthSummary_Many" xml:space="preserve"><value>{0} dates marked — solid dots are anchor dates, faded dots are milestones.</value></data>
+  <data name="Calendar_MonthSummary_One" xml:space="preserve"><value>{0} date marked. Solid dots are anchor dates, faded dots are milestones.</value></data>
+  <data name="Calendar_MonthSummary_Few" xml:space="preserve"><value>{0} dates marked. Solid dots are anchor dates, faded dots are milestones.</value></data>
+  <data name="Calendar_MonthSummary_Many" xml:space="preserve"><value>{0} dates marked. Solid dots are anchor dates, faded dots are milestones.</value></data>
   <data name="Home_Subtitle" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="Home_OccasionCount_One" xml:space="preserve"><value>{0} occasion</value></data>
   <data name="Home_OccasionCount_Few" xml:space="preserve"><value>{0} occasions</value></data>
@@ -341,9 +334,9 @@ Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolk
   <data name="Form_PreviewUntilStarts_Few" xml:space="preserve"><value>days until the counter starts on {0}</value></data>
   <data name="Form_PreviewUntilStarts_Many" xml:space="preserve"><value>days until the counter starts on {0}</value></data>
   <data name="Form_PreviewStartsToday" xml:space="preserve"><value>the counter starts today, {0}</value></data>
-  <data name="Form_PreviewSinceStarts_One" xml:space="preserve"><value>day since {0} — the counter starts here</value></data>
-  <data name="Form_PreviewSinceStarts_Few" xml:space="preserve"><value>days since {0} — the counter starts here</value></data>
-  <data name="Form_PreviewSinceStarts_Many" xml:space="preserve"><value>days since {0} — the counter starts here</value></data>
+  <data name="Form_PreviewSinceStarts_One" xml:space="preserve"><value>day since {0}, the counter starts here</value></data>
+  <data name="Form_PreviewSinceStarts_Few" xml:space="preserve"><value>days since {0}, the counter starts here</value></data>
+  <data name="Form_PreviewSinceStarts_Many" xml:space="preserve"><value>days since {0}, the counter starts here</value></data>
   <data name="Form_PreviewUntil_One" xml:space="preserve"><value>day until {0}</value></data>
   <data name="Form_PreviewUntil_Few" xml:space="preserve"><value>days until {0}</value></data>
   <data name="Form_PreviewUntil_Many" xml:space="preserve"><value>days until {0}</value></data>

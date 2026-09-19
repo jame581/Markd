@@ -31,9 +31,9 @@
   <data name="Settings_ExportSub" xml:space="preserve"><value>Enregistrez-la dans un dossier, sur Google Drive ou OneDrive, ou partagez-la.</value></data>
   <data name="Settings_ImportSub" xml:space="preserve"><value>Remplace tout le contenu de ce téléphone</value></data>
   <data name="Settings_EraseAll" xml:space="preserve"><value>Effacer tous les événements</value></data>
-  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd conserve un seul fichier SQLite sur cet appareil. Rien n'est envoyé en ligne, donc rien n'est synchronisé – exportez vos données avant de changer de téléphone.</value></data>
+  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd conserve un seul fichier SQLite sur cet appareil. Rien n'est envoyé en ligne, donc rien n'est synchronisé. Exportez vos données avant de changer de téléphone.</value></data>
   <data name="Settings_AboutMarkd" xml:space="preserve"><value>À propos de Markd</value></data>
-  <data name="Settings_ThemeSub" xml:space="preserve"><value>S'applique immédiatement – inutile d'enregistrer</value></data>
+  <data name="Settings_ThemeSub" xml:space="preserve"><value>S'applique immédiatement, inutile d'enregistrer</value></data>
   <data name="Settings_LanguageSub" xml:space="preserve"><value>English · Čeština · Deutsch · Français</value></data>
   <data name="Settings_DailyCheckTime" xml:space="preserve"><value>Vérification quotidienne</value></data>
   <data name="Settings_DailyCheckTimeSub" xml:space="preserve"><value>Heure à laquelle Markd recherche les étapes du jour</value></data>
@@ -41,7 +41,7 @@
   <data name="Settings_ImportShort" xml:space="preserve"><value>Importer</value></data>
   <data name="Settings_EraseAllShort" xml:space="preserve"><value>Tout effacer</value></data>
   <data name="Settings_EraseAllSub" xml:space="preserve"><value>Tous les événements et étapes. Les catégories et les paramètres sont conservés.</value></data>
-  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd conserve un seul fichier SQLite sur ce PC. Rien n'est envoyé en ligne, donc rien n'est synchronisé – exportez vos données avant de changer d'ordinateur.</value></data>
+  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd conserve un seul fichier SQLite sur ce PC. Rien n'est envoyé en ligne, donc rien n'est synchronisé. Exportez vos données avant de changer d'ordinateur.</value></data>
   <data name="Abbr_Year" xml:space="preserve"><value>a</value></data>
   <data name="Abbr_Month" xml:space="preserve"><value>m</value></data>
   <data name="Abbr_Day" xml:space="preserve"><value>j</value></data>
@@ -79,13 +79,6 @@
   <data name="Occasion_Count_One" xml:space="preserve"><value>{0} événement</value></data>
   <data name="Occasion_Count_Few" xml:space="preserve"><value>{0} événements</value></data>
   <data name="Occasion_Count_Many" xml:space="preserve"><value>{0} événements</value></data>
-  <data name="Calendar_Initial_Mon" xml:space="preserve"><value>L</value></data>
-  <data name="Calendar_Initial_Tue" xml:space="preserve"><value>M</value></data>
-  <data name="Calendar_Initial_Wed" xml:space="preserve"><value>M</value></data>
-  <data name="Calendar_Initial_Thu" xml:space="preserve"><value>J</value></data>
-  <data name="Calendar_Initial_Fri" xml:space="preserve"><value>V</value></data>
-  <data name="Calendar_Initial_Sat" xml:space="preserve"><value>S</value></data>
-  <data name="Calendar_Initial_Sun" xml:space="preserve"><value>D</value></data>
   <data name="Calendar_Short_Mon" xml:space="preserve"><value>lun.</value></data>
   <data name="Calendar_Short_Tue" xml:space="preserve"><value>mar.</value></data>
   <data name="Calendar_Short_Wed" xml:space="preserve"><value>mer.</value></data>
@@ -95,7 +88,7 @@
   <data name="Calendar_Short_Sun" xml:space="preserve"><value>dim.</value></data>
   <data name="Home_Pinned" xml:space="preserve"><value>ÉPINGLÉ</value></data>
   <data name="Home_EmptyTitle" xml:space="preserve"><value>Rien de marqué pour l'instant</value></data>
-  <data name="Home_EmptyHint" xml:space="preserve"><value>Choisissez une date qui compte – un premier jour, un dernier jour, un jour que vous attendez – et Markd tient le compte pour vous.</value></data>
+  <data name="Home_EmptyHint" xml:space="preserve"><value>Choisissez une date qui compte (un premier jour, un dernier jour, un jour que vous attendez) et Markd tient le compte pour vous.</value></data>
   <data name="Home_AddFirst" xml:space="preserve"><value>Ajouter votre premier événement</value></data>
   <data name="Home_EmptyFootnote" xml:space="preserve"><value>Aucun compte. Aucune publicité. Tout reste sur ce téléphone.</value></data>
   <data name="Home_NewOccasion" xml:space="preserve"><value>Nouvel événement</value></data>
@@ -130,7 +123,7 @@
   <data name="Form_ChooseEmoji" xml:space="preserve"><value>Choisir un emoji</value></data>
   <data name="Category_Title" xml:space="preserve"><value>Catégories</value></data>
   <data name="Category_Empty" xml:space="preserve"><value>Aucune catégorie pour l'instant. Utilisez « Nouvelle catégorie » pour regrouper vos événements à votre façon.</value></data>
-  <data name="Category_Footnote" xml:space="preserve"><value>Appuyez longuement sur une ligne ou touchez son menu pour afficher les actions. Les événements d'une catégorie supprimée passent dans « Sans catégorie » – ils ne sont jamais supprimés avec elle.</value></data>
+  <data name="Category_Footnote" xml:space="preserve"><value>Appuyez longuement sur une ligne ou touchez son menu pour afficher les actions. Les événements d'une catégorie supprimée passent dans « Sans catégorie ». Ils ne sont jamais supprimés avec elle.</value></data>
   <data name="Category_New" xml:space="preserve"><value>Nouvelle catégorie</value></data>
   <data name="Category_Name" xml:space="preserve"><value>Nom</value></data>
   <data name="Category_NamePlaceholder" xml:space="preserve"><value>Santé</value></data>
@@ -140,18 +133,18 @@
   <data name="Category_Edit" xml:space="preserve"><value>Modifier la catégorie</value></data>
   <data name="Category_Delete" xml:space="preserve"><value>Supprimer la catégorie</value></data>
   <data name="Category_EmptyDesktop" xml:space="preserve"><value>Aucune catégorie pour l'instant. Regroupez vos événements à votre façon.</value></data>
-  <data name="Category_FootnoteDesktop" xml:space="preserve"><value>Supprimer une catégorie conserve ses événements – ils passent dans « Sans catégorie ».</value></data>
+  <data name="Category_FootnoteDesktop" xml:space="preserve"><value>Supprimer une catégorie conserve ses événements. Ils passent dans « Sans catégorie ».</value></data>
   <data name="Category_SubtitleDesktop" xml:space="preserve"><value>Regroupez vos événements à votre façon</value></data>
   <data name="Category_EditorHint" xml:space="preserve"><value>L'emoji et la couleur identifient la catégorie partout où elle apparaît.</value></data>
   <data name="Category_NamePlaceholderDesktop" xml:space="preserve"><value>Famille, Santé, Voyages…</value></data>
   <data name="Calendar_Title" xml:space="preserve"><value>Calendrier</value></data>
   <data name="Calendar_ComingUp" xml:space="preserve"><value>À venir</value></data>
-  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Rien à décompter pour l'instant – ajoutez un événement et ses étapes apparaîtront ici.</value></data>
+  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Rien à décompter pour l'instant. Ajoutez un événement et ses étapes apparaîtront ici.</value></data>
   <data name="Calendar_DotsLegend" xml:space="preserve"><value>Points pleins : dates de référence · points estompés : étapes.</value></data>
   <data name="Calendar_PreviousMonth" xml:space="preserve"><value>Mois précédent</value></data>
   <data name="Calendar_NextMonth" xml:space="preserve"><value>Mois suivant</value></data>
   <data name="Calendar_DotsLegendDesktop" xml:space="preserve"><value>Les points pleins sont les dates de référence ; les points estompés, les dates d'étape.</value></data>
-  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Rien à venir pour l'instant – ajoutez des étapes à un événement.</value></data>
+  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Rien à venir pour l'instant. Ajoutez des étapes à un événement.</value></data>
   <data name="Calendar_ThisMonth" xml:space="preserve"><value>Ce mois-ci</value></data>
   <data name="Calendar_SubtitleDesktop" xml:space="preserve"><value>Dates de référence et étapes du mois</value></data>
   <data name="About_Title" xml:space="preserve"><value>À propos</value></data>
@@ -161,7 +154,7 @@
   <data name="About_Translations" xml:space="preserve"><value>Traductions</value></data>
   <data name="About_Acknowledgements" xml:space="preserve"><value>Remerciements</value></data>
   <data name="About_Footer" xml:space="preserve"><value>Conçu avec .NET MAUI · SQLite reste sur l'appareil</value></data>
-  <data name="About_LicenceValue" xml:space="preserve"><value>MIT – gratuit pour toujours</value></data>
+  <data name="About_LicenceValue" xml:space="preserve"><value>MIT, gratuit pour toujours</value></data>
   <data name="About_LicenceLink" xml:space="preserve"><value>Lire la licence</value></data>
   <data name="About_SourceValue" xml:space="preserve"><value>Open source sur GitHub</value></data>
   <data name="About_SourceLink" xml:space="preserve"><value>Voir le dépôt</value></data>
@@ -191,7 +184,7 @@
   <data name="Desk_LightTheme" xml:space="preserve"><value>Thème clair</value></data>
   <data name="Desk_DarkTheme" xml:space="preserve"><value>Thème sombre</value></data>
   <data name="Desk_MoreIcons" xml:space="preserve"><value>Plus d'icônes</value></data>
-  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Choisissez une date qui compte – un premier jour, un dernier jour, un jour que vous attendez. Markd compte à partir de là.</value></data>
+  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Choisissez une date qui compte : un premier jour, un dernier jour, un jour que vous attendez. Markd compte à partir de là.</value></data>
   <data name="Home_AddFirstDesktop" xml:space="preserve"><value>Créer votre premier événement</value></data>
   <data name="Home_EmptyFootnoteDesktop" xml:space="preserve"><value>Aucun compte. Aucune publicité. Tout reste sur ce PC.</value></data>
   <data name="Home_AllOccasions" xml:space="preserve"><value>Tous les événements</value></data>
@@ -252,7 +245,7 @@
   <data name="Notification_TitleUntil_Few" xml:space="preserve"><value>Encore {0} jours {1}</value></data>
   <data name="Notification_TitleUntil_Many" xml:space="preserve"><value>Encore {0} jours {1}</value></data>
   <data name="Notification_DescriptionSince" xml:space="preserve"><value>{0} : étape « {1} » atteinte aujourd'hui. Touchez pour voir le décompte.</value></data>
-  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0} : « {1} » – {2}.</value></data>
+  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0} : « {1} » ({2}).</value></data>
   <data name="Notification_DaysLeft_One" xml:space="preserve"><value>encore {0} jour</value></data>
   <data name="Notification_DaysLeft_Few" xml:space="preserve"><value>encore {0} jours</value></data>
   <data name="Notification_DaysLeft_Many" xml:space="preserve"><value>encore {0} jours</value></data>
@@ -264,7 +257,7 @@
   <data name="Category_SavedTitle" xml:space="preserve"><value>Catégorie enregistrée</value></data>
   <data name="Category_ReadyDetail" xml:space="preserve"><value>La catégorie « {0} » est prête.</value></data>
   <data name="Category_DeleteConfirmTitle" xml:space="preserve"><value>Supprimer « {0} » ?</value></data>
-  <data name="Category_DeleteConfirmMessage" xml:space="preserve"><value>Ses événements sont conservés – ils passent dans « Sans catégorie ».</value></data>
+  <data name="Category_DeleteConfirmMessage" xml:space="preserve"><value>Ses événements sont conservés et passent dans « Sans catégorie ».</value></data>
   <data name="Category_DeletedUndo" xml:space="preserve"><value>Catégorie « {0} » supprimée</value></data>
   <data name="Category_DeletedTitle" xml:space="preserve"><value>Catégorie supprimée</value></data>
   <data name="Category_DeletedDetail" xml:space="preserve"><value>La catégorie « {0} » a été supprimée ; ses événements sont passés dans « Sans catégorie ».</value></data>
@@ -285,9 +278,9 @@
 
 Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityToolkit.Maui et Plugin.LocalNotification.</value></data>
   <data name="Calendar_NothingMarked" xml:space="preserve"><value>Aucune date de référence ni étape ce mois-ci.</value></data>
-  <data name="Calendar_MonthSummary_One" xml:space="preserve"><value>{0} date marquée – les points pleins sont les dates de référence, les points estompés les étapes.</value></data>
-  <data name="Calendar_MonthSummary_Few" xml:space="preserve"><value>{0} dates marquées – les points pleins sont les dates de référence, les points estompés les étapes.</value></data>
-  <data name="Calendar_MonthSummary_Many" xml:space="preserve"><value>{0} dates marquées – les points pleins sont les dates de référence, les points estompés les étapes.</value></data>
+  <data name="Calendar_MonthSummary_One" xml:space="preserve"><value>{0} date marquée. Les points pleins sont les dates de référence, les points estompés les étapes.</value></data>
+  <data name="Calendar_MonthSummary_Few" xml:space="preserve"><value>{0} dates marquées. Les points pleins sont les dates de référence, les points estompés les étapes.</value></data>
+  <data name="Calendar_MonthSummary_Many" xml:space="preserve"><value>{0} dates marquées. Les points pleins sont les dates de référence, les points estompés les étapes.</value></data>
   <data name="Home_Subtitle" xml:space="preserve"><value>{0} · {1}</value></data>
   <data name="Home_OccasionCount_One" xml:space="preserve"><value>{0} événement</value></data>
   <data name="Home_OccasionCount_Few" xml:space="preserve"><value>{0} événements</value></data>
@@ -341,9 +334,9 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Form_PreviewUntilStarts_Few" xml:space="preserve"><value>jours avant le début du décompte, le {0}</value></data>
   <data name="Form_PreviewUntilStarts_Many" xml:space="preserve"><value>jours avant le début du décompte, le {0}</value></data>
   <data name="Form_PreviewStartsToday" xml:space="preserve"><value>le décompte commence aujourd'hui, {0}</value></data>
-  <data name="Form_PreviewSinceStarts_One" xml:space="preserve"><value>jour depuis le {0} – le décompte commence ici</value></data>
-  <data name="Form_PreviewSinceStarts_Few" xml:space="preserve"><value>jours depuis le {0} – le décompte commence ici</value></data>
-  <data name="Form_PreviewSinceStarts_Many" xml:space="preserve"><value>jours depuis le {0} – le décompte commence ici</value></data>
+  <data name="Form_PreviewSinceStarts_One" xml:space="preserve"><value>jour depuis le {0}, le décompte commence ici</value></data>
+  <data name="Form_PreviewSinceStarts_Few" xml:space="preserve"><value>jours depuis le {0}, le décompte commence ici</value></data>
+  <data name="Form_PreviewSinceStarts_Many" xml:space="preserve"><value>jours depuis le {0}, le décompte commence ici</value></data>
   <data name="Form_PreviewUntil_One" xml:space="preserve"><value>jour jusqu'au {0}</value></data>
   <data name="Form_PreviewUntil_Few" xml:space="preserve"><value>jours jusqu'au {0}</value></data>
   <data name="Form_PreviewUntil_Many" xml:space="preserve"><value>jours jusqu'au {0}</value></data>
