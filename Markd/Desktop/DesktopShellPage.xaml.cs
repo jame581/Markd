@@ -112,6 +112,11 @@ public partial class DesktopShellPage : ContentPage
             OverlayRoot.Children.Remove(layer);
             _overlays.Remove(layer);
             OverlayRoot.IsVisible = _overlays.Count > 0;
+
+            // The dialog's view model can outlive it until the next GC and still react to messages (a language
+            // switch re-labels the form's category picker). Disconnecting the handlers turns those late updates into
+            // no-ops instead of calls into WinUI controls that are already disposed, which crash the app.
+            layer.DisconnectHandlers();
         };
 
         _overlays.Add(layer);
