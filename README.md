@@ -1,8 +1,14 @@
-# Markd
+<p align="center">
+  <img src="docs/assets/markd-hero.png" alt="Markd: every date that matters, counted to the second, since and until" width="820">
+</p>
 
-[![Tests](https://github.com/jame581/Markd/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jame581/Markd/actions/workflows/ci.yml)
-[![Release build](https://github.com/jame581/Markd/actions/workflows/release.yml/badge.svg)](https://github.com/jame581/Markd/actions/workflows/release.yml)
-[![Latest release](https://img.shields.io/github/v/release/jame581/Markd?label=version)](https://github.com/jame581/Markd/releases/latest)
+<h1 align="center">Markd</h1>
+
+<p align="center">
+  <a href="https://github.com/jame581/Markd/actions/workflows/ci.yml"><img alt="Tests" src="https://github.com/jame581/Markd/actions/workflows/ci.yml/badge.svg?branch=master"></a>
+  <a href="https://github.com/jame581/Markd/actions/workflows/release.yml"><img alt="Release build" src="https://github.com/jame581/Markd/actions/workflows/release.yml/badge.svg"></a>
+  <a href="https://github.com/jame581/Markd/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/jame581/Markd?label=version"></a>
+</p>
 
 Markd counts the days that matter. Mark a date and it counts **since** it (a first day, a streak, a birthday) or **until** it (a trip, a deadline), with milestones along the way. No ads, no account, no network calls: everything lives in one SQLite file on the device.
 

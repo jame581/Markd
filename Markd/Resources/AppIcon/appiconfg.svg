@@ -1,1 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?><svg width="456" height="456" viewBox="0 0 456 456" xmlns="http://www.w3.org/2000/svg"><path d="M 148 100 L 308 100 L 308 356 L 228 296 L 148 356 Z" fill="none" stroke="#ffffff" stroke-width="18" stroke-linejoin="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <g transform="translate(512 512) scale(0.85) translate(-512 -512)">
+    <path fill="#FFFFFF" fill-rule="evenodd" d="M372 226 L652 226 Q708 226 708 282 L708 778 Q708 800 689.75 787.71 L536.89 684.76 Q512 668 487.11 684.76 L334.25 787.71 Q316 800 316 778 L316 282 Q316 226 372 226 Z M590 430 A78 78 0 1 0 434 430 A78 78 0 1 0 590 430 Z"/>
+  </g>
+</svg>
