@@ -180,13 +180,14 @@ public class CoreIntegrationTests
         var milestoneOccasion = await service.CreateAsync(new Occasion
         {
             Title = "Milestone",
-            AnchorDate = utcInstant.AddDays(-1),
+            // Far enough back that its own anchor mark falls in the previous month in any time zone.
+            AnchorDate = utcInstant.AddDays(-40),
             Direction = OccasionDirection.Since,
             Emoji = "💍",
             ColorHex = "#00ff00"
         });
 
-        await service.AddMilestoneAsync(milestoneOccasion.Id, 1, "1 day");
+        await service.AddMilestoneAsync(milestoneOccasion.Id, 40, "40 days");
 
         var marks = await service.GetCalendarMarksAsync(expectedLocalDate.Year, expectedLocalDate.Month);
 
@@ -201,8 +202,8 @@ public class CoreIntegrationTests
         Assert.Equal(expectedLocalDate, milestoneMark.Date);
         Assert.Equal(milestoneOccasion.Id, milestoneMark.OccasionId);
         Assert.Equal("Milestone", milestoneMark.Title);
-        Assert.Equal("1 day", milestoneMark.Label);
-        Assert.Equal(1, milestoneMark.ThresholdDays);
+        Assert.Equal("40 days", milestoneMark.Label);
+        Assert.Equal(40, milestoneMark.ThresholdDays);
     }
 
     [Fact]

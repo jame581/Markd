@@ -139,10 +139,11 @@ public class OccasionServiceTests
     {
         using var tuple = CreateService();
 
+        // Stored the way the form stores anchors: the UTC instant of local midnight.
         var anchorOccasion = new Occasion
         {
             Title = "Anchor",
-            AnchorDate = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Utc),
+            AnchorDate = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Local).ToUniversalTime(),
             Direction = OccasionDirection.Since,
             Emoji = "🎂",
             ColorHex = "#ff0000"
@@ -151,7 +152,7 @@ public class OccasionServiceTests
         var milestoneOccasion = new Occasion
         {
             Title = "Milestone",
-            AnchorDate = new DateTime(2025, 12, 31, 0, 0, 0, DateTimeKind.Utc),
+            AnchorDate = new DateTime(2025, 12, 31, 0, 0, 0, DateTimeKind.Local).ToUniversalTime(),
             Direction = OccasionDirection.Since,
             Emoji = "💍",
             ColorHex = "#00ff00",
