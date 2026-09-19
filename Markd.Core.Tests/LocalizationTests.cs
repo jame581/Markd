@@ -72,6 +72,40 @@ public class LanguageSettingTests
 public class LocalizationManagerTests
 {
     [Fact]
+    public void SetCulture_OneThrowingSubscriber_DoesNotStopTheOthers()
+    {
+        // Every {loc:Tr} binding subscribes to PropertyChanged; one native control failing to update must not
+        // leave every binding after it in the old language.
+        var manager = LocalizationManager.Instance;
+        var original = manager.Culture;
+        var reached = 0;
+        var cultureChanged = 0;
+        PropertyChangedEventHandler throwing = (_, _) => throw new InvalidOperationException("native control refused");
+        PropertyChangedEventHandler counting = (_, _) => reached++;
+        EventHandler throwingCulture = (_, _) => throw new InvalidOperationException("header refused");
+        EventHandler countingCulture = (_, _) => cultureChanged++;
+        manager.PropertyChanged += throwing;
+        manager.PropertyChanged += counting;
+        manager.CultureChanged += throwingCulture;
+        manager.CultureChanged += countingCulture;
+        try
+        {
+            manager.SetCulture(CultureInfo.GetCultureInfo(Equals(original, CultureInfo.GetCultureInfo("cs-CZ")) ? "en-GB" : "cs-CZ"));
+
+            Assert.Equal(1, reached);
+            Assert.Equal(1, cultureChanged);
+        }
+        finally
+        {
+            manager.PropertyChanged -= throwing;
+            manager.PropertyChanged -= counting;
+            manager.CultureChanged -= throwingCulture;
+            manager.CultureChanged -= countingCulture;
+            manager.SetCulture(original);
+        }
+    }
+
+    [Fact]
     public void Indexer_ReturnsTextForCurrentCulture_AndRaisesChange()
     {
         var manager = LocalizationManager.Instance;

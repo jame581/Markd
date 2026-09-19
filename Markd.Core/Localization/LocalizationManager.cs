@@ -39,7 +39,26 @@ public sealed class LocalizationManager : INotifyPropertyChanged
         CultureInfo.DefaultThreadCurrentCulture = culture;
         CultureInfo.DefaultThreadCurrentUICulture = culture;
 
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
-        CultureChanged?.Invoke(this, EventArgs.Empty);
+        // Every {loc:Tr} binding subscribes here. Invoke them one by one: a single control that fails to update
+        // must not leave every binding after it in the old language.
+        var args = new PropertyChangedEventArgs(string.Empty);
+        foreach (var handler in PropertyChanged?.GetInvocationList() ?? [])
+            InvokeIsolated(handler, () => ((PropertyChangedEventHandler)handler)(this, args));
+
+        foreach (var handler in CultureChanged?.GetInvocationList() ?? [])
+            InvokeIsolated(handler, () => ((EventHandler)handler)(this, EventArgs.Empty));
+    }
+
+    private static void InvokeIsolated(Delegate handler, Action invoke)
+    {
+        try
+        {
+            invoke();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine(
+                $"[Markd.Localization] {handler.Method.DeclaringType?.FullName}.{handler.Method.Name} failed on culture change: {ex}");
+        }
     }
 }
