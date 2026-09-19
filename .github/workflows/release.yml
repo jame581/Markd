@@ -39,10 +39,33 @@ jobs:
     name: Tests
     uses: ./.github/workflows/ci.yml
 
-  android:
-    name: Android
+  # The builds upload straight to this draft release. Workflow artifacts would count against the
+  # account's Actions storage quota (a release is about 150 MB), release assets do not.
+  release:
+    name: Draft release
     needs: [version, test]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists, the builds will replace its packages."
+          else
+            gh release create "$GITHUB_REF_NAME" --draft --generate-notes \
+              --title "Markd ${{ needs.version.outputs.display }}"
+          fi
+
+  android:
+    name: Android
+    needs: [version, release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
     env:
       KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -95,16 +118,18 @@ jobs:
           cp "$apk" "dist/Markd-${{ needs.version.outputs.display }}-android.apk"
           cp "$aab" "dist/Markd-${{ needs.version.outputs.display }}-android.aab"
           ls -l dist
-      - uses: actions/upload-artifact@v4
-        with:
-          name: android
-          path: dist/*
-          if-no-files-found: error
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release upload "$GITHUB_REF_NAME" dist/* --clobber
 
   windows:
     name: Windows
-    needs: [version, test]
+    needs: [version, release]
     runs-on: windows-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-dotnet@v5
@@ -129,32 +154,9 @@ jobs:
         run: |
           New-Item -ItemType Directory dist | Out-Null
           Compress-Archive -Path out/* -DestinationPath "dist/Markd-${{ needs.version.outputs.display }}-windows-x64.zip"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: windows
-          path: dist/*
-          if-no-files-found: error
-
-  release:
-    name: GitHub release
-    needs: [version, android, windows]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v5
-        with:
-          path: dist
-          merge-multiple: true
-      # A re-run replaces the packages on the existing release instead of failing.
-      - name: Create GitHub release
+      - name: Upload to release
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: |
-          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
-          else
-            gh release create "$GITHUB_REF_NAME" dist/* --draft --generate-notes \
-              --title "Markd ${{ needs.version.outputs.display }}"
-          fi
+        run: gh release upload "$env:GITHUB_REF_NAME" (Get-ChildItem dist).FullName --clobber
