@@ -76,6 +76,7 @@ namespace Markd
             builder.Services.AddSingleton<IMilestoneMomentPresenter, MilestoneMomentPresenter>();
             builder.Services.AddTransient<IMilestoneEditorService, MilestoneEditorService>();
             builder.Services.AddTransient<MilestoneEditorPage>();
+            builder.Services.AddSingleton<IPasswordPromptService, PhonePasswordPromptService>();
 #if ANDROID
             builder.Services.AddSingleton<IActionMenuService, Platforms.Android.ActionMenuService>();
             builder.Services.AddSingleton<IFileExportService, Platforms.Android.DocumentExportService>();
