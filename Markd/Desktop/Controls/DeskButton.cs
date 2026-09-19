@@ -48,6 +48,7 @@ public sealed class DeskButton : HoverSurface
 
     private readonly SvgIcon _icon = new() { VerticalOptions = LayoutOptions.Center };
     private readonly Label _label = new() { VerticalOptions = LayoutOptions.Center, FontFamily = "FigtreeSemiBold", FontSize = 13, LineBreakMode = LineBreakMode.NoWrap };
+    private readonly HorizontalStackLayout _iconAndLabel = new() { Spacing = 8, VerticalOptions = LayoutOptions.Center };
 
     public DeskButton()
     {
@@ -87,12 +88,32 @@ public sealed class DeskButton : HoverSurface
         // Text buttons get side padding; icon-only buttons set their own square WidthRequest.
         Padding = hasText ? new Thickness(hasGlyph ? 13 : 15, 0, 15, 0) : new Thickness(0);
 
-        View content = hasText && hasGlyph
-            ? new HorizontalStackLayout { Spacing = 8, VerticalOptions = LayoutOptions.Center, Children = { _icon, _label } }
-            : hasGlyph ? _icon : _label;
+        // The tree is only rebuilt when the shape changes (text, glyph, or both). A new text — a language switch —
+        // just updates the label: re-adding the icon and label to a fresh stack while they still sit in the old one
+        // makes WinUI reject the native reparent (COMException 0x800F1000).
+        View content;
+        if (hasText && hasGlyph)
+        {
+            if (_iconAndLabel.Count == 0)
+            {
+                // The icon or label may still be this border's content; detach it before it joins the stack.
+                Content = null;
+                _iconAndLabel.Add(_icon);
+                _iconAndLabel.Add(_label);
+            }
+
+            content = _iconAndLabel;
+        }
+        else
+        {
+            _iconAndLabel.Clear();
+            content = hasGlyph ? _icon : _label;
+        }
+
         content.HorizontalOptions = LayoutOptions.Center;
         content.InputTransparent = true;
-        Content = content;
+        if (!ReferenceEquals(Content, content))
+            Content = content;
         UpdateContentColor();
     }
 
