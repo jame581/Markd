@@ -44,7 +44,6 @@ jobs:
     env:
       KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       # The alias is not secret. As a secret, GitHub would mask every "markd" in the logs.
       ANDROID_KEY_ALIAS: ${{ vars.ANDROID_KEY_ALIAS || 'markd' }}
     steps:
@@ -66,7 +65,7 @@ jobs:
       # Releases must be signed with the upload key, never the debug key.
       - name: Restore keystore
         run: |
-          for name in KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_PASSWORD; do
+          for name in KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD; do
             if [ -z "${!name}" ]; then
               echo "::error::Secret for $name is not set, so the release cannot be signed."
               exit 1
@@ -74,6 +73,7 @@ jobs:
           done
           echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/markd.keystore"
 
+      # PKCS12 keystores (keytool's default) use one password for the store and the key.
       - name: Publish
         run: >
           dotnet publish ${{ env.PROJECT }} -c Release -f net10.0-android
@@ -84,7 +84,7 @@ jobs:
           -p:AndroidSigningKeyStore="$RUNNER_TEMP/markd.keystore"
           -p:AndroidSigningKeyAlias="$ANDROID_KEY_ALIAS"
           -p:AndroidSigningStorePass=env:ANDROID_KEYSTORE_PASSWORD
-          -p:AndroidSigningKeyPass=env:ANDROID_KEY_PASSWORD
+          -p:AndroidSigningKeyPass=env:ANDROID_KEYSTORE_PASSWORD
       # Publish only copies the AAB, so both packages come from the build output.
       - name: Collect packages
         run: |

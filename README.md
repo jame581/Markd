@@ -66,14 +66,18 @@ Android releases are signed with an upload key kept in repository secrets (Setti
 
 ```bash
 keytool -genkeypair -v -keystore markd.keystore -alias markd -keyalg RSA -keysize 2048 -validity 10000
-base64 -w0 markd.keystore   # PowerShell: [Convert]::ToBase64String([IO.File]::ReadAllBytes("markd.keystore"))
+
+# Upload the keystore as a secret with the GitHub CLI (bash, Git Bash or WSL)
+base64 -w0 markd.keystore | gh secret set ANDROID_KEYSTORE_BASE64
+
+# The same from PowerShell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("$PWD\markd.keystore")) | gh secret set ANDROID_KEYSTORE_BASE64
 ```
 
 | Secret | Value |
 |---|---|
-| `ANDROID_KEYSTORE_BASE64` | the base64 output above |
-| `ANDROID_KEYSTORE_PASSWORD` | the keystore password |
-| `ANDROID_KEY_PASSWORD` | the same as the keystore password (keytool's PKCS12 keystores use one password for both) |
+| `ANDROID_KEYSTORE_BASE64` | the keystore, base64 encoded (above) |
+| `ANDROID_KEYSTORE_PASSWORD` | the keystore password, which keytool also uses for the key |
 
 The key alias defaults to `markd`. If you chose another, set it as the repository variable `ANDROID_KEY_ALIAS` (a variable, not a secret). Without the secrets the release stops before building Android.
 

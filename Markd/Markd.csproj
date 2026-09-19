@@ -25,7 +25,7 @@
 		<ApplicationTitle>Markd</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.markd</ApplicationId>
+		<ApplicationId>com.janmesarc.markd</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
