@@ -1,0 +1,160 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: 10.0.4xx
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  PROJECT: Markd/Markd.csproj
+
+jobs:
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    outputs:
+      display: ${{ steps.v.outputs.display }}
+      code: ${{ steps.v.outputs.code }}
+    steps:
+      # The v1.2.3 tag sets the display version. The version code only has to grow,
+      # so the run number serves for both platforms.
+      - id: v
+        run: |
+          display="${GITHUB_REF_NAME#v}"
+          if ! [[ "$display" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]]; then
+            echo "::error::Tag must look like v1.2 or v1.2.3, got $GITHUB_REF_NAME"
+            exit 1
+          fi
+          echo "display=$display" >> "$GITHUB_OUTPUT"
+          echo "code=${{ github.run_number }}" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Tests
+    uses: ./.github/workflows/ci.yml
+
+  android:
+    name: Android
+    needs: [version, test]
+    runs-on: ubuntu-latest
+    env:
+      KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      # The alias is not secret. As a secret, GitHub would mask every "markd" in the logs.
+      ANDROID_KEY_ALIAS: ${{ vars.ANDROID_KEY_ALIAS || 'markd' }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - uses: actions/setup-java@v5
+        with:
+          distribution: microsoft
+          java-version: '17'
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+      - name: Install Android dependencies
+        run: >
+          dotnet build ${{ env.PROJECT }} -t:InstallAndroidDependencies -f net10.0-android
+          -p:AndroidSdkDirectory="$ANDROID_SDK_ROOT" -p:AcceptAndroidSDKLicenses=True
+
+      # Releases must be signed with the upload key, never the debug key.
+      - name: Restore keystore
+        run: |
+          for name in KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret for $name is not set, so the release cannot be signed."
+              exit 1
+            fi
+          done
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/markd.keystore"
+
+      - name: Publish
+        run: >
+          dotnet publish ${{ env.PROJECT }} -c Release -f net10.0-android
+          -p:AndroidPackageFormats="apk%3Baab"
+          -p:ApplicationDisplayVersion=${{ needs.version.outputs.display }}
+          -p:ApplicationVersion=${{ needs.version.outputs.code }}
+          -p:AndroidKeyStore=true
+          -p:AndroidSigningKeyStore="$RUNNER_TEMP/markd.keystore"
+          -p:AndroidSigningKeyAlias="$ANDROID_KEY_ALIAS"
+          -p:AndroidSigningStorePass=env:ANDROID_KEYSTORE_PASSWORD
+          -p:AndroidSigningKeyPass=env:ANDROID_KEY_PASSWORD
+      # Publish only copies the AAB, so both packages come from the build output.
+      - name: Collect packages
+        run: |
+          mkdir dist
+          apk=$(ls Markd/bin/Release/net10.0-android/*-Signed.apk | head -n1)
+          aab=$(ls Markd/bin/Release/net10.0-android/*-Signed.aab | head -n1)
+          cp "$apk" "dist/Markd-${{ needs.version.outputs.display }}-android.apk"
+          cp "$aab" "dist/Markd-${{ needs.version.outputs.display }}-android.aab"
+          ls -l dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: dist/*
+          if-no-files-found: error
+
+  windows:
+    name: Windows
+    needs: [version, test]
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      # Restore evaluates every target framework in the csproj, even with -f, so the
+      # iOS and Mac Catalyst workloads are needed here too.
+      - name: Install MAUI workloads
+        run: dotnet workload install maui
+
+      # Unpackaged and self-contained (including the Windows App SDK), so the zip
+      # runs on a clean machine without installing any runtime. -r would apply the RID
+      # to every target framework during restore, hence RuntimeIdentifierOverride.
+      - name: Publish
+        run: >
+          dotnet publish ${{ env.PROJECT }} -c Release -f net10.0-windows10.0.19041.0
+          -p:RuntimeIdentifierOverride=win-x64 -p:SelfContained=true -o out
+          -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true
+          -p:ApplicationDisplayVersion=${{ needs.version.outputs.display }}
+          -p:ApplicationVersion=${{ needs.version.outputs.code }}
+      - name: Zip
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory dist | Out-Null
+          Compress-Archive -Path out/* -DestinationPath "dist/Markd-${{ needs.version.outputs.display }}-windows-x64.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: GitHub release
+    needs: [version, android, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v5
+        with:
+          path: dist
+          merge-multiple: true
+      # A re-run replaces the packages on the existing release instead of failing.
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* --draft --generate-notes \
+              --title "Markd ${{ needs.version.outputs.display }}"
+          fi

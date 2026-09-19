@@ -1,5 +1,9 @@
 # Markd
 
+[![Tests](https://github.com/jame581/Markd/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/jame581/Markd/actions/workflows/ci.yml)
+[![Release build](https://github.com/jame581/Markd/actions/workflows/release.yml/badge.svg)](https://github.com/jame581/Markd/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/jame581/Markd?label=version)](https://github.com/jame581/Markd/releases/latest)
+
 Markd counts the days that matter. Mark a date and it counts **since** it (a first day, a streak, a birthday) or **until** it (a trip, a deadline), with milestones along the way. No ads, no account, no network calls: everything lives in one SQLite file on the device.
 
 ## Features
@@ -41,6 +45,37 @@ The test projects run on Microsoft.Testing.Platform (xUnit v3), so pass the proj
 dotnet test --project Markd.Core.Tests/Markd.Core.Tests.csproj
 dotnet test --project Markd.Tests/Markd.Tests.csproj
 ```
+
+## CI and releases
+
+- `.github/workflows/ci.yml` runs the tests on every push to `master` and every pull request.
+- `.github/workflows/release.yml` runs when a `v*` tag is pushed. It runs the same tests, then builds:
+  - **Android**: a signed `.apk` (for sideloading) and `.aab` (for Google Play)
+  - **Windows**: a self-contained x64 `.zip` that runs without installing .NET or the Windows App SDK
+
+To release, push a version tag:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The tag sets the version shown in the app (`1.0.0`), the run number becomes the Android version code, and a draft GitHub release is created with the packages attached. Review it and publish it from the Releases page.
+
+Android releases are signed with an upload key kept in repository secrets (Settings > Secrets and variables > Actions). Create the key once and keep a backup, because Google Play only accepts updates signed with the same key:
+
+```bash
+keytool -genkeypair -v -keystore markd.keystore -alias markd -keyalg RSA -keysize 2048 -validity 10000
+base64 -w0 markd.keystore   # PowerShell: [Convert]::ToBase64String([IO.File]::ReadAllBytes("markd.keystore"))
+```
+
+| Secret | Value |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | the base64 output above |
+| `ANDROID_KEYSTORE_PASSWORD` | the keystore password |
+| `ANDROID_KEY_PASSWORD` | the same as the keystore password (keytool's PKCS12 keystores use one password for both) |
+
+The key alias defaults to `markd`. If you chose another, set it as the repository variable `ANDROID_KEY_ALIAS` (a variable, not a secret). Without the secrets the release stops before building Android.
 
 ## Project layout
 
