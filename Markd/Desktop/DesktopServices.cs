@@ -16,6 +16,7 @@ public static class DesktopRegistration
         services.AddTransient<IMilestoneEditorService, DesktopMilestoneEditorService>();
         services.AddSingleton<IFileExportService, FileSaverExportService>();
         services.AddSingleton<IActionMenuService, ActionSheetMenuService>();
+        services.AddSingleton<IPasswordPromptService, DesktopPasswordPromptService>();
     }
 }
 
@@ -61,4 +62,14 @@ public sealed class DesktopMilestoneEditorService(IServiceProvider services) : I
 {
     public Task<MilestoneEditorResult?> PromptAsync() =>
         services.GetRequiredService<DesktopShellPage>().PromptMilestoneAsync();
+}
+
+public sealed class DesktopPasswordPromptService(IServiceProvider services) : IPasswordPromptService
+{
+    private DesktopShellPage Shell => services.GetRequiredService<DesktopShellPage>();
+
+    public Task<ExportChoice?> PromptExportAsync() => Shell.PromptExportAsync();
+
+    public Task<string?> PromptImportPasswordAsync(string fileName, bool previousAttemptFailed) =>
+        Shell.PromptPasswordAsync(fileName, previousAttemptFailed);
 }

@@ -19,9 +19,7 @@ public class SettingsViewModel : ViewModelBase
     private readonly IOccasionService _occasionService;
     private readonly IAppShellService _shellService;
     private readonly IFeedbackService _feedbackService;
-    private readonly IExportService _exportService;
-    private readonly IImportService _importService;
-    private readonly IFileExportService _fileExportService;
+    private readonly BackupCoordinator _backup;
     private readonly NotificationService _notificationService;
     private readonly SemaphoreSlim _saveGate = new(1, 1);
     private AppSettings _settings = new();
@@ -36,18 +34,14 @@ public class SettingsViewModel : ViewModelBase
         IOccasionService occasionService,
         IAppShellService shellService,
         IFeedbackService feedbackService,
-        IExportService exportService,
-        IImportService importService,
-        IFileExportService fileExportService,
+        BackupCoordinator backup,
         NotificationService notificationService)
     {
         _settingsService = settingsService;
         _occasionService = occasionService;
         _shellService = shellService;
         _feedbackService = feedbackService;
-        _exportService = exportService;
-        _importService = importService;
-        _fileExportService = fileExportService;
+        _backup = backup;
         _notificationService = notificationService;
 
         ThemeOptions =
@@ -233,53 +227,24 @@ public class SettingsViewModel : ViewModelBase
             await _notificationService.RescheduleAsync(requestPermission: requestPermission && NotificationsEnabled);
     }
 
-    private async Task ExportAsync()
-    {
-        try
-        {
-            var data = await _exportService.CreateExportJsonAsync();
-            var location = await _fileExportService.SaveAsync($"markd-export-{DateTime.Now:yyyyMMdd-HHmmss}.json", data);
-            if (location is not null)
-                await _feedbackService.ShowAsync(Strings.Export_Saved, location);
-        }
-        catch (Exception ex)
-        {
-            await _feedbackService.ShowAsync(Strings.Export_Failed, ex.Message);
-        }
-    }
+    private Task ExportAsync() => _backup.ExportAsync();
 
     private async Task ImportAsync()
     {
-        var confirmed = await _shellService.DisplayAlertAsync(
-            Strings.Import_ConfirmTitle,
-            Strings.Import_ConfirmMessage,
-            Strings.Import_ChooseFile,
-            Strings.Common_Cancel);
-        if (!confirmed)
+        if (!await _backup.ImportAsync())
             return;
 
+        // AsyncRelayCommand rethrows on the UI thread, so a failed refresh must not escape.
         try
         {
-            var file = await FilePicker.Default.PickAsync(new PickOptions { PickerTitle = Strings.Import_PickerTitle });
-            if (file is null)
-                return;
-
-            await using var stream = await file.OpenReadAsync();
-            using var memory = new MemoryStream();
-            await stream.CopyToAsync(memory);
-
-            var model = await _importService.ParseImportPackageAsync(memory.ToArray());
-            await _importService.ApplyImportAsync(model);
-
             WeakReferenceMessenger.Default.Send(new CategoriesChangedMessage(this));
             WeakReferenceMessenger.Default.Send(new OccasionsChangedMessage(null, this));
-            await LoadAsync();
+            await LoadAsync();              // re-applies theme and language from the imported settings
             await _notificationService.RescheduleAsync();
-            await _feedbackService.ShowAsync(Strings.Import_Complete, string.Format(LocalizationManager.Instance.Culture, Strings.Import_Loaded, file.FileName));
         }
         catch (Exception ex)
         {
-            await _feedbackService.ShowAsync(Strings.Import_Failed, ex.Message);
+            ErrorMessage = ex.Message;
         }
     }
 

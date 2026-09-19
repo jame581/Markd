@@ -165,6 +165,24 @@ public partial class DesktopShellPage : ContentPage
         return result;
     }
 
+    public async Task<ExportChoice?> PromptExportAsync()
+    {
+        var dialog = new ExportOptionsDialog();
+        var layer = ShowOverlay(dialog, dialog.Cancel);
+        var result = await dialog.Result;
+        await layer.CloseAsync();
+        return result;
+    }
+
+    public async Task<string?> PromptPasswordAsync(string fileName, bool previousAttemptFailed)
+    {
+        var dialog = new PasswordDialog(fileName, previousAttemptFailed);
+        var layer = ShowOverlay(dialog, dialog.Cancel);
+        var result = await dialog.Result;
+        await layer.CloseAsync();
+        return result;
+    }
+
     /// <summary>Cancels the topmost dialog, as Escape does. Returns false when no dialog is open.</summary>
     public bool DismissTopOverlay()
     {

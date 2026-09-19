@@ -19,8 +19,8 @@
   <data name="Settings_ThemeLight" xml:space="preserve"><value>Světlý</value></data>
   <data name="Settings_ThemeDark" xml:space="preserve"><value>Tmavý</value></data>
   <data name="Settings_ThemeSystemShort" xml:space="preserve"><value>Systém</value></data>
-  <data name="Settings_Export" xml:space="preserve"><value>Exportovat jako JSON</value></data>
-  <data name="Settings_Import" xml:space="preserve"><value>Importovat z JSON</value></data>
+  <data name="Settings_Export" xml:space="preserve"><value>Exportovat zálohu</value></data>
+  <data name="Settings_Import" xml:space="preserve"><value>Obnovit ze zálohy</value></data>
   <data name="Settings_Appearance" xml:space="preserve"><value>Vzhled</value></data>
   <data name="Settings_Notifications" xml:space="preserve"><value>Oznámení</value></data>
   <data name="Settings_MilestoneAlerts" xml:space="preserve"><value>Upozornění na milníky</value></data>
@@ -28,7 +28,7 @@
   <data name="Settings_MilestoneAlertsSubDesktop" xml:space="preserve"><value>Zobrazí okamžik milníku, jakmile nastane</value></data>
   <data name="Settings_TimeOfDay" xml:space="preserve"><value>Čas upozornění</value></data>
   <data name="Settings_YourData" xml:space="preserve"><value>Vaše data</value></data>
-  <data name="Settings_ExportSub" xml:space="preserve"><value>Uloží jeden soubor do složky Stažené soubory</value></data>
+  <data name="Settings_ExportSub" xml:space="preserve"><value>Uložte do složky, na Google Disk nebo OneDrive, nebo ji nasdílejte.</value></data>
   <data name="Settings_ImportSub" xml:space="preserve"><value>Nahradí vše v telefonu</value></data>
   <data name="Settings_EraseAll" xml:space="preserve"><value>Smazat všechny události</value></data>
   <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd uchovává jeden soubor SQLite v tomto zařízení. Nic se nenahrává, takže se nic nesynchronizuje — před výměnou telefonu proveďte export.</value></data>
@@ -38,7 +38,6 @@
   <data name="Settings_DailyCheckTime" xml:space="preserve"><value>Čas denní kontroly</value></data>
   <data name="Settings_DailyCheckTimeSub" xml:space="preserve"><value>Kdy Markd zjišťuje, které milníky připadají na dnešek</value></data>
   <data name="Settings_LocalDatabase" xml:space="preserve"><value>Místní databáze</value></data>
-  <data name="Settings_LocalDatabaseSub" xml:space="preserve"><value>markd.db · zůstává v tomto počítači, nikam se nenahrává</value></data>
   <data name="Settings_ImportShort" xml:space="preserve"><value>Importovat</value></data>
   <data name="Settings_EraseAllShort" xml:space="preserve"><value>Smazat vše</value></data>
   <data name="Settings_EraseAllSub" xml:space="preserve"><value>Všechny události a milníky. Kategorie a nastavení zůstanou zachovány.</value></data>
@@ -223,7 +222,6 @@
   <data name="Import_Failed" xml:space="preserve"><value>Import se nezdařil</value></data>
   <data name="Import_ConfirmTitle" xml:space="preserve"><value>Nahradit současná data?</value></data>
   <data name="Import_ConfirmMessage" xml:space="preserve"><value>Import exportu Markd nahradí všechny události, kategorie, milníky a nastavení v tomto zařízení.</value></data>
-  <data name="Import_ChooseFile" xml:space="preserve"><value>Vybrat soubor</value></data>
   <data name="Import_PickerTitle" xml:space="preserve"><value>Vyberte export Markd</value></data>
   <data name="Import_PasswordTitle" xml:space="preserve"><value>Zadejte heslo</value></data>
   <data name="Import_PasswordMessage" xml:space="preserve"><value>Soubor {0} je zašifrovaný.</value></data>

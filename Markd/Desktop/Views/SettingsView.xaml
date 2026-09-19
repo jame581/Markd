@@ -127,7 +127,7 @@
                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
                             <VerticalStackLayout Spacing="1" VerticalOptions="Center">
                                 <Label Text="{loc:Tr Settings_LocalDatabase}" Style="{StaticResource SettingTitle}" />
-                                <Label Text="{loc:Tr Settings_LocalDatabaseSub}" Style="{StaticResource SettingSub}" />
+                                <Label Text="{loc:Tr Settings_ExportSub}" Style="{StaticResource SettingSub}" />
                             </VerticalStackLayout>
                             <Button Grid.Column="1" Text="{loc:Tr Settings_Export}" Style="{StaticResource DeskTonalButton}" HeightRequest="32" FontSize="12.5"
                                     Padding="13,0" Command="{Binding ExportCommand}" />
