@@ -34,7 +34,7 @@
   <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd uchovává jeden soubor SQLite v tomto zařízení. Nic se nenahrává, takže se nic nesynchronizuje — před výměnou telefonu proveďte export.</value></data>
   <data name="Settings_AboutMarkd" xml:space="preserve"><value>O aplikaci Markd</value></data>
   <data name="Settings_ThemeSub" xml:space="preserve"><value>Použije se okamžitě — není třeba nic ukládat</value></data>
-  <data name="Settings_LanguageSub" xml:space="preserve"><value>English · Čeština</value></data>
+  <data name="Settings_LanguageSub" xml:space="preserve"><value>English · Čeština · Deutsch · Français</value></data>
   <data name="Settings_DailyCheckTime" xml:space="preserve"><value>Čas denní kontroly</value></data>
   <data name="Settings_DailyCheckTimeSub" xml:space="preserve"><value>Kdy Markd zjišťuje, které milníky připadají na dnešek</value></data>
   <data name="Settings_LocalDatabase" xml:space="preserve"><value>Místní databáze</value></data>

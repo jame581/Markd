@@ -49,7 +49,7 @@
   <data name="Abbr_Minute" xml:space="preserve"><value>min</value></data>
   <data name="Abbr_Second" xml:space="preserve"><value>s</value></data>
   <data name="Format_ShortDate" xml:space="preserve"><value>d MMM yyyy</value></data>
-  <data name="Format_LongDate" xml:space="preserve"><value>dddd, d MMMM yyyy</value></data>
+  <data name="Format_LongDate" xml:space="preserve"><value>dddd d MMMM yyyy</value></data>
   <data name="Occasion_Today" xml:space="preserve"><value>Today</value></data>
   <data name="Occasion_DaysAway_One" xml:space="preserve"><value>{0} day away</value></data>
   <data name="Occasion_DaysAway_Few" xml:space="preserve"><value>{0} days away</value></data>

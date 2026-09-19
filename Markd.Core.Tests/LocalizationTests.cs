@@ -31,6 +31,23 @@ public class PluralTests
     public void Czech_HasOneFewMany(long n, Plural.Category expected) =>
         Assert.Equal(expected, Plural.Select(n, CultureInfo.GetCultureInfo("cs-CZ")));
 
+    [Theory]
+    [InlineData(1, Plural.Category.One)]
+    [InlineData(0, Plural.Category.Many)]
+    [InlineData(2, Plural.Category.Many)]
+    [InlineData(5, Plural.Category.Many)]
+    public void German_HasOneAndOther(long n, Plural.Category expected) =>
+        Assert.Equal(expected, Plural.Select(n, CultureInfo.GetCultureInfo("de-DE")));
+
+    [Theory]
+    [InlineData(0, Plural.Category.One)]
+    [InlineData(1, Plural.Category.One)]
+    [InlineData(-1, Plural.Category.One)]
+    [InlineData(2, Plural.Category.Many)]
+    [InlineData(5, Plural.Category.Many)]
+    public void French_HasOneAndOther(long n, Plural.Category expected) =>
+        Assert.Equal(expected, Plural.Select(n, CultureInfo.GetCultureInfo("fr-FR")));
+
     [Fact]
     public void Format_PicksKeyAndFormatsCount()
     {
@@ -51,10 +68,16 @@ public class LanguageSettingTests
     [InlineData("cs", "en-US", "cs-CZ")]
     [InlineData("cs", "cs-CZ", "cs-CZ")]
     [InlineData("system", "cs-CZ", "cs-CZ")]
-    [InlineData("system", "de-DE", "en-GB")]
+    [InlineData("system", "de-DE", "de-DE")]
     [InlineData("system", "en-US", "en-US")]
     [InlineData(null, "cs-CZ", "cs-CZ")]
-    [InlineData("xx", "de-DE", "en-GB")]
+    [InlineData("xx", "de-DE", "de-DE")]
+    [InlineData("de", "en-US", "de-DE")]
+    [InlineData("fr", "en-US", "fr-FR")]
+    [InlineData("system", "de-AT", "de-AT")]
+    [InlineData("system", "fr-CA", "fr-CA")]
+    [InlineData("system", "de", "de-DE")]
+    [InlineData("de", "de-CH", "de-CH")]
     public void Resolve_PicksCulture(string? setting, string device, string expected) =>
         Assert.Equal(expected, LanguageSetting.Resolve(setting, CultureInfo.GetCultureInfo(device)).Name);
 
@@ -62,7 +85,10 @@ public class LanguageSettingTests
     [InlineData("system", true)]
     [InlineData("en", true)]
     [InlineData("cs", true)]
+    [InlineData("de", true)]
+    [InlineData("fr", true)]
     [InlineData("EN", false)]
+    [InlineData("DE", false)]
     [InlineData("", false)]
     [InlineData(null, false)]
     public void IsValid(string? value, bool expected) => Assert.Equal(expected, LanguageSetting.IsValid(value));
@@ -173,19 +199,22 @@ public partial class ResourceParityTests
     [GeneratedRegex(@"\{(\d+)[^}]*\}")]
     private static partial Regex Placeholder();
 
-    [Fact]
-    public void Czech_HasExactlyTheEnglishKeys_WithMatchingPlaceholders()
+    [Theory]
+    [InlineData("cs")]
+    [InlineData("de")]
+    [InlineData("fr")]
+    public void Language_HasExactlyTheEnglishKeys_WithMatchingPlaceholders(string language)
     {
         var english = Load(CultureInfo.InvariantCulture);
-        var czech = Load(CultureInfo.GetCultureInfo("cs"));
+        var translated = Load(CultureInfo.GetCultureInfo(language));
 
-        Assert.Empty(english.Keys.Except(czech.Keys));
-        Assert.Empty(czech.Keys.Except(english.Keys));
+        Assert.Empty(english.Keys.Except(translated.Keys));
+        Assert.Empty(translated.Keys.Except(english.Keys));
 
         foreach (var (key, value) in english)
         {
             var expected = Placeholder().Matches(value).Select(m => m.Groups[1].Value).Distinct().Order();
-            var actual = Placeholder().Matches(czech[key]).Select(m => m.Groups[1].Value).Distinct().Order();
+            var actual = Placeholder().Matches(translated[key]).Select(m => m.Groups[1].Value).Distinct().Order();
             Assert.True(expected.SequenceEqual(actual), $"Placeholders differ for {key}");
         }
     }

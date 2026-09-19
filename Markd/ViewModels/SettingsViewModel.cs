@@ -67,7 +67,9 @@ public class SettingsViewModel : ViewModelBase
     [
         new(LanguageSetting.System, Strings.Settings_LanguageSystem),
         new(LanguageSetting.English, "English"),
-        new(LanguageSetting.Czech, "Čeština")
+        new(LanguageSetting.Czech, "Čeština"),
+        new(LanguageSetting.German, "Deutsch"),
+        new(LanguageSetting.French, "Français")
     ];
 
     /// <summary>Half-hour slots for the desktop time dropdown, plus the saved time if it falls between them.</summary>

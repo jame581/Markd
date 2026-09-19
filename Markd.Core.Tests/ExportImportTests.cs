@@ -155,6 +155,8 @@ namespace Markd.Core.Tests
 
         [Theory]
         [InlineData("cs", "cs")]
+        [InlineData("de", "de")]
+        [InlineData("fr", "fr")]
         [InlineData("system", "system")]
         [InlineData("klingon", "system")]
         [InlineData("", "system")]

@@ -18,7 +18,7 @@
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<SatelliteResourceLanguages>en;cs</SatelliteResourceLanguages>
+		<SatelliteResourceLanguages>en;cs;de;fr</SatelliteResourceLanguages>
 
 
 		<!-- Display name -->

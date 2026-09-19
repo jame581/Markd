@@ -2,7 +2,10 @@ using System.Globalization;
 
 namespace Markd.Core.Localization;
 
-/// <summary>Plural categories for the app's languages: English one/other, Czech one/few (2–4)/many.</summary>
+/// <summary>
+/// Plural categories for the app's languages: English/German one/other, Czech one/few (2–4)/many, French one
+/// (0 and 1, by absolute value) / other.
+/// </summary>
 public static class Plural
 {
     public enum Category { One, Few, Many }
@@ -11,10 +14,15 @@ public static class Plural
     {
         culture ??= LocalizationManager.Instance.Culture;
         var abs = Math.Abs(n);
+        var language = culture.TwoLetterISOLanguageName;
+
+        if (language == LanguageSetting.French)
+            return abs is 0 or 1 ? Category.One : Category.Many;
+
         if (abs == 1)
             return Category.One;
 
-        return culture.TwoLetterISOLanguageName == LanguageSetting.Czech && abs is >= 2 and <= 4
+        return language == LanguageSetting.Czech && abs is >= 2 and <= 4
             ? Category.Few
             : Category.Many;
     }
