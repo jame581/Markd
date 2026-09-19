@@ -249,6 +249,34 @@ public class CoreIntegrationTests
         Assert.Null(deleted);
     }
 
+    [Fact]
+    public async Task Import_AfterEraseAll_OnTheSharedContext_Succeeds()
+    {
+        // The app keeps one context for its whole session: occasions listed on Home stay tracked when
+        // "Erase all" removes their rows, and a later import must not trip over those stale entries.
+        using var scope = CreateScope();
+        var occasions = new OccasionService(scope.Context);
+        var category = scope.Context.Categories.Add(new Category { Name = "Family" }).Entity;
+        await scope.Context.SaveChangesAsync();
+        await occasions.CreateAsync(new Occasion { Title = "Wedding", AnchorDate = DateTime.UtcNow.Date, CategoryId = category.Id });
+        await occasions.GetAllAsync();
+
+        await occasions.DeleteAllAsync();
+
+        var importer = new ImportService(scope.Context);
+        await importer.ApplyImportAsync(new ExportModel
+        {
+            SchemaVersion = "1",
+            Categories = { new CategoryDto { SourceId = 7, Name = "Friends" } },
+            Occasions = { new OccasionDto { SourceId = 3, Title = "Trip", AnchorDate = DateTime.UtcNow.Date, Direction = "Until", CategorySourceId = 7 } }
+        });
+
+        var all = await occasions.GetAllAsync();
+        var trip = Assert.Single(all);
+        Assert.Equal("Trip", trip.Title);
+        Assert.Equal("Friends", trip.Category?.Name);
+    }
+
     private static Scope CreateScope()
     {
         var (context, connection) = TestDbFactory.CreateSqliteInMemoryContext();

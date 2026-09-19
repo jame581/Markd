@@ -65,6 +65,12 @@ namespace Markd.Core.Services
             await db.Occasions.ExecuteDeleteAsync();
 
             await transaction.CommitAsync();
+
+            // ExecuteDelete bypasses the change tracker. The app keeps one context for its whole session, so any
+            // occasion or milestone it still tracks now points at a deleted row; a later SaveChanges (an import
+            // removing categories, for one) would try to update those rows and fail with a concurrency error.
+            foreach (var entry in db.ChangeTracker.Entries().Where(e => e.Entity is Occasion or Milestone).ToList())
+                entry.State = EntityState.Detached;
         }
 
         public async Task<List<Occasion>> GetAllAsync()
