@@ -4,346 +4,346 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
-  <data name="Common_Cancel" xml:space="preserve"><value>Cancel</value></data>
-  <data name="Common_Save" xml:space="preserve"><value>Save</value></data>
-  <data name="Common_Delete" xml:space="preserve"><value>Delete</value></data>
-  <data name="Common_Close" xml:space="preserve"><value>Close</value></data>
-  <data name="Unit_Days_One" xml:space="preserve"><value>{0} day</value></data>
-  <data name="Unit_Days_Few" xml:space="preserve"><value>{0} days</value></data>
-  <data name="Unit_Days_Many" xml:space="preserve"><value>{0} days</value></data>
-  <data name="Settings_Title" xml:space="preserve"><value>Settings</value></data>
-  <data name="Settings_Language" xml:space="preserve"><value>Language</value></data>
-  <data name="Settings_LanguageSystem" xml:space="preserve"><value>Match system</value></data>
-  <data name="Settings_Theme" xml:space="preserve"><value>Theme</value></data>
-  <data name="Settings_ThemeSystem" xml:space="preserve"><value>Match system</value></data>
-  <data name="Settings_ThemeLight" xml:space="preserve"><value>Light</value></data>
-  <data name="Settings_ThemeDark" xml:space="preserve"><value>Dark</value></data>
-  <data name="Settings_ThemeSystemShort" xml:space="preserve"><value>System</value></data>
-  <data name="Settings_Export" xml:space="preserve"><value>Export backup</value></data>
-  <data name="Settings_Import" xml:space="preserve"><value>Restore backup</value></data>
-  <data name="Settings_Appearance" xml:space="preserve"><value>Appearance</value></data>
+  <data name="Common_Cancel" xml:space="preserve"><value>Annuler</value></data>
+  <data name="Common_Save" xml:space="preserve"><value>Enregistrer</value></data>
+  <data name="Common_Delete" xml:space="preserve"><value>Supprimer</value></data>
+  <data name="Common_Close" xml:space="preserve"><value>Fermer</value></data>
+  <data name="Unit_Days_One" xml:space="preserve"><value>{0} jour</value></data>
+  <data name="Unit_Days_Few" xml:space="preserve"><value>{0} jours</value></data>
+  <data name="Unit_Days_Many" xml:space="preserve"><value>{0} jours</value></data>
+  <data name="Settings_Title" xml:space="preserve"><value>Paramètres</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Langue</value></data>
+  <data name="Settings_LanguageSystem" xml:space="preserve"><value>Langue du système</value></data>
+  <data name="Settings_Theme" xml:space="preserve"><value>Thème</value></data>
+  <data name="Settings_ThemeSystem" xml:space="preserve"><value>Thème du système</value></data>
+  <data name="Settings_ThemeLight" xml:space="preserve"><value>Clair</value></data>
+  <data name="Settings_ThemeDark" xml:space="preserve"><value>Sombre</value></data>
+  <data name="Settings_ThemeSystemShort" xml:space="preserve"><value>Système</value></data>
+  <data name="Settings_Export" xml:space="preserve"><value>Exporter une sauvegarde</value></data>
+  <data name="Settings_Import" xml:space="preserve"><value>Restaurer une sauvegarde</value></data>
+  <data name="Settings_Appearance" xml:space="preserve"><value>Apparence</value></data>
   <data name="Settings_Notifications" xml:space="preserve"><value>Notifications</value></data>
-  <data name="Settings_MilestoneAlerts" xml:space="preserve"><value>Milestone alerts</value></data>
-  <data name="Settings_MilestoneAlertsSub" xml:space="preserve"><value>On the morning a milestone lands</value></data>
-  <data name="Settings_MilestoneAlertsSubDesktop" xml:space="preserve"><value>Shows the milestone moment when one is reached</value></data>
-  <data name="Settings_TimeOfDay" xml:space="preserve"><value>Time of day</value></data>
-  <data name="Settings_YourData" xml:space="preserve"><value>Your data</value></data>
-  <data name="Settings_ExportSub" xml:space="preserve"><value>Save to a folder, Google Drive or OneDrive, or share it.</value></data>
-  <data name="Settings_ImportSub" xml:space="preserve"><value>Replaces everything on this phone</value></data>
-  <data name="Settings_EraseAll" xml:space="preserve"><value>Erase all occasions</value></data>
-  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd keeps one SQLite file on this device. Nothing is uploaded, so nothing syncs — export before you switch phones.</value></data>
-  <data name="Settings_AboutMarkd" xml:space="preserve"><value>About Markd</value></data>
-  <data name="Settings_ThemeSub" xml:space="preserve"><value>Applies immediately — no save needed</value></data>
+  <data name="Settings_MilestoneAlerts" xml:space="preserve"><value>Alertes d'étape</value></data>
+  <data name="Settings_MilestoneAlertsSub" xml:space="preserve"><value>Le matin du jour où une étape est atteinte</value></data>
+  <data name="Settings_MilestoneAlertsSubDesktop" xml:space="preserve"><value>Affiche une célébration dès qu'une étape est atteinte</value></data>
+  <data name="Settings_TimeOfDay" xml:space="preserve"><value>Heure de l'alerte</value></data>
+  <data name="Settings_YourData" xml:space="preserve"><value>Vos données</value></data>
+  <data name="Settings_ExportSub" xml:space="preserve"><value>Enregistrez-la dans un dossier, sur Google Drive ou OneDrive, ou partagez-la.</value></data>
+  <data name="Settings_ImportSub" xml:space="preserve"><value>Remplace tout le contenu de ce téléphone</value></data>
+  <data name="Settings_EraseAll" xml:space="preserve"><value>Effacer tous les événements</value></data>
+  <data name="Settings_DataFootnotePhone" xml:space="preserve"><value>Markd conserve un seul fichier SQLite sur cet appareil. Rien n'est envoyé en ligne, donc rien n'est synchronisé – exportez vos données avant de changer de téléphone.</value></data>
+  <data name="Settings_AboutMarkd" xml:space="preserve"><value>À propos de Markd</value></data>
+  <data name="Settings_ThemeSub" xml:space="preserve"><value>S'applique immédiatement – inutile d'enregistrer</value></data>
   <data name="Settings_LanguageSub" xml:space="preserve"><value>English · Čeština · Deutsch · Français</value></data>
-  <data name="Settings_DailyCheckTime" xml:space="preserve"><value>Daily check time</value></data>
-  <data name="Settings_DailyCheckTimeSub" xml:space="preserve"><value>When Markd looks for milestones due today</value></data>
-  <data name="Settings_LocalDatabase" xml:space="preserve"><value>Local database</value></data>
-  <data name="Settings_ImportShort" xml:space="preserve"><value>Import</value></data>
-  <data name="Settings_EraseAllShort" xml:space="preserve"><value>Erase all</value></data>
-  <data name="Settings_EraseAllSub" xml:space="preserve"><value>Every occasion and milestone. Categories and settings stay.</value></data>
-  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd keeps one SQLite file on this PC. Nothing is uploaded, so nothing syncs — export before you move to another machine.</value></data>
-  <data name="Abbr_Year" xml:space="preserve"><value>y</value></data>
-  <data name="Abbr_Month" xml:space="preserve"><value>mo</value></data>
-  <data name="Abbr_Day" xml:space="preserve"><value>d</value></data>
+  <data name="Settings_DailyCheckTime" xml:space="preserve"><value>Vérification quotidienne</value></data>
+  <data name="Settings_DailyCheckTimeSub" xml:space="preserve"><value>Heure à laquelle Markd recherche les étapes du jour</value></data>
+  <data name="Settings_LocalDatabase" xml:space="preserve"><value>Base de données locale</value></data>
+  <data name="Settings_ImportShort" xml:space="preserve"><value>Importer</value></data>
+  <data name="Settings_EraseAllShort" xml:space="preserve"><value>Tout effacer</value></data>
+  <data name="Settings_EraseAllSub" xml:space="preserve"><value>Tous les événements et étapes. Les catégories et les paramètres sont conservés.</value></data>
+  <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd conserve un seul fichier SQLite sur ce PC. Rien n'est envoyé en ligne, donc rien n'est synchronisé – exportez vos données avant de changer d'ordinateur.</value></data>
+  <data name="Abbr_Year" xml:space="preserve"><value>a</value></data>
+  <data name="Abbr_Month" xml:space="preserve"><value>m</value></data>
+  <data name="Abbr_Day" xml:space="preserve"><value>j</value></data>
   <data name="Abbr_Hour" xml:space="preserve"><value>h</value></data>
   <data name="Abbr_Minute" xml:space="preserve"><value>min</value></data>
   <data name="Abbr_Second" xml:space="preserve"><value>s</value></data>
   <data name="Format_ShortDate" xml:space="preserve"><value>d MMM yyyy</value></data>
   <data name="Format_LongDate" xml:space="preserve"><value>dddd d MMMM yyyy</value></data>
-  <data name="Occasion_Today" xml:space="preserve"><value>Today</value></data>
-  <data name="Occasion_DaysAway_One" xml:space="preserve"><value>{0} day away</value></data>
-  <data name="Occasion_DaysAway_Few" xml:space="preserve"><value>{0} days away</value></data>
-  <data name="Occasion_DaysAway_Many" xml:space="preserve"><value>{0} days away</value></data>
-  <data name="Occasion_DaysPast_One" xml:space="preserve"><value>{0} day past</value></data>
-  <data name="Occasion_DaysPast_Few" xml:space="preserve"><value>{0} days past</value></data>
-  <data name="Occasion_DaysPast_Many" xml:space="preserve"><value>{0} days past</value></data>
-  <data name="Occasion_DaysToGo_One" xml:space="preserve"><value>{0} day to go</value></data>
-  <data name="Occasion_DaysToGo_Few" xml:space="preserve"><value>{0} days to go</value></data>
-  <data name="Occasion_DaysToGo_Many" xml:space="preserve"><value>{0} days to go</value></data>
-  <data name="Occasion_Since" xml:space="preserve"><value>Since</value></data>
-  <data name="Occasion_Until" xml:space="preserve"><value>Until</value></data>
-  <data name="Occasion_SincePhrase" xml:space="preserve"><value>since {0}</value></data>
-  <data name="Occasion_UntilPhrase" xml:space="preserve"><value>until {0}</value></data>
-  <data name="Occasion_UnitToGo_One" xml:space="preserve"><value>to go</value></data>
-  <data name="Occasion_UnitToGo_Few" xml:space="preserve"><value>to go</value></data>
-  <data name="Occasion_UnitToGo_Many" xml:space="preserve"><value>to go</value></data>
-  <data name="Occasion_UnitDaysAgo_One" xml:space="preserve"><value>day ago</value></data>
-  <data name="Occasion_UnitDaysAgo_Few" xml:space="preserve"><value>days ago</value></data>
-  <data name="Occasion_UnitDaysAgo_Many" xml:space="preserve"><value>days ago</value></data>
-  <data name="Occasion_UnitDays_One" xml:space="preserve"><value>day</value></data>
-  <data name="Occasion_UnitDays_Few" xml:space="preserve"><value>days</value></data>
-  <data name="Occasion_UnitDays_Many" xml:space="preserve"><value>days</value></data>
-  <data name="Occasion_NoMilestoneAhead" xml:space="preserve"><value>No milestone ahead</value></data>
-  <data name="Occasion_NextMilestone" xml:space="preserve"><value>Next · {0}</value></data>
-  <data name="Occasion_Uncategorised" xml:space="preserve"><value>Uncategorised</value></data>
-  <data name="Occasion_Count_One" xml:space="preserve"><value>{0} occasion</value></data>
-  <data name="Occasion_Count_Few" xml:space="preserve"><value>{0} occasions</value></data>
-  <data name="Occasion_Count_Many" xml:space="preserve"><value>{0} occasions</value></data>
-  <data name="Calendar_Initial_Mon" xml:space="preserve"><value>M</value></data>
-  <data name="Calendar_Initial_Tue" xml:space="preserve"><value>T</value></data>
-  <data name="Calendar_Initial_Wed" xml:space="preserve"><value>W</value></data>
-  <data name="Calendar_Initial_Thu" xml:space="preserve"><value>T</value></data>
-  <data name="Calendar_Initial_Fri" xml:space="preserve"><value>F</value></data>
+  <data name="Occasion_Today" xml:space="preserve"><value>Aujourd'hui</value></data>
+  <data name="Occasion_DaysAway_One" xml:space="preserve"><value>dans {0} jour</value></data>
+  <data name="Occasion_DaysAway_Few" xml:space="preserve"><value>dans {0} jours</value></data>
+  <data name="Occasion_DaysAway_Many" xml:space="preserve"><value>dans {0} jours</value></data>
+  <data name="Occasion_DaysPast_One" xml:space="preserve"><value>il y a {0} jour</value></data>
+  <data name="Occasion_DaysPast_Few" xml:space="preserve"><value>il y a {0} jours</value></data>
+  <data name="Occasion_DaysPast_Many" xml:space="preserve"><value>il y a {0} jours</value></data>
+  <data name="Occasion_DaysToGo_One" xml:space="preserve"><value>{0} jour restant</value></data>
+  <data name="Occasion_DaysToGo_Few" xml:space="preserve"><value>{0} jours restants</value></data>
+  <data name="Occasion_DaysToGo_Many" xml:space="preserve"><value>{0} jours restants</value></data>
+  <data name="Occasion_Since" xml:space="preserve"><value>Depuis</value></data>
+  <data name="Occasion_Until" xml:space="preserve"><value>Jusqu'à</value></data>
+  <data name="Occasion_SincePhrase" xml:space="preserve"><value>depuis le {0}</value></data>
+  <data name="Occasion_UntilPhrase" xml:space="preserve"><value>jusqu'au {0}</value></data>
+  <data name="Occasion_UnitToGo_One" xml:space="preserve"><value>jour restant</value></data>
+  <data name="Occasion_UnitToGo_Few" xml:space="preserve"><value>jours restants</value></data>
+  <data name="Occasion_UnitToGo_Many" xml:space="preserve"><value>jours restants</value></data>
+  <data name="Occasion_UnitDaysAgo_One" xml:space="preserve"><value>jour écoulé</value></data>
+  <data name="Occasion_UnitDaysAgo_Few" xml:space="preserve"><value>jours écoulés</value></data>
+  <data name="Occasion_UnitDaysAgo_Many" xml:space="preserve"><value>jours écoulés</value></data>
+  <data name="Occasion_UnitDays_One" xml:space="preserve"><value>jour</value></data>
+  <data name="Occasion_UnitDays_Few" xml:space="preserve"><value>jours</value></data>
+  <data name="Occasion_UnitDays_Many" xml:space="preserve"><value>jours</value></data>
+  <data name="Occasion_NoMilestoneAhead" xml:space="preserve"><value>Aucune étape à venir</value></data>
+  <data name="Occasion_NextMilestone" xml:space="preserve"><value>Prochaine · {0}</value></data>
+  <data name="Occasion_Uncategorised" xml:space="preserve"><value>Sans catégorie</value></data>
+  <data name="Occasion_Count_One" xml:space="preserve"><value>{0} événement</value></data>
+  <data name="Occasion_Count_Few" xml:space="preserve"><value>{0} événements</value></data>
+  <data name="Occasion_Count_Many" xml:space="preserve"><value>{0} événements</value></data>
+  <data name="Calendar_Initial_Mon" xml:space="preserve"><value>L</value></data>
+  <data name="Calendar_Initial_Tue" xml:space="preserve"><value>M</value></data>
+  <data name="Calendar_Initial_Wed" xml:space="preserve"><value>M</value></data>
+  <data name="Calendar_Initial_Thu" xml:space="preserve"><value>J</value></data>
+  <data name="Calendar_Initial_Fri" xml:space="preserve"><value>V</value></data>
   <data name="Calendar_Initial_Sat" xml:space="preserve"><value>S</value></data>
-  <data name="Calendar_Initial_Sun" xml:space="preserve"><value>S</value></data>
-  <data name="Calendar_Short_Mon" xml:space="preserve"><value>Mon</value></data>
-  <data name="Calendar_Short_Tue" xml:space="preserve"><value>Tue</value></data>
-  <data name="Calendar_Short_Wed" xml:space="preserve"><value>Wed</value></data>
-  <data name="Calendar_Short_Thu" xml:space="preserve"><value>Thu</value></data>
-  <data name="Calendar_Short_Fri" xml:space="preserve"><value>Fri</value></data>
-  <data name="Calendar_Short_Sat" xml:space="preserve"><value>Sat</value></data>
-  <data name="Calendar_Short_Sun" xml:space="preserve"><value>Sun</value></data>
-  <data name="Home_Pinned" xml:space="preserve"><value>PINNED</value></data>
-  <data name="Home_EmptyTitle" xml:space="preserve"><value>Nothing marked yet</value></data>
-  <data name="Home_EmptyHint" xml:space="preserve"><value>Pick a date that matters — a first day, a last day, a day you're counting toward — and Markd keeps the number for you.</value></data>
-  <data name="Home_AddFirst" xml:space="preserve"><value>Add your first occasion</value></data>
-  <data name="Home_EmptyFootnote" xml:space="preserve"><value>No account. No ads. Everything stays on this phone.</value></data>
-  <data name="Home_NewOccasion" xml:space="preserve"><value>New occasion</value></data>
-  <data name="Home_AboutMarkd" xml:space="preserve"><value>About Markd</value></data>
-  <data name="Detail_Milestones" xml:space="preserve"><value>Milestones</value></data>
-  <data name="Detail_AddMilestone" xml:space="preserve"><value>Add</value></data>
-  <data name="Detail_NoMilestones" xml:space="preserve"><value>No milestones yet. Add one to get a heads-up on the day it lands.</value></data>
-  <data name="Detail_Share" xml:space="preserve"><value>Share</value></data>
-  <data name="Detail_DeleteOccasion" xml:space="preserve"><value>Delete occasion</value></data>
-  <data name="Detail_ShareMilestone" xml:space="preserve"><value>Share milestone</value></data>
-  <data name="Detail_RemoveMilestone" xml:space="preserve"><value>Remove milestone</value></data>
-  <data name="Detail_EditOccasion" xml:space="preserve"><value>Edit occasion</value></data>
-  <data name="Detail_NoMilestonesDesktop" xml:space="preserve"><value>No milestones yet. Add one to mark a day worth noticing.</value></data>
-  <data name="Form_Title" xml:space="preserve"><value>Title</value></data>
-  <data name="Form_TitlePlaceholder" xml:space="preserve"><value>What are you marking?</value></data>
-  <data name="Form_Category" xml:space="preserve"><value>Category</value></data>
+  <data name="Calendar_Initial_Sun" xml:space="preserve"><value>D</value></data>
+  <data name="Calendar_Short_Mon" xml:space="preserve"><value>lun.</value></data>
+  <data name="Calendar_Short_Tue" xml:space="preserve"><value>mar.</value></data>
+  <data name="Calendar_Short_Wed" xml:space="preserve"><value>mer.</value></data>
+  <data name="Calendar_Short_Thu" xml:space="preserve"><value>jeu.</value></data>
+  <data name="Calendar_Short_Fri" xml:space="preserve"><value>ven.</value></data>
+  <data name="Calendar_Short_Sat" xml:space="preserve"><value>sam.</value></data>
+  <data name="Calendar_Short_Sun" xml:space="preserve"><value>dim.</value></data>
+  <data name="Home_Pinned" xml:space="preserve"><value>ÉPINGLÉ</value></data>
+  <data name="Home_EmptyTitle" xml:space="preserve"><value>Rien de marqué pour l'instant</value></data>
+  <data name="Home_EmptyHint" xml:space="preserve"><value>Choisissez une date qui compte – un premier jour, un dernier jour, un jour que vous attendez – et Markd tient le compte pour vous.</value></data>
+  <data name="Home_AddFirst" xml:space="preserve"><value>Ajouter votre premier événement</value></data>
+  <data name="Home_EmptyFootnote" xml:space="preserve"><value>Aucun compte. Aucune publicité. Tout reste sur ce téléphone.</value></data>
+  <data name="Home_NewOccasion" xml:space="preserve"><value>Nouvel événement</value></data>
+  <data name="Home_AboutMarkd" xml:space="preserve"><value>À propos de Markd</value></data>
+  <data name="Detail_Milestones" xml:space="preserve"><value>Étapes</value></data>
+  <data name="Detail_AddMilestone" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="Detail_NoMilestones" xml:space="preserve"><value>Aucune étape pour l'instant. Ajoutez-en une pour être prévenu le jour où elle est atteinte.</value></data>
+  <data name="Detail_Share" xml:space="preserve"><value>Partager</value></data>
+  <data name="Detail_DeleteOccasion" xml:space="preserve"><value>Supprimer l'événement</value></data>
+  <data name="Detail_ShareMilestone" xml:space="preserve"><value>Partager l'étape</value></data>
+  <data name="Detail_RemoveMilestone" xml:space="preserve"><value>Retirer l'étape</value></data>
+  <data name="Detail_EditOccasion" xml:space="preserve"><value>Modifier l'événement</value></data>
+  <data name="Detail_NoMilestonesDesktop" xml:space="preserve"><value>Aucune étape pour l'instant. Ajoutez-en une pour marquer un jour qui compte.</value></data>
+  <data name="Form_Title" xml:space="preserve"><value>Titre</value></data>
+  <data name="Form_TitlePlaceholder" xml:space="preserve"><value>Que voulez-vous marquer ?</value></data>
+  <data name="Form_Category" xml:space="preserve"><value>Catégorie</value></data>
   <data name="Form_Notes" xml:space="preserve"><value>Notes</value></data>
-  <data name="Form_NotesPlaceholder" xml:space="preserve"><value>Why this day matters</value></data>
-  <data name="Form_Counting" xml:space="preserve"><value>Counting</value></data>
-  <data name="Form_SinceDate" xml:space="preserve"><value>Since a date</value></data>
-  <data name="Form_UntilDate" xml:space="preserve"><value>Until a date</value></data>
+  <data name="Form_NotesPlaceholder" xml:space="preserve"><value>Pourquoi ce jour compte</value></data>
+  <data name="Form_Counting" xml:space="preserve"><value>Décompte</value></data>
+  <data name="Form_SinceDate" xml:space="preserve"><value>Depuis une date</value></data>
+  <data name="Form_UntilDate" xml:space="preserve"><value>Jusqu'à une date</value></data>
   <data name="Form_Date" xml:space="preserve"><value>Date</value></data>
-  <data name="Form_Colour" xml:space="preserve"><value>Colour</value></data>
-  <data name="Form_PinToHome" xml:space="preserve"><value>Pin to Home</value></data>
-  <data name="Form_PinToHomeSub" xml:space="preserve"><value>Replaces the featured card</value></data>
+  <data name="Form_Colour" xml:space="preserve"><value>Couleur</value></data>
+  <data name="Form_PinToHome" xml:space="preserve"><value>Épingler à l'accueil</value></data>
+  <data name="Form_PinToHomeSub" xml:space="preserve"><value>Remplace la carte mise en avant</value></data>
   <data name="Form_Emoji" xml:space="preserve"><value>Emoji</value></data>
-  <data name="Form_Direction" xml:space="preserve"><value>Direction</value></data>
-  <data name="Form_CountingSince" xml:space="preserve"><value>Counting since</value></data>
-  <data name="Form_CountingUntil" xml:space="preserve"><value>Counting until</value></data>
-  <data name="Form_Pin" xml:space="preserve"><value>Pin</value></data>
-  <data name="Form_PinToTopDesktop" xml:space="preserve"><value>Pin to the top of Home</value></data>
-  <data name="Form_ChooseEmoji" xml:space="preserve"><value>Choose an emoji</value></data>
-  <data name="Category_Title" xml:space="preserve"><value>Categories</value></data>
-  <data name="Category_Empty" xml:space="preserve"><value>No categories yet. Use New category to group occasions however you think about them.</value></data>
-  <data name="Category_Footnote" xml:space="preserve"><value>Long-press or tap the overflow for row actions. Occasions filed under a deleted category move to Uncategorised — they're never removed with it.</value></data>
-  <data name="Category_New" xml:space="preserve"><value>New category</value></data>
-  <data name="Category_Name" xml:space="preserve"><value>Name</value></data>
-  <data name="Category_NamePlaceholder" xml:space="preserve"><value>Health</value></data>
-  <data name="Category_Colour" xml:space="preserve"><value>Colour</value></data>
-  <data name="Category_Rename" xml:space="preserve"><value>Rename</value></data>
-  <data name="Category_ChangeColour" xml:space="preserve"><value>Change colour</value></data>
-  <data name="Category_Edit" xml:space="preserve"><value>Edit category</value></data>
-  <data name="Category_Delete" xml:space="preserve"><value>Delete category</value></data>
-  <data name="Category_EmptyDesktop" xml:space="preserve"><value>No categories yet. Group occasions however you think about them.</value></data>
-  <data name="Category_FootnoteDesktop" xml:space="preserve"><value>Deleting a category keeps its occasions — they move to Uncategorised.</value></data>
-  <data name="Category_SubtitleDesktop" xml:space="preserve"><value>Group occasions however you think about them</value></data>
-  <data name="Category_EditorHint" xml:space="preserve"><value>Emoji and colour mark the category wherever it appears.</value></data>
-  <data name="Category_NamePlaceholderDesktop" xml:space="preserve"><value>Family, Health, Travel…</value></data>
-  <data name="Calendar_Title" xml:space="preserve"><value>Calendar</value></data>
-  <data name="Calendar_ComingUp" xml:space="preserve"><value>Coming up</value></data>
-  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Nothing to count toward yet — add an occasion and its milestones show up here.</value></data>
-  <data name="Calendar_DotsLegend" xml:space="preserve"><value>Solid dots are anchor dates · faded dots are milestones.</value></data>
-  <data name="Calendar_PreviousMonth" xml:space="preserve"><value>Previous month</value></data>
-  <data name="Calendar_NextMonth" xml:space="preserve"><value>Next month</value></data>
-  <data name="Calendar_DotsLegendDesktop" xml:space="preserve"><value>Solid dots are anchor dates; faded dots are milestone dates.</value></data>
-  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Nothing ahead yet — add milestones to an occasion.</value></data>
-  <data name="Calendar_ThisMonth" xml:space="preserve"><value>This month</value></data>
-  <data name="Calendar_SubtitleDesktop" xml:space="preserve"><value>Anchor dates and milestones across the month</value></data>
-  <data name="About_Title" xml:space="preserve"><value>About</value></data>
-  <data name="About_Description" xml:space="preserve"><value>An open-source tracker for the dates you count from and toward. No ads, no paywall, no account.</value></data>
+  <data name="Form_Direction" xml:space="preserve"><value>Sens</value></data>
+  <data name="Form_CountingSince" xml:space="preserve"><value>Compter depuis</value></data>
+  <data name="Form_CountingUntil" xml:space="preserve"><value>Compter jusqu'à</value></data>
+  <data name="Form_Pin" xml:space="preserve"><value>Épingler</value></data>
+  <data name="Form_PinToTopDesktop" xml:space="preserve"><value>Épingler en haut de l'accueil</value></data>
+  <data name="Form_ChooseEmoji" xml:space="preserve"><value>Choisir un emoji</value></data>
+  <data name="Category_Title" xml:space="preserve"><value>Catégories</value></data>
+  <data name="Category_Empty" xml:space="preserve"><value>Aucune catégorie pour l'instant. Utilisez « Nouvelle catégorie » pour regrouper vos événements à votre façon.</value></data>
+  <data name="Category_Footnote" xml:space="preserve"><value>Appuyez longuement sur une ligne ou touchez son menu pour afficher les actions. Les événements d'une catégorie supprimée passent dans « Sans catégorie » – ils ne sont jamais supprimés avec elle.</value></data>
+  <data name="Category_New" xml:space="preserve"><value>Nouvelle catégorie</value></data>
+  <data name="Category_Name" xml:space="preserve"><value>Nom</value></data>
+  <data name="Category_NamePlaceholder" xml:space="preserve"><value>Santé</value></data>
+  <data name="Category_Colour" xml:space="preserve"><value>Couleur</value></data>
+  <data name="Category_Rename" xml:space="preserve"><value>Renommer</value></data>
+  <data name="Category_ChangeColour" xml:space="preserve"><value>Changer la couleur</value></data>
+  <data name="Category_Edit" xml:space="preserve"><value>Modifier la catégorie</value></data>
+  <data name="Category_Delete" xml:space="preserve"><value>Supprimer la catégorie</value></data>
+  <data name="Category_EmptyDesktop" xml:space="preserve"><value>Aucune catégorie pour l'instant. Regroupez vos événements à votre façon.</value></data>
+  <data name="Category_FootnoteDesktop" xml:space="preserve"><value>Supprimer une catégorie conserve ses événements – ils passent dans « Sans catégorie ».</value></data>
+  <data name="Category_SubtitleDesktop" xml:space="preserve"><value>Regroupez vos événements à votre façon</value></data>
+  <data name="Category_EditorHint" xml:space="preserve"><value>L'emoji et la couleur identifient la catégorie partout où elle apparaît.</value></data>
+  <data name="Category_NamePlaceholderDesktop" xml:space="preserve"><value>Famille, Santé, Voyages…</value></data>
+  <data name="Calendar_Title" xml:space="preserve"><value>Calendrier</value></data>
+  <data name="Calendar_ComingUp" xml:space="preserve"><value>À venir</value></data>
+  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Rien à décompter pour l'instant – ajoutez un événement et ses étapes apparaîtront ici.</value></data>
+  <data name="Calendar_DotsLegend" xml:space="preserve"><value>Points pleins : dates de référence · points estompés : étapes.</value></data>
+  <data name="Calendar_PreviousMonth" xml:space="preserve"><value>Mois précédent</value></data>
+  <data name="Calendar_NextMonth" xml:space="preserve"><value>Mois suivant</value></data>
+  <data name="Calendar_DotsLegendDesktop" xml:space="preserve"><value>Les points pleins sont les dates de référence ; les points estompés, les dates d'étape.</value></data>
+  <data name="Calendar_ComingUpEmptyDesktop" xml:space="preserve"><value>Rien à venir pour l'instant – ajoutez des étapes à un événement.</value></data>
+  <data name="Calendar_ThisMonth" xml:space="preserve"><value>Ce mois-ci</value></data>
+  <data name="Calendar_SubtitleDesktop" xml:space="preserve"><value>Dates de référence et étapes du mois</value></data>
+  <data name="About_Title" xml:space="preserve"><value>À propos</value></data>
+  <data name="About_Description" xml:space="preserve"><value>Une application open source pour suivre les dates à partir desquelles vous comptez, ou jusqu'auxquelles vous décomptez. Sans publicité, sans abonnement, sans compte.</value></data>
   <data name="About_Licence" xml:space="preserve"><value>Licence</value></data>
-  <data name="About_SourceCode" xml:space="preserve"><value>Source code</value></data>
-  <data name="About_Translations" xml:space="preserve"><value>Translations</value></data>
-  <data name="About_Acknowledgements" xml:space="preserve"><value>Acknowledgements</value></data>
-  <data name="About_Footer" xml:space="preserve"><value>Built with .NET MAUI · SQLite stays on device</value></data>
-  <data name="About_LicenceValue" xml:space="preserve"><value>MIT — free forever</value></data>
-  <data name="About_LicenceLink" xml:space="preserve"><value>Read the licence</value></data>
-  <data name="About_SourceValue" xml:space="preserve"><value>Open source on GitHub</value></data>
-  <data name="About_SourceLink" xml:space="preserve"><value>View the repository</value></data>
-  <data name="About_TranslationsLink" xml:space="preserve"><value>Help translate on GitHub</value></data>
-  <data name="About_AckValue" xml:space="preserve"><value>Fonts and libraries</value></data>
-  <data name="About_AckLink" xml:space="preserve"><value>Show credits</value></data>
-  <data name="About_FooterDesktop" xml:space="preserve"><value>Built with .NET MAUI · EF Core + SQLite · CommunityToolkit · Figtree &amp; IBM Plex Mono</value></data>
-  <data name="About_SubtitleDesktop" xml:space="preserve"><value>Version, licence and credits</value></data>
-  <data name="Shell_Home" xml:space="preserve"><value>Home</value></data>
-  <data name="Shell_Calendar" xml:space="preserve"><value>Calendar</value></data>
-  <data name="Shell_Categories" xml:space="preserve"><value>Categories</value></data>
-  <data name="Shell_Settings" xml:space="preserve"><value>Settings</value></data>
-  <data name="Milestone_AddTitle" xml:space="preserve"><value>Add milestone</value></data>
-  <data name="Milestone_AddHint" xml:space="preserve"><value>Markd tells you on the morning it lands.</value></data>
-  <data name="Milestone_Name" xml:space="preserve"><value>Name</value></data>
-  <data name="Milestone_NamePlaceholder" xml:space="preserve"><value>Fifteen hundred</value></data>
-  <data name="Milestone_Days" xml:space="preserve"><value>Days</value></data>
+  <data name="About_SourceCode" xml:space="preserve"><value>Code source</value></data>
+  <data name="About_Translations" xml:space="preserve"><value>Traductions</value></data>
+  <data name="About_Acknowledgements" xml:space="preserve"><value>Remerciements</value></data>
+  <data name="About_Footer" xml:space="preserve"><value>Conçu avec .NET MAUI · SQLite reste sur l'appareil</value></data>
+  <data name="About_LicenceValue" xml:space="preserve"><value>MIT – gratuit pour toujours</value></data>
+  <data name="About_LicenceLink" xml:space="preserve"><value>Lire la licence</value></data>
+  <data name="About_SourceValue" xml:space="preserve"><value>Open source sur GitHub</value></data>
+  <data name="About_SourceLink" xml:space="preserve"><value>Voir le dépôt</value></data>
+  <data name="About_TranslationsLink" xml:space="preserve"><value>Aider à traduire sur GitHub</value></data>
+  <data name="About_AckValue" xml:space="preserve"><value>Polices et bibliothèques</value></data>
+  <data name="About_AckLink" xml:space="preserve"><value>Voir les crédits</value></data>
+  <data name="About_FooterDesktop" xml:space="preserve"><value>Conçu avec .NET MAUI · EF Core + SQLite · CommunityToolkit · Figtree &amp; IBM Plex Mono</value></data>
+  <data name="About_SubtitleDesktop" xml:space="preserve"><value>Version, licence et crédits</value></data>
+  <data name="Shell_Home" xml:space="preserve"><value>Accueil</value></data>
+  <data name="Shell_Calendar" xml:space="preserve"><value>Calendrier</value></data>
+  <data name="Shell_Categories" xml:space="preserve"><value>Catégories</value></data>
+  <data name="Shell_Settings" xml:space="preserve"><value>Paramètres</value></data>
+  <data name="Milestone_AddTitle" xml:space="preserve"><value>Ajouter une étape</value></data>
+  <data name="Milestone_AddHint" xml:space="preserve"><value>Markd vous prévient le matin du jour où elle est atteinte.</value></data>
+  <data name="Milestone_Name" xml:space="preserve"><value>Nom</value></data>
+  <data name="Milestone_NamePlaceholder" xml:space="preserve"><value>Mille cinq cents</value></data>
+  <data name="Milestone_Days" xml:space="preserve"><value>Jours</value></data>
   <data name="Milestone_DaysPlaceholder" xml:space="preserve"><value>1500</value></data>
-  <data name="Milestone_Add" xml:space="preserve"><value>Add</value></data>
-  <data name="Milestone_Reached" xml:space="preserve"><value>MILESTONE REACHED</value></data>
-  <data name="Milestone_NotNow" xml:space="preserve"><value>Not now</value></data>
-  <data name="Milestone_ShareThis" xml:space="preserve"><value>Share this</value></data>
-  <data name="Milestone_AddHintDesktop" xml:space="preserve"><value>Markd marks the day the count reaches this number.</value></data>
-  <data name="Milestone_WhatToCallIt" xml:space="preserve"><value>What to call it</value></data>
-  <data name="Milestone_NamePlaceholderDesktop" xml:space="preserve"><value>Four digits</value></data>
-  <data name="Emoji_PickTitle" xml:space="preserve"><value>Pick an icon</value></data>
-  <data name="Desk_LightTheme" xml:space="preserve"><value>Light theme</value></data>
-  <data name="Desk_DarkTheme" xml:space="preserve"><value>Dark theme</value></data>
-  <data name="Desk_MoreIcons" xml:space="preserve"><value>More icons</value></data>
-  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Pick a date that matters — a first day, a last day, a day you're waiting for. Markd counts from there.</value></data>
-  <data name="Home_AddFirstDesktop" xml:space="preserve"><value>Create your first occasion</value></data>
-  <data name="Home_EmptyFootnoteDesktop" xml:space="preserve"><value>No account. No ads. Everything stays on this PC.</value></data>
-  <data name="Home_AllOccasions" xml:space="preserve"><value>All occasions</value></data>
-  <data name="Settings_SubtitleDesktop" xml:space="preserve"><value>Appearance, notifications and your local data</value></data>
-  <data name="Common_Add" xml:space="preserve"><value>Add</value></data>
-  <data name="Common_Remove" xml:space="preserve"><value>Remove</value></data>
-  <data name="Common_Undo" xml:space="preserve"><value>UNDO</value></data>
+  <data name="Milestone_Add" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="Milestone_Reached" xml:space="preserve"><value>ÉTAPE ATTEINTE</value></data>
+  <data name="Milestone_NotNow" xml:space="preserve"><value>Plus tard</value></data>
+  <data name="Milestone_ShareThis" xml:space="preserve"><value>Partager</value></data>
+  <data name="Milestone_AddHintDesktop" xml:space="preserve"><value>Markd marque le jour où le compteur atteint ce nombre.</value></data>
+  <data name="Milestone_WhatToCallIt" xml:space="preserve"><value>Comment l'appeler</value></data>
+  <data name="Milestone_NamePlaceholderDesktop" xml:space="preserve"><value>Quatre chiffres</value></data>
+  <data name="Emoji_PickTitle" xml:space="preserve"><value>Choisir une icône</value></data>
+  <data name="Desk_LightTheme" xml:space="preserve"><value>Thème clair</value></data>
+  <data name="Desk_DarkTheme" xml:space="preserve"><value>Thème sombre</value></data>
+  <data name="Desk_MoreIcons" xml:space="preserve"><value>Plus d'icônes</value></data>
+  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Choisissez une date qui compte – un premier jour, un dernier jour, un jour que vous attendez. Markd compte à partir de là.</value></data>
+  <data name="Home_AddFirstDesktop" xml:space="preserve"><value>Créer votre premier événement</value></data>
+  <data name="Home_EmptyFootnoteDesktop" xml:space="preserve"><value>Aucun compte. Aucune publicité. Tout reste sur ce PC.</value></data>
+  <data name="Home_AllOccasions" xml:space="preserve"><value>Tous les événements</value></data>
+  <data name="Settings_SubtitleDesktop" xml:space="preserve"><value>Apparence, notifications et données locales</value></data>
+  <data name="Common_Add" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="Common_Remove" xml:space="preserve"><value>Retirer</value></data>
+  <data name="Common_Undo" xml:space="preserve"><value>ANNULER</value></data>
   <data name="Settings_Version" xml:space="preserve"><value>Version {0} · build {1}</value></data>
-  <data name="Settings_EraseConfirmTitle" xml:space="preserve"><value>Erase all occasions?</value></data>
-  <data name="Settings_EraseConfirmMessage" xml:space="preserve"><value>Every occasion and milestone on this device is permanently removed. Categories and settings stay.</value></data>
-  <data name="Settings_ErasedTitle" xml:space="preserve"><value>All occasions erased</value></data>
-  <data name="Settings_ErasedDetail" xml:space="preserve"><value>Markd is back to a clean slate.</value></data>
-  <data name="Export_Saved" xml:space="preserve"><value>Export saved</value></data>
-  <data name="Export_Failed" xml:space="preserve"><value>Export failed</value></data>
-  <data name="Export_ShareTitle" xml:space="preserve"><value>Markd export</value></data>
-  <data name="Export_CouldNotOpenFile" xml:space="preserve"><value>Could not open the export file.</value></data>
-  <data name="Export_Title" xml:space="preserve"><value>Export</value></data>
-  <data name="Export_Encrypt" xml:space="preserve"><value>Encrypt with password</value></data>
-  <data name="Export_Password" xml:space="preserve"><value>Password</value></data>
-  <data name="Export_ConfirmPassword" xml:space="preserve"><value>Confirm password</value></data>
-  <data name="Export_PasswordWarning" xml:space="preserve"><value>Markd cannot recover a forgotten password. Without it, this backup cannot be restored.</value></data>
-  <data name="Export_PasswordTooShort" xml:space="preserve"><value>Use at least 8 characters.</value></data>
-  <data name="Export_PasswordMismatch" xml:space="preserve"><value>The passwords do not match.</value></data>
-  <data name="Export_SaveTo" xml:space="preserve"><value>Save to…</value></data>
-  <data name="Export_Share" xml:space="preserve"><value>Share…</value></data>
-  <data name="Import_Complete" xml:space="preserve"><value>Import complete</value></data>
-  <data name="Import_Loaded" xml:space="preserve"><value>Loaded {0}.</value></data>
-  <data name="Import_Failed" xml:space="preserve"><value>Import failed</value></data>
-  <data name="Import_ConfirmTitle" xml:space="preserve"><value>Replace current data?</value></data>
-  <data name="Import_ConfirmMessage" xml:space="preserve"><value>Importing a Markd export replaces every occasion, category, milestone and setting on this device.</value></data>
-  <data name="Import_PickerTitle" xml:space="preserve"><value>Select a Markd export</value></data>
-  <data name="Import_PasswordTitle" xml:space="preserve"><value>Enter password</value></data>
-  <data name="Import_PasswordMessage" xml:space="preserve"><value>{0} is encrypted.</value></data>
-  <data name="Import_WrongPassword" xml:space="preserve"><value>Wrong password, or the file is damaged. Try again.</value></data>
-  <data name="Import_Open" xml:space="preserve"><value>Open</value></data>
-  <data name="Import_Replace" xml:space="preserve"><value>Replace</value></data>
-  <data name="Import_FileTooLarge" xml:space="preserve"><value>This file is too large to be a Markd backup.</value></data>
-  <data name="Import_UnsupportedSchema" xml:space="preserve"><value>Unsupported import schema version '{0}'. This app supports schema version 1.</value></data>
-  <data name="Import_EmptyFile" xml:space="preserve"><value>The selected file is empty.</value></data>
-  <data name="Import_InvalidJson" xml:space="preserve"><value>The selected file is not a valid Markd JSON export.</value></data>
-  <data name="Import_MissingSchemaVersion" xml:space="preserve"><value>The selected file is missing a schema version.</value></data>
-  <data name="Import_MissingCategoryName" xml:space="preserve"><value>The selected file contains a category with a missing name.</value></data>
-  <data name="Import_MissingOccasionTitle" xml:space="preserve"><value>The selected file contains an occasion with a missing title.</value></data>
-  <data name="Import_MissingMilestoneLabel" xml:space="preserve"><value>The selected file contains a milestone with a missing label.</value></data>
-  <data name="Package_PasswordRequired" xml:space="preserve"><value>This file is encrypted. Enter its password.</value></data>
-  <data name="Package_WrongPassword" xml:space="preserve"><value>Wrong password, or the file has been damaged.</value></data>
-  <data name="Package_Truncated" xml:space="preserve"><value>The file is incomplete.</value></data>
-  <data name="Package_UnsupportedVersion" xml:space="preserve"><value>This file was made by a newer version of Markd.</value></data>
-  <data name="Package_UnsupportedKdf" xml:space="preserve"><value>This file uses an unsupported encryption method.</value></data>
-  <data name="Package_InvalidIterations" xml:space="preserve"><value>This file has invalid encryption settings.</value></data>
-  <data name="Backup_UnexpectedError" xml:space="preserve"><value>Something went wrong. Please try again.</value></data>
-  <data name="Notification_Open" xml:space="preserve"><value>Open</value></data>
-  <data name="Notification_Snooze" xml:space="preserve"><value>Snooze</value></data>
-  <data name="Notification_TitleSince_One" xml:space="preserve"><value>{0} day {1}</value></data>
-  <data name="Notification_TitleSince_Few" xml:space="preserve"><value>{0} days {1}</value></data>
-  <data name="Notification_TitleSince_Many" xml:space="preserve"><value>{0} days {1}</value></data>
-  <data name="Notification_TitleUntil_One" xml:space="preserve"><value>{0} day to go {1}</value></data>
-  <data name="Notification_TitleUntil_Few" xml:space="preserve"><value>{0} days to go {1}</value></data>
-  <data name="Notification_TitleUntil_Many" xml:space="preserve"><value>{0} days to go {1}</value></data>
-  <data name="Notification_DescriptionSince" xml:space="preserve"><value>{0} hit “{1}” today. Tap to see the count.</value></data>
-  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0}: “{1}” — {2}.</value></data>
-  <data name="Notification_DaysLeft_One" xml:space="preserve"><value>{0} day left</value></data>
-  <data name="Notification_DaysLeft_Few" xml:space="preserve"><value>{0} days left</value></data>
-  <data name="Notification_DaysLeft_Many" xml:space="preserve"><value>{0} days left</value></data>
-  <data name="Category_NotFoundById" xml:space="preserve"><value>Category {0} was not found.</value></data>
-  <data name="Occasion_NotFoundById" xml:space="preserve"><value>Occasion {0} was not found.</value></data>
-  <data name="Occasion_NotFound" xml:space="preserve"><value>Occasion not found.</value></data>
-  <data name="Category_NameRequired" xml:space="preserve"><value>Category name is required.</value></data>
-  <data name="Category_AddedTitle" xml:space="preserve"><value>Category added</value></data>
-  <data name="Category_SavedTitle" xml:space="preserve"><value>Category saved</value></data>
-  <data name="Category_ReadyDetail" xml:space="preserve"><value>{0} is ready to use.</value></data>
-  <data name="Category_DeleteConfirmTitle" xml:space="preserve"><value>Delete “{0}”?</value></data>
-  <data name="Category_DeleteConfirmMessage" xml:space="preserve"><value>Its occasions are kept — they move to Uncategorised.</value></data>
-  <data name="Category_DeletedUndo" xml:space="preserve"><value>“{0}” deleted</value></data>
-  <data name="Category_DeletedTitle" xml:space="preserve"><value>Category deleted</value></data>
-  <data name="Category_DeletedDetail" xml:space="preserve"><value>{0} is gone; its occasions moved to Uncategorised.</value></data>
-  <data name="Category_RowEmpty" xml:space="preserve"><value>Empty · nothing filed here</value></data>
-  <data name="Milestone_LabelRequired" xml:space="preserve"><value>Milestone label is required.</value></data>
-  <data name="Milestone_ThresholdInvalid" xml:space="preserve"><value>Milestone threshold must be a positive number.</value></data>
-  <data name="Milestone_Sentence_Since_One" xml:space="preserve"><value>{0} day since {1}.</value></data>
-  <data name="Milestone_Sentence_Since_Few" xml:space="preserve"><value>{0} days since {1}.</value></data>
-  <data name="Milestone_Sentence_Since_Many" xml:space="preserve"><value>{0} days since {1}.</value></data>
-  <data name="Milestone_Sentence_Until_One" xml:space="preserve"><value>{0} day to go until {1}.</value></data>
-  <data name="Milestone_Sentence_Until_Few" xml:space="preserve"><value>{0} days to go until {1}.</value></data>
-  <data name="Milestone_Sentence_Until_Many" xml:space="preserve"><value>{0} days to go until {1}.</value></data>
-  <data name="Milestone_Sentence_LastTracked" xml:space="preserve"><value>That was the last milestone you're tracking.</value></data>
-  <data name="Milestone_Sentence_NextUp_One" xml:space="preserve"><value>Next up is {0}, {1} day out.</value></data>
-  <data name="Milestone_Sentence_NextUp_Few" xml:space="preserve"><value>Next up is {0}, {1} days out.</value></data>
-  <data name="Milestone_Sentence_NextUp_Many" xml:space="preserve"><value>Next up is {0}, {1} days out.</value></data>
-  <data name="About_AcknowledgementsBody" xml:space="preserve"><value>Figtree and IBM Plex Mono are used under the SIL Open Font License 1.1.
+  <data name="Settings_EraseConfirmTitle" xml:space="preserve"><value>Effacer tous les événements ?</value></data>
+  <data name="Settings_EraseConfirmMessage" xml:space="preserve"><value>Tous les événements et étapes de cet appareil seront définitivement supprimés. Les catégories et les paramètres sont conservés.</value></data>
+  <data name="Settings_ErasedTitle" xml:space="preserve"><value>Tous les événements ont été effacés</value></data>
+  <data name="Settings_ErasedDetail" xml:space="preserve"><value>Markd repart de zéro.</value></data>
+  <data name="Export_Saved" xml:space="preserve"><value>Export enregistré</value></data>
+  <data name="Export_Failed" xml:space="preserve"><value>Échec de l'export</value></data>
+  <data name="Export_ShareTitle" xml:space="preserve"><value>Export Markd</value></data>
+  <data name="Export_CouldNotOpenFile" xml:space="preserve"><value>Impossible d'ouvrir le fichier d'export.</value></data>
+  <data name="Export_Title" xml:space="preserve"><value>Exporter</value></data>
+  <data name="Export_Encrypt" xml:space="preserve"><value>Chiffrer avec un mot de passe</value></data>
+  <data name="Export_Password" xml:space="preserve"><value>Mot de passe</value></data>
+  <data name="Export_ConfirmPassword" xml:space="preserve"><value>Confirmer le mot de passe</value></data>
+  <data name="Export_PasswordWarning" xml:space="preserve"><value>Markd ne peut pas récupérer un mot de passe oublié. Sans lui, cette sauvegarde ne pourra pas être restaurée.</value></data>
+  <data name="Export_PasswordTooShort" xml:space="preserve"><value>Utilisez au moins 8 caractères.</value></data>
+  <data name="Export_PasswordMismatch" xml:space="preserve"><value>Les mots de passe ne correspondent pas.</value></data>
+  <data name="Export_SaveTo" xml:space="preserve"><value>Enregistrer dans…</value></data>
+  <data name="Export_Share" xml:space="preserve"><value>Partager…</value></data>
+  <data name="Import_Complete" xml:space="preserve"><value>Import terminé</value></data>
+  <data name="Import_Loaded" xml:space="preserve"><value>Fichier « {0} » chargé.</value></data>
+  <data name="Import_Failed" xml:space="preserve"><value>Échec de l'import</value></data>
+  <data name="Import_ConfirmTitle" xml:space="preserve"><value>Remplacer les données actuelles ?</value></data>
+  <data name="Import_ConfirmMessage" xml:space="preserve"><value>L'import d'un export Markd remplace tous les événements, catégories, étapes et paramètres de cet appareil.</value></data>
+  <data name="Import_PickerTitle" xml:space="preserve"><value>Sélectionnez un export Markd</value></data>
+  <data name="Import_PasswordTitle" xml:space="preserve"><value>Saisissez le mot de passe</value></data>
+  <data name="Import_PasswordMessage" xml:space="preserve"><value>Le fichier « {0} » est chiffré.</value></data>
+  <data name="Import_WrongPassword" xml:space="preserve"><value>Mot de passe incorrect, ou fichier endommagé. Réessayez.</value></data>
+  <data name="Import_Open" xml:space="preserve"><value>Ouvrir</value></data>
+  <data name="Import_Replace" xml:space="preserve"><value>Remplacer</value></data>
+  <data name="Import_FileTooLarge" xml:space="preserve"><value>Ce fichier est trop volumineux pour être une sauvegarde Markd.</value></data>
+  <data name="Import_UnsupportedSchema" xml:space="preserve"><value>Version de schéma d'import non prise en charge : « {0} ». Cette application prend en charge la version 1.</value></data>
+  <data name="Import_EmptyFile" xml:space="preserve"><value>Le fichier sélectionné est vide.</value></data>
+  <data name="Import_InvalidJson" xml:space="preserve"><value>Le fichier sélectionné n'est pas un export JSON Markd valide.</value></data>
+  <data name="Import_MissingSchemaVersion" xml:space="preserve"><value>Il manque une version de schéma dans le fichier sélectionné.</value></data>
+  <data name="Import_MissingCategoryName" xml:space="preserve"><value>Le fichier sélectionné contient une catégorie sans nom.</value></data>
+  <data name="Import_MissingOccasionTitle" xml:space="preserve"><value>Le fichier sélectionné contient un événement sans titre.</value></data>
+  <data name="Import_MissingMilestoneLabel" xml:space="preserve"><value>Le fichier sélectionné contient une étape sans nom.</value></data>
+  <data name="Package_PasswordRequired" xml:space="preserve"><value>Ce fichier est chiffré. Saisissez son mot de passe.</value></data>
+  <data name="Package_WrongPassword" xml:space="preserve"><value>Mot de passe incorrect, ou fichier endommagé.</value></data>
+  <data name="Package_Truncated" xml:space="preserve"><value>Le fichier est incomplet.</value></data>
+  <data name="Package_UnsupportedVersion" xml:space="preserve"><value>Ce fichier a été créé par une version plus récente de Markd.</value></data>
+  <data name="Package_UnsupportedKdf" xml:space="preserve"><value>Ce fichier utilise une méthode de chiffrement non prise en charge.</value></data>
+  <data name="Package_InvalidIterations" xml:space="preserve"><value>Les paramètres de chiffrement de ce fichier ne sont pas valides.</value></data>
+  <data name="Backup_UnexpectedError" xml:space="preserve"><value>Une erreur s'est produite. Veuillez réessayer.</value></data>
+  <data name="Notification_Open" xml:space="preserve"><value>Ouvrir</value></data>
+  <data name="Notification_Snooze" xml:space="preserve"><value>Reporter</value></data>
+  <data name="Notification_TitleSince_One" xml:space="preserve"><value>{0} jour {1}</value></data>
+  <data name="Notification_TitleSince_Few" xml:space="preserve"><value>{0} jours {1}</value></data>
+  <data name="Notification_TitleSince_Many" xml:space="preserve"><value>{0} jours {1}</value></data>
+  <data name="Notification_TitleUntil_One" xml:space="preserve"><value>Encore {0} jour {1}</value></data>
+  <data name="Notification_TitleUntil_Few" xml:space="preserve"><value>Encore {0} jours {1}</value></data>
+  <data name="Notification_TitleUntil_Many" xml:space="preserve"><value>Encore {0} jours {1}</value></data>
+  <data name="Notification_DescriptionSince" xml:space="preserve"><value>{0} : étape « {1} » atteinte aujourd'hui. Touchez pour voir le décompte.</value></data>
+  <data name="Notification_DescriptionUntil" xml:space="preserve"><value>{0} : « {1} » – {2}.</value></data>
+  <data name="Notification_DaysLeft_One" xml:space="preserve"><value>encore {0} jour</value></data>
+  <data name="Notification_DaysLeft_Few" xml:space="preserve"><value>encore {0} jours</value></data>
+  <data name="Notification_DaysLeft_Many" xml:space="preserve"><value>encore {0} jours</value></data>
+  <data name="Category_NotFoundById" xml:space="preserve"><value>Catégorie {0} introuvable.</value></data>
+  <data name="Occasion_NotFoundById" xml:space="preserve"><value>Événement {0} introuvable.</value></data>
+  <data name="Occasion_NotFound" xml:space="preserve"><value>Événement introuvable.</value></data>
+  <data name="Category_NameRequired" xml:space="preserve"><value>Le nom de la catégorie est obligatoire.</value></data>
+  <data name="Category_AddedTitle" xml:space="preserve"><value>Catégorie ajoutée</value></data>
+  <data name="Category_SavedTitle" xml:space="preserve"><value>Catégorie enregistrée</value></data>
+  <data name="Category_ReadyDetail" xml:space="preserve"><value>La catégorie « {0} » est prête.</value></data>
+  <data name="Category_DeleteConfirmTitle" xml:space="preserve"><value>Supprimer « {0} » ?</value></data>
+  <data name="Category_DeleteConfirmMessage" xml:space="preserve"><value>Ses événements sont conservés – ils passent dans « Sans catégorie ».</value></data>
+  <data name="Category_DeletedUndo" xml:space="preserve"><value>Catégorie « {0} » supprimée</value></data>
+  <data name="Category_DeletedTitle" xml:space="preserve"><value>Catégorie supprimée</value></data>
+  <data name="Category_DeletedDetail" xml:space="preserve"><value>La catégorie « {0} » a été supprimée ; ses événements sont passés dans « Sans catégorie ».</value></data>
+  <data name="Category_RowEmpty" xml:space="preserve"><value>Vide · aucun événement</value></data>
+  <data name="Milestone_LabelRequired" xml:space="preserve"><value>Le nom de l'étape est obligatoire.</value></data>
+  <data name="Milestone_ThresholdInvalid" xml:space="preserve"><value>Le nombre de jours de l'étape doit être un nombre positif.</value></data>
+  <data name="Milestone_Sentence_Since_One" xml:space="preserve"><value>{0} jour écoulé depuis « {1} ».</value></data>
+  <data name="Milestone_Sentence_Since_Few" xml:space="preserve"><value>{0} jours écoulés depuis « {1} ».</value></data>
+  <data name="Milestone_Sentence_Since_Many" xml:space="preserve"><value>{0} jours écoulés depuis « {1} ».</value></data>
+  <data name="Milestone_Sentence_Until_One" xml:space="preserve"><value>Encore {0} jour avant « {1} ».</value></data>
+  <data name="Milestone_Sentence_Until_Few" xml:space="preserve"><value>Encore {0} jours avant « {1} ».</value></data>
+  <data name="Milestone_Sentence_Until_Many" xml:space="preserve"><value>Encore {0} jours avant « {1} ».</value></data>
+  <data name="Milestone_Sentence_LastTracked" xml:space="preserve"><value>C'était la dernière étape que vous suiviez.</value></data>
+  <data name="Milestone_Sentence_NextUp_One" xml:space="preserve"><value>Prochaine étape : « {0} », dans {1} jour.</value></data>
+  <data name="Milestone_Sentence_NextUp_Few" xml:space="preserve"><value>Prochaine étape : « {0} », dans {1} jours.</value></data>
+  <data name="Milestone_Sentence_NextUp_Many" xml:space="preserve"><value>Prochaine étape : « {0} », dans {1} jours.</value></data>
+  <data name="About_AcknowledgementsBody" xml:space="preserve"><value>Les polices Figtree et IBM Plex Mono sont utilisées sous licence SIL Open Font License 1.1.
 
-Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolkit.Maui and Plugin.LocalNotification.</value></data>
-  <data name="Calendar_NothingMarked" xml:space="preserve"><value>No anchors or milestones fall in this month.</value></data>
-  <data name="Calendar_MonthSummary_One" xml:space="preserve"><value>{0} date marked — solid dots are anchor dates, faded dots are milestones.</value></data>
-  <data name="Calendar_MonthSummary_Few" xml:space="preserve"><value>{0} dates marked — solid dots are anchor dates, faded dots are milestones.</value></data>
-  <data name="Calendar_MonthSummary_Many" xml:space="preserve"><value>{0} dates marked — solid dots are anchor dates, faded dots are milestones.</value></data>
+Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityToolkit.Maui et Plugin.LocalNotification.</value></data>
+  <data name="Calendar_NothingMarked" xml:space="preserve"><value>Aucune date de référence ni étape ce mois-ci.</value></data>
+  <data name="Calendar_MonthSummary_One" xml:space="preserve"><value>{0} date marquée – les points pleins sont les dates de référence, les points estompés les étapes.</value></data>
+  <data name="Calendar_MonthSummary_Few" xml:space="preserve"><value>{0} dates marquées – les points pleins sont les dates de référence, les points estompés les étapes.</value></data>
+  <data name="Calendar_MonthSummary_Many" xml:space="preserve"><value>{0} dates marquées – les points pleins sont les dates de référence, les points estompés les étapes.</value></data>
   <data name="Home_Subtitle" xml:space="preserve"><value>{0} · {1}</value></data>
-  <data name="Home_OccasionCount_One" xml:space="preserve"><value>{0} occasion</value></data>
-  <data name="Home_OccasionCount_Few" xml:space="preserve"><value>{0} occasions</value></data>
-  <data name="Home_OccasionCount_Many" xml:space="preserve"><value>{0} occasions</value></data>
-  <data name="Home_CategoryCount_One" xml:space="preserve"><value>{0} category</value></data>
-  <data name="Home_CategoryCount_Few" xml:space="preserve"><value>{0} categories</value></data>
-  <data name="Home_CategoryCount_Many" xml:space="preserve"><value>{0} categories</value></data>
-  <data name="Home_NothingTracked" xml:space="preserve"><value>Nothing tracked yet</value></data>
-  <data name="Share_Title" xml:space="preserve"><value>Share {0}</value></data>
-  <data name="Share_DaysSince_One" xml:space="preserve"><value>{0} day since {1}</value></data>
-  <data name="Share_DaysSince_Few" xml:space="preserve"><value>{0} days since {1}</value></data>
-  <data name="Share_DaysSince_Many" xml:space="preserve"><value>{0} days since {1}</value></data>
-  <data name="Share_DaysUntil_One" xml:space="preserve"><value>{0} day until {1}</value></data>
-  <data name="Share_DaysUntil_Few" xml:space="preserve"><value>{0} days until {1}</value></data>
-  <data name="Share_DaysUntil_Many" xml:space="preserve"><value>{0} days until {1}</value></data>
-  <data name="Share_NextMilestone" xml:space="preserve"><value>Next milestone: {0} · {1}</value></data>
-  <data name="Share_NextMilestoneShort" xml:space="preserve"><value>Next milestone: {0}</value></data>
-  <data name="Detail_NoNotes" xml:space="preserve"><value>No notes yet.</value></data>
-  <data name="Detail_PinAction" xml:space="preserve"><value>Pin</value></data>
-  <data name="Detail_UnpinAction" xml:space="preserve"><value>Unpin</value></data>
-  <data name="Detail_MilestoneCount_One" xml:space="preserve"><value>{0} tracked</value></data>
-  <data name="Detail_MilestoneCount_Few" xml:space="preserve"><value>{0} tracked</value></data>
-  <data name="Detail_MilestoneCount_Many" xml:space="preserve"><value>{0} tracked</value></data>
-  <data name="Detail_DeleteConfirmTitle" xml:space="preserve"><value>Delete “{0}”?</value></data>
-  <data name="Detail_DeleteConfirmMessage_One" xml:space="preserve"><value>Its counter, notes and {0} milestone is deleted with it. This cannot be undone.</value></data>
-  <data name="Detail_DeleteConfirmMessage_Few" xml:space="preserve"><value>Its counter, notes and {0} milestones are deleted with it. This cannot be undone.</value></data>
-  <data name="Detail_DeleteConfirmMessage_Many" xml:space="preserve"><value>Its counter, notes and {0} milestones are deleted with it. This cannot be undone.</value></data>
-  <data name="Detail_OccasionDeletedUndo" xml:space="preserve"><value>“{0}” deleted</value></data>
-  <data name="Detail_OccasionDeletedTitle" xml:space="preserve"><value>Occasion deleted</value></data>
-  <data name="Detail_OccasionDeletedDetail" xml:space="preserve"><value>{0} has been removed.</value></data>
-  <data name="Detail_UnpinnedTitle" xml:space="preserve"><value>Unpinned</value></data>
-  <data name="Detail_PinnedTitle" xml:space="preserve"><value>Pinned to Home</value></data>
-  <data name="Detail_UnpinnedDetail" xml:space="preserve"><value>{0} is no longer featured.</value></data>
-  <data name="Detail_PinnedDetail" xml:space="preserve"><value>{0} now leads the Home screen.</value></data>
-  <data name="Detail_MilestoneAddedTitle" xml:space="preserve"><value>Milestone added</value></data>
-  <data name="Detail_MilestoneAlreadyPassed" xml:space="preserve"><value>{0} passed {1} already.</value></data>
-  <data name="Detail_MilestoneAtDays_One" xml:space="preserve"><value>{0} at {1} day.</value></data>
-  <data name="Detail_MilestoneAtDays_Few" xml:space="preserve"><value>{0} at {1} days.</value></data>
-  <data name="Detail_MilestoneAtDays_Many" xml:space="preserve"><value>{0} at {1} days.</value></data>
-  <data name="Detail_RemoveMilestoneConfirm" xml:space="preserve"><value>Remove “{0}”?</value></data>
-  <data name="Detail_MilestoneRemovedUndo" xml:space="preserve"><value>“{0}” removed</value></data>
-  <data name="Detail_MilestoneRemovedTitle" xml:space="preserve"><value>Milestone removed</value></data>
-  <data name="Detail_MilestoneRemovedDetail" xml:space="preserve"><value>“{0}” is no longer tracked.</value></data>
-  <data name="Detail_MilestoneReachedOn" xml:space="preserve"><value>reached {0}</value></data>
-  <data name="Form_SubtitleNew" xml:space="preserve"><value>Pick a date, give it a name</value></data>
-  <data name="Form_SubtitleEdit" xml:space="preserve"><value>Changes save when you press Save</value></data>
-  <data name="Form_CreateOccasion" xml:space="preserve"><value>Create occasion</value></data>
-  <data name="Form_SaveChanges" xml:space="preserve"><value>Save changes</value></data>
-  <data name="Form_TitleRequired" xml:space="preserve"><value>Title is required.</value></data>
-  <data name="Form_PreviewUntilStarts" xml:space="preserve"><value>days until the counter starts on {0}</value></data>
-  <data name="Form_PreviewStartsToday" xml:space="preserve"><value>the counter starts today, {0}</value></data>
-  <data name="Form_PreviewSinceStarts" xml:space="preserve"><value>days since {0} — the counter starts here</value></data>
-  <data name="Form_PreviewUntil" xml:space="preserve"><value>days until {0}</value></data>
-  <data name="Form_PreviewSince" xml:space="preserve"><value>days since {0}</value></data>
-  <data name="Form_OccasionCreatedTitle" xml:space="preserve"><value>Occasion created</value></data>
-  <data name="Form_ChangesSavedTitle" xml:space="preserve"><value>Changes saved</value></data>
-  <data name="Form_SavedSince" xml:space="preserve"><value>{0} · counting since {1}</value></data>
-  <data name="Form_SavedUntil" xml:space="preserve"><value>{0} · counting until {1}</value></data>
+  <data name="Home_OccasionCount_One" xml:space="preserve"><value>{0} événement</value></data>
+  <data name="Home_OccasionCount_Few" xml:space="preserve"><value>{0} événements</value></data>
+  <data name="Home_OccasionCount_Many" xml:space="preserve"><value>{0} événements</value></data>
+  <data name="Home_CategoryCount_One" xml:space="preserve"><value>{0} catégorie</value></data>
+  <data name="Home_CategoryCount_Few" xml:space="preserve"><value>{0} catégories</value></data>
+  <data name="Home_CategoryCount_Many" xml:space="preserve"><value>{0} catégories</value></data>
+  <data name="Home_NothingTracked" xml:space="preserve"><value>Rien de suivi pour l'instant</value></data>
+  <data name="Share_Title" xml:space="preserve"><value>Partager « {0} »</value></data>
+  <data name="Share_DaysSince_One" xml:space="preserve"><value>{0} jour depuis le {1}</value></data>
+  <data name="Share_DaysSince_Few" xml:space="preserve"><value>{0} jours depuis le {1}</value></data>
+  <data name="Share_DaysSince_Many" xml:space="preserve"><value>{0} jours depuis le {1}</value></data>
+  <data name="Share_DaysUntil_One" xml:space="preserve"><value>Encore {0} jour jusqu'au {1}</value></data>
+  <data name="Share_DaysUntil_Few" xml:space="preserve"><value>Encore {0} jours jusqu'au {1}</value></data>
+  <data name="Share_DaysUntil_Many" xml:space="preserve"><value>Encore {0} jours jusqu'au {1}</value></data>
+  <data name="Share_NextMilestone" xml:space="preserve"><value>Prochaine étape : {0} · {1}</value></data>
+  <data name="Share_NextMilestoneShort" xml:space="preserve"><value>Prochaine étape : {0}</value></data>
+  <data name="Detail_NoNotes" xml:space="preserve"><value>Aucune note pour l'instant.</value></data>
+  <data name="Detail_PinAction" xml:space="preserve"><value>Épingler</value></data>
+  <data name="Detail_UnpinAction" xml:space="preserve"><value>Désépingler</value></data>
+  <data name="Detail_MilestoneCount_One" xml:space="preserve"><value>{0} suivie</value></data>
+  <data name="Detail_MilestoneCount_Few" xml:space="preserve"><value>{0} suivies</value></data>
+  <data name="Detail_MilestoneCount_Many" xml:space="preserve"><value>{0} suivies</value></data>
+  <data name="Detail_DeleteConfirmTitle" xml:space="preserve"><value>Supprimer « {0} » ?</value></data>
+  <data name="Detail_DeleteConfirmMessage_One" xml:space="preserve"><value>Le compteur, les notes et {0} étape associés seront aussi supprimés. Cette action est irréversible.</value></data>
+  <data name="Detail_DeleteConfirmMessage_Few" xml:space="preserve"><value>Le compteur, les notes et {0} étapes associés seront aussi supprimés. Cette action est irréversible.</value></data>
+  <data name="Detail_DeleteConfirmMessage_Many" xml:space="preserve"><value>Le compteur, les notes et {0} étapes associés seront aussi supprimés. Cette action est irréversible.</value></data>
+  <data name="Detail_OccasionDeletedUndo" xml:space="preserve"><value>Événement « {0} » supprimé</value></data>
+  <data name="Detail_OccasionDeletedTitle" xml:space="preserve"><value>Événement supprimé</value></data>
+  <data name="Detail_OccasionDeletedDetail" xml:space="preserve"><value>L'événement « {0} » a été supprimé.</value></data>
+  <data name="Detail_UnpinnedTitle" xml:space="preserve"><value>Désépinglé</value></data>
+  <data name="Detail_PinnedTitle" xml:space="preserve"><value>Épinglé à l'accueil</value></data>
+  <data name="Detail_UnpinnedDetail" xml:space="preserve"><value>L'événement « {0} » n'est plus mis en avant.</value></data>
+  <data name="Detail_PinnedDetail" xml:space="preserve"><value>L'événement « {0} » est désormais mis en avant sur l'accueil.</value></data>
+  <data name="Detail_MilestoneAddedTitle" xml:space="preserve"><value>Étape ajoutée</value></data>
+  <data name="Detail_MilestoneAlreadyPassed" xml:space="preserve"><value>« {0} » a déjà dépassé l'étape « {1} ».</value></data>
+  <data name="Detail_MilestoneAtDays_One" xml:space="preserve"><value>« {0} » à {1} jour.</value></data>
+  <data name="Detail_MilestoneAtDays_Few" xml:space="preserve"><value>« {0} » à {1} jours.</value></data>
+  <data name="Detail_MilestoneAtDays_Many" xml:space="preserve"><value>« {0} » à {1} jours.</value></data>
+  <data name="Detail_RemoveMilestoneConfirm" xml:space="preserve"><value>Retirer « {0} » ?</value></data>
+  <data name="Detail_MilestoneRemovedUndo" xml:space="preserve"><value>Étape « {0} » retirée</value></data>
+  <data name="Detail_MilestoneRemovedTitle" xml:space="preserve"><value>Étape retirée</value></data>
+  <data name="Detail_MilestoneRemovedDetail" xml:space="preserve"><value>L'étape « {0} » n'est plus suivie.</value></data>
+  <data name="Detail_MilestoneReachedOn" xml:space="preserve"><value>atteinte le {0}</value></data>
+  <data name="Form_SubtitleNew" xml:space="preserve"><value>Choisissez une date, donnez-lui un nom</value></data>
+  <data name="Form_SubtitleEdit" xml:space="preserve"><value>Les modifications sont enregistrées quand vous appuyez sur « Enregistrer »</value></data>
+  <data name="Form_CreateOccasion" xml:space="preserve"><value>Créer l'événement</value></data>
+  <data name="Form_SaveChanges" xml:space="preserve"><value>Enregistrer les modifications</value></data>
+  <data name="Form_TitleRequired" xml:space="preserve"><value>Le titre est obligatoire.</value></data>
+  <data name="Form_PreviewUntilStarts" xml:space="preserve"><value>jours avant le début du décompte, le {0}</value></data>
+  <data name="Form_PreviewStartsToday" xml:space="preserve"><value>le décompte commence aujourd'hui, {0}</value></data>
+  <data name="Form_PreviewSinceStarts" xml:space="preserve"><value>jours depuis le {0} – le décompte commence ici</value></data>
+  <data name="Form_PreviewUntil" xml:space="preserve"><value>jours jusqu'au {0}</value></data>
+  <data name="Form_PreviewSince" xml:space="preserve"><value>jours depuis le {0}</value></data>
+  <data name="Form_OccasionCreatedTitle" xml:space="preserve"><value>Événement créé</value></data>
+  <data name="Form_ChangesSavedTitle" xml:space="preserve"><value>Modifications enregistrées</value></data>
+  <data name="Form_SavedSince" xml:space="preserve"><value>{0} · décompte depuis le {1}</value></data>
+  <data name="Form_SavedUntil" xml:space="preserve"><value>{0} · décompte jusqu'au {1}</value></data>
 </root>
