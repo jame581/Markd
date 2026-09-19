@@ -208,9 +208,7 @@
   <data name="Export_Saved" xml:space="preserve"><value>Export saved</value></data>
   <data name="Export_Failed" xml:space="preserve"><value>Export failed</value></data>
   <data name="Export_ShareTitle" xml:space="preserve"><value>Markd export</value></data>
-  <data name="Export_CouldNotCreateFile" xml:space="preserve"><value>Could not create the export file in Downloads.</value></data>
   <data name="Export_CouldNotOpenFile" xml:space="preserve"><value>Could not open the export file.</value></data>
-  <data name="Export_LocationPrefix" xml:space="preserve"><value>Downloads/{0}</value></data>
   <data name="Export_Title" xml:space="preserve"><value>Export</value></data>
   <data name="Export_Encrypt" xml:space="preserve"><value>Encrypt with password</value></data>
   <data name="Export_Password" xml:space="preserve"><value>Password</value></data>

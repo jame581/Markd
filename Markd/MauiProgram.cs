@@ -64,6 +64,9 @@ namespace Markd
             builder.Services.AddTransient<SettingsViewModel>();
             builder.Services.AddTransient<AboutViewModel>();
 
+            builder.Services.AddSingleton<IFilePickService, FilePickService>();
+            builder.Services.AddTransient<BackupCoordinator>();
+
 #if WINDOWS
             Desktop.DesktopRegistration.AddDesktopShell(builder.Services);
 #else
@@ -75,10 +78,10 @@ namespace Markd
             builder.Services.AddTransient<MilestoneEditorPage>();
 #if ANDROID
             builder.Services.AddSingleton<IActionMenuService, Platforms.Android.ActionMenuService>();
-            builder.Services.AddSingleton<IFileExportService, Platforms.Android.DownloadsExportService>();
+            builder.Services.AddSingleton<IFileExportService, Platforms.Android.DocumentExportService>();
 #else
             builder.Services.AddSingleton<IActionMenuService, ActionSheetMenuService>();
-            builder.Services.AddSingleton<IFileExportService, ShareFileExportService>();
+            builder.Services.AddSingleton<IFileExportService, FileSaverExportService>();
 #endif
 #endif
 

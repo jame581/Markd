@@ -1,4 +1,3 @@
-using CommunityToolkit.Maui.Storage;
 using Markd.Services;
 using Markd.ViewModels;
 using Microsoft.Maui.Devices;
@@ -15,7 +14,7 @@ public static class DesktopRegistration
         services.AddSingleton<IFeedbackService, DesktopFeedbackService>();
         services.AddSingleton<IMilestoneMomentPresenter, DesktopMilestoneMomentPresenter>();
         services.AddTransient<IMilestoneEditorService, DesktopMilestoneEditorService>();
-        services.AddSingleton<IFileExportService, DesktopFileExportService>();
+        services.AddSingleton<IFileExportService, FileSaverExportService>();
         services.AddSingleton<IActionMenuService, ActionSheetMenuService>();
     }
 }
@@ -62,25 +61,4 @@ public sealed class DesktopMilestoneEditorService(IServiceProvider services) : I
 {
     public Task<MilestoneEditorResult?> PromptAsync() =>
         services.GetRequiredService<DesktopShellPage>().PromptMilestoneAsync();
-}
-
-/// <summary>Saves an export through the system Save As dialog.</summary>
-public sealed class DesktopFileExportService : IFileExportService
-{
-    public async Task<string?> SaveAsync(string fileName, byte[] data)
-    {
-        using var stream = new MemoryStream(data);
-        var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
-        if (result.IsSuccessful)
-            return result.FilePath;
-
-        // Closing the dialog is reported as a failed result, not an error worth showing.
-        if (result.Exception is null or OperationCanceledException
-            || result.Exception.Message.Contains("cancel", StringComparison.OrdinalIgnoreCase))
-            return null;
-
-        throw result.Exception;
-    }
-
-    public Task ShareAsync(string fileName, byte[] data) => ShareSheet.ShareAsync(fileName, data);
 }

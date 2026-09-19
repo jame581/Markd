@@ -41,6 +41,7 @@ namespace Markd
         protected override async void OnStart()
         {
             base.OnStart();
+            ShareSheet.ClearStaged();
             _notificationService.StartClock();
             await _notificationService.CheckOnOpenAsync();
             await _notificationService.RescheduleAsync();

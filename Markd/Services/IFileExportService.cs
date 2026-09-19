@@ -17,10 +17,14 @@ public static class ShareSheet
     /// <summary>Deletes exports staged for earlier shares. Also called at app start so a plain JSON copy does not linger.</summary>
     public static void ClearStaged()
     {
+        if (!Directory.Exists(FileSystem.CacheDirectory))
+            return;
+
         foreach (var old in Directory.EnumerateFiles(FileSystem.CacheDirectory, "markd-export-*"))
         {
             try { File.Delete(old); }
             catch (IOException) { } // still open in the receiving app; the next start retries
+            catch (UnauthorizedAccessException) { }
         }
     }
 
@@ -32,16 +36,4 @@ public static class ShareSheet
         await File.WriteAllBytesAsync(path, data);
         await Share.Default.RequestAsync(new ShareFileRequest { Title = Strings.Export_ShareTitle, File = new ShareFile(path) });
     }
-}
-
-/// <summary>Fallback until Task 3: "save" also goes to the share sheet.</summary>
-public sealed class ShareFileExportService : IFileExportService
-{
-    public async Task<string?> SaveAsync(string fileName, byte[] data)
-    {
-        await ShareSheet.ShareAsync(fileName, data);
-        return fileName;
-    }
-
-    public Task ShareAsync(string fileName, byte[] data) => ShareSheet.ShareAsync(fileName, data);
 }

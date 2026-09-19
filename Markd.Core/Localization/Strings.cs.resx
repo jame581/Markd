@@ -208,9 +208,7 @@
   <data name="Export_Saved" xml:space="preserve"><value>Export uložen</value></data>
   <data name="Export_Failed" xml:space="preserve"><value>Export se nezdařil</value></data>
   <data name="Export_ShareTitle" xml:space="preserve"><value>Export Markd</value></data>
-  <data name="Export_CouldNotCreateFile" xml:space="preserve"><value>Exportní soubor se nepodařilo vytvořit ve složce Stažené soubory.</value></data>
   <data name="Export_CouldNotOpenFile" xml:space="preserve"><value>Exportní soubor se nepodařilo otevřít.</value></data>
-  <data name="Export_LocationPrefix" xml:space="preserve"><value>Stažené soubory/{0}</value></data>
   <data name="Export_Title" xml:space="preserve"><value>Export</value></data>
   <data name="Export_Encrypt" xml:space="preserve"><value>Zašifrovat heslem</value></data>
   <data name="Export_Password" xml:space="preserve"><value>Heslo</value></data>
