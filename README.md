@@ -10,7 +10,8 @@ Markd counts the days that matter. Mark a date and it counts **since** it (a fir
 - Categories with their own emoji and colour
 - Month calendar of anchor dates and milestone dates, plus what is coming up next
 - Light, dark and system themes
-- Export and import as JSON, optionally encrypted
+- English, Czech, German and French, switched live from Settings or following the device language
+- Backups: export to a password-protected `.markd` file (AES-256-GCM, key from PBKDF2-SHA256) or plain JSON, saved through the system file picker (so to Google Drive or OneDrive when their apps are installed) or sent with the share sheet. Restoring asks for the password and replaces the data on the device after a confirmation.
 
 ## Platforms
 
@@ -43,12 +44,25 @@ dotnet test --project Markd.Tests/Markd.Tests.csproj
 
 ## Project layout
 
-- `Markd.Core` holds the UI-free domain, EF Core + SQLite data and services: occasions, milestones, categories, settings, export and import.
+- `Markd.Core` holds the UI-free domain, EF Core + SQLite data and services: occasions, milestones, categories, settings, export and import. `Localization/` has the UI text (`Strings.resx` plus one `Strings.<language>.resx` per translation), plural rules and language selection.
 - `Markd` is the .NET MAUI app. View models and services are shared by both layouts:
   - `Desktop/` is the Windows layout (built only for Windows).
   - The pages in the project root and `Pages/`, with `Controls/Mobile/`, form the phone layout.
 - `Markd.Core.Tests` runs the Core tests against in-memory SQLite.
 - `Markd.Tests` tests view-model logic.
+
+## Translations
+
+All UI text lives in `Markd.Core/Localization/Strings.resx` (English). XAML shows it with `{loc:Tr Key}` and code with `Strings.Key`, so text updates live when the language changes. Counts use `_One` / `_Few` / `_Many` key families chosen by `Plural`.
+
+The tests check that every translation has exactly the English keys and placeholders, and that every key used in XAML or code exists.
+
+To add a language:
+
+1. Copy `Strings.resx` to `Strings.<code>.resx` and translate the values.
+2. Add the code to `LanguageSetting` (constant, `IsValid`, `Resolve`) and, if its plural rules differ, to `Plural.Select`.
+3. Add its own name to the language picker in `SettingsViewModel` and to `Settings_LanguageSub`.
+4. Add the code to `SatelliteResourceLanguages` in `Markd/Markd.csproj`, to `CFBundleLocalizations` in the iOS and Mac Catalyst `Info.plist`, and to the language list of `ResourceParityTests`.
 
 ## Licence
 
