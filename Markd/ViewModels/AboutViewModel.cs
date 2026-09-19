@@ -18,7 +18,7 @@ public class AboutViewModel : ViewModelBase
         ShowAcknowledgementsCommand = new AsyncRelayCommand(ShowAcknowledgementsAsync);
     }
 
-    public string VersionText => string.Format(LocalizationManager.Instance.Culture, Strings.Settings_Version, AppInfo.Current.VersionString, AppInfo.Current.BuildString);
+    public string VersionText => string.Format(LocalizationManager.Instance.Culture, Strings.Settings_Version, AppVersion.Version, AppVersion.Build);
 
     public IAsyncRelayCommand OpenSourceCommand { get; }
     public IAsyncRelayCommand OpenLicenceCommand { get; }

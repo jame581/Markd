@@ -21,13 +21,15 @@ jobs:
       display: ${{ steps.v.outputs.display }}
       code: ${{ steps.v.outputs.code }}
     steps:
-      # The v1.2.3 tag sets the display version. The version code only has to grow,
-      # so the run number serves for both platforms.
+      - uses: actions/checkout@v5
+      # The version lives in Markd.csproj (ApplicationDisplayVersion) and the tag must match it,
+      # so the app shows exactly the tagged version. The build number only has to grow, so the
+      # run number serves for both platforms.
       - id: v
         run: |
-          display="${GITHUB_REF_NAME#v}"
-          if ! [[ "$display" =~ ^[0-9]+(\.[0-9]+){1,2}$ ]]; then
-            echo "::error::Tag must look like v1.2 or v1.2.3, got $GITHUB_REF_NAME"
+          display=$(sed -n 's:.*<ApplicationDisplayVersion>\(.*\)</ApplicationDisplayVersion>.*:\1:p' ${{ env.PROJECT }})
+          if [ "$GITHUB_REF_NAME" != "v$display" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match ApplicationDisplayVersion $display in ${{ env.PROJECT }}. Tag v$display, or update the project first."
             exit 1
           fi
           echo "display=$display" >> "$GITHUB_OUTPUT"
@@ -78,7 +80,6 @@ jobs:
         run: >
           dotnet publish ${{ env.PROJECT }} -c Release -f net10.0-android
           -p:AndroidPackageFormats="apk%3Baab"
-          -p:ApplicationDisplayVersion=${{ needs.version.outputs.display }}
           -p:ApplicationVersion=${{ needs.version.outputs.code }}
           -p:AndroidKeyStore=true
           -p:AndroidSigningKeyStore="$RUNNER_TEMP/markd.keystore"
@@ -122,7 +123,6 @@ jobs:
           dotnet publish ${{ env.PROJECT }} -c Release -f net10.0-windows10.0.19041.0
           -p:RuntimeIdentifierOverride=win-x64 -p:SelfContained=true -o out
           -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true
-          -p:ApplicationDisplayVersion=${{ needs.version.outputs.display }}
           -p:ApplicationVersion=${{ needs.version.outputs.code }}
       - name: Zip
         shell: pwsh

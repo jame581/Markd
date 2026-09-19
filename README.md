@@ -59,14 +59,17 @@ dotnet test --project Markd.Tests/Markd.Tests.csproj
   - **Android**: a signed `.apk` (for sideloading) and `.aab` (for Google Play)
   - **Windows**: a self-contained x64 `.zip` that runs without installing .NET or the Windows App SDK
 
-To release, push a version tag:
+The version lives in `ApplicationDisplayVersion` in `Markd/Markd.csproj`, and the app shows it in Settings and About. To release:
 
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
+1. Set `ApplicationDisplayVersion` to the new version (for example `0.2.0`) and commit it.
+2. Tag that commit with the same version and push the tag:
 
-The tag sets the version shown in the app (`1.0.0`), the run number becomes the Android version code, and a draft GitHub release is created with the packages attached. Review it and publish it from the Releases page.
+   ```bash
+   git tag v0.2.0
+   git push origin v0.2.0
+   ```
+
+The release stops if the tag does not match `ApplicationDisplayVersion`. The run number becomes the build number (the Android version code), and a draft GitHub release is created with the packages attached. Review it and publish it from the Releases page.
 
 Android releases are signed with an upload key kept in repository secrets (Settings > Secrets and variables > Actions). Create the key once and keep a backup, because Google Play only accepts updates signed with the same key:
 

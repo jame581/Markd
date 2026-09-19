@@ -27,8 +27,8 @@
 		<!-- App Identifier -->
 		<ApplicationId>com.janmesarc.markd</ApplicationId>
 
-		<!-- Versions -->
-		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<!-- Versions: a release tag must be v + ApplicationDisplayVersion. CI sets ApplicationVersion to the run number. -->
+		<ApplicationDisplayVersion>0.1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
@@ -74,6 +74,12 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Markd.Core\Markd.Core.csproj" />
+	</ItemGroup>
+
+	<!-- Read by Services/AppVersion.cs, so every platform shows the same version. -->
+	<ItemGroup>
+	  <AssemblyMetadata Include="Markd.Version" Value="$(ApplicationDisplayVersion)" />
+	  <AssemblyMetadata Include="Markd.Build" Value="$(ApplicationVersion)" />
 	</ItemGroup>
 
 	<!-- The desktop shell (rail, two panes, overlays) only exists on Windows. -->

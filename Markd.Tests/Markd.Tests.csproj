@@ -21,6 +21,12 @@
     <ProjectReference Include="..\Markd.Core\Markd.Core.csproj" />
   </ItemGroup>
 
+  <!-- Same keys Markd.csproj embeds for AppVersion, with fixed values for AppVersionTests. -->
+  <ItemGroup>
+    <AssemblyMetadata Include="Markd.Version" Value="9.8.7" />
+    <AssemblyMetadata Include="Markd.Build" Value="65" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="..\Markd\ViewModels\ViewModelBase.cs" Link="ViewModels\ViewModelBase.cs" />
     <Compile Include="..\Markd\ViewModels\OccasionMath.cs" Link="ViewModels\OccasionMath.cs" />
@@ -38,6 +44,7 @@
     <Compile Include="..\Markd\Services\IFileExportService.cs" Link="Services\IFileExportService.cs" />
     <Compile Include="..\Markd\Services\BackupCoordinator.cs" Link="Services\BackupCoordinator.cs" />
     <Compile Include="..\Markd\ViewModels\ExportOptionsForm.cs" Link="ViewModels\ExportOptionsForm.cs" />
+    <Compile Include="..\Markd\Services\AppVersion.cs" Link="Services\AppVersion.cs" />
   </ItemGroup>
 
 </Project>
