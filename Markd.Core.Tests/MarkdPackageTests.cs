@@ -113,4 +113,29 @@ public class MarkdPackageTests
     [Fact]
     public void Encrypt_RejectsOutOfRangeIterations() =>
         Assert.Throws<ArgumentOutOfRangeException>(() => MarkdPackage.Encrypt(Plain, Password, 1_000));
+
+    [Fact]
+    public void ValidateHeader_ValidPackage_DoesNotThrow() =>
+        MarkdPackage.ValidateHeader(Encrypt());
+
+    [Fact]
+    public void ValidateHeader_UnsupportedVersion_Throws()
+    {
+        var package = Encrypt();
+        package[5] = 3;
+        Assert.Equal(PackageError.UnsupportedVersion, Assert.Throws<MarkdPackageException>(() => MarkdPackage.ValidateHeader(package)).Error);
+    }
+
+    [Fact]
+    public void NfdPassword_DecryptsWithNfcForm()
+    {
+        // "z" + COMBINING CARON (U+030C), the decomposed (NFD) form of Czech "ž".
+        const string decomposed = "heslo-ž";
+        // Composed (NFC) form of the same word.
+        const string composed = "heslo-ž";
+
+        var package = MarkdPackage.Encrypt(Plain, decomposed, MarkdPackage.MinIterations);
+
+        Assert.Equal(Plain, MarkdPackage.Decrypt(package, composed));
+    }
 }

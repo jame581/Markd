@@ -47,6 +47,13 @@ namespace Markd
             builder.Logging.AddDebug();
 #endif
 
+#if ANDROID
+            // Essentials' Share stages files under this location before handing them to the share sheet.
+            // Default is PreferExternal; force it into the app's internal cache so staged copies live under
+            // FileSystem.CacheDirectory, where ShareSheet.ClearStaged() can find and delete them.
+            Microsoft.Maui.Storage.FileProvider.TemporaryLocation = Microsoft.Maui.Storage.FileProviderLocation.Internal;
+#endif
+
             InputChrome.Configure();
 
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "markd.db");

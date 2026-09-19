@@ -9,6 +9,10 @@ public class BackupCoordinatorTests
 {
     private static readonly byte[] PlainJson = "{}"u8.ToArray();
 
+    /// <summary>A structurally valid encrypted package (real header) so MarkdPackage.ValidateHeader lets it through.</summary>
+    private static byte[] EncryptedFixture(string password = "right") =>
+        MarkdPackage.Encrypt(PlainJson, password, MarkdPackage.MinIterations);
+
     private readonly FakeExport _export = new();
     private readonly FakeImport _import = new();
     private readonly FakePrompts _prompts = new();
@@ -69,6 +73,18 @@ public class BackupCoordinatorTests
     }
 
     [Fact]
+    public async Task Export_Failure_NonInvalidOperationException_ShowsGenericMessage()
+    {
+        _prompts.ExportChoice = new ExportChoice(null, ExportDestination.Save);
+        _export.PackageError = new IOException("disk full");
+
+        await Create().ExportAsync();
+
+        Assert.Equal("Export failed", Assert.Single(_feedback.Titles));
+        Assert.Equal("Something went wrong. Please try again.", Assert.Single(_feedback.Details));
+    }
+
+    [Fact]
     public async Task Import_PlainFile_SkipsPasswordPrompt()
     {
         _picker.File = new PickedFile("backup.json", PlainJson);
@@ -83,7 +99,7 @@ public class BackupCoordinatorTests
     [Fact]
     public async Task Import_WrongThenRightPassword_Succeeds()
     {
-        _picker.File = new PickedFile("backup.markd", "MARKD\u0002"u8.ToArray());
+        _picker.File = new PickedFile("backup.markd", EncryptedFixture());
         _prompts.Passwords.Enqueue("wrong");
         _prompts.Passwords.Enqueue("right");
         _import.CorrectPassword = "right";
@@ -98,10 +114,37 @@ public class BackupCoordinatorTests
     [Fact]
     public async Task Import_CancelAtPassword_LeavesDataAlone()
     {
-        _picker.File = new PickedFile("backup.markd", "MARKD\u0002"u8.ToArray());
+        _picker.File = new PickedFile("backup.markd", EncryptedFixture());
 
         Assert.False(await Create().ImportAsync());
 
+        Assert.False(_import.Applied);
+    }
+
+    [Fact]
+    public async Task Import_UnsupportedVersion_ReportsFailureWithoutPasswordPrompt()
+    {
+        var package = EncryptedFixture();
+        package[5] = 99; // right after the "MARKD" magic
+        _picker.File = new PickedFile("backup.markd", package);
+
+        Assert.False(await Create().ImportAsync());
+
+        Assert.Empty(_prompts.PasswordRequests);
+        Assert.Equal("Import failed", Assert.Single(_feedback.Titles));
+        Assert.False(_import.Applied);
+    }
+
+    [Fact]
+    public async Task Import_ApplyFailure_InvalidOperationException_ShowsItsMessage()
+    {
+        _picker.File = new PickedFile("backup.json", PlainJson);
+        _import.ApplyError = new InvalidOperationException("Could not write to the database.");
+
+        Assert.False(await Create().ImportAsync());
+
+        Assert.Equal("Import failed", Assert.Single(_feedback.Titles));
+        Assert.Equal("Could not write to the database.", Assert.Single(_feedback.Details));
         Assert.False(_import.Applied);
     }
 
@@ -141,13 +184,20 @@ public class BackupCoordinatorTests
     private sealed class FakeExport : IExportService
     {
         public string? LastPassword { get; private set; }
+        public Exception? PackageError { get; set; }
 
         public Task<byte[]> CreateExportJsonAsync() => Task.FromResult(PlainJson);
 
         public Task<byte[]> CreateExportPackageAsync(string? passphrase = null)
         {
             LastPassword = passphrase;
-            return Task.FromResult(PlainJson);
+            if (PackageError is not null)
+                throw PackageError;
+
+            // Mirrors the real ExportService: encrypts when a passphrase is given, matching MarkdPackage's
+            // format so BackupCoordinator's extension choice (MarkdPackage.IsEncrypted) sees real data.
+            var package = string.IsNullOrEmpty(passphrase) ? PlainJson : MarkdPackage.Encrypt(PlainJson, passphrase, MarkdPackage.MinIterations);
+            return Task.FromResult(package);
         }
     }
 
@@ -155,6 +205,7 @@ public class BackupCoordinatorTests
     {
         public string? CorrectPassword { get; set; }
         public Exception? ParseError { get; set; }
+        public Exception? ApplyError { get; set; }
         public bool Applied { get; private set; }
 
         public Task<ExportModel> ParseImportPackageAsync(byte[] package, string? passphrase = null)
@@ -168,6 +219,8 @@ public class BackupCoordinatorTests
 
         public Task ApplyImportAsync(ExportModel model)
         {
+            if (ApplyError is not null)
+                throw ApplyError;
             Applied = true;
             return Task.CompletedTask;
         }
@@ -222,10 +275,12 @@ public class BackupCoordinatorTests
     private sealed class FakeFeedback : IFeedbackService
     {
         public List<string> Titles { get; } = [];
+        public List<string?> Details { get; } = [];
 
         public Task ShowAsync(string title, string? detail = null)
         {
             Titles.Add(title);
+            Details.Add(detail);
             return Task.CompletedTask;
         }
 

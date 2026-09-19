@@ -43,7 +43,13 @@ public partial class PasswordPage : ContentPage
 
         _closing = true;
         PasswordEntry.Text = string.Empty;
-        await Navigation.PopModalAsync(false);
-        _result.TrySetResult(password);
+        try
+        {
+            await Navigation.PopModalAsync(false);
+        }
+        finally
+        {
+            _result.TrySetResult(password);
+        }
     }
 }

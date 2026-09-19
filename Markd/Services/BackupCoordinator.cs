@@ -25,7 +25,7 @@ public sealed class BackupCoordinator(
                 return;
 
             var data = await exportService.CreateExportPackageAsync(choice.Password);
-            var extension = choice.Password is null ? ".json" : MarkdPackage.EncryptedExtension;
+            var extension = MarkdPackage.IsEncrypted(data) ? MarkdPackage.EncryptedExtension : ".json";
             var fileName = $"markd-export-{DateTime.Now:yyyyMMdd-HHmmss}{extension}";
 
             if (choice.Destination == ExportDestination.Share)
@@ -40,7 +40,7 @@ public sealed class BackupCoordinator(
         }
         catch (Exception ex)
         {
-            await feedback.ShowAsync(Strings.Export_Failed, ex.Message);
+            await feedback.ShowAsync(Strings.Export_Failed, DetailFor(ex));
         }
     }
 
@@ -68,16 +68,26 @@ public sealed class BackupCoordinator(
         }
         catch (Exception ex)
         {
-            await feedback.ShowAsync(Strings.Import_Failed, ex.Message);
+            await feedback.ShowAsync(Strings.Import_Failed, DetailFor(ex));
             return false;
         }
     }
+
+    /// <summary>
+    /// Our own errors (bad password, malformed package, invalid import data, ...) are safe and useful to show
+    /// verbatim. Anything else (IO failures, provider errors, ...) gets a generic message instead.
+    /// </summary>
+    private static string DetailFor(Exception ex) => ex is InvalidOperationException ? ex.Message : Strings.Backup_UnexpectedError;
 
     /// <summary>Asks for the password until it is right or the user cancels; the file is read only once.</summary>
     private async Task<ExportModel?> ParseAsync(PickedFile file)
     {
         if (!MarkdPackage.IsEncrypted(file.Data))
             return await importService.ParseImportPackageAsync(file.Data);
+
+        // Structural problems (bad version, truncation, ...) surface here so the user is never asked for a
+        // password just to be told the file is unusable.
+        MarkdPackage.ValidateHeader(file.Data);
 
         var failed = false;
         while (true)

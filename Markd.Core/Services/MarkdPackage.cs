@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Security.Cryptography;
+using System.Text;
 using Markd.Core.Localization;
 
 namespace Markd.Core.Services;
@@ -74,7 +75,11 @@ public static class MarkdPackage
         return output;
     }
 
-    public static byte[] Decrypt(ReadOnlySpan<byte> package, string? password)
+    /// <summary>
+    /// Checks the header (magic/length/version/truncation/KDF/iteration range) without touching the password,
+    /// so structural problems can surface before the user is asked to enter one.
+    /// </summary>
+    public static void ValidateHeader(ReadOnlySpan<byte> package)
     {
         if (!IsEncrypted(package))
             throw new ArgumentException("Not an encrypted Markd package.", nameof(package));
@@ -90,9 +95,15 @@ public static class MarkdPackage
         var iterations = BinaryPrimitives.ReadUInt32LittleEndian(package.Slice(IterationsOffset, 4));
         if (iterations is < MinIterations or > MaxIterations)
             throw Fail(PackageError.InvalidIterations, Strings.Package_InvalidIterations);
+    }
+
+    public static byte[] Decrypt(ReadOnlySpan<byte> package, string? password)
+    {
+        ValidateHeader(package);
         if (string.IsNullOrEmpty(password))
             throw Fail(PackageError.PasswordRequired, Strings.Package_PasswordRequired);
 
+        var iterations = BinaryPrimitives.ReadUInt32LittleEndian(package.Slice(IterationsOffset, 4));
         var header = package[..HeaderSize];
         var ciphertext = package[HeaderSize..^TagSize];
         var plaintext = new byte[ciphertext.Length];
@@ -114,8 +125,10 @@ public static class MarkdPackage
         }
     }
 
+    // Normalized so a password typed in composed (NFC) or decomposed (NFD) Unicode form derives the same key
+    // regardless of which form the keyboard/IME produced when the password was set versus re-entered.
     private static byte[] DeriveKey(string password, ReadOnlySpan<byte> salt, int iterations) =>
-        Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, KeySize);
+        Rfc2898DeriveBytes.Pbkdf2(password.Normalize(NormalizationForm.FormC), salt, iterations, HashAlgorithmName.SHA256, KeySize);
 
     private static MarkdPackageException Fail(PackageError error, string message, Exception? inner = null) =>
         new(error, message, inner);

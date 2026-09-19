@@ -43,7 +43,13 @@ public partial class ExportOptionsPage : ContentPage
         _closing = true;
         _form.Password = string.Empty;
         _form.ConfirmPassword = string.Empty;
-        await Navigation.PopModalAsync(false);
-        _result.TrySetResult(choice);
+        try
+        {
+            await Navigation.PopModalAsync(false);
+        }
+        finally
+        {
+            _result.TrySetResult(choice);
+        }
     }
 }

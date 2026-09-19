@@ -225,7 +225,7 @@
   <data name="Import_PickerTitle" xml:space="preserve"><value>Vyberte export Markd</value></data>
   <data name="Import_PasswordTitle" xml:space="preserve"><value>Zadejte heslo</value></data>
   <data name="Import_PasswordMessage" xml:space="preserve"><value>Soubor {0} je zašifrovaný.</value></data>
-  <data name="Import_WrongPassword" xml:space="preserve"><value>Nesprávné heslo. Zkuste to znovu.</value></data>
+  <data name="Import_WrongPassword" xml:space="preserve"><value>Nesprávné heslo, nebo je soubor poškozený. Zkuste to znovu.</value></data>
   <data name="Import_Open" xml:space="preserve"><value>Otevřít</value></data>
   <data name="Import_Replace" xml:space="preserve"><value>Nahradit</value></data>
   <data name="Import_FileTooLarge" xml:space="preserve"><value>Tento soubor je na zálohu Markd příliš velký.</value></data>
@@ -242,6 +242,7 @@
   <data name="Package_UnsupportedVersion" xml:space="preserve"><value>Tento soubor vytvořila novější verze Markd.</value></data>
   <data name="Package_UnsupportedKdf" xml:space="preserve"><value>Tento soubor používá nepodporovanou metodu šifrování.</value></data>
   <data name="Package_InvalidIterations" xml:space="preserve"><value>Tento soubor má neplatné nastavení šifrování.</value></data>
+  <data name="Backup_UnexpectedError" xml:space="preserve"><value>Něco se nepovedlo. Zkuste to prosím znovu.</value></data>
   <data name="Notification_Open" xml:space="preserve"><value>Otevřít</value></data>
   <data name="Notification_Snooze" xml:space="preserve"><value>Odložit</value></data>
   <data name="Notification_TitleSince_One" xml:space="preserve"><value>{0} den {1}</value></data>
