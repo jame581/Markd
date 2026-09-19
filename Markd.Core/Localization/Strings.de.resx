@@ -25,7 +25,7 @@
   <data name="Settings_Notifications" xml:space="preserve"><value>Benachrichtigungen</value></data>
   <data name="Settings_MilestoneAlerts" xml:space="preserve"><value>Meilenstein-Hinweise</value></data>
   <data name="Settings_MilestoneAlertsSub" xml:space="preserve"><value>Morgens am Tag des Meilensteins</value></data>
-  <data name="Settings_MilestoneAlertsSubDesktop" xml:space="preserve"><value>Zeigt den Meilenstein-Moment, sobald einer erreicht ist</value></data>
+  <data name="Settings_MilestoneAlertsSubDesktop" xml:space="preserve"><value>Zeigt eine Meldung an, sobald ein Meilenstein erreicht ist</value></data>
   <data name="Settings_TimeOfDay" xml:space="preserve"><value>Uhrzeit</value></data>
   <data name="Settings_YourData" xml:space="preserve"><value>Ihre Daten</value></data>
   <data name="Settings_ExportSub" xml:space="preserve"><value>In einem Ordner, in Google Drive oder OneDrive speichern oder teilen.</value></data>
@@ -95,7 +95,7 @@
   <data name="Calendar_Short_Sun" xml:space="preserve"><value>So</value></data>
   <data name="Home_Pinned" xml:space="preserve"><value>ANGEHEFTET</value></data>
   <data name="Home_EmptyTitle" xml:space="preserve"><value>Noch nichts markiert</value></data>
-  <data name="Home_EmptyHint" xml:space="preserve"><value>Wählen Sie ein Datum, das zählt – ein erster Tag, ein letzter Tag, ein Tag, auf den Sie hinfiebern – und Markd behält die Zahl für Sie im Blick.</value></data>
+  <data name="Home_EmptyHint" xml:space="preserve"><value>Wählen Sie ein Datum, das zählt – einen ersten Tag, einen letzten Tag, einen Tag, auf den Sie hinfiebern – und Markd behält die Zahl für Sie im Blick.</value></data>
   <data name="Home_AddFirst" xml:space="preserve"><value>Ersten Anlass hinzufügen</value></data>
   <data name="Home_EmptyFootnote" xml:space="preserve"><value>Kein Konto. Keine Werbung. Alles bleibt auf diesem Smartphone.</value></data>
   <data name="Home_NewOccasion" xml:space="preserve"><value>Neuer Anlass</value></data>
@@ -146,7 +146,7 @@
   <data name="Category_NamePlaceholderDesktop" xml:space="preserve"><value>Familie, Gesundheit, Reisen…</value></data>
   <data name="Calendar_Title" xml:space="preserve"><value>Kalender</value></data>
   <data name="Calendar_ComingUp" xml:space="preserve"><value>Demnächst</value></data>
-  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Noch nichts, worauf Sie hinzählen – fügen Sie einen Anlass hinzu, dann erscheinen seine Meilensteine hier.</value></data>
+  <data name="Calendar_ComingUpEmpty" xml:space="preserve"><value>Noch nichts in Sicht – fügen Sie einen Anlass hinzu, dann erscheinen seine Meilensteine hier.</value></data>
   <data name="Calendar_DotsLegend" xml:space="preserve"><value>Volle Punkte sind Stichtage · blasse Punkte sind Meilensteine.</value></data>
   <data name="Calendar_PreviousMonth" xml:space="preserve"><value>Vorheriger Monat</value></data>
   <data name="Calendar_NextMonth" xml:space="preserve"><value>Nächster Monat</value></data>
@@ -191,7 +191,7 @@
   <data name="Desk_LightTheme" xml:space="preserve"><value>Helles Design</value></data>
   <data name="Desk_DarkTheme" xml:space="preserve"><value>Dunkles Design</value></data>
   <data name="Desk_MoreIcons" xml:space="preserve"><value>Weitere Symbole</value></data>
-  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Wählen Sie ein Datum, das zählt – ein erster Tag, ein letzter Tag, ein Tag, auf den Sie warten. Markd zählt ab da.</value></data>
+  <data name="Home_EmptyHintDesktop" xml:space="preserve"><value>Wählen Sie ein Datum, das zählt – einen ersten Tag, einen letzten Tag, einen Tag, auf den Sie warten. Markd zählt ab da.</value></data>
   <data name="Home_AddFirstDesktop" xml:space="preserve"><value>Ersten Anlass erstellen</value></data>
   <data name="Home_EmptyFootnoteDesktop" xml:space="preserve"><value>Kein Konto. Keine Werbung. Alles bleibt auf diesem PC.</value></data>
   <data name="Home_AllOccasions" xml:space="preserve"><value>Alle Anlässe</value></data>
@@ -307,7 +307,7 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Share_NextMilestoneShort" xml:space="preserve"><value>Nächster Meilenstein: {0}</value></data>
   <data name="Detail_NoNotes" xml:space="preserve"><value>Noch keine Notizen.</value></data>
   <data name="Detail_PinAction" xml:space="preserve"><value>Anheften</value></data>
-  <data name="Detail_UnpinAction" xml:space="preserve"><value>Lösen</value></data>
+  <data name="Detail_UnpinAction" xml:space="preserve"><value>Loslösen</value></data>
   <data name="Detail_MilestoneCount_One" xml:space="preserve"><value>{0} verfolgt</value></data>
   <data name="Detail_MilestoneCount_Few" xml:space="preserve"><value>{0} verfolgt</value></data>
   <data name="Detail_MilestoneCount_Many" xml:space="preserve"><value>{0} verfolgt</value></data>

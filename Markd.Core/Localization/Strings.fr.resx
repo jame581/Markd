@@ -155,7 +155,7 @@
   <data name="Calendar_ThisMonth" xml:space="preserve"><value>Ce mois-ci</value></data>
   <data name="Calendar_SubtitleDesktop" xml:space="preserve"><value>Dates de référence et étapes du mois</value></data>
   <data name="About_Title" xml:space="preserve"><value>À propos</value></data>
-  <data name="About_Description" xml:space="preserve"><value>Une application open source pour suivre les dates à partir desquelles vous comptez, ou jusqu'auxquelles vous décomptez. Sans publicité, sans abonnement, sans compte.</value></data>
+  <data name="About_Description" xml:space="preserve"><value>Une application open source pour compter les jours depuis ou jusqu'à une date qui compte. Sans publicité, sans abonnement, sans compte.</value></data>
   <data name="About_Licence" xml:space="preserve"><value>Licence</value></data>
   <data name="About_SourceCode" xml:space="preserve"><value>Code source</value></data>
   <data name="About_Translations" xml:space="preserve"><value>Traductions</value></data>
@@ -270,14 +270,14 @@
   <data name="Category_DeletedDetail" xml:space="preserve"><value>La catégorie « {0} » a été supprimée ; ses événements sont passés dans « Sans catégorie ».</value></data>
   <data name="Category_RowEmpty" xml:space="preserve"><value>Vide · aucun événement</value></data>
   <data name="Milestone_LabelRequired" xml:space="preserve"><value>Le nom de l'étape est obligatoire.</value></data>
-  <data name="Milestone_ThresholdInvalid" xml:space="preserve"><value>Le nombre de jours de l'étape doit être un nombre positif.</value></data>
+  <data name="Milestone_ThresholdInvalid" xml:space="preserve"><value>Le nombre de jours de l'étape doit être positif.</value></data>
   <data name="Milestone_Sentence_Since_One" xml:space="preserve"><value>{0} jour écoulé depuis « {1} ».</value></data>
   <data name="Milestone_Sentence_Since_Few" xml:space="preserve"><value>{0} jours écoulés depuis « {1} ».</value></data>
   <data name="Milestone_Sentence_Since_Many" xml:space="preserve"><value>{0} jours écoulés depuis « {1} ».</value></data>
   <data name="Milestone_Sentence_Until_One" xml:space="preserve"><value>Encore {0} jour avant « {1} ».</value></data>
   <data name="Milestone_Sentence_Until_Few" xml:space="preserve"><value>Encore {0} jours avant « {1} ».</value></data>
   <data name="Milestone_Sentence_Until_Many" xml:space="preserve"><value>Encore {0} jours avant « {1} ».</value></data>
-  <data name="Milestone_Sentence_LastTracked" xml:space="preserve"><value>C'était la dernière étape que vous suiviez.</value></data>
+  <data name="Milestone_Sentence_LastTracked" xml:space="preserve"><value>C'est la dernière étape que vous suivez.</value></data>
   <data name="Milestone_Sentence_NextUp_One" xml:space="preserve"><value>Prochaine étape : « {0} », dans {1} jour.</value></data>
   <data name="Milestone_Sentence_NextUp_Few" xml:space="preserve"><value>Prochaine étape : « {0} », dans {1} jours.</value></data>
   <data name="Milestone_Sentence_NextUp_Many" xml:space="preserve"><value>Prochaine étape : « {0} », dans {1} jours.</value></data>
