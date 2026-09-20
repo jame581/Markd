@@ -29,7 +29,7 @@ namespace Markd.Services
         private readonly SemaphoreSlim _gate = new(1, 1);
         private IDispatcherTimer? _clock;
         private DateTime _lastTick = DateTime.Now;
-#if ANDROID || IOS
+#if ANDROID || IOS || WINDOWS
         private CancellationTokenSource? _rescheduleDelay;
 #endif
 
@@ -46,6 +46,8 @@ namespace Markd.Services
             _appSettingsService = appSettingsService;
 #if ANDROID || IOS
             LocalNotificationCenter.Current.NotificationActionTapped += OnNotificationActionTapped;
+#endif
+#if ANDROID || IOS || WINDOWS
             WeakReferenceMessenger.Default.Register<NotificationService, OccasionsChangedMessage>(this, (service, message) => service.OnOccasionsChanged(message));
 #endif
         }
@@ -160,12 +162,27 @@ namespace Markd.Services
             {
                 // Scheduling is best effort; the in-app check still runs on start and resume.
             }
+#elif WINDOWS
+            try
+            {
+                Platforms.Windows.WindowsToastScheduler.Clear();
+
+                var settings = await _appSettingsService.GetAsync();
+                var upcoming = MilestoneSchedule.Upcoming(
+                    await _occasionService.GetAllAsync(), settings, DateTime.Now, MaxScheduled);
+
+                Platforms.Windows.WindowsToastScheduler.Schedule(upcoming, LocalizationManager.Instance.Culture);
+            }
+            catch (Exception)
+            {
+                // Best effort, exactly as on phones: the in-app check still runs on start and resume.
+            }
 #else
             await Task.CompletedTask;
 #endif
         }
 
-#if ANDROID || IOS
+#if ANDROID || IOS || WINDOWS
         // Deleted, edited, restored or newly added milestones all change the schedule; a burst of changes rebuilds it once.
         private void OnOccasionsChanged(OccasionsChangedMessage message)
         {
@@ -180,7 +197,9 @@ namespace Markd.Services
                 TaskContinuationOptions.OnlyOnRanToCompletion,
                 TaskScheduler.Default);
         }
+#endif
 
+#if ANDROID || IOS
         private static NotificationRequest CreateRequest(Occasion occasion, Milestone milestone, DateTime when)
         {
             var since = occasion.Direction == OccasionDirection.Since;
