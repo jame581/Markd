@@ -150,16 +150,11 @@ namespace Markd.Services
                 if (requestPermission && !await center.AreNotificationsEnabled())
                     await center.RequestNotificationPermission();
 
-                var now = DateTime.Now;
-                var upcoming = (await _occasionService.GetAllAsync())
-                    .SelectMany(o => o.Milestones.Where(m => !m.Notified).Select(m => (Occasion: o, Milestone: m)))
-                    .Select(x => (x.Occasion, x.Milestone, When: OccasionDates.GetMilestoneDate(x.Occasion, x.Milestone) + settings.NotificationTimeOfDay))
-                    .Where(x => x.When > now)
-                    .OrderBy(x => x.When)
-                    .Take(MaxScheduled);
+                var upcoming = MilestoneSchedule.Upcoming(
+                    await _occasionService.GetAllAsync(), settings, DateTime.Now, MaxScheduled);
 
-                foreach (var (occasion, milestone, when) in upcoming)
-                    await center.Show(CreateRequest(occasion, milestone, when));
+                foreach (var entry in upcoming)
+                    await center.Show(CreateRequest(entry.Occasion, entry.Milestone, entry.When));
             }
             catch (Exception)
             {
