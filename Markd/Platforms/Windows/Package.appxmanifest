@@ -4,15 +4,22 @@
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  IgnorableNamespaces="uap rescap com desktop">
 
-  <Identity Name="maui-package-name-placeholder" Publisher="CN=User Name" Version="0.0.0.0" />
+  <!-- Identity, Publisher and PublisherDisplayName are the Product identity Partner Center assigned
+       (package family 21441Mesarc.MarkdDayCounter_r7cvsd1wfgvb0). Version stays 0.0.0.0 so MAUI
+       fills it from ApplicationDisplayVersion. -->
+  <Identity Name="21441Mesarc.MarkdDayCounter" Publisher="CN=68156E3E-964C-4233-B256-D9D053C0DBC1" Version="0.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="233B261C-93F9-43AF-AC7A-4EA637A18E6C" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>$placeholder$</DisplayName>
-    <PublisherDisplayName>User Name</PublisherDisplayName>
+    <!-- The Store requires this to match the reserved name exactly, so it is not the $placeholder$
+         token MAUI fills from ApplicationTitle. The tile name below stays Markd. -->
+    <DisplayName>Markd Day Counter</DisplayName>
+    <PublisherDisplayName>Jan Mesarč</PublisherDisplayName>
     <Logo>$placeholder$.png</Logo>
   </Properties>
 
@@ -36,6 +43,20 @@
         <uap:DefaultTile Square71x71Logo="$placeholder$.png" Wide310x150Logo="$placeholder$.png" Square310x310Logo="$placeholder$.png" />
         <uap:SplashScreen Image="$placeholder$.png" />
       </uap:VisualElements>
+      <Extensions>
+        <!-- A click on a milestone toast activates this CLSID; Windows App SDK routes it to AppNotificationManager. -->
+        <desktop:Extension Category="windows.toastNotificationActivation">
+          <desktop:ToastNotificationActivation ToastActivatorCLSID="3736A808-35D3-4A91-AE55-99713C056494" />
+        </desktop:Extension>
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <!-- Named literally: MAUI does not substitute $targetnametoken$ inside com:ExeServer. -->
+            <com:ExeServer Executable="Markd.exe" DisplayName="Markd" Arguments="----AppNotificationActivated:">
+              <com:Class Id="3736A808-35D3-4A91-AE55-99713C056494" />
+            </com:ExeServer>
+          </com:ComServer>
+        </com:Extension>
+      </Extensions>
     </Application>
   </Applications>
 

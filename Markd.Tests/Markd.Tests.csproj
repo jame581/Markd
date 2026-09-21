@@ -45,6 +45,7 @@
     <Compile Include="..\Markd\Services\BackupCoordinator.cs" Link="Services\BackupCoordinator.cs" />
     <Compile Include="..\Markd\ViewModels\ExportOptionsForm.cs" Link="ViewModels\ExportOptionsForm.cs" />
     <Compile Include="..\Markd\Services\AppVersion.cs" Link="Services\AppVersion.cs" />
+    <Compile Include="..\Markd\Services\MilestoneSchedule.cs" Link="Services\MilestoneSchedule.cs" />
   </ItemGroup>
 
 </Project>

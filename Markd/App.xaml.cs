@@ -18,8 +18,7 @@ namespace Markd
             _notificationService = notificationService;
             _notificationService.MilestoneReached += (_, e) =>
                 EnqueueMoment(new MilestoneMoment(e.Occasion, e.Milestone, e.NextMilestone, e.Days));
-            _notificationService.OpenOccasionRequested += async (_, id) =>
-                await _services.GetRequiredService<IAppShellService>().GoToAsync($"{nameof(OccasionDetailPage)}?id={id}");
+            _notificationService.OpenOccasionRequested += (_, id) => OpenOccasion(id);
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
@@ -31,6 +30,7 @@ namespace Markd
 
 #if WINDOWS
             var window = Desktop.DesktopWindow.Create(_services);
+            window.Destroying += (_, _) => Platforms.Windows.WindowsToastActivation.Shutdown();
 #else
             var window = new Window(_services.GetRequiredService<AppShell>());
 #endif
@@ -42,9 +42,18 @@ namespace Markd
         {
             base.OnStart();
             ShareSheet.ClearStaged();
+#if WINDOWS
+            // A toast click that launched the app is delivered here, once the shell exists to navigate.
+            Platforms.Windows.WindowsToastActivation.Attach(OpenOccasion);
+#endif
             _notificationService.StartClock();
             await _notificationService.CheckOnOpenAsync();
             await _notificationService.RescheduleAsync();
+        }
+
+        private async void OpenOccasion(int id)
+        {
+            await _services.GetRequiredService<IAppShellService>().GoToAsync($"{nameof(OccasionDetailPage)}?id={id}");
         }
 
         private async void OnWindowResumed(object? sender, EventArgs e)

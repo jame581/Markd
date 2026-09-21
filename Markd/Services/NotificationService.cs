@@ -15,8 +15,11 @@ namespace Markd.Services
     /// <summary>
     /// Milestone alerts. While the app is open, reached milestones surface as the in-app milestone moment.
     /// On phones, upcoming milestones are also scheduled as system notifications at the chosen time of day,
-    /// with OPEN and SNOOZE actions, and the schedule is rebuilt whenever occasions change. The desktop has no
-    /// system notifications, so there the time of day is when Markd looks for milestones due that day.
+    /// with OPEN and SNOOZE actions, and the schedule is rebuilt whenever occasions change. Packaged Windows
+    /// builds schedule system toasts the same way. Unpackaged Windows builds have no package identity and so
+    /// no scheduled toasts, which is why the daily in-app check remains the path there: it is also the
+    /// documented backstop everywhere else, since Windows drops any toast whose delivery time passed while
+    /// the machine was off for more than 5 minutes.
     /// </summary>
     public class NotificationService
     {
@@ -29,7 +32,7 @@ namespace Markd.Services
         private readonly SemaphoreSlim _gate = new(1, 1);
         private IDispatcherTimer? _clock;
         private DateTime _lastTick = DateTime.Now;
-#if ANDROID || IOS
+#if ANDROID || IOS || WINDOWS
         private CancellationTokenSource? _rescheduleDelay;
 #endif
 
@@ -46,6 +49,8 @@ namespace Markd.Services
             _appSettingsService = appSettingsService;
 #if ANDROID || IOS
             LocalNotificationCenter.Current.NotificationActionTapped += OnNotificationActionTapped;
+#endif
+#if ANDROID || IOS || WINDOWS
             WeakReferenceMessenger.Default.Register<NotificationService, OccasionsChangedMessage>(this, (service, message) => service.OnOccasionsChanged(message));
 #endif
         }
@@ -150,27 +155,41 @@ namespace Markd.Services
                 if (requestPermission && !await center.AreNotificationsEnabled())
                     await center.RequestNotificationPermission();
 
-                var now = DateTime.Now;
-                var upcoming = (await _occasionService.GetAllAsync())
-                    .SelectMany(o => o.Milestones.Where(m => !m.Notified).Select(m => (Occasion: o, Milestone: m)))
-                    .Select(x => (x.Occasion, x.Milestone, When: OccasionDates.GetMilestoneDate(x.Occasion, x.Milestone) + settings.NotificationTimeOfDay))
-                    .Where(x => x.When > now)
-                    .OrderBy(x => x.When)
-                    .Take(MaxScheduled);
+                var upcoming = MilestoneSchedule.Upcoming(
+                    await _occasionService.GetAllAsync(), settings, DateTime.Now, MaxScheduled);
 
-                foreach (var (occasion, milestone, when) in upcoming)
-                    await center.Show(CreateRequest(occasion, milestone, when));
+                foreach (var entry in upcoming)
+                    await center.Show(CreateRequest(entry.Occasion, entry.Milestone, entry.When));
             }
             catch (Exception)
             {
                 // Scheduling is best effort; the in-app check still runs on start and resume.
+            }
+#elif WINDOWS
+            try
+            {
+                if (!Platforms.Windows.WindowsToastScheduler.IsAvailable)
+                    return;
+
+                var settings = await _appSettingsService.GetAsync();
+                var upcoming = MilestoneSchedule.Upcoming(
+                    await _occasionService.GetAllAsync(), settings, DateTime.Now, MaxScheduled);
+
+                // Clear only after the awaits: two overlapping rebuilds (start plus a debounced change) would
+                // otherwise both clear first and then both schedule, and Windows keeps duplicate entries.
+                Platforms.Windows.WindowsToastScheduler.Clear();
+                Platforms.Windows.WindowsToastScheduler.Schedule(upcoming, LocalizationManager.Instance.Culture);
+            }
+            catch (Exception)
+            {
+                // Best effort, exactly as on phones: the in-app check still runs on start and resume.
             }
 #else
             await Task.CompletedTask;
 #endif
         }
 
-#if ANDROID || IOS
+#if ANDROID || IOS || WINDOWS
         // Deleted, edited, restored or newly added milestones all change the schedule; a burst of changes rebuilds it once.
         private void OnOccasionsChanged(OccasionsChangedMessage message)
         {
@@ -185,7 +204,9 @@ namespace Markd.Services
                 TaskContinuationOptions.OnlyOnRanToCompletion,
                 TaskScheduler.Default);
         }
+#endif
 
+#if ANDROID || IOS
         private static NotificationRequest CreateRequest(Occasion occasion, Milestone milestone, DateTime when)
         {
             var since = occasion.Direction == OccasionDirection.Since;
