@@ -17,6 +17,7 @@ namespace Markd.WinUI
         public App()
         {
             this.InitializeComponent();
+            Markd.Platforms.Windows.WindowsToastActivation.Initialize();
         }
 
         protected override MauiApp CreateMauiApp() => MauiProgram.CreateMauiApp();
