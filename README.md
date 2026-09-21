@@ -16,7 +16,7 @@ Markd counts the days that matter. Mark a date and it counts **since** it (a fir
 
 - Occasions counting since or until a date, with a live years / months / days / time breakdown
 - One pinned occasion featured at the top of Home
-- Milestones at day thresholds, with a "milestone reached" moment in the app and scheduled notifications on phones
+- Milestones at day thresholds, with a "milestone reached" moment in the app and scheduled notifications on phones and in the Microsoft Store build for Windows
 - Categories with their own emoji and colour
 - Month calendar of anchor dates and milestone dates, plus what is coming up next
 - Light, dark and system themes
@@ -58,8 +58,9 @@ dotnet test --project Markd.Tests/Markd.Tests.csproj
 - `.github/workflows/release.yml` runs when a `v*` tag is pushed. It runs the same tests, then builds:
   - **Android**: a signed `.apk` (for sideloading) and `.aab` (for Google Play)
   - **Windows**: a self-contained x64 `.zip` that runs without installing .NET or the Windows App SDK
+  - **Microsoft Store**: an unsigned x64 `.msix` to upload in Partner Center, which signs it. Milestone notifications on Windows need the package identity the `.msix` carries, which the `.zip` lacks. The job fails while `Package.appxmanifest` still holds a placeholder identity.
 
-The version lives in `ApplicationDisplayVersion` in `Markd/Markd.csproj`, and the app shows it in Settings and About. To release:
+The version lives in `ApplicationDisplayVersion` in `Markd/Markd.csproj`, and the app shows it in Settings and About. The Store package takes the same version with a revision of 0, because the Store rejects any other revision. To release:
 
 1. Set `ApplicationDisplayVersion` to the new version (for example `0.2.0`) and commit it.
 2. Tag that commit with the same version and push the tag:
