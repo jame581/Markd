@@ -15,8 +15,11 @@ namespace Markd.Services
     /// <summary>
     /// Milestone alerts. While the app is open, reached milestones surface as the in-app milestone moment.
     /// On phones, upcoming milestones are also scheduled as system notifications at the chosen time of day,
-    /// with OPEN and SNOOZE actions, and the schedule is rebuilt whenever occasions change. The desktop has no
-    /// system notifications, so there the time of day is when Markd looks for milestones due that day.
+    /// with OPEN and SNOOZE actions, and the schedule is rebuilt whenever occasions change. Packaged Windows
+    /// builds schedule system toasts the same way. Unpackaged Windows builds have no package identity and so
+    /// no scheduled toasts, which is why the daily in-app check remains the path there: it is also the
+    /// documented backstop everywhere else, since Windows drops any toast whose delivery time passed while
+    /// the machine was off for more than 5 minutes.
     /// </summary>
     public class NotificationService
     {
@@ -165,6 +168,9 @@ namespace Markd.Services
 #elif WINDOWS
             try
             {
+                if (!Platforms.Windows.WindowsToastScheduler.IsAvailable)
+                    return;
+
                 Platforms.Windows.WindowsToastScheduler.Clear();
 
                 var settings = await _appSettingsService.GetAsync();

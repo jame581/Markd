@@ -92,6 +92,26 @@ public class MilestoneScheduleTests
     }
 
     [Fact]
+    public void Orders_soonest_first_across_multiple_occasions()
+    {
+        var anniversary = Since(Now.Date.AddDays(-900), At(1, 910), At(2, 920));
+        var trip = new Occasion
+        {
+            Id = 2,
+            Title = "Trip",
+            AnchorDate = Now.Date.AddDays(30).ToUniversalTime(),
+            Direction = OccasionDirection.Until,
+            Milestones = [At(3, 15), At(4, 5)]
+        };
+
+        var result = MilestoneSchedule.Upcoming([anniversary, trip], Settings(), Now, 48);
+
+        // Anniversary #1 lands in 10 days, trip #3 in 15, anniversary #2 in 20, trip #4 in 25,
+        // interleaving the two occasions so the combined order only holds if SelectMany merges them.
+        Assert.Equal([1, 3, 2, 4], result.Select(r => r.Milestone.Id).ToArray());
+    }
+
+    [Fact]
     public void Returns_nothing_when_notifications_are_disabled()
     {
         var occasion = Since(Now.Date.AddDays(-998), At(14, 1000));

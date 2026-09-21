@@ -57,12 +57,20 @@ namespace Markd.Platforms.Windows
             var notifier = ToastNotificationManager.CreateToastNotifier();
             foreach (var entry in upcoming)
             {
-                var toast = new ScheduledToastNotification(Build(entry, culture), entry.When)
+                try
                 {
-                    Group = Group,
-                    Tag = entry.Milestone.Id.ToString(CultureInfo.InvariantCulture)
-                };
-                notifier.AddToSchedule(toast);
+                    var toast = new ScheduledToastNotification(Build(entry, culture), entry.When)
+                    {
+                        Group = Group,
+                        Tag = entry.Milestone.Id.ToString(CultureInfo.InvariantCulture)
+                    };
+                    notifier.AddToSchedule(toast);
+                }
+                catch (Exception)
+                {
+                    // One unschedulable milestone must not cost the other 47. A delivery time that has just
+                    // passed, or user text carrying a control character, throws here and only here.
+                }
             }
         }
 
