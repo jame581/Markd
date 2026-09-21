@@ -171,12 +171,13 @@ namespace Markd.Services
                 if (!Platforms.Windows.WindowsToastScheduler.IsAvailable)
                     return;
 
-                Platforms.Windows.WindowsToastScheduler.Clear();
-
                 var settings = await _appSettingsService.GetAsync();
                 var upcoming = MilestoneSchedule.Upcoming(
                     await _occasionService.GetAllAsync(), settings, DateTime.Now, MaxScheduled);
 
+                // Clear only after the awaits: two overlapping rebuilds (start plus a debounced change) would
+                // otherwise both clear first and then both schedule, and Windows keeps duplicate entries.
+                Platforms.Windows.WindowsToastScheduler.Clear();
                 Platforms.Windows.WindowsToastScheduler.Schedule(upcoming, LocalizationManager.Instance.Culture);
             }
             catch (Exception)

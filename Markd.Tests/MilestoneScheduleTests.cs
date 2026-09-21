@@ -15,7 +15,7 @@ public class MilestoneScheduleTests
     };
 
     // Anchors are stored as the UTC instant of a local midnight, which is what
-    // OccasionFormViewModel.cs:272 writes and what OccasionDates.ToLocalDate reads back.
+    // OccasionFormViewModel.SaveAsync writes and what OccasionDates.ToLocalDate reads back.
     // SpecifyKind(..., Utc) would look equivalent and silently shift the date by one in
     // every timezone west of UTC, so always convert rather than relabel.
     private static Occasion Since(DateTime localAnchor, params Milestone[] milestones) => new()

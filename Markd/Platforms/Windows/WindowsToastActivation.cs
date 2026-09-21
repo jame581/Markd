@@ -42,6 +42,25 @@ namespace Markd.Platforms.Windows
             }
         }
 
+        /// <summary>
+        /// Releases the activator on exit. Microsoft's guidance for <see cref="AppNotificationManager.Register()"/> is to
+        /// unregister before terminating so that later clicks launch the app again instead of targeting a dead process.
+        /// </summary>
+        public static void Shutdown()
+        {
+            if (!WindowsToastScheduler.IsAvailable)
+                return;
+
+            try
+            {
+                AppNotificationManager.Default.Unregister();
+            }
+            catch (Exception)
+            {
+                // Nothing to recover on the way out.
+            }
+        }
+
         /// <summary>Starts delivering clicks to <paramref name="open"/>, including one that launched the app.</summary>
         public static void Attach(Action<int> open)
         {

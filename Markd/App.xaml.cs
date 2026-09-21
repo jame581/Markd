@@ -30,6 +30,7 @@ namespace Markd
 
 #if WINDOWS
             var window = Desktop.DesktopWindow.Create(_services);
+            window.Destroying += (_, _) => Platforms.Windows.WindowsToastActivation.Shutdown();
 #else
             var window = new Window(_services.GetRequiredService<AppShell>());
 #endif
