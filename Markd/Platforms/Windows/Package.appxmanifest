@@ -8,7 +8,7 @@
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   IgnorableNamespaces="uap rescap com desktop">
 
-  <Identity Name="maui-package-name-placeholder" Publisher="CN=Jan Mesarc" Version="1.0.1.0" />
+  <Identity Name="maui-package-name-placeholder" Publisher="CN=Jan Mesarc" Version="0.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="233B261C-93F9-43AF-AC7A-4EA637A18E6C" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
@@ -45,6 +45,7 @@
         </desktop:Extension>
         <com:Extension Category="windows.comServer">
           <com:ComServer>
+            <!-- Named literally: MAUI does not substitute $targetnametoken$ inside com:ExeServer. -->
             <com:ExeServer Executable="Markd.exe" DisplayName="Markd" Arguments="----AppNotificationActivated:">
               <com:Class Id="3736A808-35D3-4A91-AE55-99713C056494" />
             </com:ExeServer>

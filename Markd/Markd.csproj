@@ -28,11 +28,13 @@
 		<ApplicationId>com.janmesarc.markd</ApplicationId>
 
 		<!-- Versions: a release tag must be v + ApplicationDisplayVersion. CI sets ApplicationVersion to the run number. -->
-		<ApplicationDisplayVersion>0.1.0</ApplicationDisplayVersion>
+		<ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 
-		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
-		<WindowsPackageType>MSIX</WindowsPackageType>
+		<!-- Unpackaged by default, which is what the GitHub release zip ships. The Store needs a
+		     packaged build, so the microsoft-store release job overrides this to MSIX. Milestone toasts
+		     need package identity, so test them locally with -p:WindowsPackageType=MSIX. -->
+		<WindowsPackageType>None</WindowsPackageType>
 
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
@@ -40,12 +42,15 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
+		<!-- The symbol package needs mspdbcmf.exe from the Visual Studio C++ tooling and fails the build without it. -->
+		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+	</PropertyGroup>
+
+	<!-- Local sideload packages are signed with a developer's own gitignored test certificate when it exists.
+	     The Store package is uploaded unsigned (Partner Center signs it), so CI never has the key. -->
+	<PropertyGroup Condition="Exists('Markd_TemporaryKey.pfx')">
 		<AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
 		<AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-		<AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
-		<AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
-		<GenerateTestArtifacts>False</GenerateTestArtifacts>
-		<HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
 		<PackageCertificateKeyFile>Markd_TemporaryKey.pfx</PackageCertificateKeyFile>
 	</PropertyGroup>
 

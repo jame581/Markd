@@ -160,3 +160,57 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: gh release upload "$env:GITHUB_REF_NAME" (Get-ChildItem dist).FullName --clobber
+
+  # The Store takes a packaged MSIX and signs it itself, so this one is uploaded unsigned. Its
+  # identity must be the one Partner Center assigned, so the job refuses to build while the
+  # manifest still holds the template's placeholder identity.
+  microsoft-store:
+    name: Microsoft Store package
+    needs: [version, release]
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Install MAUI workloads
+        run: dotnet workload install maui
+
+      - name: Check the package identity is real
+        shell: bash
+        run: |
+          if grep -qE 'PLACEHOLDER|maui-package-name-placeholder|CN=User Name' Markd/Platforms/Windows/Package.appxmanifest; then
+            echo "::error::Package.appxmanifest still holds a placeholder identity. Copy Identity Name, Publisher and PublisherDisplayName from Partner Center (Product identity) before tagging a Store release."
+            exit 1
+          fi
+
+      # ApplicationVersion=0 because the Store rejects a package whose version revision is not 0,
+      # so the version is the tag alone. Self-contained (including the Windows App SDK) so the
+      # package runs without separately installed runtimes. AppxSymbolPackageEnabled=false because
+      # the symbol step needs mspdbcmf.exe from the Visual Studio C++ tooling.
+      - name: Publish
+        run: >
+          dotnet publish ${{ env.PROJECT }} -c Release -f net10.0-windows10.0.19041.0
+          -p:RuntimeIdentifierOverride=win-x64 -p:WindowsPackageType=MSIX
+          -p:SelfContained=true -p:WindowsAppSDKSelfContained=true
+          -p:AppxPackageSigningEnabled=false -p:UapAppxPackageBuildMode=StoreUpload
+          -p:AppxSymbolPackageEnabled=false -p:ApplicationVersion=0
+
+      - name: Collect package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory dist | Out-Null
+          $upload = "Markd/bin/Release/net10.0-windows10.0.19041.0/win-x64/Upload"
+          $msix = Get-ChildItem -Path $upload -Recurse -Filter *.msix | Select-Object -First 1
+          if (-not $msix) { throw "No .msix was produced under the Upload folder." }
+          Copy-Item $msix.FullName "dist/Markd-${{ needs.version.outputs.display }}-windows-x64-store.msix"
+          Get-ChildItem dist
+
+      - name: Upload to release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release upload "$env:GITHUB_REF_NAME" (Get-ChildItem dist).FullName --clobber
