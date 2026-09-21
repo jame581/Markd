@@ -8,13 +8,18 @@
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   IgnorableNamespaces="uap rescap com desktop">
 
-  <Identity Name="maui-package-name-placeholder" Publisher="CN=Jan Mesarc" Version="0.0.0.0" />
+  <!-- Identity, Publisher and PublisherDisplayName are the Product identity Partner Center assigned
+       (package family 21441Mesarc.MarkdDayCounter_r7cvsd1wfgvb0). Version stays 0.0.0.0 so MAUI
+       fills it from ApplicationDisplayVersion. -->
+  <Identity Name="21441Mesarc.MarkdDayCounter" Publisher="CN=68156E3E-964C-4233-B256-D9D053C0DBC1" Version="0.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="233B261C-93F9-43AF-AC7A-4EA637A18E6C" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>$placeholder$</DisplayName>
-    <PublisherDisplayName>User Name</PublisherDisplayName>
+    <!-- The Store requires this to match the reserved name exactly, so it is not the $placeholder$
+         token MAUI fills from ApplicationTitle. The tile name below stays Markd. -->
+    <DisplayName>Markd Day Counter</DisplayName>
+    <PublisherDisplayName>Jan Mesarč</PublisherDisplayName>
     <Logo>$placeholder$.png</Logo>
   </Properties>
 
