@@ -13,7 +13,7 @@ public static class DesktopWindow
         var page = services.GetRequiredService<DesktopShellPage>();
         var window = new Window(page)
         {
-            Title = "Markd",
+            Title = "Markd Day Counter",
             Width = 1320,
             Height = 840,
             MinimumWidth = 720,
@@ -52,7 +52,7 @@ public static class DesktopWindow
         };
         ThemeColors.Bind(mark, VisualElement.BackgroundColorProperty, "AccentFill");
 
-        var name = new Label { Text = "Markd", FontFamily = "Segoe UI", FontSize = 12, VerticalOptions = LayoutOptions.Center };
+        var name = new Label { Text = "Markd Day Counter", FontFamily = "Segoe UI", FontSize = 12, VerticalOptions = LayoutOptions.Center };
         ThemeColors.Bind(name, Label.TextColorProperty, "TextPrimary");
 
         var titleBar = new TitleBar

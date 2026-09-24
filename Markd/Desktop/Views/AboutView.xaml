@@ -29,7 +29,7 @@
                                    HorizontalOptions="Center" VerticalOptions="Center" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
-                            <Label Text="Markd" FontFamily="FigtreeBold" FontSize="24" />
+                            <Label Text="Markd Day Counter" FontFamily="FigtreeBold" FontSize="24" />
                             <Label Text="{Binding VersionText}" FontFamily="PlexMonoMedium" FontSize="13" Style="{StaticResource SecondaryText}" />
                             <Label Text="{loc:Tr About_Description}"
                                    FontSize="14" LineHeight="1.4" Style="{StaticResource SecondaryText}" />

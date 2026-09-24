@@ -16,8 +16,8 @@
   <mp:PhoneIdentity PhoneProductId="233B261C-93F9-43AF-AC7A-4EA637A18E6C" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <!-- The Store requires this to match the reserved name exactly, so it is not the $placeholder$
-         token MAUI fills from ApplicationTitle. The tile name below stays Markd. -->
+    <!-- The Store requires this to match the reserved name exactly, so it is written out rather
+         than left to the $placeholder$ token MAUI fills from ApplicationTitle. -->
     <DisplayName>Markd Day Counter</DisplayName>
     <PublisherDisplayName>Jan Mesarč</PublisherDisplayName>
     <Logo>$placeholder$.png</Logo>
@@ -51,7 +51,7 @@
         <com:Extension Category="windows.comServer">
           <com:ComServer>
             <!-- Named literally: MAUI does not substitute $targetnametoken$ inside com:ExeServer. -->
-            <com:ExeServer Executable="Markd.exe" DisplayName="Markd" Arguments="----AppNotificationActivated:">
+            <com:ExeServer Executable="Markd.exe" DisplayName="Markd Day Counter" Arguments="----AppNotificationActivated:">
               <com:Class Id="3736A808-35D3-4A91-AE55-99713C056494" />
             </com:ExeServer>
           </com:ComServer>

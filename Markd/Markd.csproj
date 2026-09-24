@@ -22,7 +22,7 @@
 
 
 		<!-- Display name -->
-		<ApplicationTitle>Markd</ApplicationTitle>
+		<ApplicationTitle>Markd Day Counter</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.janmesarc.markd</ApplicationId>
@@ -44,6 +44,12 @@
 		<GenerateAppInstallerFile>False</GenerateAppInstallerFile>
 		<!-- The symbol package needs mspdbcmf.exe from the Visual Studio C++ tooling and fails the build without it. -->
 		<AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+		<!-- Shown in the file properties of Markd.exe. -->
+		<Product>Markd Day Counter</Product>
+		<Company>Jan Mesarč</Company>
+		<Copyright>© 2026 Jan Mesarč</Copyright>
+		<Description>Counts the days since or until the dates that matter, with milestones.</Description>
+		<RepositoryUrl>https://github.com/jame581/Markd</RepositoryUrl>
 	</PropertyGroup>
 
 	<!-- Local sideload packages are signed with a developer's own gitignored test certificate when it exists.

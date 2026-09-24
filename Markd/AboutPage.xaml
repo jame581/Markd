@@ -31,7 +31,7 @@
                 </Border>
 
                 <VerticalStackLayout Spacing="5" HorizontalOptions="Center">
-                    <Label Text="Markd" FontFamily="FigtreeBold" FontSize="24" HorizontalOptions="Center" />
+                    <Label Text="Markd Day Counter" FontFamily="FigtreeBold" FontSize="24" HorizontalOptions="Center" />
                     <Label Text="{Binding VersionText}" FontFamily="PlexMonoMedium" FontSize="13"
                            Style="{StaticResource SecondaryText}" HorizontalOptions="Center" />
                 </VerticalStackLayout>
