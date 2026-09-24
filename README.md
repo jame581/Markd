@@ -23,6 +23,25 @@ Markd counts the days that matter. Mark a date and it counts **since** it (a fir
 - English, Czech, German and French, switched live from Settings or following the device language
 - Backups: export to a password-protected `.markd` file (AES-256-GCM, key from PBKDF2-SHA256) or plain JSON, saved through the system file picker (so to Google Drive or OneDrive when their apps are installed) or sent with the share sheet. Restoring asks for the password and replaces the data on the device after a confirmation.
 
+## Screenshots
+
+Windows desktop layout, dark theme.
+
+<table>
+  <tr>
+    <td><img src="docs/assets/screenshots/home.png" alt="Home: occasions grouped by category, with the pinned occasion's live count, notes and milestones"></td>
+    <td><img src="docs/assets/screenshots/home-until.png" alt="An occasion counting down to a trip, with its upcoming milestones"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshots/milestone.png" alt="The milestone reached moment for two years in a new flat"></td>
+    <td><img src="docs/assets/screenshots/calendar.png" alt="Calendar of anchor and milestone dates, with what is coming up next"></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshots/categories.png" alt="Categories with their own emoji and colour"></td>
+    <td><img src="docs/assets/screenshots/settings.png" alt="Settings: theme, language, milestone alerts, backups"></td>
+  </tr>
+</table>
+
 ## Platforms
 
 | Platform | UI |
