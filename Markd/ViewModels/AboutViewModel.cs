@@ -14,7 +14,7 @@ public class AboutViewModel : ViewModelBase
     {
         _shellService = shellService;
         OpenSourceCommand = new AsyncRelayCommand(() => Launcher.Default.OpenAsync(RepositoryUrl));
-        OpenLicenceCommand = new AsyncRelayCommand(() => Launcher.Default.OpenAsync($"{RepositoryUrl}/blob/master/LICENSE.txt"));
+        OpenLicenceCommand = new AsyncRelayCommand(() => Launcher.Default.OpenAsync($"{RepositoryUrl}/blob/master/LICENSE"));
         ShowAcknowledgementsCommand = new AsyncRelayCommand(ShowAcknowledgementsAsync);
     }
 

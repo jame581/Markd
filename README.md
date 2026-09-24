@@ -10,7 +10,7 @@
   <a href="https://github.com/jame581/Markd/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/jame581/Markd?label=version"></a>
 </p>
 
-Markd counts the days that matter. Mark a date and it counts **since** it (a first day, a streak, a birthday) or **until** it (a trip, a deadline), with milestones along the way. No ads, no account, no network calls: everything lives in one SQLite file on the device.
+Markd counts the days that matter. Mark a date and it counts **since** it (a first day, a streak, a birthday) or **until** it (a trip, a deadline), with milestones along the way. No ads, no account, no network calls: everything lives in one SQLite file on the device. See the [privacy policy](docs/privacy-policy.md).
 
 ## Features
 
@@ -115,4 +115,4 @@ To add a language:
 
 ## Licence
 
-MIT, see [LICENSE.txt](LICENSE.txt). Figtree and IBM Plex Mono are used under the SIL Open Font License 1.1.
+MIT, see [LICENSE](LICENSE). Figtree and IBM Plex Mono are used under the SIL Open Font License 1.1, see [Markd/Resources/Raw](Markd/Resources/Raw).
