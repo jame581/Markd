@@ -29,7 +29,12 @@
   </Dependencies>
 
   <Resources>
-    <Resource Language="x-generate" />
+    <!-- Listed explicitly: the translations are .resx satellite assemblies, which x-generate cannot see,
+         so it would declare English only. Keep in step with SatelliteResourceLanguages in Markd.csproj. -->
+    <Resource Language="en-US" />
+    <Resource Language="cs-CZ" />
+    <Resource Language="de-DE" />
+    <Resource Language="fr-FR" />
   </Resources>
 
   <Applications>

@@ -130,7 +130,7 @@ To add a language:
 1. Copy `Strings.resx` to `Strings.<code>.resx` and translate the values.
 2. Add the code to `LanguageSetting` (constant, `IsValid`, `Resolve`) and, if its plural rules differ, to `Plural.Select`.
 3. Add its own name to the language picker in `SettingsViewModel` and to `Settings_LanguageSub`.
-4. Add the code to `SatelliteResourceLanguages` in `Markd/Markd.csproj`, to `CFBundleLocalizations` in the iOS and Mac Catalyst `Info.plist`, and to the language list of `ResourceParityTests`.
+4. Add the code to `SatelliteResourceLanguages` in `Markd/Markd.csproj`, to `CFBundleLocalizations` in the iOS and Mac Catalyst `Info.plist`, to the `<Resources>` list in `Markd/Platforms/Windows/Package.appxmanifest`, and to the language list of `ResourceParityTests`.
 
 ## Licence
 
