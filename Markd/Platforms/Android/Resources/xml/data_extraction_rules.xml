@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12 and newer. Only the database, not the copies an import leaves beside it. -->
+<data-extraction-rules>
+	<cloud-backup>
+		<include domain="file" path="markd.db" />
+		<include domain="file" path="markd.db-wal" />
+	</cloud-backup>
+	<device-transfer>
+		<include domain="file" path="markd.db" />
+		<include domain="file" path="markd.db-wal" />
+	</device-transfer>
+</data-extraction-rules>

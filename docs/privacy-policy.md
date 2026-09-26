@@ -1,6 +1,6 @@
 # Privacy policy
 
-Last updated: 2026-09-24
+Last updated: 2026-09-26
 
 This policy covers Markd (listed in the Microsoft Store as Markd Day Counter) on Windows and
 Android.
@@ -20,6 +20,11 @@ Only what you export yourself. Export writes a backup file wherever you choose t
 it, and you decide where that goes. A backup contains your occasions, milestones, categories and
 settings, plus the name of the device it was made on, so you can tell backups apart. A backup can
 be protected with a password, in which case it is encrypted on your device before it is written.
+
+On Android, if you have backup turned on in your device settings, Android can include Markd's
+database in your device backup to your own Google account, and restore it when you set up a new
+phone. Markd does not send it anywhere itself, and it has no access to that backup. Turn off
+backup in your device settings to keep it out.
 
 ## Notifications
 

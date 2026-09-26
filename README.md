@@ -76,6 +76,7 @@ dotnet test --project Markd.Tests/Markd.Tests.csproj
 - `.github/workflows/ci.yml` runs the tests on every push to `master` and every pull request.
 - `.github/workflows/release.yml` runs when a `v*` tag is pushed. It runs the same tests, then builds:
   - **Android**: a signed `.apk` (for sideloading) and `.aab` (for Google Play)
+    Google Play re-signs the app with its own key, so an app installed from the `.apk` and one installed from Google Play cannot update each other. To switch, export a backup, uninstall, install from the other source and restore.
   - **Windows**: a self-contained x64 `.zip` that runs without installing .NET or the Windows App SDK
   - **Microsoft Store**: an unsigned x64 `.msix` to upload in Partner Center, which signs it. Milestone notifications on Windows need the package identity the `.msix` carries, which the `.zip` lacks. The job fails while `Package.appxmanifest` still holds a placeholder identity.
 

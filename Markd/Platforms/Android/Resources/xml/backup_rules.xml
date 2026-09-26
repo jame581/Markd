@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 and older. Only the database, not the copies an import leaves beside it. -->
+<full-backup-content>
+	<include domain="file" path="markd.db" />
+	<include domain="file" path="markd.db-wal" />
+</full-backup-content>
