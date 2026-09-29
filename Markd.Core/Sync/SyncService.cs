@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using Markd.Core.Domain;
 using Markd.Core.Services;
 
@@ -157,7 +156,91 @@ namespace Markd.Core.Sync
             catch (InvalidOperationException) { return null; }
         }
 
-        /// <summary>Failure mapping. Filled in by Task 13.</summary>
-        private static async Task<SyncResult> RunAsync(Func<Task<SyncResult>> body, CancellationToken ct) => await body();
+        public async Task<SyncResult> ReplaceRemoteAsync(ICloudSyncProvider provider, string newPassphrase, CancellationToken ct = default)
+        {
+            await _gate.WaitAsync(ct);
+            try
+            {
+                return await RunAsync(async () =>
+                {
+                    var now = clock.GetUtcNow().UtcDateTime;
+                    var info = await provider.GetInfoAsync(ct);
+                    var local = await snapshots.ReadForSyncAsync();
+                    local.SyncEpoch = Guid.NewGuid();   // a new lineage: other devices must not merge against their old base
+                    var bytes = await Task.Run(() => SyncSnapshotCodec.Encode(local, newPassphrase, options.KdfIterations), ct);
+                    var revision = await provider.UploadAsync(bytes, info?.Revision, ct);
+
+                    await secrets.SetPassphraseAsync(newPassphrase);
+                    var state = await store.LoadAsync();
+                    state.ProviderId = provider.Id;
+                    state.RemoteRevision = revision;
+                    state.LastSyncUtc = now;
+                    state.LastResult = nameof(SyncOutcome.Synced);
+                    state.Epoch = local.SyncEpoch;
+                    state.BaseSnapshotJson = ExportModelJson.Serialize(local, indented: false);
+                    await store.SaveAsync(state);
+                    return new SyncResult(SyncOutcome.Synced);
+                }, ct);
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
+
+        /// <summary>Forgets the link and the passphrase. Local data is never touched.</summary>
+        public async Task DisconnectAsync(ICloudSyncProvider? provider, bool deleteRemote, CancellationToken ct = default)
+        {
+            await _gate.WaitAsync(ct);
+            try
+            {
+                if (deleteRemote && provider is not null)
+                    await provider.DeleteAsync(ct);
+
+                await store.ClearAsync();
+                await secrets.SetPassphraseAsync(null);
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
+
+        private static async Task<SyncResult> RunAsync(Func<Task<SyncResult>> body, CancellationToken ct)
+        {
+            try
+            {
+                return await body();
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                throw;   // the caller cancelled
+            }
+            catch (SyncAuthException)
+            {
+                return new SyncResult(SyncOutcome.AuthExpired);
+            }
+            catch (Exception ex) when (ex is SyncOfflineException or HttpRequestException or OperationCanceledException)
+            {
+                // OperationCanceledException here is a timeout (HttpClient reports one as TaskCanceledException).
+                return new SyncResult(SyncOutcome.Offline);
+            }
+            catch (MarkdPackageException ex) when (ex.Error is PackageError.WrongPassword or PackageError.PasswordRequired)
+            {
+                return new SyncResult(SyncOutcome.WrongPassphrase);
+            }
+            catch (SnapshotTooNewException)
+            {
+                return new SyncResult(SyncOutcome.RemoteTooNew);
+            }
+            catch (RevisionConflictException)
+            {
+                return new SyncResult(SyncOutcome.Failed, Detail: "The remote file changed while replacing it.");
+            }
+            catch (Exception ex)
+            {
+                return new SyncResult(SyncOutcome.Failed, Detail: ex.Message);
+            }
+        }
     }
 }
