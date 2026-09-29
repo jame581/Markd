@@ -28,7 +28,7 @@ namespace Markd.Core.Services
 
         public async Task<Category> UpdateAsync(Category category)
         {
-            var existing = await db.Categories.FindAsync(category.Id)
+            var existing = await db.Categories.FirstOrDefaultAsync(c => c.Id == category.Id)
                 ?? throw new InvalidOperationException(string.Format(LocalizationManager.Instance.Culture, Strings.Category_NotFoundById, category.Id));
 
             existing.Name = category.Name;
@@ -41,11 +41,15 @@ namespace Markd.Core.Services
 
         public async Task DeleteAsync(int id)
         {
-            var category = await db.Categories.FindAsync(id);
+            var category = await db.Categories.FirstOrDefaultAsync(c => c.Id == id);
             if (category == null)
                 return;
 
-            db.Categories.Remove(category);
+            var occasions = await db.Occasions.Where(o => o.CategoryId == id).ToListAsync();
+            foreach (var occasion in occasions)
+                occasion.CategoryId = null;
+
+            category.DeletedAt = DateTime.UtcNow;
             await db.SaveChangesAsync();
         }
     }

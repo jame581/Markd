@@ -21,6 +21,11 @@ namespace Markd.Core.Services
 
         public async Task<Occasion> RestoreAsync(Occasion snapshot)
         {
+            var tombstone = await db.Occasions.IgnoreQueryFilters().Include(o => o.Milestones)
+                .FirstOrDefaultAsync(o => o.SyncId == snapshot.SyncId && o.DeletedAt != null);
+            if (tombstone is not null)
+                return await ReviveAsync(tombstone);
+
             if (snapshot.IsPinned)
                 await UnpinAllAsync();
 
@@ -47,30 +52,81 @@ namespace Markd.Core.Services
             return occasion;
         }
 
+        /// <summary>Undo: bring the deleted record back as itself, with the milestones that were deleted with it.</summary>
+        private async Task<Occasion> ReviveAsync(Occasion tombstone)
+        {
+            var deletedAt = tombstone.DeletedAt;
+            if (tombstone.IsPinned)
+            {
+                // Saved on its own first: within one SaveChanges the update order is not guaranteed, and the unique
+                // pin index would reject the revived pin landing before the old one is cleared.
+                await UnpinAllAsync(tombstone.Id);
+                await db.SaveChangesAsync();
+            }
+
+            tombstone.DeletedAt = null;
+            tombstone.CategoryId = tombstone.CategoryId is { } categoryId && await db.Categories.AnyAsync(c => c.Id == categoryId)
+                ? categoryId
+                : null;
+            foreach (var milestone in tombstone.Milestones.Where(m => m.DeletedAt == deletedAt))
+                milestone.DeletedAt = null;
+
+            await db.SaveChangesAsync();
+            return tombstone;
+        }
+
         public async Task DeleteAsync(int id)
         {
-            var occasion = await db.Occasions.FindAsync(id);
+            var occasion = await db.Occasions.Include(o => o.Milestones).FirstOrDefaultAsync(o => o.Id == id);
             if (occasion == null)
                 return;
 
-            db.Occasions.Remove(occasion);
+            var milestones = occasion.Milestones.ToList();
+            Tombstone(occasion, milestones, DateTime.UtcNow);
             await db.SaveChangesAsync();
+            Forget(occasion, milestones);
         }
 
         public async Task DeleteAllAsync()
         {
-            await using var transaction = await db.Database.BeginTransactionAsync();
+            var now = DateTime.UtcNow;
+            var occasions = await db.Occasions.Include(o => o.Milestones).ToListAsync();
+            var forgotten = new List<(Occasion, List<Milestone>)>();
+            foreach (var occasion in occasions)
+            {
+                var milestones = occasion.Milestones.ToList();
+                Tombstone(occasion, milestones, now);
+                forgotten.Add((occasion, milestones));
+            }
 
-            await db.Milestones.ExecuteDeleteAsync();
-            await db.Occasions.ExecuteDeleteAsync();
+            await db.SaveChangesAsync();
+            foreach (var (occasion, milestones) in forgotten)
+                Forget(occasion, milestones);
+        }
 
-            await transaction.CommitAsync();
+        /// <summary>
+        /// Soft delete. IsPinned is left alone on purpose: the pin index ignores tombstones, and undo restores
+        /// the pin from the record itself.
+        /// </summary>
+        private static void Tombstone(Occasion occasion, IEnumerable<Milestone> milestones, DateTime now)
+        {
+            occasion.DeletedAt = now;
+            foreach (var milestone in milestones)
+                milestone.DeletedAt ??= now;
+        }
 
-            // ExecuteDelete bypasses the change tracker. The app keeps one context for its whole session, so any
-            // occasion or milestone it still tracks now points at a deleted row; a later SaveChanges (an import
-            // removing categories, for one) would try to update those rows and fail with a concurrency error.
-            foreach (var entry in db.ChangeTracker.Entries().Where(e => e.Entity is Occasion or Milestone).ToList())
-                entry.State = EntityState.Detached;
+        /// <summary>
+        /// Query filters hide tombstones from queries but never from entities the context already tracks, and the
+        /// app keeps one context for its whole session. Detach first, then drop from the parent's collection
+        /// (removing a tracked required dependent from its collection would delete it).
+        /// </summary>
+        private void Forget(Occasion occasion, IEnumerable<Milestone> milestones)
+        {
+            foreach (var milestone in milestones.ToList())
+            {
+                db.Entry(milestone).State = EntityState.Detached;
+                occasion.Milestones.Remove(milestone);
+            }
         }
 
         public async Task<List<Occasion>> GetAllAsync()
@@ -226,7 +282,7 @@ namespace Markd.Core.Services
         {
             await UnpinAllAsync(id);
 
-            var occasion = await db.Occasions.FindAsync(id);
+            var occasion = await db.Occasions.FirstOrDefaultAsync(o => o.Id == id);
             if (occasion == null)
                 return;
 
@@ -236,6 +292,9 @@ namespace Markd.Core.Services
 
         public async Task<Milestone> AddMilestoneAsync(int occasionId, int thresholdDays, string label)
         {
+            if (!await db.Occasions.AnyAsync(o => o.Id == occasionId))
+                throw new InvalidOperationException(string.Format(LocalizationManager.Instance.Culture, Strings.Occasion_NotFoundById, occasionId));
+
             var milestone = new Milestone
             {
                 OccasionId = occasionId,
@@ -250,12 +309,16 @@ namespace Markd.Core.Services
 
         public async Task RemoveMilestoneAsync(int milestoneId)
         {
-            var milestone = await db.Milestones.FindAsync(milestoneId);
+            var milestone = await db.Milestones.Include(m => m.Occasion).FirstOrDefaultAsync(m => m.Id == milestoneId);
             if (milestone == null)
                 return;
 
-            db.Milestones.Remove(milestone);
+            var parent = milestone.Occasion;
+            milestone.DeletedAt = DateTime.UtcNow;
             await db.SaveChangesAsync();
+
+            db.Entry(milestone).State = EntityState.Detached;
+            parent?.Milestones.Remove(milestone);
         }
 
         private async Task UnpinAllAsync(int? keepId = null)
@@ -270,7 +333,7 @@ namespace Markd.Core.Services
 
         public async Task MarkMilestoneNotifiedAsync(int milestoneId)
         {
-            var milestone = await db.Milestones.FindAsync(milestoneId);
+            var milestone = await db.Milestones.FirstOrDefaultAsync(m => m.Id == milestoneId);
             if (milestone is null) return;
             milestone.Notified = true;
             await db.SaveChangesAsync();
