@@ -3,7 +3,7 @@ namespace Markd.Core.Sync
     public enum SyncOutcome
     {
         Synced, NoChanges, NeedsConflictResolution, NeedsPassphrase, WrongPassphrase,
-        AuthExpired, Offline, RemoteTooNew, Failed
+        AuthExpired, Offline, RemoteTooNew, RemoteUnreadable, Failed
     }
 
     /// <summary>What a sync run did. SyncService never throws into the UI: every failure is an outcome.</summary>

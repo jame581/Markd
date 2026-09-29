@@ -9,6 +9,9 @@ namespace Markd.Core.Sync
     {
         string Id { get; }
 
+        /// <summary>The signed-in account, for display. Null when the provider does not know it.</summary>
+        string? AccountName { get; }
+
         /// <summary>Cheap metadata call. Null when no file exists yet.</summary>
         Task<RemoteInfo?> GetInfoAsync(CancellationToken ct);
 

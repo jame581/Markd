@@ -289,7 +289,8 @@ public class CoreIntegrationTests
         using var provider = services.BuildServiceProvider();
         using var scope = provider.CreateScope();
 
-        Assert.NotNull(scope.ServiceProvider.GetRequiredService<Markd.Core.Sync.SyncService>());
+        var sync = scope.ServiceProvider.GetRequiredService<Markd.Core.Sync.SyncService>();
+        Assert.Same(sync, scope.ServiceProvider.GetRequiredService<Markd.Core.Sync.ISyncService>());
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<Markd.Core.Services.ISnapshotService>());
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<Markd.Core.Sync.ISyncStateStore>());
     }

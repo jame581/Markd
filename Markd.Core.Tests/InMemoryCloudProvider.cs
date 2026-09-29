@@ -9,6 +9,7 @@ internal sealed class InMemoryCloudProvider : ICloudSyncProvider
     private int _version;
 
     public string Id => "test";
+    public string? AccountName { get; set; } = "me@test";
     public bool Offline { get; set; }
     public bool AuthExpired { get; set; }
     public int Uploads { get; private set; }

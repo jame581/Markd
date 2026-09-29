@@ -5,6 +5,7 @@ namespace Markd.Core.Sync
 {
     public sealed class SyncService(
         ISnapshotService snapshots, ISyncStateStore store, ISyncSecretStore secrets, TimeProvider clock, SyncOptions options)
+        : ISyncService
     {
         private readonly SemaphoreSlim _gate = new(1, 1);
 
@@ -44,6 +45,7 @@ namespace Markd.Core.Sync
             var state = await store.LoadAsync();
             if (state.ProviderId != provider.Id)
                 state = new SyncState { ProviderId = provider.Id };
+            state.AccountName = provider.AccountName;   // never a stale name from another provider
 
             var info = await provider.GetInfoAsync(ct);
             var local = await snapshots.ReadForSyncAsync();
@@ -169,6 +171,9 @@ namespace Markd.Core.Sync
 
         public async Task<SyncResult> ReplaceRemoteAsync(ICloudSyncProvider provider, string newPassphrase, CancellationToken ct = default)
         {
+            if (string.IsNullOrWhiteSpace(newPassphrase))
+                return new SyncResult(SyncOutcome.NeedsPassphrase);
+
             await _gate.WaitAsync(ct);
             try
             {
@@ -184,6 +189,7 @@ namespace Markd.Core.Sync
                     await secrets.SetPassphraseAsync(newPassphrase);
                     var state = await store.LoadAsync();
                     state.ProviderId = provider.Id;
+                    state.AccountName = provider.AccountName;
                     state.RemoteRevision = revision;
                     state.LastSyncUtc = now;
                     state.LastResult = nameof(SyncOutcome.Synced);
@@ -199,17 +205,25 @@ namespace Markd.Core.Sync
             }
         }
 
-        /// <summary>Forgets the link and the passphrase. Local data is never touched.</summary>
-        public async Task DisconnectAsync(ICloudSyncProvider? provider, bool deleteRemote, CancellationToken ct = default)
+        /// <summary>
+        /// Forgets the link and the passphrase. Local data is never touched. When deleting the cloud file fails,
+        /// nothing is forgotten and the failure is the outcome.
+        /// </summary>
+        public async Task<SyncResult> DisconnectAsync(ICloudSyncProvider? provider, bool deleteRemote, CancellationToken ct = default)
         {
             await _gate.WaitAsync(ct);
             try
             {
-                if (deleteRemote && provider is not null)
-                    await provider.DeleteAsync(ct);
+                return await RunAsync(async () =>
+                {
+                    // A failed delete throws before anything is forgotten: the link, the state and the passphrase stay.
+                    if (deleteRemote && provider is not null)
+                        await provider.DeleteAsync(ct);
 
-                await store.ClearAsync();
-                await secrets.SetPassphraseAsync(null);
+                    await store.ClearAsync();
+                    await secrets.SetPassphraseAsync(null);
+                    return new SyncResult(SyncOutcome.Synced);
+                }, ct);
             }
             finally
             {
@@ -243,6 +257,10 @@ namespace Markd.Core.Sync
             catch (SnapshotTooNewException)
             {
                 return new SyncResult(SyncOutcome.RemoteTooNew);
+            }
+            catch (SnapshotFormatException ex)
+            {
+                return new SyncResult(SyncOutcome.RemoteUnreadable, Detail: ex.Message);   // Detail is for logging only
             }
             catch (RevisionConflictException)
             {

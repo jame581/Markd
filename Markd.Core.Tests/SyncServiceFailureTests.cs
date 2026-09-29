@@ -69,7 +69,7 @@ public class SyncServiceFailureTests
     }
 
     [Fact]
-    public async Task A_corrupt_remote_file_is_a_failure_and_is_not_overwritten()
+    public async Task A_corrupt_remote_file_is_reported_as_unreadable_and_is_not_overwritten()
     {
         using var a = new SyncDevice();
         var cloud = new InMemoryCloudProvider();
@@ -78,8 +78,10 @@ public class SyncServiceFailureTests
 
         var result = await a.Sync.SyncAsync(cloud);
 
-        Assert.Equal(SyncOutcome.Failed, result.Outcome);
+        Assert.Equal(SyncOutcome.RemoteUnreadable, result.Outcome);
         Assert.Equal(new byte[] { 1, 2, 3, 4 }, cloud.Data);
+        Assert.Equal(0, cloud.Uploads);
+        Assert.Equal(new[] { "local" }, await a.TitlesAsync());
     }
 
     [Fact]
@@ -293,18 +295,91 @@ public class SyncServiceFailureTests
         await a.AddOccasionAsync("x");
         await a.Sync.SyncAsync(cloud);
 
-        await a.Sync.DisconnectAsync(cloud, deleteRemote: true);
+        var result = await a.Sync.DisconnectAsync(cloud, deleteRemote: true);
 
+        Assert.Equal(SyncOutcome.Synced, result.Outcome);
         Assert.Null(cloud.Data);
         Assert.Null(a.Secrets.Passphrase);
         Assert.Null((await a.State.LoadAsync()).ProviderId);
         Assert.Equal(new[] { "x" }, await a.TitlesAsync());
     }
 
+    [Theory]
+    [InlineData(false, SyncOutcome.Offline)]
+    [InlineData(true, SyncOutcome.AuthExpired)]
+    public async Task A_failed_remote_delete_on_disconnect_is_an_outcome_and_keeps_the_link(bool authExpired, SyncOutcome expected)
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionAsync("x");
+        await a.Sync.SyncAsync(cloud);
+        var before = await a.State.LoadAsync();
+        cloud.Offline = !authExpired;
+        cloud.AuthExpired = authExpired;
+
+        var result = await a.Sync.DisconnectAsync(cloud, deleteRemote: true);
+
+        Assert.Equal(expected, result.Outcome);
+        Assert.Equal("pass", a.Secrets.Passphrase);
+        var after = await a.State.LoadAsync();
+        Assert.Equal("test", after.ProviderId);
+        Assert.Equal(before.RemoteRevision, after.RemoteRevision);
+        Assert.Equal(before.BaseSnapshotJson, after.BaseSnapshotJson);
+        cloud.Offline = false;
+        cloud.AuthExpired = false;
+        Assert.NotNull(cloud.Data);
+        Assert.Equal(SyncOutcome.NoChanges, (await a.Sync.SyncAsync(cloud)).Outcome);
+    }
+
+    [Fact]
+    public async Task The_state_carries_the_providers_account_name_and_drops_it_on_a_provider_switch()
+    {
+        using var a = new SyncDevice();
+        var first = new InMemoryCloudProvider { AccountName = "me@first" };
+        await a.AddOccasionAsync("x");
+
+        await a.Sync.SyncAsync(first);
+        Assert.Equal("me@first", (await a.State.LoadAsync()).AccountName);
+
+        var second = new OtherProvider(new InMemoryCloudProvider());
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(second)).Outcome);
+        Assert.Equal("me@other", (await a.State.LoadAsync()).AccountName);
+
+        // a provider that knows no account name must not inherit the previous provider's
+        var unnamed = new InMemoryCloudProvider { AccountName = null };
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(unnamed)).Outcome);
+        Assert.Null((await a.State.LoadAsync()).AccountName);
+
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.ReplaceRemoteAsync(second, "new")).Outcome);
+        Assert.Equal("me@other", (await a.State.LoadAsync()).AccountName);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task ReplaceRemote_without_a_passphrase_changes_nothing(string passphrase)
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionAsync("x");
+        await a.Sync.SyncAsync(cloud);
+        var data = cloud.Data;
+        var before = await a.State.LoadAsync();
+
+        var result = await a.Sync.ReplaceRemoteAsync(cloud, passphrase);
+
+        Assert.Equal(SyncOutcome.NeedsPassphrase, result.Outcome);
+        Assert.Equal(1, cloud.Uploads);
+        Assert.Same(data, cloud.Data);
+        Assert.Equal("pass", a.Secrets.Passphrase);
+        Assert.Equal(before.Epoch, (await a.State.LoadAsync()).Epoch);
+    }
+
     private sealed class OtherProvider(InMemoryCloudProvider inner) : ICloudSyncProvider
     {
         public InMemoryCloudProvider Inner => inner;
         public string Id => "other";
+        public string? AccountName => "me@other";
         public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct) => inner.GetInfoAsync(ct);
         public Task<RemoteFile?> DownloadAsync(CancellationToken ct) => inner.DownloadAsync(ct);
         public Task<string> UploadAsync(byte[] data, string? expected, CancellationToken ct) => inner.UploadAsync(data, expected, ct);
@@ -315,6 +390,7 @@ public class SyncServiceFailureTests
     private sealed class RacingProvider(InMemoryCloudProvider inner, Action onAttempt) : ICloudSyncProvider
     {
         public string Id => "test";
+        public string? AccountName => null;
         public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct) => inner.GetInfoAsync(ct);
         public Task<RemoteFile?> DownloadAsync(CancellationToken ct) => inner.DownloadAsync(ct);
         public Task<string> UploadAsync(byte[] data, string? expected, CancellationToken ct)

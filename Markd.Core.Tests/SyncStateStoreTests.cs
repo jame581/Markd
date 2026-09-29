@@ -39,5 +39,6 @@ public class SyncStateStoreTests
         Assert.True(new SyncResult(SyncOutcome.NoChanges).IsSuccess);
         Assert.False(new SyncResult(SyncOutcome.Offline).IsSuccess);
         Assert.False(new SyncResult(SyncOutcome.NeedsConflictResolution).IsSuccess);
+        Assert.False(new SyncResult(SyncOutcome.RemoteUnreadable).IsSuccess);
     }
 }

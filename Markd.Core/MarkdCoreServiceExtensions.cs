@@ -27,6 +27,7 @@ namespace Markd.Core
             services.AddSingleton(new SyncOptions());
             services.TryAddSingleton(TimeProvider.System);
             services.AddScoped<SyncService>();
+            services.AddScoped<ISyncService>(sp => sp.GetRequiredService<SyncService>());
 
             return services;
         }
