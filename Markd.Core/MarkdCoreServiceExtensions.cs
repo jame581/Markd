@@ -1,7 +1,9 @@
 ﻿using Markd.Core.Data;
 using Markd.Core.Services;
+using Markd.Core.Sync;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Markd.Core
 {
@@ -21,6 +23,10 @@ namespace Markd.Core
             services.AddScoped<IExportService, ExportService>();
             services.AddScoped<IImportService, ImportService>();
             services.AddScoped<ISnapshotService, SnapshotService>();
+            services.AddScoped<ISyncStateStore, SyncStateStore>();
+            services.AddSingleton(new SyncOptions());
+            services.TryAddSingleton(TimeProvider.System);
+            services.AddScoped<SyncService>();
 
             return services;
         }

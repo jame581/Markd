@@ -1,6 +1,7 @@
 using Markd.Core.Data;
 using Markd.Core.Domain;
 using Markd.Core.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
 namespace Markd.Core.Tests;
@@ -276,6 +277,21 @@ public class CoreIntegrationTests
         var trip = Assert.Single(all);
         Assert.Equal("Trip", trip.Title);
         Assert.Equal("Friends", trip.Category?.Name);
+    }
+
+    [Fact]
+    public void AddMarkdCore_can_resolve_the_sync_service_once_the_app_supplies_secrets()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"markd_di_{Guid.NewGuid():N}.db");
+        var services = new ServiceCollection();
+        services.AddMarkdCore(path);
+        services.AddSingleton<Markd.Core.Sync.ISyncSecretStore, FakeSecrets>();
+        using var provider = services.BuildServiceProvider();
+        using var scope = provider.CreateScope();
+
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<Markd.Core.Sync.SyncService>());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<Markd.Core.Services.ISnapshotService>());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<Markd.Core.Sync.ISyncStateStore>());
     }
 
     private static Scope CreateScope()
