@@ -115,6 +115,7 @@ namespace Markd.Core.Tests
             // Two pinned occasions break the single-pin index halfway through the import.
             var model = new ExportModel
             {
+                SchemaVersion = "1",
                 Occasions =
                 [
                     new OccasionDto { SourceId = 1, Title = "First", IsPinned = true, AnchorDate = new DateTime(2021, 1, 1) },
@@ -130,6 +131,59 @@ namespace Markd.Core.Tests
             Assert.False(db.ChangeTracker.HasChanges());
             await db.SaveChangesAsync();
             Assert.Equal(["Keep me"], await db.Occasions.Select(o => o.Title).ToListAsync());
+        }
+
+        [Fact]
+        public async Task Import_replaces_by_tombstoning_and_leaves_no_backup_file()
+        {
+            var path = Path.Combine(Path.GetTempPath(), $"markd_imp_{Guid.NewGuid():N}.db");
+            try
+            {
+                using var db = CreateSqliteContext(path);
+                var occasions = new OccasionService(db);
+                var old = await occasions.CreateAsync(new Markd.Core.Domain.Occasion { Title = "old", AnchorDate = DateTime.UtcNow });
+
+                var model = new ExportModel
+                {
+                    SchemaVersion = "1",
+                    Occasions = { new OccasionDto { SourceId = 1, Title = "imported", AnchorDate = DateTime.UtcNow, Direction = "Since", CreatedAt = DateTime.UtcNow } },
+                    Settings = new AppSettingsDto(),
+                };
+                await new ImportService(db).ApplyImportAsync(model);
+
+                Assert.Equal(new[] { "imported" }, (await occasions.GetAllAsync()).Select(o => o.Title));
+                var tomb = await db.Occasions.IgnoreQueryFilters().SingleAsync(o => o.SyncId == old.SyncId);
+                Assert.NotNull(tomb.DeletedAt);
+                Assert.Empty(Directory.GetFiles(Path.GetDirectoryName(path)!, Path.GetFileName(path) + ".backup-*"));
+            }
+            finally
+            {
+                Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+                if (File.Exists(path)) File.Delete(path);
+            }
+        }
+
+        [Fact]
+        public async Task Import_of_a_v2_file_keeps_its_SyncIds()
+        {
+            var path = Path.Combine(Path.GetTempPath(), $"markd_imp_{Guid.NewGuid():N}.db");
+            try
+            {
+                using var db = CreateSqliteContext(path);
+                var id = Guid.NewGuid();
+                var model = new ExportModel
+                {
+                    Occasions = { new OccasionDto { SyncId = id, Title = "kept", AnchorDate = DateTime.UtcNow, Direction = "Since", UpdatedAt = DateTime.UtcNow } },
+                };
+                await new ImportService(db).ApplyImportAsync(model);
+
+                Assert.Equal(id, (await db.Occasions.SingleAsync()).SyncId);
+            }
+            finally
+            {
+                Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+                if (File.Exists(path)) File.Delete(path);
+            }
         }
 
         [Fact]

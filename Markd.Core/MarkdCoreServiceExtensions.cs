@@ -20,6 +20,7 @@ namespace Markd.Core
             services.AddScoped<IAppSettingsService, AppSettingsService>();
             services.AddScoped<IExportService, ExportService>();
             services.AddScoped<IImportService, ImportService>();
+            services.AddScoped<ISnapshotService, SnapshotService>();
 
             return services;
         }
@@ -33,6 +34,7 @@ namespace Markd.Core
             using var scope = services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MarkdDbContext>();
             db.Database.Migrate();
+            DatabaseBackups.DeleteStale(db.Database.GetDbConnection().DataSource, TimeSpan.FromHours(24));
         }
     }
 }

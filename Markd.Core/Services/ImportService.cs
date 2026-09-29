@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Markd.Core.Data;
-using Markd.Core.Domain;
 using Markd.Core.Localization;
 
 namespace Markd.Core.Services
@@ -16,9 +15,14 @@ namespace Markd.Core.Services
     public class ImportService : IImportService
     {
         private readonly MarkdDbContext _db;
-        public ImportService(MarkdDbContext db)
+        private readonly ISnapshotService _snapshots;
+
+        public ImportService(MarkdDbContext db) : this(db, new SnapshotService(db)) { }
+
+        public ImportService(MarkdDbContext db, ISnapshotService snapshots)
         {
             _db = db;
+            _snapshots = snapshots;
         }
 
         public async Task<ExportModel> ParseImportPackageAsync(byte[] package, string? passphrase = null)
@@ -42,10 +46,11 @@ namespace Markd.Core.Services
 
         public async Task ApplyImportAsync(ExportModel model)
         {
-            // Resolve DB file path from connection string (SQLite)
+            var target = ExportModelUpgrade.ToCurrent(model);
+            ExportModelJson.Validate(target);   // a hand-built v2 model with empty or duplicate SyncIds must not reach the database
+
             var conn = (SqliteConnection)_db.Database.GetDbConnection();
-            var cs = conn.ConnectionString;
-            var dataSource = GetSqliteDataSource(cs);
+            var dataSource = GetSqliteDataSource(conn.ConnectionString);
             string? backupPath = null;
             if (!string.IsNullOrEmpty(dataSource) && File.Exists(dataSource))
             {
@@ -53,99 +58,14 @@ namespace Markd.Core.Services
                 File.Copy(dataSource, backupPath, overwrite: true);
             }
 
-            using var transaction = await _db.Database.BeginTransactionAsync();
-            try
+            // Records missing from the file become tombstones, so the replace also reaches other synced devices.
+            // On failure the transaction rolls back and the backup stays for manual recovery.
+            await _snapshots.ApplyAsync(target, new SnapshotApplyOptions(TakeNotifiedFromTarget: true, ApplySettings: true));
+
+            if (backupPath is not null)
             {
-                var existingMilestones = await _db.Milestones.ToListAsync();
-                var existingOccasions = await _db.Occasions.ToListAsync();
-                var existingCategories = await _db.Categories.ToListAsync();
-
-                if (existingMilestones.Count > 0)
-                    _db.Milestones.RemoveRange(existingMilestones);
-
-                if (existingOccasions.Count > 0)
-                    _db.Occasions.RemoveRange(existingOccasions);
-
-                if (existingCategories.Count > 0)
-                    _db.Categories.RemoveRange(existingCategories);
-
-                await _db.SaveChangesAsync();
-
-                var categoryMap = new System.Collections.Generic.Dictionary<int, int>();
-                foreach (var c in model.Categories)
-                {
-                    var category = new Category
-                    {
-                        Name = c.Name,
-                        Emoji = c.Emoji,
-                        ColorHex = c.ColorHex
-                    };
-
-                    _db.Categories.Add(category);
-                    await _db.SaveChangesAsync();
-                    categoryMap[c.SourceId] = category.Id;
-                }
-
-                var occasionMap = new System.Collections.Generic.Dictionary<int, int>();
-                foreach (var o in model.Occasions)
-                {
-                    var occasion = new Occasion
-                    {
-                        Title = o.Title,
-                        Emoji = o.Emoji,
-                        ColorHex = o.ColorHex,
-                        IsPinned = o.IsPinned,
-                        AnchorDate = o.AnchorDate,
-                        Direction = Enum.TryParse<OccasionDirection>(o.Direction, true, out var direction) ? direction : OccasionDirection.Since,
-                        Notes = o.Notes,
-                        CreatedAt = o.CreatedAt,
-                        CategoryId = o.CategorySourceId.HasValue && categoryMap.TryGetValue(o.CategorySourceId.Value, out var categoryId)
-                            ? categoryId
-                            : null
-                    };
-
-                    _db.Occasions.Add(occasion);
-                    await _db.SaveChangesAsync();
-                    occasionMap[o.SourceId] = occasion.Id;
-                }
-
-                foreach (var m in model.Milestones)
-                {
-                    if (!occasionMap.TryGetValue(m.OccasionSourceId, out var occasionId))
-                        continue;
-
-                    _db.Milestones.Add(new Milestone
-                    {
-                        OccasionId = occasionId,
-                        ThresholdDays = m.ThresholdDays,
-                        Label = m.Label,
-                        Notified = m.Notified
-                    });
-                }
-
-                var settingsData = model.Settings ?? new AppSettingsDto();
-                var settings = await _db.AppSettings.FirstOrDefaultAsync();
-                if (settings == null)
-                {
-                    settings = new Core.Domain.AppSettings();
-                    _db.AppSettings.Add(settings);
-                }
-
-                settings.Theme = settingsData.Theme;
-                settings.Language = LanguageSetting.IsValid(settingsData.Language) ? settingsData.Language : LanguageSetting.System;
-                settings.NotificationsEnabled = settingsData.NotificationsEnabled;
-
-                await _db.SaveChangesAsync();
-                await transaction.CommitAsync();
-            }
-            catch (Exception)
-            {
-                // The rollback restores the data. Copying the backup over the file here would race the open
-                // connection, so the backup stays on disk for manual recovery only. The app keeps one context for
-                // its whole session, so the rolled-back entities must also leave the change tracker.
-                await transaction.RollbackAsync();
-                _db.ChangeTracker.Clear();
-                throw;
+                try { File.Delete(backupPath); }
+                catch (Exception) { /* the startup sweep removes it later */ }
             }
         }
 
