@@ -130,10 +130,4 @@ namespace Markd.Core.Sync
             return result;
         }
     }
-
-    /// <summary>First-sync matching. Filled in by Task 9.</summary>
-    internal static class FirstSyncAligner
-    {
-        public static ExportModel Align(ExportModel local, ExportModel remote, Dictionary<Guid, Guid> remaps) => local;
-    }
 }
