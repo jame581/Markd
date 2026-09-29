@@ -66,6 +66,9 @@ namespace Markd.Core.Data.Migrations
                         .HasMaxLength(7)
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Emoji")
                         .HasMaxLength(8)
                         .HasColumnType("TEXT");
@@ -75,7 +78,16 @@ namespace Markd.Core.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("SyncId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("SyncId")
+                        .IsUnique();
 
                     b.ToTable("Categories");
                 });
@@ -85,6 +97,9 @@ namespace Markd.Core.Data.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Label")
                         .IsRequired()
@@ -97,12 +112,21 @@ namespace Markd.Core.Data.Migrations
                     b.Property<int>("OccasionId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid>("SyncId")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("ThresholdDays")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OccasionId");
+
+                    b.HasIndex("SyncId")
+                        .IsUnique();
 
                     b.ToTable("Milestones");
                 });
@@ -126,6 +150,9 @@ namespace Markd.Core.Data.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Direction")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -142,9 +169,15 @@ namespace Markd.Core.Data.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid>("SyncId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -153,9 +186,45 @@ namespace Markd.Core.Data.Migrations
 
                     b.HasIndex("IsPinned")
                         .IsUnique()
-                        .HasFilter("\"IsPinned\" = 1");
+                        .HasFilter("\"IsPinned\" = 1 AND \"DeletedAt\" IS NULL");
+
+                    b.HasIndex("SyncId")
+                        .IsUnique();
 
                     b.ToTable("Occasions");
+                });
+
+            modelBuilder.Entity("Markd.Core.Domain.SyncState", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AccountName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BaseSnapshotJson")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("Epoch")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LastResult")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastSyncUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProviderId")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RemoteRevision")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SyncStates");
                 });
 
             modelBuilder.Entity("Markd.Core.Domain.Milestone", b =>
