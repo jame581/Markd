@@ -49,6 +49,23 @@ public class SoftDeleteServiceTests
     }
 
     [Fact]
+    public async Task Pinning_a_deleted_occasion_leaves_the_current_pin_alone_even_after_a_later_save()
+    {
+        var (occasions, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var pinned = await occasions.CreateAsync(NewOccasion("Pinned"));
+        await occasions.SetPinnedAsync(pinned.Id);
+        var gone = await occasions.CreateAsync(NewOccasion("Gone"));
+        await occasions.DeleteAsync(gone.Id);
+
+        await occasions.SetPinnedAsync(gone.Id);   // a stale UI pins a record a sync just deleted
+        await occasions.CreateAsync(NewOccasion("Unrelated"));
+
+        var stored = await db.Occasions.AsNoTracking().SingleAsync(o => o.Id == pinned.Id);
+        Assert.True(stored.IsPinned);
+    }
+
+    [Fact]
     public async Task A_deleted_milestone_is_hidden_everywhere_including_the_tracked_occasion()
     {
         var (occasions, _, db, conn) = Create();

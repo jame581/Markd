@@ -107,6 +107,8 @@ public class SyncServiceTests
         Assert.Equal(new[] { "One (a)", "Two (b)" }, await b.TitlesAsync());
         Assert.Equal(new[] { "One (a)", "Two (b)" }, await a.TitlesAsync());
         Assert.True(third.IsSuccess);
+        Assert.Equal(SyncOutcome.NoChanges, (await a.Sync.SyncAsync(cloud)).Outcome);
+        Assert.Equal(SyncOutcome.NoChanges, (await b.Sync.SyncAsync(cloud)).Outcome);
     }
 
     [Fact]
@@ -149,6 +151,8 @@ public class SyncServiceTests
         Assert.True(Assert.Single(only.Milestones).Notified);
         await a.Sync.SyncAsync(cloud);
         Assert.Single(await a.Occasions.GetAllAsync());
+        Assert.Equal(SyncOutcome.NoChanges, (await a.Sync.SyncAsync(cloud)).Outcome);
+        Assert.Equal(SyncOutcome.NoChanges, (await b.Sync.SyncAsync(cloud)).Outcome);
     }
 
     [Fact]

@@ -55,4 +55,41 @@ public class MigrationBackfillTests
             if (File.Exists(path)) File.Delete(path);
         }
     }
+
+    [Fact]
+    public void The_SyncId_backfill_survives_the_smallest_random_value()
+    {
+        // SQLite's random() can return INT64_MIN, the one value abs() rejects with "integer overflow".
+        var backfills = new Markd.Core.Data.Migrations.AddSync().UpOperations
+            .OfType<Microsoft.EntityFrameworkCore.Migrations.Operations.SqlOperation>()
+            .Where(o => o.Sql.Contains("\"SyncId\""))
+            .ToList();
+        Assert.Equal(3, backfills.Count);
+
+        using var connection = new Microsoft.Data.Sqlite.SqliteConnection("Data Source=:memory:");
+        connection.Open();
+        using (var create = connection.CreateCommand())
+        {
+            create.CommandText = "CREATE TABLE Categories (SyncId TEXT); CREATE TABLE Occasions (SyncId TEXT); " +
+                                 "CREATE TABLE Milestones (SyncId TEXT); INSERT INTO Categories VALUES (NULL); " +
+                                 "INSERT INTO Occasions VALUES (NULL); INSERT INTO Milestones VALUES (NULL);";
+            create.ExecuteNonQuery();
+        }
+
+        foreach (var backfill in backfills)
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = backfill.Sql.Replace("random()", "(-9223372036854775807 - 1)");
+            command.ExecuteNonQuery();
+        }
+
+        using var read = connection.CreateCommand();
+        read.CommandText = "SELECT SyncId FROM Categories UNION ALL SELECT SyncId FROM Occasions UNION ALL SELECT SyncId FROM Milestones";
+        using var reader = read.ExecuteReader();
+        while (reader.Read())
+        {
+            var id = Guid.Parse(reader.GetString(0));
+            Assert.Contains(id.ToString()[19], "89ab");
+        }
+    }
 }

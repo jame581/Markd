@@ -283,12 +283,13 @@ namespace Markd.Core.Services
 
         public async Task SetPinnedAsync(int id)
         {
-            await UnpinAllAsync(id);
-
+            // Look it up first: unpinning the others for a missing (or just deleted) occasion would leave those
+            // changes tracked for the next unrelated save.
             var occasion = await db.Occasions.FirstOrDefaultAsync(o => o.Id == id);
             if (occasion == null)
                 return;
 
+            await UnpinAllAsync(id);
             occasion.IsPinned = true;
             await db.SaveChangesAsync();
         }
