@@ -170,15 +170,24 @@ public class SyncServiceFailureTests
     {
         using var a = new SyncDevice();
         var first = new InMemoryCloudProvider();
-        await a.AddOccasionAsync("x");
+        await a.AddOccasionAsync("X");
         await a.Sync.SyncAsync(first);
+        var storedRevision = (await a.State.LoadAsync()).RemoteRevision;
 
+        // the new provider already holds another device's data (without X) under the same revision string
         var second = new OtherProvider(new InMemoryCloudProvider());
+        using var other = new SyncDevice();
+        await other.AddOccasionAsync("Y");
+        await other.Sync.SyncAsync(second);
+        Assert.Equal(storedRevision, second.Inner.Revision);   // the collision this test relies on
+
         var result = await a.Sync.SyncAsync(second);
 
         Assert.Equal(SyncOutcome.Synced, result.Outcome);
-        Assert.NotNull(second.Inner.Data);
+        Assert.Equal(new[] { "X", "Y" }, await a.TitlesAsync());   // X must not read as "deleted remotely"
         Assert.Equal("other", (await a.State.LoadAsync()).ProviderId);
+        await other.Sync.SyncAsync(second);
+        Assert.Equal(new[] { "X", "Y" }, await other.TitlesAsync());
     }
 
     [Fact]
