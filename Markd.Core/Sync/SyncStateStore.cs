@@ -1,0 +1,50 @@
+using Markd.Core.Data;
+using Markd.Core.Domain;
+using Microsoft.EntityFrameworkCore;
+
+namespace Markd.Core.Sync
+{
+    public class SyncStateStore(MarkdDbContext db) : ISyncStateStore
+    {
+        public async Task<SyncState> LoadAsync()
+        {
+            var row = await db.SyncStates.AsNoTracking().FirstOrDefaultAsync();
+            return row is null ? new SyncState() : Copy(row);
+        }
+
+        public async Task SaveAsync(SyncState state)
+        {
+            var row = await db.SyncStates.FirstOrDefaultAsync();
+            if (row is null)
+            {
+                row = new SyncState();
+                db.SyncStates.Add(row);
+            }
+
+            row.ProviderId = state.ProviderId;
+            row.AccountName = state.AccountName;
+            row.RemoteRevision = state.RemoteRevision;
+            row.LastSyncUtc = state.LastSyncUtc;
+            row.LastResult = state.LastResult;
+            row.Epoch = state.Epoch;
+            row.BaseSnapshotJson = state.BaseSnapshotJson;
+            await db.SaveChangesAsync();
+        }
+
+        public async Task ClearAsync()
+        {
+            var row = await db.SyncStates.FirstOrDefaultAsync();
+            if (row is null)
+                return;
+
+            db.SyncStates.Remove(row);
+            await db.SaveChangesAsync();
+        }
+
+        private static SyncState Copy(SyncState s) => new()
+        {
+            Id = s.Id, ProviderId = s.ProviderId, AccountName = s.AccountName, RemoteRevision = s.RemoteRevision,
+            LastSyncUtc = s.LastSyncUtc, LastResult = s.LastResult, BaseSnapshotJson = s.BaseSnapshotJson, Epoch = s.Epoch
+        };
+    }
+}
