@@ -222,7 +222,7 @@
   <data name="Import_Open" xml:space="preserve"><value>Ouvrir</value></data>
   <data name="Import_Replace" xml:space="preserve"><value>Remplacer</value></data>
   <data name="Import_FileTooLarge" xml:space="preserve"><value>Ce fichier est trop volumineux pour être une sauvegarde Markd.</value></data>
-  <data name="Import_UnsupportedSchema" xml:space="preserve"><value>Version de schéma d'import non prise en charge : « {0} ». Cette application prend en charge la version 1.</value></data>
+  <data name="Import_UnsupportedSchema" xml:space="preserve"><value>Version de schéma d'import non prise en charge : « {0} ». Cette application prend en charge les versions 1 et 2.</value></data>
   <data name="Import_EmptyFile" xml:space="preserve"><value>Le fichier sélectionné est vide.</value></data>
   <data name="Import_InvalidJson" xml:space="preserve"><value>Le fichier sélectionné n'est pas un export JSON Markd valide.</value></data>
   <data name="Import_MissingSchemaVersion" xml:space="preserve"><value>Il manque une version de schéma dans le fichier sélectionné.</value></data>

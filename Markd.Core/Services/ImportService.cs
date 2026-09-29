@@ -16,12 +16,6 @@ namespace Markd.Core.Services
     public class ImportService : IImportService
     {
         private readonly MarkdDbContext _db;
-        private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
         public ImportService(MarkdDbContext db)
         {
             _db = db;
@@ -33,12 +27,12 @@ namespace Markd.Core.Services
                 throw new InvalidOperationException(Strings.Import_EmptyFile);
 
             if (!MarkdPackage.IsEncrypted(package))
-                return ParseAndValidateImportJson(Encoding.UTF8.GetString(package));
+                return ExportModelJson.Deserialize(Encoding.UTF8.GetString(package));
 
             var plain = await Task.Run(() => MarkdPackage.Decrypt(package, passphrase));
             try
             {
-                return ParseAndValidateImportJson(Encoding.UTF8.GetString(plain));
+                return ExportModelJson.Deserialize(Encoding.UTF8.GetString(plain));
             }
             finally
             {
@@ -153,43 +147,6 @@ namespace Markd.Core.Services
                 _db.ChangeTracker.Clear();
                 throw;
             }
-        }
-
-        private ExportModel ParseAndValidateImportJson(string json)
-        {
-            ExportModel? model;
-            try
-            {
-                model = JsonSerializer.Deserialize<ExportModel>(json, _jsonOptions);
-            }
-            catch (JsonException ex)
-            {
-                throw new InvalidOperationException(Strings.Import_InvalidJson, ex);
-            }
-
-            if (model == null)
-                throw new InvalidOperationException(Strings.Import_InvalidJson);
-
-            ValidateModel(model);
-            return model;
-        }
-
-        private static void ValidateModel(ExportModel model)
-        {
-            if (string.IsNullOrWhiteSpace(model.SchemaVersion))
-                throw new InvalidOperationException(Strings.Import_MissingSchemaVersion);
-
-            if (!string.Equals(model.SchemaVersion, "1", StringComparison.Ordinal))
-                throw new InvalidOperationException(string.Format(LocalizationManager.Instance.Culture, Strings.Import_UnsupportedSchema, model.SchemaVersion));
-
-            if (model.Categories.Any(c => string.IsNullOrWhiteSpace(c.Name)))
-                throw new InvalidOperationException(Strings.Import_MissingCategoryName);
-
-            if (model.Occasions.Any(o => string.IsNullOrWhiteSpace(o.Title)))
-                throw new InvalidOperationException(Strings.Import_MissingOccasionTitle);
-
-            if (model.Milestones.Any(m => string.IsNullOrWhiteSpace(m.Label)))
-                throw new InvalidOperationException(Strings.Import_MissingMilestoneLabel);
         }
 
         private static string? GetSqliteDataSource(string connectionString)

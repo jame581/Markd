@@ -140,7 +140,7 @@ namespace Markd.Core.Tests
             var importer = new ImportService(db);
             var bytes = System.Text.Encoding.UTF8.GetBytes("""
                 {
-                  "schemaVersion": "2",
+                  "schemaVersion": "3",
                   "appVersion": "1.0.0",
                   "exportedAt": "2026-01-01T00:00:00Z",
                   "categories": [],
@@ -150,7 +150,7 @@ namespace Markd.Core.Tests
                 """);
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => importer.ParseImportPackageAsync(bytes));
-            Assert.Equal("Unsupported import schema version '2'. This app supports schema version 1.", ex.Message);
+            Assert.Equal("Unsupported import schema version '3'. This app supports schema versions 1 and 2.", ex.Message);
         }
 
         [Theory]

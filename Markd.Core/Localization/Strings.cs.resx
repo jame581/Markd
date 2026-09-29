@@ -222,7 +222,7 @@
   <data name="Import_Open" xml:space="preserve"><value>Otevřít</value></data>
   <data name="Import_Replace" xml:space="preserve"><value>Nahradit</value></data>
   <data name="Import_FileTooLarge" xml:space="preserve"><value>Tento soubor je na zálohu Markd příliš velký.</value></data>
-  <data name="Import_UnsupportedSchema" xml:space="preserve"><value>Nepodporovaná verze schématu importu „{0}“. Aplikace podporuje verzi 1.</value></data>
+  <data name="Import_UnsupportedSchema" xml:space="preserve"><value>Nepodporovaná verze schématu importu „{0}“. Aplikace podporuje verze 1 a 2.</value></data>
   <data name="Import_EmptyFile" xml:space="preserve"><value>Vybraný soubor je prázdný.</value></data>
   <data name="Import_InvalidJson" xml:space="preserve"><value>Vybraný soubor není platný export Markd ve formátu JSON.</value></data>
   <data name="Import_MissingSchemaVersion" xml:space="preserve"><value>Vybranému souboru chybí verze schématu.</value></data>

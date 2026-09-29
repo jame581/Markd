@@ -222,7 +222,7 @@
   <data name="Import_Open" xml:space="preserve"><value>Open</value></data>
   <data name="Import_Replace" xml:space="preserve"><value>Replace</value></data>
   <data name="Import_FileTooLarge" xml:space="preserve"><value>This file is too large to be a Markd backup.</value></data>
-  <data name="Import_UnsupportedSchema" xml:space="preserve"><value>Unsupported import schema version '{0}'. This app supports schema version 1.</value></data>
+  <data name="Import_UnsupportedSchema" xml:space="preserve"><value>Unsupported import schema version '{0}'. This app supports schema versions 1 and 2.</value></data>
   <data name="Import_EmptyFile" xml:space="preserve"><value>The selected file is empty.</value></data>
   <data name="Import_InvalidJson" xml:space="preserve"><value>The selected file is not a valid Markd JSON export.</value></data>
   <data name="Import_MissingSchemaVersion" xml:space="preserve"><value>The selected file is missing a schema version.</value></data>

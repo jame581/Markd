@@ -11,12 +11,6 @@ namespace Markd.Core.Services
     public class ExportService : IExportService
     {
         private readonly MarkdDbContext _db;
-        private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        };
-
         public ExportService(MarkdDbContext db)
         {
             _db = db;
@@ -25,8 +19,7 @@ namespace Markd.Core.Services
         public async Task<byte[]> CreateExportJsonAsync()
         {
             var model = await BuildExportModelAsync();
-            var json = JsonSerializer.Serialize(model, _jsonOptions);
-            return Encoding.UTF8.GetBytes(json);
+            return Encoding.UTF8.GetBytes(ExportModelJson.Serialize(model, indented: true));
         }
 
         public async Task<byte[]> CreateExportPackageAsync(string? passphrase = null)
@@ -48,56 +41,9 @@ namespace Markd.Core.Services
 
         private async Task<ExportModel> BuildExportModelAsync()
         {
-            var model = new ExportModel
-            {
-                SchemaVersion = "1",
-                AppVersion = "", // populate from app if available
-                ExportedAt = DateTime.UtcNow,
-                DeviceId = Environment.MachineName
-            };
-
-            var categories = await _db.Categories.AsNoTracking().ToListAsync();
-            foreach (var c in categories)
-            {
-                model.Categories.Add(new CategoryDto
-                {
-                    SourceId = c.Id,
-                    Name = c.Name,
-                    Emoji = c.Emoji,
-                    ColorHex = c.ColorHex
-                });
-            }
-
-            var occasions = await _db.Occasions.AsNoTracking().ToListAsync();
-            foreach (var o in occasions)
-            {
-                model.Occasions.Add(new OccasionDto
-                {
-                    SourceId = o.Id,
-                    Title = o.Title,
-                    Emoji = o.Emoji,
-                    ColorHex = o.ColorHex,
-                    IsPinned = o.IsPinned,
-                    AnchorDate = o.AnchorDate,
-                    Direction = o.Direction.ToString(),
-                    Notes = o.Notes,
-                    CreatedAt = o.CreatedAt,
-                    CategorySourceId = o.CategoryId
-                });
-            }
-
-            var milestones = await _db.Milestones.AsNoTracking().ToListAsync();
-            foreach (var m in milestones)
-            {
-                model.Milestones.Add(new MilestoneDto
-                {
-                    SourceId = m.Id,
-                    OccasionSourceId = m.OccasionId,
-                    ThresholdDays = m.ThresholdDays,
-                    Label = m.Label,
-                    Notified = m.Notified
-                });
-            }
+            var model = await SnapshotReader.ReadAsync(_db, includeTombstones: false, includeNotified: true);
+            model.AppVersion = ""; // populate from app if available
+            model.DeviceId = Environment.MachineName;
 
             var settings = await _db.AppSettings.AsNoTracking().FirstOrDefaultAsync();
             if (settings != null)
