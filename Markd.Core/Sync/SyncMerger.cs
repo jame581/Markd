@@ -47,9 +47,11 @@ namespace Markd.Core.Sync
             // A milestone edit against a delete of its whole occasion is not worth asking about: the occasion's
             // own decision (or its own conflict) settles it, and the cascade tombstones the orphan.
             var liveOccasions = occasions.Values.Where(o => o.DeletedAt is null).Select(o => o.SyncId).ToHashSet();
+            var deadOccasions = local.Occasions.Concat(remote.Occasions).Where(o => o.DeletedAt is not null).Select(o => o.SyncId).ToHashSet();
             var milestones = MergeKind(baseModel.Milestones, local.Milestones, remote.Milestones,
                 m => m.SyncId, SyncContent.Of, m => m.DeletedAt is not null, m => m.UpdatedAt,
-                SyncRecordKind.Milestone, choices, conflicts, null, m => !liveOccasions.Contains(m.OccasionSyncId));
+                SyncRecordKind.Milestone, choices, conflicts, null, m => !liveOccasions.Contains(m.OccasionSyncId),
+                m => deadOccasions.Contains(m.OccasionSyncId));
 
             MergeCascades.Apply(baseModel, local, remote, categories, occasions, milestones, liveOverDeadOccasions, nowUtc);
 
@@ -73,7 +75,7 @@ namespace Markd.Core.Sync
             IEnumerable<T> baseItems, IEnumerable<T> localItems, IEnumerable<T> remoteItems,
             Func<T, Guid> id, Func<T, string> content, Func<T, bool> isDeleted, Func<T, DateTime> updatedAt,
             SyncRecordKind kind, IReadOnlyDictionary<Guid, ConflictChoice> choices, List<SyncConflict> conflicts,
-            HashSet<Guid>? liveOverDead, Func<T, bool>? autoDrop = null) where T : class
+            HashSet<Guid>? liveOverDead, Func<T, bool>? autoDrop = null, Func<T, bool>? parentDeleted = null) where T : class
         {
             var b = baseItems.ToDictionary(id);
             var l = localItems.ToDictionary(id);
@@ -93,16 +95,22 @@ namespace Markd.Core.Sync
                 var sl = Sig(lItem);
                 var sr = Sig(rItem);
 
+                // Without a base record (first sync after a reconnect, a provider switch or a new epoch) a tombstone
+                // looks like "never had it" and the live side would win silently. But a SyncId both sides hold was
+                // shared once, so a delete on one side against the live record on the other is "deleted vs changed".
+                // A tombstone against a record the other side never had stays a plain delete.
+                var deleteVersusLive = bItem is null && lItem is not null && rItem is not null && isDeleted(lItem) != isDeleted(rItem);
+
                 T? chosen;
                 if (sl == sr)
                 {
                     chosen = lItem is null ? rItem : rItem is null ? lItem : updatedAt(rItem) > updatedAt(lItem) ? rItem : lItem;
                 }
-                else if (sl == sb)
+                else if (!deleteVersusLive && sl == sb)
                 {
                     chosen = rItem;
                 }
-                else if (sr == sb)
+                else if (!deleteVersusLive && sr == sb)
                 {
                     chosen = lItem;
                 }
@@ -116,6 +124,12 @@ namespace Markd.Core.Sync
                 else if (autoDrop is not null && autoDrop((lItem ?? rItem)!))
                 {
                     chosen = lItem ?? rItem;   // the cascade tombstones it because its parent is gone
+                }
+                else if (deleteVersusLive && parentDeleted is not null && parentDeleted(lItem!))
+                {
+                    // The delete came with its parent's: the parent's own decision settles it, and the cascade
+                    // either tombstones it or brings back the live version.
+                    chosen = lItem;
                 }
                 else
                 {

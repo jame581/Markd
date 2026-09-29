@@ -95,6 +95,78 @@ public class SyncMergerTests
     }
 
     [Fact]
+    public void Without_a_base_a_local_delete_against_a_remote_live_record_is_a_conflict()
+    {
+        // A shared SyncId with no base means both sides once held the record (reconnect, provider switch, new epoch).
+        var deleted = Model(o: [Occ(1, "a", deleted: true)]);
+        var live = Model(o: [Occ(1, "a")]);
+
+        var result = SyncMerger.Merge(null, deleted, live, Now);
+
+        var conflict = Assert.Single(result.Conflicts);
+        Assert.Equal(G(1), conflict.SyncId);
+        Assert.Null(conflict.Local);
+        Assert.NotNull(conflict.Remote);
+        var keepDelete = SyncMerger.Merge(null, deleted, live, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
+        var keepRecord = SyncMerger.Merge(null, deleted, live, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Remote });
+        Assert.Empty(keepDelete.Conflicts);
+        Assert.Equal("", Titles(keepDelete.Merged));
+        Assert.Equal("a", Titles(keepRecord.Merged));
+    }
+
+    [Fact]
+    public void Without_a_base_a_local_live_record_against_a_remote_delete_is_a_conflict()
+    {
+        var live = Model(o: [Occ(1, "a")]);
+        var deleted = Model(o: [Occ(1, "a", deleted: true)]);
+
+        var result = SyncMerger.Merge(null, live, deleted, Now);
+
+        var conflict = Assert.Single(result.Conflicts);
+        Assert.NotNull(conflict.Local);
+        Assert.Null(conflict.Remote);
+        var keepRecord = SyncMerger.Merge(null, live, deleted, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
+        var keepDelete = SyncMerger.Merge(null, live, deleted, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Remote });
+        Assert.Empty(keepRecord.Conflicts);
+        Assert.Equal("a", Titles(keepRecord.Merged));
+        Assert.Equal("", Titles(keepDelete.Merged));
+    }
+
+    [Fact]
+    public void Without_a_base_a_delete_against_a_missing_record_is_a_plain_delete()
+    {
+        var deleted = Model(o: [Occ(1, "a", deleted: true)]);
+
+        var result = SyncMerger.Merge(null, deleted, Model(), Now);
+
+        Assert.Empty(result.Conflicts);
+        Assert.NotNull(Assert.Single(result.Merged.Occasions).DeletedAt);
+    }
+
+    [Fact]
+    public void Without_a_base_one_decision_on_a_deleted_occasion_settles_its_milestones()
+    {
+        var deleted = Model(o: [Occ(1, "a", deleted: true)], m: [Ms(2, 1, deleted: true)]);
+        var live = Model(o: [Occ(1, "a")], m: [Ms(2, 1)]);
+
+        var pending = SyncMerger.Merge(null, deleted, live, Now);
+        var keepRecord = SyncMerger.Merge(null, deleted, live, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Remote });
+        var keepDelete = SyncMerger.Merge(null, deleted, live, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
+
+        Assert.Equal(G(1), Assert.Single(pending.Conflicts).SyncId);
+        Assert.Empty(keepRecord.Conflicts);
+        Assert.Null(Assert.Single(keepRecord.Merged.Milestones).DeletedAt);
+        Assert.Empty(keepDelete.Conflicts);
+        Assert.NotNull(Assert.Single(keepDelete.Merged.Milestones).DeletedAt);
+
+        var mirrored = SyncMerger.Merge(null, live, deleted, Now);
+        var mirroredKeep = SyncMerger.Merge(null, live, deleted, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
+        Assert.Equal(G(1), Assert.Single(mirrored.Conflicts).SyncId);
+        Assert.Empty(mirroredKeep.Conflicts);
+        Assert.Null(Assert.Single(mirroredKeep.Merged.Milestones).DeletedAt);
+    }
+
+    [Fact]
     public void New_records_on_either_side_are_added()
     {
         var b = Model(o: [Occ(1, "a")]);
