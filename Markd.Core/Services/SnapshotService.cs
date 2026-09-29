@@ -1,0 +1,199 @@
+using Markd.Core.Data;
+using Markd.Core.Domain;
+using Markd.Core.Localization;
+using Microsoft.EntityFrameworkCore;
+
+namespace Markd.Core.Services
+{
+    public class SnapshotService(MarkdDbContext db) : ISnapshotService
+    {
+        public Task<ExportModel> ReadForSyncAsync() =>
+            SnapshotReader.ReadAsync(db, includeTombstones: true, includeNotified: false);
+
+        public async Task ApplyAsync(ExportModel target, SnapshotApplyOptions options)
+        {
+            var now = options.NowUtc ?? DateTime.UtcNow;
+            await using var transaction = await db.Database.BeginTransactionAsync();
+            try
+            {
+                db.StampTimestamps = false;
+
+                if (options.ExpectedLocalFingerprint is { } expected)
+                {
+                    var current = await SnapshotReader.ReadAsync(db, includeTombstones: true, includeNotified: false);
+                    if (Markd.Core.Sync.SyncContent.Fingerprint(current) != expected)
+                        throw new SnapshotChangedException();
+                }
+
+                var categories = await db.Categories.IgnoreQueryFilters().ToListAsync();
+                var occasions = await db.Occasions.IgnoreQueryFilters().ToListAsync();
+                var milestones = await db.Milestones.IgnoreQueryFilters().ToListAsync();
+
+                if (options.SyncIdRemaps is { Count: > 0 } remaps)
+                {
+                    foreach (var c in categories) if (remaps.TryGetValue(c.SyncId, out var to)) c.SyncId = to;
+                    foreach (var o in occasions) if (remaps.TryGetValue(o.SyncId, out var to)) o.SyncId = to;
+                    foreach (var m in milestones) if (remaps.TryGetValue(m.SyncId, out var to)) m.SyncId = to;
+                }
+
+                // Free the single pin first: the unique index would reject an intermediate state with two pins.
+                foreach (var o in occasions.Where(o => o.IsPinned))
+                    o.IsPinned = false;
+                await db.SaveChangesAsync();
+
+                var categoryBySync = categories.ToDictionary(c => c.SyncId);
+                foreach (var dto in target.Categories)
+                {
+                    if (!categoryBySync.TryGetValue(dto.SyncId, out var category))
+                    {
+                        category = new Category { SyncId = dto.SyncId };
+                        db.Categories.Add(category);
+                        categoryBySync[dto.SyncId] = category;
+                    }
+
+                    category.Name = dto.Name;
+                    category.Emoji = dto.Emoji;
+                    category.ColorHex = dto.ColorHex;
+                    category.UpdatedAt = dto.UpdatedAt;
+                    category.DeletedAt = dto.DeletedAt;
+                }
+
+                var targetCategories = target.Categories.Select(c => c.SyncId).ToHashSet();
+                foreach (var category in categories.Where(c => c.DeletedAt is null && !targetCategories.Contains(c.SyncId)))
+                {
+                    category.DeletedAt = now;
+                    category.UpdatedAt = now;
+                }
+
+                await db.SaveChangesAsync();
+
+                var occasionBySync = occasions.ToDictionary(o => o.SyncId);
+                foreach (var dto in target.Occasions)
+                {
+                    if (!occasionBySync.TryGetValue(dto.SyncId, out var occasion))
+                    {
+                        occasion = new Occasion { SyncId = dto.SyncId };
+                        db.Occasions.Add(occasion);
+                        occasionBySync[dto.SyncId] = occasion;
+                    }
+
+                    occasion.Title = dto.Title;
+                    occasion.Emoji = dto.Emoji;
+                    occasion.ColorHex = dto.ColorHex;
+                    occasion.AnchorDate = dto.AnchorDate;
+                    occasion.Direction = Enum.TryParse<OccasionDirection>(dto.Direction, true, out var direction) ? direction : OccasionDirection.Since;
+                    occasion.Notes = dto.Notes;
+                    occasion.CreatedAt = dto.CreatedAt == default ? dto.UpdatedAt : dto.CreatedAt;
+                    occasion.UpdatedAt = dto.UpdatedAt;
+                    occasion.DeletedAt = dto.DeletedAt;
+                    occasion.IsPinned = dto.IsPinned && dto.DeletedAt is null;
+                    occasion.CategoryId = dto.CategorySyncId is { } categorySyncId
+                        && categoryBySync.TryGetValue(categorySyncId, out var category) && category.DeletedAt is null
+                            ? category.Id
+                            : null;
+                }
+
+                var targetOccasions = target.Occasions.Select(o => o.SyncId).ToHashSet();
+                foreach (var occasion in occasions.Where(o => o.DeletedAt is null && !targetOccasions.Contains(o.SyncId)))
+                {
+                    occasion.DeletedAt = now;
+                    occasion.UpdatedAt = now;
+                    occasion.IsPinned = false;
+                }
+
+                await db.SaveChangesAsync();
+
+                var milestoneBySync = milestones.ToDictionary(m => m.SyncId);
+                foreach (var dto in target.Milestones)
+                {
+                    if (!occasionBySync.TryGetValue(dto.OccasionSyncId, out var parent))
+                        continue;
+
+                    if (!milestoneBySync.TryGetValue(dto.SyncId, out var milestone))
+                    {
+                        milestone = new Milestone { SyncId = dto.SyncId };
+                        db.Milestones.Add(milestone);
+                        milestoneBySync[dto.SyncId] = milestone;
+                        // A milestone that is already reached was announced on the device that has it: do not fire it
+                        // again here (UpdateAsync applies the same rule when a date moves).
+                        milestone.Notified = options.TakeNotifiedFromTarget
+                            ? dto.Notified
+                            : dto.DeletedAt is null && AlreadyReached(parent, dto);
+                    }
+                    else if (options.TakeNotifiedFromTarget)
+                    {
+                        milestone.Notified = dto.Notified;
+                    }
+
+                    milestone.OccasionId = parent.Id;
+                    milestone.ThresholdDays = dto.ThresholdDays;
+                    milestone.Label = dto.Label;
+                    milestone.UpdatedAt = dto.UpdatedAt;
+                    milestone.DeletedAt = dto.DeletedAt ?? parent.DeletedAt;
+                }
+
+                var targetMilestones = target.Milestones.Select(m => m.SyncId).ToHashSet();
+                foreach (var milestone in milestones.Where(m => m.DeletedAt is null && !targetMilestones.Contains(m.SyncId)))
+                {
+                    milestone.DeletedAt = now;
+                    milestone.UpdatedAt = now;
+                }
+
+                if (options.ApplySettings)
+                    await ApplySettingsAsync(target.Settings ?? new AppSettingsDto());
+
+                await db.SaveChangesAsync();
+                await transaction.CommitAsync();
+                db.ChangeTracker.Clear();
+            }
+            catch (SnapshotChangedException)
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                db.ChangeTracker.Clear();
+                throw;
+            }
+            finally
+            {
+                db.StampTimestamps = true;
+            }
+        }
+
+        public async Task<int> PurgeTombstonesAsync(DateTime olderThanUtc)
+        {
+            var milestones = await db.Milestones.IgnoreQueryFilters().Where(m => m.DeletedAt < olderThanUtc).ToListAsync();
+            var occasions = await db.Occasions.IgnoreQueryFilters().Where(o => o.DeletedAt < olderThanUtc).ToListAsync();
+            var categories = await db.Categories.IgnoreQueryFilters().Where(c => c.DeletedAt < olderThanUtc).ToListAsync();
+
+            db.Milestones.RemoveRange(milestones);
+            db.Occasions.RemoveRange(occasions);
+            db.Categories.RemoveRange(categories);
+            await db.SaveChangesAsync();   // EF detaches the deleted entities itself; no tracker reset for the whole session
+            return milestones.Count + occasions.Count + categories.Count;
+        }
+
+        private static bool AlreadyReached(Occasion occasion, MilestoneDto dto)
+        {
+            var milestone = new Milestone { ThresholdDays = dto.ThresholdDays };
+            return OccasionDates.IsMilestoneReached(occasion, milestone, OccasionDates.GetDays(occasion, DateTime.Now));
+        }
+
+        private async Task ApplySettingsAsync(AppSettingsDto dto)
+        {
+            var settings = await db.AppSettings.FirstOrDefaultAsync();
+            if (settings == null)
+            {
+                settings = new AppSettings();
+                db.AppSettings.Add(settings);
+            }
+
+            settings.Theme = dto.Theme;
+            settings.Language = LanguageSetting.IsValid(dto.Language) ? dto.Language : LanguageSetting.System;
+            settings.NotificationsEnabled = dto.NotificationsEnabled;
+        }
+    }
+}

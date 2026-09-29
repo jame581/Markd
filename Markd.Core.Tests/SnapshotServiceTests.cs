@@ -1,0 +1,223 @@
+using Markd.Core.Domain;
+using Markd.Core.Services;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
+
+namespace Markd.Core.Tests;
+
+public class SnapshotServiceTests
+{
+    private static readonly DateTime T = new(2026, 3, 1, 0, 0, 0, DateTimeKind.Utc);
+
+    private static (SnapshotService Snap, OccasionService Occ, CategoryService Cat, Data.MarkdDbContext Db, IDisposable Conn) Create()
+    {
+        var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
+        return (new SnapshotService(db), new OccasionService(db), new CategoryService(db), db, conn);
+    }
+
+    [Fact]
+    public async Task ReadForSync_includes_tombstones_and_hides_Notified()
+    {
+        var (snap, occ, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var live = await occ.CreateAsync(new Occasion { Title = "live", AnchorDate = DateTime.UtcNow.AddDays(-9) });
+        var m = await occ.AddMilestoneAsync(live.Id, 1, "one");
+        await occ.MarkMilestoneNotifiedAsync(m.Id);
+        var dead = await occ.CreateAsync(new Occasion { Title = "dead", AnchorDate = DateTime.UtcNow });
+        await occ.DeleteAsync(dead.Id);
+
+        var model = await snap.ReadForSyncAsync();
+
+        Assert.Equal(2, model.Occasions.Count);
+        Assert.Contains(model.Occasions, o => o.DeletedAt != null);
+        Assert.False(Assert.Single(model.Milestones).Notified);
+    }
+
+    [Fact]
+    public async Task Apply_inserts_updates_and_tombstones_by_SyncId_and_keeps_local_Notified()
+    {
+        var (snap, occ, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var keep = await occ.CreateAsync(new Occasion { Title = "keep", AnchorDate = DateTime.UtcNow.AddDays(-9) });
+        var ms = await occ.AddMilestoneAsync(keep.Id, 1, "one");
+        await occ.MarkMilestoneNotifiedAsync(ms.Id);
+        var drop = await occ.CreateAsync(new Occasion { Title = "drop", AnchorDate = DateTime.UtcNow });
+
+        var target = await snap.ReadForSyncAsync();
+        target.Occasions.RemoveAll(o => o.SyncId == drop.SyncId);
+        target.Occasions.Single(o => o.SyncId == keep.SyncId).Title = "renamed";
+        target.Occasions.Add(new OccasionDto { SyncId = Guid.NewGuid(), Title = "new", AnchorDate = T, Direction = "Since", UpdatedAt = T });
+
+        await snap.ApplyAsync(target, new SnapshotApplyOptions(TakeNotifiedFromTarget: false, NowUtc: T));
+
+        var live = await occ.GetAllAsync();
+        Assert.Equal(new[] { "new", "renamed" }, live.Select(o => o.Title).OrderBy(t => t));
+        var renamed = live.Single(o => o.Title == "renamed");
+        Assert.True(renamed.Milestones.Single().Notified);
+        var dropped = await db.Occasions.IgnoreQueryFilters().SingleAsync(o => o.SyncId == drop.SyncId);
+        Assert.Equal(T, dropped.DeletedAt);
+    }
+
+    [Fact]
+    public async Task Apply_stores_UpdatedAt_from_the_target_instead_of_stamping()
+    {
+        var (snap, _, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var target = new ExportModel { Categories = { new CategoryDto { SyncId = Guid.NewGuid(), Name = "c", UpdatedAt = T } } };
+
+        await snap.ApplyAsync(target, new SnapshotApplyOptions(false));
+
+        Assert.Equal(T, (await db.Categories.SingleAsync()).UpdatedAt);
+        Assert.True(db.StampTimestamps);
+    }
+
+    [Fact]
+    public async Task Apply_moves_the_pin_without_violating_the_unique_pin_index()
+    {
+        var (snap, occ, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var a = new Occasion { Title = "a", AnchorDate = DateTime.UtcNow, IsPinned = true };
+        var b = new Occasion { Title = "b", AnchorDate = DateTime.UtcNow };
+        await occ.CreateAsync(a);
+        await occ.CreateAsync(b);
+
+        var target = await snap.ReadForSyncAsync();
+        target.Occasions.Single(o => o.SyncId == a.SyncId).IsPinned = false;
+        target.Occasions.Single(o => o.SyncId == b.SyncId).IsPinned = true;
+        await snap.ApplyAsync(target, new SnapshotApplyOptions(false));
+
+        var pinned = (await occ.GetAllAsync()).Single(o => o.IsPinned);
+        Assert.Equal("b", pinned.Title);
+    }
+
+    [Fact]
+    public async Task Apply_remaps_local_SyncIds_in_place_and_keeps_Notified()
+    {
+        var (snap, occ, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var o = await occ.CreateAsync(new Occasion { Title = "same", AnchorDate = DateTime.UtcNow.AddDays(-9) });
+        var m = await occ.AddMilestoneAsync(o.Id, 1, "one");
+        await occ.MarkMilestoneNotifiedAsync(m.Id);
+        var remoteOccasionId = Guid.NewGuid();
+        var remoteMilestoneId = Guid.NewGuid();
+        var local = await snap.ReadForSyncAsync();
+        var target = local.CloneModel();
+        target.Occasions[0].SyncId = remoteOccasionId;
+        target.Milestones[0].SyncId = remoteMilestoneId;
+        target.Milestones[0].OccasionSyncId = remoteOccasionId;
+        var remaps = new Dictionary<Guid, Guid> { [o.SyncId] = remoteOccasionId, [m.SyncId] = remoteMilestoneId };
+
+        await snap.ApplyAsync(target, new SnapshotApplyOptions(false, SyncIdRemaps: remaps));
+
+        var all = await db.Occasions.IgnoreQueryFilters().Include(x => x.Milestones).ToListAsync();
+        var only = Assert.Single(all);
+        Assert.Equal(o.Id, only.Id);
+        Assert.Equal(remoteOccasionId, only.SyncId);
+        Assert.True(Assert.Single(only.Milestones).Notified);
+    }
+
+    [Fact]
+    public async Task Apply_can_take_Notified_and_settings_from_the_target()
+    {
+        var (snap, _, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var occ = Guid.NewGuid();
+        var target = new ExportModel
+        {
+            Occasions = { new OccasionDto { SyncId = occ, Title = "o", AnchorDate = T, Direction = "Since" } },
+            Milestones = { new MilestoneDto { SyncId = Guid.NewGuid(), OccasionSyncId = occ, Label = "m", ThresholdDays = 1, Notified = true } },
+            Settings = new AppSettingsDto { Theme = "Dark", Language = "cs", NotificationsEnabled = false },
+        };
+
+        await snap.ApplyAsync(target, new SnapshotApplyOptions(TakeNotifiedFromTarget: true, ApplySettings: true));
+
+        Assert.True((await db.Milestones.SingleAsync()).Notified);
+        var settings = await db.AppSettings.SingleAsync();
+        Assert.Equal("Dark", settings.Theme);
+        Assert.Equal("cs", settings.Language);
+        Assert.False(settings.NotificationsEnabled);
+    }
+
+    [Fact]
+    public async Task Apply_rolls_back_on_failure_and_leaves_local_data_alone()
+    {
+        var (snap, occ, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        await occ.CreateAsync(new Occasion { Title = "safe", AnchorDate = DateTime.UtcNow });
+        var target = new ExportModel
+        {
+            Occasions =
+            {
+                new OccasionDto { SyncId = Guid.NewGuid(), Title = "x", AnchorDate = T, Direction = "Since", IsPinned = true },
+                new OccasionDto { SyncId = Guid.NewGuid(), Title = "y", AnchorDate = T, Direction = "Since", IsPinned = true }, // two pins: violates the unique index
+            }
+        };
+
+        await Assert.ThrowsAnyAsync<Exception>(() => snap.ApplyAsync(target, new SnapshotApplyOptions(false)));
+
+        Assert.Equal(new[] { "safe" }, (await occ.GetAllAsync()).Select(o => o.Title));
+        Assert.True(db.StampTimestamps);
+    }
+
+    [Fact]
+    public async Task Apply_aborts_without_changes_when_local_data_changed_since_it_was_read()
+    {
+        var (snap, occ, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        await occ.CreateAsync(new Occasion { Title = "before", AnchorDate = DateTime.UtcNow });
+        var read = await snap.ReadForSyncAsync();
+        var fingerprint = Markd.Core.Sync.SyncContent.Fingerprint(read);
+        await occ.CreateAsync(new Occasion { Title = "typed meanwhile", AnchorDate = DateTime.UtcNow });
+
+        await Assert.ThrowsAsync<SnapshotChangedException>(
+            () => snap.ApplyAsync(read, new SnapshotApplyOptions(false, ExpectedLocalFingerprint: fingerprint)));
+
+        Assert.Equal(new[] { "before", "typed meanwhile" }, (await occ.GetAllAsync()).Select(o => o.Title).OrderBy(t => t));
+        Assert.True(db.StampTimestamps);
+    }
+
+    [Fact]
+    public async Task Apply_marks_inserted_milestones_that_are_already_reached_as_notified()
+    {
+        var (snap, _, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var occasionId = Guid.NewGuid();
+        var target = new ExportModel
+        {
+            Occasions = { new OccasionDto { SyncId = occasionId, Title = "o", AnchorDate = DateTime.UtcNow.AddDays(-10), Direction = "Since", UpdatedAt = T } },
+            Milestones =
+            {
+                new MilestoneDto { SyncId = Guid.NewGuid(), OccasionSyncId = occasionId, Label = "reached", ThresholdDays = 5, UpdatedAt = T },
+                new MilestoneDto { SyncId = Guid.NewGuid(), OccasionSyncId = occasionId, Label = "future", ThresholdDays = 100, UpdatedAt = T },
+            },
+        };
+
+        await snap.ApplyAsync(target, new SnapshotApplyOptions(TakeNotifiedFromTarget: false));
+
+        var milestones = await db.Milestones.ToListAsync();
+        Assert.True(milestones.Single(m => m.ThresholdDays == 5).Notified);
+        Assert.False(milestones.Single(m => m.ThresholdDays == 100).Notified);
+    }
+
+    [Fact]
+    public async Task Purge_removes_only_old_tombstones()
+    {
+        var (snap, occ, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var old = await occ.CreateAsync(new Occasion { Title = "old", AnchorDate = DateTime.UtcNow });
+        var recent = await occ.CreateAsync(new Occasion { Title = "recent", AnchorDate = DateTime.UtcNow });
+        await occ.CreateAsync(new Occasion { Title = "live", AnchorDate = DateTime.UtcNow });
+        await occ.DeleteAsync(old.Id);
+        await occ.DeleteAsync(recent.Id);
+        db.StampTimestamps = false;
+        (await db.Occasions.IgnoreQueryFilters().SingleAsync(o => o.Id == old.Id)).DeletedAt = T.AddDays(-200);
+        (await db.Occasions.IgnoreQueryFilters().SingleAsync(o => o.Id == recent.Id)).DeletedAt = T.AddDays(-5);
+        await db.SaveChangesAsync();
+        db.StampTimestamps = true;
+
+        var removed = await snap.PurgeTombstonesAsync(T.AddDays(-90));
+
+        Assert.Equal(1, removed);
+        Assert.Equal(2, await db.Occasions.IgnoreQueryFilters().CountAsync());
+    }
+}
