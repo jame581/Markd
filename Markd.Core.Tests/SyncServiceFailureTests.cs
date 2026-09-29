@@ -132,6 +132,74 @@ public class SyncServiceFailureTests
         Assert.Equal(new[] { "Base", "From A", "From B" }, await a.TitlesAsync());
     }
 
+    private static async Task<(SyncDevice a, SyncDevice b, InMemoryCloudProvider cloud, int tripId)> TripEditedOnAAsync()
+    {
+        var a = new SyncDevice();
+        var b = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        var trip = await a.AddOccasionAsync("Trip");
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+        await RenameAsync(a, trip.Id, "Trip v1");
+        await a.Sync.SyncAsync(cloud);
+        await b.AddOccasionAsync("Y");
+        return (a, b, cloud, trip.Id);
+    }
+
+    private static async Task RenameAsync(SyncDevice device, int id, string title)
+    {
+        var occasion = (await device.Occasions.GetByIdAsync(id))!;
+        occasion.Title = title;
+        await device.Occasions.UpdateAsync(occasion);
+    }
+
+    [Fact]
+    public async Task Losing_the_upload_race_after_adopting_a_remote_edit_is_not_a_conflict()
+    {
+        var (a, b, cloud, tripId) = await TripEditedOnAAsync();
+        using var _a = a;
+        using var _b = b;
+
+        // b has applied a's "Trip v1" and is about to upload its Y when a edits the trip again and wins the race
+        cloud.BeforeUpload = () => Task.Run(async () =>
+        {
+            await RenameAsync(a, tripId, "Trip v2");
+            await a.Sync.SyncAsync(cloud);
+        }).GetAwaiter().GetResult();
+        var result = await b.Sync.SyncAsync(cloud);
+
+        Assert.Equal(SyncOutcome.Synced, result.Outcome);
+        Assert.Equal(new[] { "Trip v2", "Y" }, await b.TitlesAsync());
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);
+        Assert.Equal(new[] { "Trip v2", "Y" }, await a.TitlesAsync());
+        Assert.Equal(SyncOutcome.NoChanges, (await a.Sync.SyncAsync(cloud)).Outcome);
+        Assert.Equal(SyncOutcome.NoChanges, (await b.Sync.SyncAsync(cloud)).Outcome);
+    }
+
+    [Fact]
+    public async Task Going_offline_after_adopting_a_remote_edit_is_not_a_conflict_on_the_next_sync()
+    {
+        var (a, b, cloud, tripId) = await TripEditedOnAAsync();
+        using var _a = a;
+        using var _b = b;
+
+        // b applies a's "Trip v1" and then loses the network before its upload
+        cloud.BeforeUpload = () => throw new SyncOfflineException();
+        Assert.Equal(SyncOutcome.Offline, (await b.Sync.SyncAsync(cloud)).Outcome);
+        Assert.Equal(new[] { "Trip v1", "Y" }, await b.TitlesAsync());
+        await RenameAsync(a, tripId, "Trip v2");
+        await a.Sync.SyncAsync(cloud);
+
+        var result = await b.Sync.SyncAsync(cloud);
+
+        Assert.Equal(SyncOutcome.Synced, result.Outcome);
+        Assert.Equal(new[] { "Trip v2", "Y" }, await b.TitlesAsync());
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);
+        Assert.Equal(new[] { "Trip v2", "Y" }, await a.TitlesAsync());
+        Assert.Equal(SyncOutcome.NoChanges, (await a.Sync.SyncAsync(cloud)).Outcome);
+        Assert.Equal(SyncOutcome.NoChanges, (await b.Sync.SyncAsync(cloud)).Outcome);
+    }
+
     [Fact]
     public async Task Giving_up_after_repeated_races_is_a_failure_not_a_hang()
     {

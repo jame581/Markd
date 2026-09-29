@@ -122,6 +122,17 @@ namespace Markd.Core.Sync
             string newRevision;
             if (remoteRevision is null || mergedPrint != SyncContent.Fingerprint(remote))
             {
+                if (!remoteMissing)
+                {
+                    // Local data now holds everything the remote had at remoteRevision, so that remote is the common
+                    // ancestor. Store it before uploading: if the upload loses a race (or the network drops), the next
+                    // merge must not read the records this device just adopted as its own edits.
+                    state.BaseSnapshotJson = ExportModelJson.Serialize(remote, indented: false);
+                    state.RemoteRevision = remoteRevision;
+                    state.Epoch = merged.SyncEpoch;
+                    await store.SaveAsync(state);
+                }
+
                 var bytes = await Task.Run(() => SyncSnapshotCodec.Encode(merged, passphrase, options.KdfIterations), ct);
                 try
                 {
