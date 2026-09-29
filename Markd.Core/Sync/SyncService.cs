@@ -63,6 +63,7 @@ namespace Markd.Core.Sync
                 return new SyncResult(SyncOutcome.NoChanges);
             }
 
+            var remoteMissing = info is null;
             ExportModel remote;
             string? remoteRevision = info?.Revision;
             if (info is null)
@@ -76,6 +77,7 @@ namespace Markd.Core.Sync
                 {
                     remote = SyncMerger.Empty();
                     remoteRevision = null;
+                    remoteMissing = true;
                     baseModel = null;
                 }
                 else
@@ -99,7 +101,9 @@ namespace Markd.Core.Sync
                 return new SyncResult(SyncOutcome.NeedsConflictResolution, merge.Conflicts);
 
             var merged = merge.Merged;
-            merged.SyncEpoch = remote.SyncEpoch ?? state.Epoch ?? Guid.NewGuid();
+            // A missing cloud file starts a new lineage: reusing the old epoch would let other devices keep their
+            // base and read everything this device never saw as "deleted remotely".
+            merged.SyncEpoch = remoteMissing ? Guid.NewGuid() : (remote.SyncEpoch ?? state.Epoch ?? Guid.NewGuid());
             var mergedPrint = SyncContent.Fingerprint(merged);
 
             if (mergedPrint != SyncContent.Fingerprint(local) || merge.SyncIdRemaps.Count > 0)

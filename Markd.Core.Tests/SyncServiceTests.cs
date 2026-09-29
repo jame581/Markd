@@ -219,4 +219,26 @@ public class SyncServiceTests
         Assert.Equal(1, cloud.Uploads);
         Assert.Single(await a.Occasions.GetAllAsync());
     }
+
+    [Fact]
+    public async Task A_deleted_cloud_file_re_uploaded_by_a_lagging_device_does_not_erase_the_other_devices_data()
+    {
+        using var a = new SyncDevice();
+        using var b = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionAsync("X");
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+        await b.AddOccasionAsync("R");
+        await b.Sync.SyncAsync(cloud);
+
+        await cloud.DeleteAsync(default);
+        await a.Sync.SyncAsync(cloud);   // re-uploads X only
+        var result = await b.Sync.SyncAsync(cloud);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(new[] { "R", "X" }, await b.TitlesAsync());
+        await a.Sync.SyncAsync(cloud);
+        Assert.Equal(new[] { "R", "X" }, await a.TitlesAsync());
+    }
 }
