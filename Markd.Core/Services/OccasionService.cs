@@ -72,6 +72,9 @@ namespace Markd.Core.Services
                 milestone.DeletedAt = null;
 
             await db.SaveChangesAsync();
+
+            // The unfiltered load also attached milestones deleted before the occasion; they stay tombstoned.
+            Forget(tombstone, tombstone.Milestones.Where(m => m.DeletedAt != null).ToList());
             return tombstone;
         }
 

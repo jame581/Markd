@@ -142,4 +142,23 @@ public class SoftDeleteServiceTests
         Assert.Single(await occasions.GetAllAsync());
         Assert.Single((await occasions.GetByIdAsync(restored.Id))!.Milestones);
     }
+
+    [Fact]
+    public async Task Undo_does_not_bring_back_milestones_deleted_before_the_occasion()
+    {
+        var (occasions, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var o = await occasions.CreateAsync(NewOccasion());
+        await occasions.AddMilestoneAsync(o.Id, 1, "keep");
+        var earlier = await occasions.AddMilestoneAsync(o.Id, 2, "removed earlier");
+        await occasions.RemoveMilestoneAsync(earlier.Id);
+        var snapshot = (await occasions.GetByIdAsync(o.Id))!;
+
+        await occasions.DeleteAsync(o.Id);
+        var restored = await occasions.RestoreAsync(snapshot);
+
+        Assert.Equal("keep", Assert.Single(restored.Milestones).Label);
+        Assert.Equal("keep", Assert.Single((await occasions.GetByIdAsync(o.Id))!.Milestones).Label);
+        Assert.Equal("keep", Assert.Single(await occasions.GetPendingMilestonesAsync()).Item2.Label);
+    }
 }
