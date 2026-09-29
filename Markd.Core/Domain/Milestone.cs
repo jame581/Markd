@@ -1,8 +1,14 @@
 ﻿namespace Markd.Core.Domain
 {
-    public class Milestone
+    public class Milestone : ISyncEntity
     {
         public int Id { get; set; }
+
+        public Guid SyncId { get; set; } = Guid.NewGuid();
+
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? DeletedAt { get; set; }
 
         public int OccasionId { get; set; }
         public Occasion? Occasion { get; set; }
