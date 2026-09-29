@@ -68,6 +68,7 @@ namespace Markd.Core.Services
                 await db.SaveChangesAsync();
 
                 var occasionBySync = occasions.ToDictionary(o => o.SyncId);
+                var datesMoved = new HashSet<Guid>();
                 foreach (var dto in target.Occasions)
                 {
                     if (!occasionBySync.TryGetValue(dto.SyncId, out var occasion))
@@ -80,8 +81,11 @@ namespace Markd.Core.Services
                     occasion.Title = dto.Title;
                     occasion.Emoji = dto.Emoji;
                     occasion.ColorHex = dto.ColorHex;
+                    var newDirection = Enum.TryParse<OccasionDirection>(dto.Direction, true, out var direction) ? direction : OccasionDirection.Since;
+                    if (occasion.Id != 0 && (occasion.AnchorDate != dto.AnchorDate || occasion.Direction != newDirection))
+                        datesMoved.Add(dto.SyncId);
                     occasion.AnchorDate = dto.AnchorDate;
-                    occasion.Direction = Enum.TryParse<OccasionDirection>(dto.Direction, true, out var direction) ? direction : OccasionDirection.Since;
+                    occasion.Direction = newDirection;
                     occasion.Notes = dto.Notes;
                     occasion.CreatedAt = dto.CreatedAt == default ? dto.UpdatedAt : dto.CreatedAt;
                     occasion.UpdatedAt = dto.UpdatedAt;
@@ -114,8 +118,7 @@ namespace Markd.Core.Services
                         milestone = new Milestone { SyncId = dto.SyncId };
                         db.Milestones.Add(milestone);
                         milestoneBySync[dto.SyncId] = milestone;
-                        // A milestone that is already reached was announced on the device that has it: do not fire it
-                        // again here (UpdateAsync applies the same rule when a date moves).
+                        // A new milestone that is already reached was announced on the device that has it: do not fire it again here.
                         milestone.Notified = options.TakeNotifiedFromTarget
                             ? dto.Notified
                             : dto.DeletedAt is null && AlreadyReached(parent, dto);
@@ -123,6 +126,12 @@ namespace Markd.Core.Services
                     else if (options.TakeNotifiedFromTarget)
                     {
                         milestone.Notified = dto.Notified;
+                    }
+                    else if (datesMoved.Contains(dto.OccasionSyncId) || milestone.ThresholdDays != dto.ThresholdDays)
+                    {
+                        // Same rule as OccasionService.UpdateAsync: when the date, direction or threshold moves, reached
+                        // milestones count as announced and the rest notify when they land.
+                        milestone.Notified = dto.DeletedAt is null && AlreadyReached(parent, dto);
                     }
 
                     milestone.OccasionId = parent.Id;

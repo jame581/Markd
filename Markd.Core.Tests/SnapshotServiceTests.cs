@@ -199,6 +199,59 @@ public class SnapshotServiceTests
         Assert.False(milestones.Single(m => m.ThresholdDays == 100).Notified);
     }
 
+    private static async Task<(SnapshotService Snap, Data.MarkdDbContext Db, IDisposable Conn, ExportModel Target, Occasion O, Milestone M)> Seed(int anchorDaysAgo, int threshold, bool notified)
+    {
+        var (snap, occ, _, db, conn) = Create();
+        var o = await occ.CreateAsync(new Occasion { Title = "o", AnchorDate = DateTime.UtcNow.AddDays(-anchorDaysAgo) });
+        var m = await occ.AddMilestoneAsync(o.Id, threshold, "m");
+        if (notified) await occ.MarkMilestoneNotifiedAsync(m.Id);
+        return (snap, db, conn, await snap.ReadForSyncAsync(), o, m);
+    }
+
+    private static async Task<bool> NotifiedAfter(SnapshotService snap, Data.MarkdDbContext db, ExportModel target)
+    {
+        await snap.ApplyAsync(target, new SnapshotApplyOptions(false));
+        return (await db.Milestones.SingleAsync()).Notified;
+    }
+
+    [Fact]
+    public async Task Apply_marks_an_existing_milestone_notified_when_the_anchor_moves_into_the_past()
+    {
+        var (snap, db, conn, target, _, _) = await Seed(1, 5, false);
+        using var _ = conn; using var __ = db;
+        target.Occasions[0].AnchorDate = DateTime.UtcNow.AddDays(-20);
+        Assert.True(await NotifiedAfter(snap, db, target));
+    }
+
+    [Fact]
+    public async Task Apply_clears_Notified_of_an_existing_milestone_when_the_anchor_moves_into_the_future()
+    {
+        var (snap, db, conn, target, _, _) = await Seed(20, 5, true);
+        using var _ = conn; using var __ = db;
+        target.Occasions[0].AnchorDate = DateTime.UtcNow;
+        Assert.False(await NotifiedAfter(snap, db, target));
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task Apply_keeps_local_Notified_when_only_the_title_changes(bool notified)
+    {
+        var (snap, db, conn, target, _, _) = await Seed(20, 5, notified);
+        using var _ = conn; using var __ = db;
+        target.Occasions[0].Title = "renamed";
+        Assert.Equal(notified, await NotifiedAfter(snap, db, target));
+    }
+
+    [Fact]
+    public async Task Apply_recomputes_Notified_when_the_threshold_changes()
+    {
+        var (snap, db, conn, target, _, _) = await Seed(20, 100, false);
+        using var _ = conn; using var __ = db;
+        target.Milestones[0].ThresholdDays = 5;
+        Assert.True(await NotifiedAfter(snap, db, target));
+    }
+
     [Fact]
     public async Task Purge_removes_only_old_tombstones()
     {
