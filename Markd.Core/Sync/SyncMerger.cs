@@ -131,17 +131,6 @@ namespace Markd.Core.Sync
         }
     }
 
-    /// <summary>Cascades between record kinds. Filled in by Task 8.</summary>
-    internal static class MergeCascades
-    {
-        public static void Apply(
-            ExportModel baseModel, ExportModel local, ExportModel remote,
-            Dictionary<Guid, CategoryDto> categories, Dictionary<Guid, OccasionDto> occasions, Dictionary<Guid, MilestoneDto> milestones,
-            HashSet<Guid> liveOverDeadOccasions, DateTime nowUtc)
-        {
-        }
-    }
-
     /// <summary>First-sync matching. Filled in by Task 9.</summary>
     internal static class FirstSyncAligner
     {

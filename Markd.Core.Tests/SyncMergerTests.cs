@@ -117,9 +117,17 @@ public class SyncMergerTests
         var b = Model(o: [Occ(1, "a")]);
         var l = Model(o: [Occ(1, "mine")]);
         var r = Model(o: [Occ(1, "a", deleted: true)]);
-        SyncMerger.Merge(b, l, r, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
+        var result = SyncMerger.Merge(b, l, r, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
         Assert.Equal("mine", l.Occasions[0].Title);
         Assert.Null(l.Occasions[0].DeletedAt);
+        Assert.Equal("a", b.Occasions[0].Title);
+        Assert.Null(b.Occasions[0].DeletedAt);
+        Assert.Equal("a", r.Occasions[0].Title);
+        Assert.NotNull(r.Occasions[0].DeletedAt);
+        var merged = Assert.Single(result.Merged.Occasions);
+        Assert.NotSame(l.Occasions[0], merged);
+        Assert.NotSame(r.Occasions[0], merged);
+        Assert.NotSame(b.Occasions[0], merged);
     }
 
     [Fact]
