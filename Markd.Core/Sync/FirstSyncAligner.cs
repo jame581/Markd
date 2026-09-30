@@ -25,7 +25,7 @@ namespace Markd.Core.Sync
 
             Pair(result.Categories.Where(c => c.DeletedAt is null && !remoteIds.Contains(c.SyncId)),
                  remote.Categories.Where(c => c.DeletedAt is null && !localIds.Contains(c.SyncId)),
-                 c => c.SyncId, c => Norm(c.Name), remaps);
+                 c => c.SyncId, c => (Name: Norm(c.Name), c.Emoji, c.ColorHex), remaps);   // the identity MergeCascades collapses on
 
             Pair(result.Occasions.Where(o => o.DeletedAt is null && !remoteIds.Contains(o.SyncId)),
                  remote.Occasions.Where(o => o.DeletedAt is null && !localIds.Contains(o.SyncId)),
@@ -51,8 +51,8 @@ namespace Markd.Core.Sync
             return result;
         }
 
-        private static void Pair<T>(IEnumerable<T> locals, IEnumerable<T> remotes, Func<T, Guid> id, Func<T, string> key,
-            Dictionary<Guid, Guid> remaps)
+        private static void Pair<T, TKey>(IEnumerable<T> locals, IEnumerable<T> remotes, Func<T, Guid> id, Func<T, TKey> key,
+            Dictionary<Guid, Guid> remaps) where TKey : notnull
         {
             var remoteByKey = remotes.OrderBy(id).GroupBy(key).ToDictionary(g => g.Key, g => new Queue<T>(g));
             foreach (var l in locals.OrderBy(id))

@@ -37,6 +37,35 @@ public class FirstSyncAlignerTests
         Assert.Single(result.Merged.Milestones.Where(m => m.DeletedAt is null));
     }
 
+    [Theory]
+    [InlineData("🎉", null, "🎂", null)]
+    [InlineData(null, "#FF0000", null, "#00FF00")]
+    [InlineData("🎉", null, null, null)]
+    public void Categories_with_the_same_name_but_another_emoji_or_colour_stay_separate(
+        string? localEmoji, string? localColor, string? remoteEmoji, string? remoteColor)
+    {
+        var lc = Cat(10, "Family"); lc.Emoji = localEmoji; lc.ColorHex = localColor;
+        var rc = Cat(20, "Family"); rc.Emoji = remoteEmoji; rc.ColorHex = remoteColor;
+
+        var result = SyncMerger.Merge(null, Model(c: [lc]), Model(c: [rc]), Now);
+
+        Assert.Empty(result.Conflicts);
+        Assert.Empty(result.SyncIdRemaps);
+        Assert.Equal(new[] { G(10), G(20) }, result.Merged.Categories.Where(c => c.DeletedAt is null).Select(c => c.SyncId).Order());
+    }
+
+    [Fact]
+    public void Categories_with_the_same_emoji_and_colour_match_despite_name_case()
+    {
+        var lc = Cat(10, "Family"); lc.Emoji = "🎉"; lc.ColorHex = "#FF0000";
+        var rc = Cat(20, " family"); rc.Emoji = "🎉"; rc.ColorHex = "#FF0000";
+
+        var result = SyncMerger.Merge(null, Model(c: [lc]), Model(c: [rc]), Now);
+
+        Assert.Equal(G(20), result.SyncIdRemaps[G(10)]);
+        Assert.Single(result.Merged.Categories.Where(c => c.DeletedAt is null));
+    }
+
     [Fact]
     public void Different_events_are_all_kept()
     {
