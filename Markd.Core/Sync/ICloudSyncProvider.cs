@@ -4,12 +4,20 @@ namespace Markd.Core.Sync
 
     public sealed record RemoteFile(byte[] Data, string Revision);
 
-    /// <summary>One cloud location holding one file. Implementations live in the app project (they need sign-in).</summary>
+    /// <summary>
+    /// One cloud location holding one file. Implementations live in the app project (they need sign-in).
+    /// Revision strings must be unique per file version across files (for example include the file id), so that
+    /// equal strings never mean equal content across accounts.
+    /// </summary>
     public interface ICloudSyncProvider
     {
         string Id { get; }
 
-        /// <summary>The signed-in account, for display. Null when the provider does not know it.</summary>
+        /// <summary>
+        /// A stable identifier of the signed-in account, also shown to the user. Null when the provider does not know
+        /// it. It must not be a display name that can change: a different value is treated as another account, which
+        /// resets the link and makes the next sync a first-sync merge.
+        /// </summary>
         string? AccountName { get; }
 
         /// <summary>Cheap metadata call. Null when no file exists yet.</summary>

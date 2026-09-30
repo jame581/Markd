@@ -43,9 +43,11 @@ namespace Markd.Core.Sync
         {
             var now = clock.GetUtcNow().UtcDateTime;
             var state = await store.LoadAsync();
-            if (state.ProviderId != provider.Id)
-                state = new SyncState { ProviderId = provider.Id };
-            state.AccountName = provider.AccountName;   // never a stale name from another provider
+            // Another provider or another account on the same provider is another file: its revision strings say
+            // nothing about ours, so start over as a first sync (no base, no revision, no epoch) and merge.
+            if (!string.Equals(state.ProviderId, provider.Id, StringComparison.Ordinal)
+                || !string.Equals(state.AccountName, provider.AccountName, StringComparison.Ordinal))
+                state = new SyncState { ProviderId = provider.Id, AccountName = provider.AccountName };
 
             var info = await provider.GetInfoAsync(ct);
             var local = await snapshots.ReadForSyncAsync();

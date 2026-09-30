@@ -261,6 +261,35 @@ public class SyncServiceFailureTests
     }
 
     [Fact]
+    public async Task Switching_account_on_the_same_provider_merges_instead_of_overwriting_the_other_accounts_file()
+    {
+        using var a = new SyncDevice();
+        var personal = new InMemoryCloudProvider { AccountName = "personal@test" };
+        await a.AddOccasionAsync("Mine");
+        await a.Sync.SyncAsync(personal);
+
+        // the other account on the same provider already holds another device's data under the same revision string
+        using var other = new SyncDevice();
+        var work = new InMemoryCloudProvider { AccountName = "work@test" };
+        await other.AddOccasionAsync("Theirs");
+        await other.Sync.SyncAsync(work);
+        Assert.Equal(personal.Id, work.Id);
+        Assert.Equal(personal.Revision, work.Revision);   // the collision this test relies on
+
+        var switched = await a.Sync.SyncAsync(work);
+        await a.AddOccasionAsync("Later");
+        var edited = await a.Sync.SyncAsync(work);
+
+        Assert.Equal(SyncOutcome.Synced, switched.Outcome);
+        Assert.Equal(SyncOutcome.Synced, edited.Outcome);
+        Assert.Equal(new[] { "Later", "Mine", "Theirs" }, await a.TitlesAsync());
+        Assert.Contains("Theirs", SyncSnapshotCodec.Decode(work.Data!, "pass").Occasions.Where(o => o.DeletedAt is null).Select(o => o.Title));
+        Assert.Equal("work@test", (await a.State.LoadAsync()).AccountName);
+        Assert.True((await other.Sync.SyncAsync(work)).IsSuccess);
+        Assert.Equal(new[] { "Later", "Mine", "Theirs" }, await other.TitlesAsync());
+    }
+
+    [Fact]
     public async Task ReplaceRemote_overwrites_the_cloud_with_this_device_under_a_new_passphrase()
     {
         using var a = new SyncDevice("old");
