@@ -234,6 +234,28 @@ public class SyncServiceFailureTests
 
         Assert.Equal(SyncOutcome.Failed, result.Outcome);
         Assert.Equal(3, attempts);
+        Assert.Equal("The remote file kept changing.", result.Detail);
+    }
+
+    [Fact]
+    public async Task Giving_up_after_repeated_local_edits_names_local_changes_as_the_reason()
+    {
+        using var a = new SyncDevice();
+        using var b = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        await b.AddOccasionAsync("From B");
+        await b.Sync.SyncAsync(cloud);
+        await a.AddOccasionAsync("Old on A");
+        var edits = 0;
+        var editing = new EditingProvider(cloud,
+            () => Task.Run(() => a.AddOccasionAsync($"Typed meanwhile {++edits}")).GetAwaiter().GetResult());
+
+        var result = await a.Sync.SyncAsync(editing);
+
+        Assert.Equal(SyncOutcome.Failed, result.Outcome);
+        Assert.Equal(3, edits);
+        Assert.Equal("Local data kept changing during the sync.", result.Detail);
+        Assert.Equal(1, cloud.Uploads);
     }
 
     [Fact]
@@ -431,6 +453,21 @@ public class SyncServiceFailureTests
         public string? AccountName => "me@other";
         public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct) => inner.GetInfoAsync(ct);
         public Task<RemoteFile?> DownloadAsync(CancellationToken ct) => inner.DownloadAsync(ct);
+        public Task<string> UploadAsync(byte[] data, string? expected, CancellationToken ct) => inner.UploadAsync(data, expected, ct);
+        public Task DeleteAsync(CancellationToken ct) => inner.DeleteAsync(ct);
+    }
+
+    /// <summary>Simulates the user editing during every download.</summary>
+    private sealed class EditingProvider(InMemoryCloudProvider inner, Action onDownload) : ICloudSyncProvider
+    {
+        public string Id => inner.Id;
+        public string? AccountName => inner.AccountName;
+        public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct) => inner.GetInfoAsync(ct);
+        public Task<RemoteFile?> DownloadAsync(CancellationToken ct)
+        {
+            onDownload();
+            return inner.DownloadAsync(ct);
+        }
         public Task<string> UploadAsync(byte[] data, string? expected, CancellationToken ct) => inner.UploadAsync(data, expected, ct);
         public Task DeleteAsync(CancellationToken ct) => inner.DeleteAsync(ct);
     }

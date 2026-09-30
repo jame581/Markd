@@ -21,14 +21,17 @@ namespace Markd.Core.Sync
                     if (string.IsNullOrEmpty(passphrase))
                         return new SyncResult(SyncOutcome.NeedsPassphrase);
 
+                    var retry = RetryReason.RemoteChanged;
                     for (var attempt = 0; attempt < Math.Max(1, options.MaxUploadAttempts); attempt++)
                     {
-                        var result = await TryOnceAsync(provider, passphrase, resolutions, ct);
+                        (var result, retry) = await TryOnceAsync(provider, passphrase, resolutions, ct);
                         if (result is not null)
                             return result;
                     }
 
-                    return new SyncResult(SyncOutcome.Failed, Detail: "The remote file kept changing.");
+                    return new SyncResult(SyncOutcome.Failed, Detail: retry == RetryReason.LocalChanged
+                        ? "Local data kept changing during the sync."
+                        : "The remote file kept changing.");
                 }, ct);
             }
             finally
@@ -37,8 +40,13 @@ namespace Markd.Core.Sync
             }
         }
 
-        /// <summary>Returns null when the upload lost a race and the attempt must be repeated.</summary>
-        private async Task<SyncResult?> TryOnceAsync(
+        private enum RetryReason { RemoteChanged, LocalChanged }
+
+        /// <summary>
+        /// Returns a null result when the attempt must be repeated, with the reason: the upload lost a race, or the
+        /// user edited while the sync was running.
+        /// </summary>
+        private async Task<(SyncResult? Result, RetryReason Retry)> TryOnceAsync(
             ICloudSyncProvider provider, string passphrase, IReadOnlyDictionary<Guid, ConflictChoice>? resolutions, CancellationToken ct)
         {
             var now = clock.GetUtcNow().UtcDateTime;
@@ -63,7 +71,7 @@ namespace Markd.Core.Sync
                 state.LastSyncUtc = now;
                 state.LastResult = nameof(SyncOutcome.NoChanges);
                 await store.SaveAsync(state);
-                return new SyncResult(SyncOutcome.NoChanges);
+                return Done(new SyncResult(SyncOutcome.NoChanges));
             }
 
             var remoteMissing = info is null;
@@ -101,7 +109,7 @@ namespace Markd.Core.Sync
 
             var merge = SyncMerger.Merge(baseModel, local, remote, now, resolutions);
             if (merge.Conflicts.Count > 0)
-                return new SyncResult(SyncOutcome.NeedsConflictResolution, merge.Conflicts);
+                return Done(new SyncResult(SyncOutcome.NeedsConflictResolution, merge.Conflicts));
 
             var merged = merge.Merged;
             // A missing cloud file starts a new lineage: reusing the old epoch would let other devices keep their
@@ -119,7 +127,7 @@ namespace Markd.Core.Sync
                 }
                 catch (SnapshotChangedException)
                 {
-                    return null;   // the user edited while we were talking to the cloud: merge again from fresh data
+                    return (null, RetryReason.LocalChanged);   // the user edited while we were talking to the cloud: merge again from fresh data
                 }
             }
 
@@ -144,7 +152,7 @@ namespace Markd.Core.Sync
                 }
                 catch (RevisionConflictException)
                 {
-                    return null;
+                    return (null, RetryReason.RemoteChanged);
                 }
             }
             else
@@ -160,8 +168,10 @@ namespace Markd.Core.Sync
             state.LastResult = nameof(SyncOutcome.Synced);
             state.BaseSnapshotJson = ExportModelJson.Serialize(merged, indented: false);
             await store.SaveAsync(state);
-            return new SyncResult(SyncOutcome.Synced);
+            return Done(new SyncResult(SyncOutcome.Synced));
         }
+
+        private static (SyncResult? Result, RetryReason Retry) Done(SyncResult result) => (result, default);
 
         private static ExportModel? ParseBase(string? json)
         {
