@@ -147,6 +147,43 @@ public class SoftDeleteServiceTests
     }
 
     [Fact]
+    public async Task Undo_twice_leaves_one_live_record()
+    {
+        var (occasions, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var o = await occasions.CreateAsync(NewOccasion("X"));
+        var snapshot = (await occasions.GetByIdAsync(o.Id))!;
+
+        await occasions.DeleteAsync(o.Id);
+        var first = await occasions.RestoreAsync(snapshot);
+        var second = await occasions.RestoreAsync(snapshot);
+
+        Assert.Equal(o.Id, first.Id);
+        Assert.Equal(o.Id, second.Id);
+        Assert.Equal(o.Id, Assert.Single(await occasions.GetAllAsync()).Id);
+        Assert.Equal(1, await db.Occasions.IgnoreQueryFilters().CountAsync());
+    }
+
+    [Fact]
+    public async Task Undo_after_a_sync_already_revived_the_record_leaves_one_live_record()
+    {
+        var (occasions, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var snapshots = new SnapshotService(db);
+        var o = await occasions.CreateAsync(NewOccasion("X"));
+        var snapshot = (await occasions.GetByIdAsync(o.Id))!;
+        var remoteWithX = await snapshots.ReadForSyncAsync();
+
+        await occasions.DeleteAsync(o.Id);
+        await snapshots.ApplyAsync(remoteWithX, new SnapshotApplyOptions(TakeNotifiedFromTarget: false));   // the delete was undone by a sync
+        var restored = await occasions.RestoreAsync(snapshot);
+
+        Assert.Equal(o.Id, restored.Id);
+        Assert.Equal(o.Id, Assert.Single(await occasions.GetAllAsync()).Id);
+        Assert.Equal(1, await db.Occasions.IgnoreQueryFilters().CountAsync());
+    }
+
+    [Fact]
     public async Task Undo_of_a_record_that_no_longer_exists_inserts_a_fresh_copy()
     {
         var (occasions, _, db, conn) = Create();

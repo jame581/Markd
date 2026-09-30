@@ -21,6 +21,11 @@ namespace Markd.Core.Services
 
         public async Task<Occasion> RestoreAsync(Occasion snapshot)
         {
+            // Already live again (undo pressed twice, or a sync brought it back): nothing to restore, never a copy.
+            var live = await db.Occasions.FirstOrDefaultAsync(o => o.SyncId == snapshot.SyncId);
+            if (live is not null)
+                return live;
+
             var tombstone = await db.Occasions.IgnoreQueryFilters().Include(o => o.Milestones)
                 .FirstOrDefaultAsync(o => o.SyncId == snapshot.SyncId && o.DeletedAt != null);
             if (tombstone is not null)

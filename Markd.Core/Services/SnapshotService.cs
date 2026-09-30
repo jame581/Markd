@@ -37,7 +37,8 @@ namespace Markd.Core.Services
                 }
 
                 // Free the single pin first: the unique index would reject an intermediate state with two pins.
-                foreach (var o in occasions.Where(o => o.IsPinned))
+                // Tombstones are outside that index and keep their pin, so undo can restore it.
+                foreach (var o in occasions.Where(o => o.IsPinned && o.DeletedAt is null))
                     o.IsPinned = false;
                 await db.SaveChangesAsync();
 
@@ -90,7 +91,7 @@ namespace Markd.Core.Services
                     occasion.CreatedAt = dto.CreatedAt == default ? dto.UpdatedAt : dto.CreatedAt;
                     occasion.UpdatedAt = dto.UpdatedAt;
                     occasion.DeletedAt = dto.DeletedAt;
-                    occasion.IsPinned = dto.IsPinned && dto.DeletedAt is null;
+                    occasion.IsPinned = dto.IsPinned;
                     occasion.CategoryId = dto.CategorySyncId is { } categorySyncId
                         && categoryBySync.TryGetValue(categorySyncId, out var category) && category.DeletedAt is null
                             ? category.Id

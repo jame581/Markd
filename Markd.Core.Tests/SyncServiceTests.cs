@@ -28,6 +28,32 @@ public class SyncServiceTests
     }
 
     [Fact]
+    public async Task Undo_after_a_sync_applied_another_devices_change_keeps_the_pin()
+    {
+        using var a = new SyncDevice();
+        using var b = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        var x = await a.AddOccasionAsync("X");
+        await a.Occasions.SetPinnedAsync(x.Id);
+        await a.AddOccasionAsync("Y");
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+        var yOnB = (await b.Occasions.GetAllAsync()).Single(o => o.Title == "Y");
+        yOnB.Notes = "from b";
+        await b.Occasions.UpdateAsync(yOnB);
+        await b.Sync.SyncAsync(cloud);
+
+        var snapshot = (await a.Occasions.GetByIdAsync(x.Id))!;
+        await a.Occasions.DeleteAsync(x.Id);
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);   // applies b's note while X is a tombstone
+        var restored = await a.Occasions.RestoreAsync(snapshot);
+
+        Assert.Equal(x.Id, restored.Id);
+        Assert.True(restored.IsPinned);
+        Assert.True((await a.Occasions.GetByIdAsync(x.Id))!.IsPinned);
+    }
+
+    [Fact]
     public async Task A_second_empty_device_downloads_everything()
     {
         using var a = new SyncDevice();
