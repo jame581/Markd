@@ -48,6 +48,37 @@ public class SyncSnapshotCodecTests
         Assert.Throws<SnapshotTooNewException>(() => SyncSnapshotCodec.Decode(bytes, "p"));
     }
 
+    /// <summary>Header layout (MarkdPackage): "MARKD", format version byte, KDF id byte, iterations (uint32 LE).</summary>
+    internal static byte[] PackageWithPatchedHeader(string field)
+    {
+        var bytes = SyncSnapshotCodec.Encode(Model(), "p", Fast);
+        switch (field)
+        {
+            case "version": bytes[5] = 3; break;
+            case "kdf": bytes[6] = 2; break;
+            case "iterations": System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(bytes.AsSpan(7, 4), MarkdPackage.MaxIterations + 1); break;
+            default: throw new ArgumentOutOfRangeException(nameof(field));
+        }
+        return bytes;
+    }
+
+    [Theory]
+    [InlineData("version")]
+    [InlineData("kdf")]
+    [InlineData("iterations")]
+    public void A_newer_package_format_is_reported_as_too_new(string field)
+    {
+        var bytes = PackageWithPatchedHeader(field);
+        Assert.Throws<SnapshotTooNewException>(() => SyncSnapshotCodec.Decode(bytes, "p"));
+    }
+
+    [Fact]
+    public void A_truncated_package_is_a_format_error()
+    {
+        var bytes = SyncSnapshotCodec.Encode(Model(), "p", Fast);
+        Assert.Throws<SnapshotFormatException>(() => SyncSnapshotCodec.Decode(bytes[..(MarkdPackage.HeaderSize - 1)], "p"));
+    }
+
     [Fact]
     public void Schema_1_is_not_a_sync_snapshot()
     {

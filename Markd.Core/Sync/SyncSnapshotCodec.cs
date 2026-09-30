@@ -6,8 +6,17 @@ namespace Markd.Core.Sync
 {
     public sealed class SnapshotFormatException(string message, Exception? inner = null) : InvalidOperationException(message, inner);
 
-    public sealed class SnapshotTooNewException(string schemaVersion)
-        : InvalidOperationException($"Snapshot schema {schemaVersion} is newer than this app understands.");
+    public sealed class SnapshotTooNewException : InvalidOperationException
+    {
+        public SnapshotTooNewException(string schemaVersion)
+            : base($"Snapshot schema {schemaVersion} is newer than this app understands.") { }
+
+        private SnapshotTooNewException(string message, Exception inner) : base(message, inner) { }
+
+        /// <summary>The package header (format version, KDF or its parameters) is newer than this app understands.</summary>
+        public static SnapshotTooNewException PackageFormat(Exception inner) =>
+            new("The remote package format is newer than this app understands.", inner);
+    }
 
     public static class SyncSnapshotCodec
     {
@@ -34,10 +43,16 @@ namespace Markd.Core.Sync
             {
                 plain = MarkdPackage.Decrypt(data, passphrase);
             }
-            catch (MarkdPackageException ex) when (ex.Error is PackageError.Truncated or PackageError.UnsupportedVersion
+            catch (MarkdPackageException ex) when (ex.Error is PackageError.UnsupportedVersion
                                                     or PackageError.UnsupportedKdf or PackageError.InvalidIterations)
             {
-                throw new SnapshotFormatException("The remote file is damaged or from an unknown format.", ex);
+                // A later app may raise the format, change the KDF or raise the iteration count: ask for an update,
+                // never steer the user toward replacing the newer app's data.
+                throw SnapshotTooNewException.PackageFormat(ex);
+            }
+            catch (MarkdPackageException ex) when (ex.Error is PackageError.Truncated)
+            {
+                throw new SnapshotFormatException("The remote file is damaged.", ex);
             }
 
             try
