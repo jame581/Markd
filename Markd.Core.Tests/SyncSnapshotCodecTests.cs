@@ -49,17 +49,28 @@ public class SyncSnapshotCodecTests
     }
 
     /// <summary>Header layout (MarkdPackage): "MARKD", format version byte, KDF id byte, iterations (uint32 LE).</summary>
-    internal static byte[] PackageWithPatchedHeader(string field)
+    internal static byte[] PackageWithPatchedHeader(string field, uint? value = null)
     {
         var bytes = SyncSnapshotCodec.Encode(Model(), "p", Fast);
         switch (field)
         {
-            case "version": bytes[5] = 3; break;
-            case "kdf": bytes[6] = 2; break;
-            case "iterations": System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(bytes.AsSpan(7, 4), MarkdPackage.MaxIterations + 1); break;
+            case "version": bytes[5] = (byte)(value ?? 3); break;
+            case "kdf": bytes[6] = (byte)(value ?? 2); break;
+            case "iterations": System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(bytes.AsSpan(7, 4), value ?? MarkdPackage.MaxIterations + 1); break;
             default: throw new ArgumentOutOfRangeException(nameof(field));
         }
         return bytes;
+    }
+
+    [Theory]
+    [InlineData("version", 0u)]
+    [InlineData("version", 1u)]
+    [InlineData("kdf", 0u)]
+    [InlineData("iterations", 5u)]
+    public void An_older_or_invalid_package_header_is_a_format_error(string field, uint value)
+    {
+        var bytes = PackageWithPatchedHeader(field, value);
+        Assert.Throws<SnapshotFormatException>(() => SyncSnapshotCodec.Decode(bytes, "p"));
     }
 
     [Theory]

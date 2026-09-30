@@ -25,8 +25,8 @@ public static class MarkdPackage
     public const int MinIterations = 100_000;
     public const int MaxIterations = 2_000_000;
 
-    private const byte FormatVersion = 2;
-    private const byte KdfPbkdf2Sha256 = 1;
+    internal const byte FormatVersion = 2;
+    internal const byte KdfPbkdf2Sha256 = 1;
     private const int MagicSize = 5;
     private const int SaltSize = 16;
     private const int NonceSize = 12;

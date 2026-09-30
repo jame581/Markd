@@ -89,6 +89,23 @@ public class SyncServiceFailureTests
     }
 
     [Fact]
+    public async Task An_older_package_format_is_reported_as_unreadable_and_is_not_overwritten()
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        var bytes = SyncSnapshotCodecTests.PackageWithPatchedHeader("version", 1);
+        cloud.Put(bytes);
+        await a.AddOccasionAsync("local");
+
+        var result = await a.Sync.SyncAsync(cloud);
+
+        Assert.Equal(SyncOutcome.RemoteUnreadable, result.Outcome);
+        Assert.Equal(bytes, cloud.Data);
+        Assert.Equal(0, cloud.Uploads);
+        Assert.Equal(new[] { "local" }, await a.TitlesAsync());
+    }
+
+    [Fact]
     public async Task A_corrupt_remote_file_is_reported_as_unreadable_and_is_not_overwritten()
     {
         using var a = new SyncDevice();

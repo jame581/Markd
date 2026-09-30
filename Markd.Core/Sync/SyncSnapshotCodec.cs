@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using Markd.Core.Services;
@@ -43,16 +44,16 @@ namespace Markd.Core.Sync
             {
                 plain = MarkdPackage.Decrypt(data, passphrase);
             }
-            catch (MarkdPackageException ex) when (ex.Error is PackageError.UnsupportedVersion
-                                                    or PackageError.UnsupportedKdf or PackageError.InvalidIterations)
+            catch (MarkdPackageException ex) when (IsNewerHeader(ex.Error, data))
             {
                 // A later app may raise the format, change the KDF or raise the iteration count: ask for an update,
                 // never steer the user toward replacing the newer app's data.
                 throw SnapshotTooNewException.PackageFormat(ex);
             }
-            catch (MarkdPackageException ex) when (ex.Error is PackageError.Truncated)
+            catch (MarkdPackageException ex) when (ex.Error is PackageError.Truncated or PackageError.UnsupportedVersion
+                                                    or PackageError.UnsupportedKdf or PackageError.InvalidIterations)
             {
-                throw new SnapshotFormatException("The remote file is damaged.", ex);
+                throw new SnapshotFormatException("The remote file is damaged or from an unknown format.", ex);
             }
 
             try
@@ -94,6 +95,24 @@ namespace Markd.Core.Sync
                 CryptographicOperations.ZeroMemory(plain);
             }
         }
+
+        // Header layout (MarkdPackage): "MARKD" magic, format version byte, KDF id byte, iterations (uint32 LE).
+        private const int VersionOffset = 5;
+        private const int KdfOffset = 6;
+        private const int IterationsOffset = 7;
+
+        /// <summary>
+        /// Only a header value above what this app writes can come from a later app. Older or invalid values are
+        /// damage, which the user can fix by replacing the cloud data.
+        /// </summary>
+        private static bool IsNewerHeader(PackageError error, byte[] data) => error switch
+        {
+            PackageError.UnsupportedVersion => data.Length > VersionOffset && data[VersionOffset] > MarkdPackage.FormatVersion,
+            PackageError.UnsupportedKdf => data.Length > KdfOffset && data[KdfOffset] > MarkdPackage.KdfPbkdf2Sha256,
+            PackageError.InvalidIterations => data.Length >= IterationsOffset + 4
+                && BinaryPrimitives.ReadUInt32LittleEndian(data.AsSpan(IterationsOffset, 4)) > MarkdPackage.MaxIterations,
+            _ => false,
+        };
 
         private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
         {
