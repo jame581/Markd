@@ -22,6 +22,22 @@ public class SyncServiceFailureTests
     }
 
     [Fact]
+    public async Task A_failed_attempt_record_is_not_saved_later_by_an_unrelated_change()
+    {
+        using var a = new SyncDevice();
+        await a.Db.Database.ExecuteSqlRawAsync(
+            "CREATE TRIGGER no_state BEFORE INSERT ON SyncStates BEGIN SELECT RAISE(ABORT, 'disk full'); END");
+        var result = await a.Sync.SyncAsync(new InMemoryCloudProvider { Offline = true });
+        Assert.Equal(SyncOutcome.Offline, result.Outcome);
+        await a.Db.Database.ExecuteSqlRawAsync("DROP TRIGGER no_state");
+
+        await a.AddOccasionAsync("Unrelated");
+
+        Assert.Empty(a.Db.ChangeTracker.Entries<SyncState>());
+        Assert.Equal(0, await a.Db.SyncStates.CountAsync());
+    }
+
+    [Fact]
     public async Task A_wrong_passphrase_is_reported_and_local_data_is_untouched()
     {
         using var a = new SyncDevice("right");

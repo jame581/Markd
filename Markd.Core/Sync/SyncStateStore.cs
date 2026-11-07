@@ -31,7 +31,17 @@ namespace Markd.Core.Sync
             row.LastAttemptResult = state.LastAttemptResult;
             row.Epoch = state.Epoch;
             row.BaseSnapshotJson = state.BaseSnapshotJson;
-            await db.SaveChangesAsync();
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch
+            {
+                // The app keeps one context for its session: a row left tracked as added or modified would be
+                // written by the next unrelated save.
+                db.Entry(row).State = EntityState.Detached;
+                throw;
+            }
         }
 
         public async Task ClearAsync()
