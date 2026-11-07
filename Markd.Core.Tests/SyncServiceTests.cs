@@ -366,6 +366,29 @@ public class SyncServiceTests
     }
 
     [Fact]
+    public async Task Pinning_a_lower_Id_after_a_sync_moved_the_pin_keeps_one_pin()
+    {
+        using var a = new SyncDevice();
+        using var b = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        var x = await a.AddOccasionAsync("X");
+        var y = await a.AddOccasionAsync("Y");
+        var z = await a.AddOccasionAsync("Z");
+        await a.Occasions.SetPinnedAsync(x.Id);
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+        await a.Occasions.SetPinnedAsync(z.Id);
+        await a.Sync.SyncAsync(cloud);
+        Assert.Equal(SyncOutcome.Synced, (await b.Sync.SyncAsync(cloud)).Outcome);   // b receives the pin move X to Z
+
+        var onB = await b.Occasions.GetAllAsync();
+        Assert.Equal("Z", Assert.Single(onB, o => o.IsPinned).Title);
+        await b.Occasions.SetPinnedAsync(onB.Single(o => o.Title == "Y").Id);
+
+        Assert.Equal("Y", Assert.Single(await b.Occasions.GetAllAsync(), o => o.IsPinned).Title);
+    }
+
+    [Fact]
     public async Task Deleting_a_category_does_not_conflict_with_an_edit_of_its_occasion()
     {
         using var a = new SyncDevice();

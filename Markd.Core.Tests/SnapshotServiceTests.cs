@@ -91,6 +91,23 @@ public class SnapshotServiceTests
     }
 
     [Fact]
+    public async Task Apply_moves_the_pin_to_a_lower_Id_without_violating_the_unique_pin_index()
+    {
+        var (snap, occ, _, db, conn) = Create();
+        using var _ = conn; using var __ = db;
+        var a = await occ.CreateAsync(new Occasion { Title = "a", AnchorDate = DateTime.UtcNow });
+        var b = await occ.CreateAsync(new Occasion { Title = "b", AnchorDate = DateTime.UtcNow, IsPinned = true });
+        Assert.True(a.Id < b.Id);
+
+        var target = await snap.ReadForSyncAsync();
+        target.Occasions.Single(o => o.SyncId == a.SyncId).IsPinned = true;
+        target.Occasions.Single(o => o.SyncId == b.SyncId).IsPinned = false;
+        await snap.ApplyAsync(target, new SnapshotApplyOptions(false));
+
+        Assert.Equal("a", Assert.Single(await occ.GetAllAsync(), o => o.IsPinned).Title);
+    }
+
+    [Fact]
     public async Task Apply_remaps_local_SyncIds_in_place_and_keeps_Notified()
     {
         var (snap, occ, _, db, conn) = Create();

@@ -309,6 +309,66 @@ public class OccasionServiceTests
         Assert.True((await tuple.Service.GetByIdAsync(occasion.Id))!.Milestones.Single().Notified);
     }
 
+    [Fact]
+    public async Task SetPinnedAsync_MovingThePinToALowerId_KeepsOnePin()
+    {
+        using var tuple = CreateService();
+        var lower = await tuple.Service.CreateAsync(new Occasion { Title = "Lower", AnchorDate = LocalMidnightUtc(-3) });
+        var higher = await tuple.Service.CreateAsync(new Occasion { Title = "Higher", AnchorDate = LocalMidnightUtc(-3) });
+        await tuple.Service.SetPinnedAsync(higher.Id);
+
+        await tuple.Service.SetPinnedAsync(lower.Id);
+
+        Assert.Equal("Lower", Assert.Single(await tuple.Service.GetAllAsync(), o => o.IsPinned).Title);
+    }
+
+    [Fact]
+    public async Task SetPinnedAsync_MovingThePinToAHigherId_KeepsOnePin()
+    {
+        using var tuple = CreateService();
+        var lower = await tuple.Service.CreateAsync(new Occasion { Title = "Lower", AnchorDate = LocalMidnightUtc(-3) });
+        var higher = await tuple.Service.CreateAsync(new Occasion { Title = "Higher", AnchorDate = LocalMidnightUtc(-3) });
+        await tuple.Service.SetPinnedAsync(lower.Id);
+
+        await tuple.Service.SetPinnedAsync(higher.Id);
+
+        Assert.Equal("Higher", Assert.Single(await tuple.Service.GetAllAsync(), o => o.IsPinned).Title);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_PinningALowerId_KeepsOnePin()
+    {
+        using var tuple = CreateService();
+        var lower = await tuple.Service.CreateAsync(new Occasion { Title = "Lower", AnchorDate = LocalMidnightUtc(-3) });
+        await tuple.Service.CreateAsync(new Occasion { Title = "Higher", AnchorDate = LocalMidnightUtc(-3), IsPinned = true });
+
+        await tuple.Service.UpdateAsync(new Occasion { Id = lower.Id, Title = "Lower", AnchorDate = lower.AnchorDate, IsPinned = true });
+
+        Assert.Equal("Lower", Assert.Single(await tuple.Service.GetAllAsync(), o => o.IsPinned).Title);
+    }
+
+    [Fact]
+    public async Task CreateAsync_Pinned_TakesThePinFromTheOldOne()
+    {
+        using var tuple = CreateService();
+        await tuple.Service.CreateAsync(new Occasion { Title = "Old", AnchorDate = LocalMidnightUtc(-3), IsPinned = true });
+
+        await tuple.Service.CreateAsync(new Occasion { Title = "New", AnchorDate = LocalMidnightUtc(-3), IsPinned = true });
+
+        Assert.Equal("New", Assert.Single(await tuple.Service.GetAllAsync(), o => o.IsPinned).Title);
+    }
+
+    [Fact]
+    public async Task RestoreAsync_PinnedSnapshotWithoutTombstone_TakesThePin()
+    {
+        using var tuple = CreateService();
+        await tuple.Service.CreateAsync(new Occasion { Title = "Old", AnchorDate = LocalMidnightUtc(-3), IsPinned = true });
+
+        await tuple.Service.RestoreAsync(new Occasion { Title = "Restored", AnchorDate = LocalMidnightUtc(-3), IsPinned = true });
+
+        Assert.Equal("Restored", Assert.Single(await tuple.Service.GetAllAsync(), o => o.IsPinned).Title);
+    }
+
     private static DateTime LocalMidnightUtc(int dayOffset) =>
         DateTime.Today.AddDays(dayOffset).ToUniversalTime();
 

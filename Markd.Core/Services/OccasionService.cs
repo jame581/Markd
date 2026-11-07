@@ -15,11 +15,8 @@ namespace Markd.Core.Services
             occasion.CreatedAt = DateTime.UtcNow;
             occasion.AnchorDay = OccasionDates.ToLocalDay(occasion.AnchorDate, _zone);
 
-            if (occasion.IsPinned)
-                await UnpinAllAsync();
-
             db.Occasions.Add(occasion);
-            await db.SaveChangesAsync();
+            await SaveAsync(occasion);
             return occasion;
         }
 
@@ -34,9 +31,6 @@ namespace Markd.Core.Services
                 .FirstOrDefaultAsync(o => o.SyncId == snapshot.SyncId && o.DeletedAt != null);
             if (tombstone is not null)
                 return await ReviveAsync(tombstone);
-
-            if (snapshot.IsPinned)
-                await UnpinAllAsync();
 
             var occasion = new Occasion
             {
@@ -58,7 +52,7 @@ namespace Markd.Core.Services
             };
 
             db.Occasions.Add(occasion);
-            await db.SaveChangesAsync();
+            await SaveAsync(occasion);
             return occasion;
         }
 
@@ -256,9 +250,6 @@ namespace Markd.Core.Services
 
         public async Task<Occasion> UpdateAsync(Occasion occasion)
         {
-            if (occasion.IsPinned)
-                await UnpinAllAsync(occasion.Id);
-
             var existing = await db.Occasions
                 .FirstOrDefaultAsync(o => o.Id == occasion.Id);
 
@@ -293,7 +284,7 @@ namespace Markd.Core.Services
                     milestone.Notified = OccasionDates.IsMilestoneReached(existing, milestone, days);
             }
 
-            await db.SaveChangesAsync();
+            await SaveAsync(existing);
             return existing;
         }
 
@@ -305,8 +296,30 @@ namespace Markd.Core.Services
             if (occasion == null)
                 return;
 
-            await UnpinAllAsync(id);
             occasion.IsPinned = true;
+            await SaveAsync(occasion);
+        }
+
+        /// <summary>
+        /// Saves pending changes, and when <paramref name="occasion"/> is pinned, makes it the only pin. Clearing the
+        /// old pin is saved on its own first, with this one's pin held back: within one SaveChanges EF does not order
+        /// updates by the filtered unique pin index, so the new pin could land before the old one is cleared.
+        /// </summary>
+        private async Task SaveAsync(Occasion occasion)
+        {
+            if (occasion.IsPinned)
+            {
+                var others = await db.Occasions.Where(o => o.IsPinned && o.Id != occasion.Id).ToListAsync();
+                if (others.Count > 0)
+                {
+                    foreach (var other in others)
+                        other.IsPinned = false;
+                    occasion.IsPinned = false;
+                    await db.SaveChangesAsync();
+                    occasion.IsPinned = true;
+                }
+            }
+
             await db.SaveChangesAsync();
         }
 
