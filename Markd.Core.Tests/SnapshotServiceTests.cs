@@ -46,7 +46,7 @@ public class SnapshotServiceTests
         var target = await snap.ReadForSyncAsync();
         target.Occasions.RemoveAll(o => o.SyncId == drop.SyncId);
         target.Occasions.Single(o => o.SyncId == keep.SyncId).Title = "renamed";
-        target.Occasions.Add(new OccasionDto { SyncId = Guid.NewGuid(), Title = "new", AnchorDate = T, Direction = "Since", UpdatedAt = T });
+        target.Occasions.Add(new OccasionDto { SyncId = Guid.NewGuid(), Title = "new", AnchorDay = DateOnly.FromDateTime(T), Direction = "Since", UpdatedAt = T });
 
         await snap.ApplyAsync(target, new SnapshotApplyOptions(TakeNotifiedFromTarget: false, NowUtc: T));
 
@@ -124,7 +124,7 @@ public class SnapshotServiceTests
         var occ = Guid.NewGuid();
         var target = new ExportModel
         {
-            Occasions = { new OccasionDto { SyncId = occ, Title = "o", AnchorDate = T, Direction = "Since" } },
+            Occasions = { new OccasionDto { SyncId = occ, Title = "o", AnchorDay = DateOnly.FromDateTime(T), Direction = "Since" } },
             Milestones = { new MilestoneDto { SyncId = Guid.NewGuid(), OccasionSyncId = occ, Label = "m", ThresholdDays = 1, Notified = true } },
             Settings = new AppSettingsDto { Theme = "Dark", Language = "cs", NotificationsEnabled = false },
         };
@@ -148,8 +148,8 @@ public class SnapshotServiceTests
         {
             Occasions =
             {
-                new OccasionDto { SyncId = Guid.NewGuid(), Title = "x", AnchorDate = T, Direction = "Since", IsPinned = true },
-                new OccasionDto { SyncId = Guid.NewGuid(), Title = "y", AnchorDate = T, Direction = "Since", IsPinned = true }, // two pins: violates the unique index
+                new OccasionDto { SyncId = Guid.NewGuid(), Title = "x", AnchorDay = DateOnly.FromDateTime(T), Direction = "Since", IsPinned = true },
+                new OccasionDto { SyncId = Guid.NewGuid(), Title = "y", AnchorDay = DateOnly.FromDateTime(T), Direction = "Since", IsPinned = true }, // two pins: violates the unique index
             }
         };
 
@@ -184,7 +184,7 @@ public class SnapshotServiceTests
         var occasionId = Guid.NewGuid();
         var target = new ExportModel
         {
-            Occasions = { new OccasionDto { SyncId = occasionId, Title = "o", AnchorDate = DateTime.UtcNow.AddDays(-10), Direction = "Since", UpdatedAt = T } },
+            Occasions = { new OccasionDto { SyncId = occasionId, Title = "o", AnchorDay = DateOnly.FromDateTime(DateTime.Today.AddDays(-10)), Direction = "Since", UpdatedAt = T } },
             Milestones =
             {
                 new MilestoneDto { SyncId = Guid.NewGuid(), OccasionSyncId = occasionId, Label = "reached", ThresholdDays = 5, UpdatedAt = T },
@@ -197,6 +197,63 @@ public class SnapshotServiceTests
         var milestones = await db.Milestones.ToListAsync();
         Assert.True(milestones.Single(m => m.ThresholdDays == 5).Notified);
         Assert.False(milestones.Single(m => m.ThresholdDays == 100).Notified);
+    }
+
+    private static async Task<DateTime> ApplyNewDayAsync(TimeZoneInfo zone, DateOnly day)
+    {
+        var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
+        using var _ = conn; using var __ = db;
+        var target = new ExportModel
+        {
+            Occasions = { new OccasionDto { SyncId = Guid.NewGuid(), Title = "Birthday", AnchorDay = day, Direction = "Since", UpdatedAt = T } },
+        };
+
+        await new SnapshotService(db, zone).ApplyAsync(target, new SnapshotApplyOptions(false));
+
+        return DateTime.SpecifyKind((await db.Occasions.AsNoTracking().SingleAsync()).AnchorDate, DateTimeKind.Utc);
+    }
+
+    [Fact]
+    public async Task Applying_a_day_stores_local_midnight_of_this_device()
+    {
+        var zone = Zones.Utc(-5);
+
+        var stored = await ApplyNewDayAsync(zone, new DateOnly(2026, 3, 2));
+
+        Assert.Equal(new DateTime(2026, 3, 2, 5, 0, 0, DateTimeKind.Utc), stored);
+        Assert.Equal(new DateTime(2026, 3, 2), OccasionDates.ToLocalDate(stored, zone));
+    }
+
+    [Fact]
+    public async Task Applying_a_day_whose_midnight_does_not_exist_stores_the_first_valid_time_after_it()
+    {
+        var zone = Zones.MidnightGap();   // 2 March jumps from 00:00 (UTC-5) to 01:00 (UTC-4)
+
+        var stored = await ApplyNewDayAsync(zone, new DateOnly(2026, 3, 2));
+
+        Assert.Equal(new DateTime(2026, 3, 2, 5, 0, 0, DateTimeKind.Utc), stored);   // 01:00 local
+        Assert.Equal(new DateTime(2026, 3, 2), OccasionDates.ToLocalDate(stored, zone));
+    }
+
+    [Fact]
+    public async Task Apply_leaves_a_row_on_the_same_local_day_untouched()
+    {
+        var zone = Zones.Utc(-5);
+        var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
+        using var _ = conn; using var __ = db;
+        var occ = new OccasionService(db);
+        var noon = new DateTime(2026, 3, 2, 17, 0, 0, DateTimeKind.Utc);   // 12:00 local on 2 March
+        var o = await occ.CreateAsync(new Occasion { Title = "o", AnchorDate = noon });
+        var m = await occ.AddMilestoneAsync(o.Id, 1000, "far");
+        await occ.MarkMilestoneNotifiedAsync(m.Id);
+        var snap = new SnapshotService(db, zone);
+        var target = await snap.ReadForSyncAsync();
+        target.Occasions[0].AnchorDay = new DateOnly(2026, 3, 2);
+
+        await snap.ApplyAsync(target, new SnapshotApplyOptions(false));
+
+        Assert.Equal(noon, DateTime.SpecifyKind((await db.Occasions.AsNoTracking().SingleAsync()).AnchorDate, DateTimeKind.Utc));
+        Assert.True((await db.Milestones.SingleAsync()).Notified);
     }
 
     private static async Task<(SnapshotService Snap, Data.MarkdDbContext Db, IDisposable Conn, ExportModel Target, Occasion O, Milestone M)> Seed(int anchorDaysAgo, int threshold, bool notified)
@@ -219,7 +276,7 @@ public class SnapshotServiceTests
     {
         var (snap, db, conn, target, _, _) = await Seed(1, 5, false);
         using var _ = conn; using var __ = db;
-        target.Occasions[0].AnchorDate = DateTime.UtcNow.AddDays(-20);
+        target.Occasions[0].AnchorDay = DateOnly.FromDateTime(DateTime.Today.AddDays(-20));
         Assert.True(await NotifiedAfter(snap, db, target));
     }
 
@@ -228,7 +285,7 @@ public class SnapshotServiceTests
     {
         var (snap, db, conn, target, _, _) = await Seed(20, 5, true);
         using var _ = conn; using var __ = db;
-        target.Occasions[0].AnchorDate = DateTime.UtcNow;
+        target.Occasions[0].AnchorDay = DateOnly.FromDateTime(DateTime.Today);
         Assert.False(await NotifiedAfter(snap, db, target));
     }
 

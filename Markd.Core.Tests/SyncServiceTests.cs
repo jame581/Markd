@@ -404,4 +404,65 @@ public class SyncServiceTests
         occasion.Title = title;
         await device.Occasions.UpdateAsync(occasion);
     }
+
+    private static readonly DateOnly March2 = new(2026, 3, 2);
+
+    [Fact]
+    public async Task Two_devices_in_different_time_zones_share_one_event_without_conflict()
+    {
+        using var a = new SyncDevice(zone: Zones.Utc(-5));
+        using var b = new SyncDevice(zone: Zones.Utc(9));
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionOnAsync("Birthday", March2);
+        await b.AddOccasionOnAsync("Birthday", March2);
+
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);
+        var result = await b.Sync.SyncAsync(cloud);
+
+        Assert.Equal(SyncOutcome.Synced, result.Outcome);
+        Assert.Empty(result.Conflicts ?? []);
+        Assert.Equal(March2, b.DayOf(Assert.Single(await b.Occasions.GetAllAsync())));
+        await a.Sync.SyncAsync(cloud);
+        Assert.Equal(March2, a.DayOf(Assert.Single(await a.Occasions.GetAllAsync())));
+    }
+
+    [Fact]
+    public async Task An_event_created_in_one_zone_shows_the_same_day_in_another()
+    {
+        using var a = new SyncDevice(zone: Zones.Utc(9));
+        using var b = new SyncDevice(zone: Zones.Utc(-5));
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionOnAsync("Birthday", March2);
+        await a.Sync.SyncAsync(cloud);
+
+        await b.Sync.SyncAsync(cloud);
+
+        Assert.Equal(March2, b.DayOf(Assert.Single(await b.Occasions.GetAllAsync())));
+    }
+
+    [Fact]
+    public async Task A_pure_zone_difference_does_not_reset_milestone_notifications()
+    {
+        using var a = new SyncDevice(zone: Zones.Utc(9));
+        using var b = new SyncDevice(zone: Zones.Utc(-5));
+        var cloud = new InMemoryCloudProvider();
+        var ao = await a.AddOccasionOnAsync("Birthday", March2);
+        await a.Occasions.AddMilestoneAsync(ao.Id, 1000, "1000 days");
+        var bo = await b.AddOccasionOnAsync("Birthday", March2);
+        var bm = await b.Occasions.AddMilestoneAsync(bo.Id, 1000, "1000 days");   // not reached: a recompute would clear it
+        await b.Occasions.MarkMilestoneNotifiedAsync(bm.Id);
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+        await a.Sync.SyncAsync(cloud);
+        var onA = Assert.Single(await a.Occasions.GetAllAsync());
+        onA.Notes = "same day, new note";
+        await a.Occasions.UpdateAsync(onA);
+        await a.Sync.SyncAsync(cloud);
+
+        Assert.Equal(SyncOutcome.Synced, (await b.Sync.SyncAsync(cloud)).Outcome);
+
+        var onB = Assert.Single(await b.Occasions.GetAllAsync());
+        Assert.Equal("same day, new note", onB.Notes);
+        Assert.True(Assert.Single(onB.Milestones).Notified);
+    }
 }

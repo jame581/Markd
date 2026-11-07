@@ -81,6 +81,52 @@ public class ExportModelV2Tests
     }
 
     [Fact]
+    public async Task A_v2_snapshot_carries_the_local_calendar_day()
+    {
+        var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
+        using var _ = conn; using var __ = db;
+        var tokyo = Zones.Utc(9);
+        await new OccasionService(db).CreateAsync(new Occasion
+        {
+            Title = "Birthday", AnchorDate = new DateTime(2026, 3, 1, 15, 0, 0, DateTimeKind.Utc),   // local midnight of 2 March in UTC+9
+        });
+
+        var model = await new SnapshotService(db, tokyo).ReadForSyncAsync();
+        var json = ExportModelJson.Serialize(model, indented: false);
+        var exported = Encoding.UTF8.GetString(await new ExportService(db, tokyo).CreateExportJsonAsync());
+
+        Assert.Equal(new DateOnly(2026, 3, 2), Assert.Single(model.Occasions).AnchorDay);
+        Assert.Contains("\"anchorDay\":\"2026-03-02\"", json);
+        Assert.DoesNotContain("anchorDate", json);
+        Assert.Contains("\"anchorDay\": \"2026-03-02\"", exported);
+        Assert.DoesNotContain("anchorDate", exported);
+    }
+
+    [Fact]
+    public void A_v1_file_imports_as_the_day_this_device_shows()
+    {
+        var v1 = ExportModelJson.Deserialize(
+            "{\"schemaVersion\":\"1\",\"occasions\":[{\"sourceId\":1,\"title\":\"Birthday\",\"anchorDate\":\"2026-03-01T15:00:00Z\",\"direction\":\"Since\"}]}");
+
+        var v2 = ExportModelUpgrade.ToCurrent(v1, Zones.Utc(9));
+
+        Assert.Equal(new DateOnly(2026, 3, 2), Assert.Single(v2.Occasions).AnchorDay);
+        Assert.DoesNotContain("anchorDate", ExportModelJson.Serialize(v2, indented: false));
+    }
+
+    [Fact]
+    public void A_v2_file_without_a_day_is_rejected()
+    {
+        var json = "{\"schemaVersion\":\"2\",\"occasions\":[{\"syncId\":\"" + Guid.NewGuid() +
+                   "\",\"title\":\"Birthday\",\"anchorDate\":\"2026-03-01T15:00:00Z\",\"direction\":\"Since\"}]}";
+        Assert.Throws<InvalidOperationException>(() => ExportModelJson.Deserialize(json));
+
+        var model = new ExportModel { Occasions = { new OccasionDto { SyncId = Guid.NewGuid(), Title = "Birthday", Direction = "Since" } } };
+        var package = Markd.Core.Sync.SyncSnapshotCodec.Encode(model, "pass", MarkdPackage.MinIterations);
+        Assert.Throws<Markd.Core.Sync.SnapshotFormatException>(() => Markd.Core.Sync.SyncSnapshotCodec.Decode(package, "pass"));
+    }
+
+    [Fact]
     public void CloneModel_is_deep_for_records()
     {
         var m = new ExportModel { Occasions = { new OccasionDto { SyncId = Guid.NewGuid(), Title = "a" } } };

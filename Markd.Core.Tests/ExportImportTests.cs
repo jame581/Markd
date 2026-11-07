@@ -173,7 +173,7 @@ namespace Markd.Core.Tests
                 var id = Guid.NewGuid();
                 var model = new ExportModel
                 {
-                    Occasions = { new OccasionDto { SyncId = id, Title = "kept", AnchorDate = DateTime.UtcNow, Direction = "Since", UpdatedAt = DateTime.UtcNow } },
+                    Occasions = { new OccasionDto { SyncId = id, Title = "kept", AnchorDay = DateOnly.FromDateTime(DateTime.Today), Direction = "Since", UpdatedAt = DateTime.UtcNow } },
                 };
                 await new ImportService(db).ApplyImportAsync(model);
 

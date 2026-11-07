@@ -18,6 +18,24 @@ namespace Markd.Core.Domain
             return TimeZoneInfo.ConvertTimeFromUtc(utc, zone ?? TimeZoneInfo.Local).Date;
         }
 
+        /// <summary>The local calendar day of a stored anchor.</summary>
+        public static DateOnly ToLocalDay(DateTime storedAnchor, TimeZoneInfo? zone = null) =>
+            DateOnly.FromDateTime(ToLocalDate(storedAnchor, zone));
+
+        /// <summary>
+        /// The anchor to store for a calendar day: the UTC instant of its local midnight. Where midnight does not
+        /// exist (a daylight saving gap), the first valid local time after it, so <see cref="ToLocalDate"/> still
+        /// returns the same day.
+        /// </summary>
+        public static DateTime LocalMidnightUtc(DateOnly day, TimeZoneInfo? zone = null)
+        {
+            zone ??= TimeZoneInfo.Local;
+            var local = day.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified);
+            while (zone.IsInvalidTime(local))
+                local = local.AddMinutes(1);
+            return TimeZoneInfo.ConvertTimeToUtc(local, zone);
+        }
+
         /// <summary>
         /// Elapsed days for Since, remaining days for Until (negative once an Until date has passed).
         /// </summary>

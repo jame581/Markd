@@ -13,13 +13,16 @@ namespace Markd.Core.Services
     {
         private readonly MarkdDbContext _db;
         private readonly ISnapshotService _snapshots;
+        private readonly TimeZoneInfo? _zone;
 
         public ImportService(MarkdDbContext db) : this(db, new SnapshotService(db)) { }
 
-        public ImportService(MarkdDbContext db, ISnapshotService snapshots)
+        /// <param name="zone">The time zone a v1 file's anchors are read in. Defaults to local; pass the snapshot service's zone.</param>
+        public ImportService(MarkdDbContext db, ISnapshotService snapshots, TimeZoneInfo? zone = null)
         {
             _db = db;
             _snapshots = snapshots;
+            _zone = zone;
         }
 
         public async Task<ExportModel> ParseImportPackageAsync(byte[] package, string? passphrase = null)
@@ -43,7 +46,7 @@ namespace Markd.Core.Services
 
         public async Task ApplyImportAsync(ExportModel model)
         {
-            var target = ExportModelUpgrade.ToCurrent(model);
+            var target = ExportModelUpgrade.ToCurrent(model, _zone);
             ExportModelJson.Validate(target);   // a hand-built v2 model with empty or duplicate SyncIds must not reach the database
 
             var conn = (SqliteConnection)_db.Database.GetDbConnection();

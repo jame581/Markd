@@ -1,3 +1,4 @@
+using System.Globalization;
 using Markd.Core.Services;
 
 namespace Markd.Core.Sync
@@ -29,7 +30,7 @@ namespace Markd.Core.Sync
 
             Pair(result.Occasions.Where(o => o.DeletedAt is null && !remoteIds.Contains(o.SyncId)),
                  remote.Occasions.Where(o => o.DeletedAt is null && !localIds.Contains(o.SyncId)),
-                 o => o.SyncId, o => Norm(o.Title) + "|" + o.AnchorDate.Ticks + "|" + o.Direction, remaps);
+                 o => o.SyncId, o => Norm(o.Title) + "|" + o.AnchorDay.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) + "|" + o.Direction, remaps);
 
             foreach (var c in result.Categories) c.SyncId = Map(remaps, c.SyncId);
             foreach (var o in result.Occasions)

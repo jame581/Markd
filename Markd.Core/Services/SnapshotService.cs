@@ -5,10 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Markd.Core.Services
 {
-    public class SnapshotService(MarkdDbContext db) : ISnapshotService
+    /// <param name="zone">The device's time zone, which turns stored anchors into calendar days and back. Defaults to local.</param>
+    public class SnapshotService(MarkdDbContext db, TimeZoneInfo? zone = null) : ISnapshotService
     {
+        private readonly TimeZoneInfo _zone = zone ?? TimeZoneInfo.Local;
+
         public Task<ExportModel> ReadForSyncAsync() =>
-            SnapshotReader.ReadAsync(db, includeTombstones: true, includeNotified: false);
+            SnapshotReader.ReadAsync(db, includeTombstones: true, includeNotified: false, _zone);
 
         public async Task ApplyAsync(ExportModel target, SnapshotApplyOptions options)
         {
@@ -20,7 +23,7 @@ namespace Markd.Core.Services
 
                 if (options.ExpectedLocalFingerprint is { } expected)
                 {
-                    var current = await SnapshotReader.ReadAsync(db, includeTombstones: true, includeNotified: false);
+                    var current = await SnapshotReader.ReadAsync(db, includeTombstones: true, includeNotified: false, _zone);
                     if (Markd.Core.Sync.SyncContent.Fingerprint(current) != expected)
                         throw new SnapshotChangedException();
                 }
@@ -83,9 +86,12 @@ namespace Markd.Core.Services
                     occasion.Emoji = dto.Emoji;
                     occasion.ColorHex = dto.ColorHex;
                     var newDirection = Enum.TryParse<OccasionDirection>(dto.Direction, true, out var direction) ? direction : OccasionDirection.Since;
-                    if (occasion.Id != 0 && (occasion.AnchorDate != dto.AnchorDate || occasion.Direction != newDirection))
+                    // Compare calendar days: the same day stored at another device's midnight is not a move.
+                    var dayMoved = occasion.Id == 0 || OccasionDates.ToLocalDay(occasion.AnchorDate, _zone) != dto.AnchorDay;
+                    if (occasion.Id != 0 && (dayMoved || occasion.Direction != newDirection))
                         datesMoved.Add(dto.SyncId);
-                    occasion.AnchorDate = dto.AnchorDate;
+                    if (dayMoved)
+                        occasion.AnchorDate = OccasionDates.LocalMidnightUtc(dto.AnchorDay, _zone);
                     occasion.Direction = newDirection;
                     occasion.Notes = dto.Notes;
                     occasion.CreatedAt = dto.CreatedAt == default ? dto.UpdatedAt : dto.CreatedAt;
@@ -186,10 +192,11 @@ namespace Markd.Core.Services
             return milestones.Count + occasions.Count + categories.Count;
         }
 
-        private static bool AlreadyReached(Occasion occasion, MilestoneDto dto)
+        private bool AlreadyReached(Occasion occasion, MilestoneDto dto)
         {
             var milestone = new Milestone { ThresholdDays = dto.ThresholdDays };
-            return OccasionDates.IsMilestoneReached(occasion, milestone, OccasionDates.GetDays(occasion, DateTime.Now));
+            var today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _zone);
+            return OccasionDates.IsMilestoneReached(occasion, milestone, OccasionDates.GetDays(occasion, today, _zone));
         }
 
         private async Task ApplySettingsAsync(AppSettingsDto dto)

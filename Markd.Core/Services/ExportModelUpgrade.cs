@@ -1,9 +1,14 @@
+using Markd.Core.Domain;
+
 namespace Markd.Core.Services
 {
     public static class ExportModelUpgrade
     {
-        /// <summary>Returns a v2 model. A v1 file gets fresh SyncIds and its int references rewritten. v2 is returned as is.</summary>
-        public static ExportModel ToCurrent(ExportModel model)
+        /// <summary>
+        /// Returns a v2 model. A v1 file gets fresh SyncIds, its int references rewritten and each anchor instant turned
+        /// into the calendar day it shows in <paramref name="zone"/> (this device's zone by default). v2 is returned as is.
+        /// </summary>
+        public static ExportModel ToCurrent(ExportModel model, TimeZoneInfo? zone = null)
         {
             if (model.SchemaVersion == ExportModel.CurrentSchemaVersion)
                 return model;
@@ -34,6 +39,8 @@ namespace Markd.Core.Services
             {
                 var copy = o.Clone();
                 copy.SyncId = Guid.NewGuid();
+                copy.AnchorDay = OccasionDates.ToLocalDay(o.AnchorDate, zone);
+                copy.AnchorDate = default;
                 copy.UpdatedAt = o.CreatedAt == default ? now : o.CreatedAt;
                 copy.DeletedAt = null;
                 copy.CategorySyncId = o.CategorySourceId is { } cid && categoryIds.TryGetValue(cid, out var g) ? g : null;

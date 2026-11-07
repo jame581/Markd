@@ -9,9 +9,13 @@ namespace Markd.Core.Services
     public class ExportService : IExportService
     {
         private readonly MarkdDbContext _db;
-        public ExportService(MarkdDbContext db)
+        private readonly TimeZoneInfo _zone;
+
+        /// <param name="zone">The time zone whose calendar days the export writes. Defaults to local.</param>
+        public ExportService(MarkdDbContext db, TimeZoneInfo? zone = null)
         {
             _db = db;
+            _zone = zone ?? TimeZoneInfo.Local;
         }
 
         public async Task<byte[]> CreateExportJsonAsync()
@@ -39,7 +43,7 @@ namespace Markd.Core.Services
 
         private async Task<ExportModel> BuildExportModelAsync()
         {
-            var model = await SnapshotReader.ReadAsync(_db, includeTombstones: false, includeNotified: true);
+            var model = await SnapshotReader.ReadAsync(_db, includeTombstones: false, includeNotified: true, _zone);
             model.AppVersion = ""; // populate from app if available
             model.DeviceId = Environment.MachineName;
 

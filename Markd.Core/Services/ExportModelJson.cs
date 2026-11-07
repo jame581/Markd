@@ -67,6 +67,10 @@ namespace Markd.Core.Services
                     .ToList();
                 if (ids.Contains(Guid.Empty) || ids.Distinct().Count() != ids.Count)
                     throw new InvalidOperationException(Strings.Import_InvalidJson);
+
+                // v2 carries the anchor only as a calendar day.
+                if (model.Occasions.Any(o => o.AnchorDay == default))
+                    throw new InvalidOperationException(Strings.Import_InvalidJson);
             }
         }
     }

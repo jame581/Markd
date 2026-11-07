@@ -79,8 +79,8 @@ public class FirstSyncAlignerTests
     [Fact]
     public void Same_title_but_different_date_is_not_the_same_event()
     {
-        var l = Model(o: [Occ(1, "Birthday", anchor: T0)]);
-        var r = Model(o: [Occ(2, "Birthday", anchor: T0.AddDays(1))]);
+        var l = Model(o: [Occ(1, "Birthday", day: D0)]);
+        var r = Model(o: [Occ(2, "Birthday", day: D0.AddDays(1))]);
         Assert.Equal(2, SyncMerger.Merge(null, l, r, Now).Merged.Occasions.Count);
     }
 

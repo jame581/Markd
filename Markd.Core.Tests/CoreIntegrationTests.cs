@@ -293,6 +293,8 @@ public class CoreIntegrationTests
         Assert.Same(sync, scope.ServiceProvider.GetRequiredService<Markd.Core.Sync.ISyncService>());
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<Markd.Core.Services.ISnapshotService>());
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<Markd.Core.Sync.ISyncStateStore>());
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<Markd.Core.Services.IExportService>());   // zone parameters default to local
+        Assert.NotNull(scope.ServiceProvider.GetRequiredService<Markd.Core.Services.IImportService>());
     }
 
     [Fact]

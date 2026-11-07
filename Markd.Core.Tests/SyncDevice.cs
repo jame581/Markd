@@ -31,12 +31,16 @@ internal sealed class SyncDevice : IDisposable
     public FixedTimeProvider Clock { get; } = new(DateTime.UtcNow);
     public SyncService Sync { get; }
 
-    public SyncDevice(string passphrase = "pass")
+    /// <summary>The device's local time zone: anchors are stored as the UTC instant of a local midnight here.</summary>
+    public TimeZoneInfo Zone { get; }
+
+    public SyncDevice(string passphrase = "pass", TimeZoneInfo? zone = null)
     {
+        Zone = zone ?? TimeZoneInfo.Utc;
         (Db, _connection) = TestDbFactory.CreateSqliteInMemoryContext();
         Occasions = new OccasionService(Db);
         Categories = new CategoryService(Db);
-        Snapshots = new SnapshotService(Db);
+        Snapshots = new SnapshotService(Db, Zone);
         State = new SyncStateStore(Db);
         Secrets.Passphrase = passphrase;
         Sync = new SyncService(Snapshots, State, Secrets, Clock, new SyncOptions { KdfIterations = MarkdPackage.MinIterations }, new SyncGate());
@@ -49,6 +53,19 @@ internal sealed class SyncDevice : IDisposable
             AnchorDate = DateTime.UtcNow.Date.AddDays(-daysAgo),
             Direction = Markd.Core.Domain.OccasionDirection.Since,
         });
+
+    /// <summary>An occasion typed on this device for a calendar day, stored the way the form stores it.</summary>
+    public async Task<Markd.Core.Domain.Occasion> AddOccasionOnAsync(string title, DateOnly day) =>
+        await Occasions.CreateAsync(new Markd.Core.Domain.Occasion
+        {
+            Title = title,
+            AnchorDate = TimeZoneInfo.ConvertTimeToUtc(day.ToDateTime(TimeOnly.MinValue), Zone),
+            Direction = Markd.Core.Domain.OccasionDirection.Since,
+        });
+
+    /// <summary>The calendar day this device shows for an occasion.</summary>
+    public DateOnly DayOf(Markd.Core.Domain.Occasion occasion) =>
+        DateOnly.FromDateTime(Markd.Core.Domain.OccasionDates.ToLocalDate(occasion.AnchorDate, Zone));
 
     public async Task<string[]> TitlesAsync() =>
         (await Occasions.GetAllAsync()).Select(o => o.Title).OrderBy(t => t).ToArray();

@@ -26,7 +26,7 @@ namespace Markd.Core.Sync
         private static string?[] CoreParts(OccasionDto o) =>
         [
             o.Title, o.Emoji, o.ColorHex,
-            o.AnchorDate.Ticks.ToString(CultureInfo.InvariantCulture), o.Direction, o.Notes,
+            o.AnchorDay.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), o.Direction, o.Notes,
         ];
 
         public static string Of(MilestoneDto m) => Join(

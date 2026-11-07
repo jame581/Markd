@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using Markd.Core.Localization;
 
 namespace Markd.Core.Services
@@ -47,7 +48,14 @@ namespace Markd.Core.Services
         public string? Emoji { get; set; }
         public string? ColorHex { get; set; }
         public bool IsPinned { get; set; }
+
+        /// <summary>The v1 anchor (a UTC instant). Read only by <see cref="ExportModelUpgrade"/>; never written for v2.</summary>
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public DateTime AnchorDate { get; set; }
+
+        /// <summary>The v2 anchor: the calendar day, so devices in different time zones agree on it.</summary>
+        public DateOnly AnchorDay { get; set; }
+
         public string Direction { get; set; } = "Since";
         public string? Notes { get; set; }
         public DateTime CreatedAt { get; set; }
