@@ -1,6 +1,7 @@
 using System.Text;
 using Markd.Core.Domain;
 using Markd.Core.Services;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace Markd.Core.Tests;
@@ -86,7 +87,7 @@ public class ExportModelV2Tests
         var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
         using var _ = conn; using var __ = db;
         var tokyo = Zones.Utc(9);
-        await new OccasionService(db).CreateAsync(new Occasion
+        await new OccasionService(db, tokyo).CreateAsync(new Occasion
         {
             Title = "Birthday", AnchorDate = new DateTime(2026, 3, 1, 15, 0, 0, DateTimeKind.Utc),   // local midnight of 2 March in UTC+9
         });
@@ -112,6 +113,24 @@ public class ExportModelV2Tests
 
         Assert.Equal(new DateOnly(2026, 3, 2), Assert.Single(v2.Occasions).AnchorDay);
         Assert.DoesNotContain("anchorDate", ExportModelJson.Serialize(v2, indented: false));
+    }
+
+    [Fact]
+    public async Task A_v1_file_imported_on_a_device_stores_and_shows_the_day_it_showed_there()
+    {
+        var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
+        using var _ = conn; using var __ = db;
+        var tokyo = Zones.Utc(9);
+        var importer = new ImportService(db, new SnapshotService(db, tokyo));
+        var file = Encoding.UTF8.GetBytes(
+            "{\"schemaVersion\":\"1\",\"occasions\":[{\"sourceId\":1,\"title\":\"Birthday\",\"anchorDate\":\"2026-03-01T15:00:00Z\",\"direction\":\"Since\"}]}");
+
+        await importer.ApplyImportAsync(await importer.ParseImportPackageAsync(file));
+
+        var stored = await db.Occasions.AsNoTracking().SingleAsync(TestContext.Current.CancellationToken);
+        Assert.Equal(new DateTime(2026, 3, 1, 15, 0, 0, DateTimeKind.Utc), DateTime.SpecifyKind(stored.AnchorDate, DateTimeKind.Utc));
+        Assert.Equal(new DateOnly(2026, 3, 2), stored.AnchorDay);
+        Assert.Equal(new DateTime(2026, 3, 2), OccasionDates.ToLocalDate(stored.AnchorDate, tokyo));
     }
 
     [Fact]

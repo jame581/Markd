@@ -28,7 +28,7 @@ public class SyncContentTests
         {
             var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
             using var _ = conn; using var __ = db;
-            await new OccasionService(db).CreateAsync(new Markd.Core.Domain.Occasion
+            await new OccasionService(db, zone).CreateAsync(new Markd.Core.Domain.Occasion
             {
                 Title = "Birthday",
                 AnchorDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2026, 3, 2), zone),

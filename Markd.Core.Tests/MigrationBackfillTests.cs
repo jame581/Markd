@@ -1,4 +1,5 @@
 using Markd.Core.Data;
+using Markd.Core.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -91,5 +92,26 @@ public class MigrationBackfillTests
             var id = Guid.Parse(reader.GetString(0));
             Assert.Contains(id.ToString()[19], "89ab");
         }
+    }
+
+    [Fact]
+    public async Task Startup_backfill_gives_every_row_its_calendar_day_once()
+    {
+        var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
+        using var _ = conn; using var __ = db;
+        var occasions = new OccasionService(db);
+        await occasions.CreateAsync(new Markd.Core.Domain.Occasion { Title = "live", AnchorDate = new DateTime(2026, 3, 1, 15, 0, 0, DateTimeKind.Utc) });
+        var dead = await occasions.CreateAsync(new Markd.Core.Domain.Occasion { Title = "dead", AnchorDate = new DateTime(2026, 4, 1, 15, 0, 0, DateTimeKind.Utc) });
+        await occasions.DeleteAsync(dead.Id);
+        await db.Database.ExecuteSqlRawAsync("UPDATE Occasions SET AnchorDay = NULL", TestContext.Current.CancellationToken);
+        db.ChangeTracker.Clear();
+        var before = await db.Occasions.IgnoreQueryFilters().AsNoTracking().ToListAsync(TestContext.Current.CancellationToken);
+
+        Assert.Equal(2, AnchorDayBackfill.Run(db, Zones.Utc(9)));
+        Assert.Equal(0, AnchorDayBackfill.Run(db, Zones.Utc(9)));
+
+        var after = await db.Occasions.IgnoreQueryFilters().AsNoTracking().OrderBy(o => o.Id).ToListAsync(TestContext.Current.CancellationToken);
+        Assert.Equal([new DateOnly(2026, 3, 2), new DateOnly(2026, 4, 2)], after.Select(o => o.AnchorDay));
+        Assert.Equal(before.OrderBy(o => o.Id).Select(o => o.UpdatedAt), after.Select(o => o.UpdatedAt));   // not an edit to sync
     }
 }

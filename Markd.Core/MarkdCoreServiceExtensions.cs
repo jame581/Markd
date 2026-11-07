@@ -42,6 +42,7 @@ namespace Markd.Core
             using var scope = services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<MarkdDbContext>();
             db.Database.Migrate();
+            AnchorDayBackfill.Run(db);
             DatabaseBackups.DeleteStale(db.Database.GetDbConnection().DataSource, TimeSpan.FromHours(24));
         }
     }

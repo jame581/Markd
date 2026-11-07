@@ -465,4 +465,74 @@ public class SyncServiceTests
         Assert.Equal("same day, new note", onB.Notes);
         Assert.True(Assert.Single(onB.Milestones).Notified);
     }
+
+    private static async Task<(SyncDevice A, SyncDevice B, InMemoryCloudProvider Cloud)> SyncedInPragueAsync()
+    {
+        var a = new SyncDevice(zone: Zones.Utc(1));
+        var b = new SyncDevice(zone: Zones.Utc(1));
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionOnAsync("Birthday", March2);   // stored 1 March 23:00 UTC
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+        return (a, b, cloud);
+    }
+
+    private static async Task<DateOnly?> StoredDayAsync(SyncDevice device) =>
+        (await device.Db.Occasions.AsNoTracking().SingleAsync()).AnchorDay;
+
+    [Fact]
+    public async Task A_device_that_changed_time_zone_does_not_push_a_day_shift()
+    {
+        var (a, b, cloud) = await SyncedInPragueAsync();
+        using var _ = a; using var __ = b;
+        var revision = cloud.Revision;
+
+        a.SwitchZone(Zones.Utc(-5));   // the same instant is 1 March in New York
+        var result = await a.Sync.SyncAsync(cloud);
+
+        Assert.Equal(SyncOutcome.NoChanges, result.Outcome);
+        Assert.Equal(revision, cloud.Revision);
+        Assert.Equal(March2, Assert.Single(SyncSnapshotCodec.Decode(cloud.Data!, "pass").Occasions).AnchorDay);
+        Assert.Equal(SyncOutcome.NoChanges, (await b.Sync.SyncAsync(cloud)).Outcome);
+        Assert.Equal(March2, b.DayOf(Assert.Single(await b.Occasions.GetAllAsync())));
+    }
+
+    [Fact]
+    public async Task Editing_another_field_after_a_time_zone_change_keeps_the_day()
+    {
+        var (a, b, cloud) = await SyncedInPragueAsync();
+        using var _ = a; using var __ = b;
+        a.SwitchZone(Zones.Utc(-5));
+        var onA = Assert.Single(await a.Occasions.GetAllAsync());
+        onA.Notes = "travelling";
+        await a.Occasions.UpdateAsync(onA);   // same anchor instant
+
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);
+        await b.Sync.SyncAsync(cloud);
+
+        Assert.Equal(March2, await StoredDayAsync(a));
+        var onB = Assert.Single(await b.Occasions.GetAllAsync());
+        Assert.Equal("travelling", onB.Notes);
+        Assert.Equal(March2, b.DayOf(onB));
+    }
+
+    [Fact]
+    public async Task Changing_the_date_updates_the_stored_day()
+    {
+        var (a, b, cloud) = await SyncedInPragueAsync();
+        using var _ = a; using var __ = b;
+        a.SwitchZone(Zones.Utc(-5));
+        var onA = Assert.Single(await a.Occasions.GetAllAsync());
+        await a.Occasions.UpdateAsync(new Occasion   // a fresh object, as the edit form sends
+        {
+            Id = onA.Id, Title = onA.Title, Direction = onA.Direction,
+            AnchorDate = TimeZoneInfo.ConvertTimeToUtc(new DateTime(2026, 3, 5), a.Zone),
+        });
+
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+
+        Assert.Equal(new DateOnly(2026, 3, 5), await StoredDayAsync(a));
+        Assert.Equal(new DateOnly(2026, 3, 5), b.DayOf(Assert.Single(await b.Occasions.GetAllAsync())));
+    }
 }

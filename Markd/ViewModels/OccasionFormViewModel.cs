@@ -23,6 +23,9 @@ public class OccasionFormViewModel : ViewModelBase
     private string? _emoji;
     private string? _colorHex;
     private DateTime _anchorDate = DateTime.Today;
+    // The stored anchor of the occasion being edited and the date it was shown as, so a save that leaves the date
+    // alone keeps the instant (and with it the stored calendar day, even after the device changed time zone).
+    private (DateTime Stored, DateTime Shown)? _loadedAnchor;
     private OccasionDirection _direction = OccasionDirection.Since;
     private string? _notes;
     private bool _isPinned;
@@ -207,6 +210,7 @@ public class OccasionFormViewModel : ViewModelBase
 
         await LoadCategoriesAsync();
 
+        _loadedAnchor = null;
         if (id == 0)
         {
             Title = string.Empty;
@@ -231,6 +235,7 @@ public class OccasionFormViewModel : ViewModelBase
             Emoji = occasion.Emoji;
             ColorHex = occasion.ColorHex;
             AnchorDate = OccasionDates.ToLocalDate(occasion.AnchorDate);
+            _loadedAnchor = (occasion.AnchorDate, AnchorDate);
             Direction = occasion.Direction;
             Notes = occasion.Notes;
             IsPinned = occasion.IsPinned;
@@ -269,7 +274,9 @@ public class OccasionFormViewModel : ViewModelBase
                 Title = Title.Trim(),
                 Emoji = string.IsNullOrWhiteSpace(Emoji) ? null : Emoji.Trim(),
                 ColorHex = string.IsNullOrWhiteSpace(ColorHex) ? null : ColorHex.Trim(),
-                AnchorDate = DateTime.SpecifyKind(AnchorDate.Date, DateTimeKind.Local).ToUniversalTime(),
+                AnchorDate = _loadedAnchor is { } loaded && loaded.Shown == AnchorDate.Date
+                    ? loaded.Stored
+                    : DateTime.SpecifyKind(AnchorDate.Date, DateTimeKind.Local).ToUniversalTime(),
                 Direction = Direction,
                 Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
                 IsPinned = IsPinned,

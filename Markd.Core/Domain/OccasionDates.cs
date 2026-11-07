@@ -25,7 +25,8 @@ namespace Markd.Core.Domain
         /// <summary>
         /// The anchor to store for a calendar day: the UTC instant of its local midnight. Where midnight does not
         /// exist (a daylight saving gap), the first valid local time after it, so <see cref="ToLocalDate"/> still
-        /// returns the same day.
+        /// returns the same day. A calendar day that does not exist in the zone at all (Samoa skipped 2011-12-30
+        /// when it crossed the date line) has no valid time, so the result is the next day's midnight.
         /// </summary>
         public static DateTime LocalMidnightUtc(DateOnly day, TimeZoneInfo? zone = null)
         {

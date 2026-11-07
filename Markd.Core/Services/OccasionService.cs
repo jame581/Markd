@@ -5,11 +5,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Markd.Core.Services
 {
-    public class OccasionService(MarkdDbContext db) : IOccasionService
+    /// <param name="zone">The device's time zone, which fixes the calendar day of a chosen anchor. Defaults to local.</param>
+    public class OccasionService(MarkdDbContext db, TimeZoneInfo? zone = null) : IOccasionService
     {
+        private readonly TimeZoneInfo _zone = zone ?? TimeZoneInfo.Local;
+
         public async Task<Occasion> CreateAsync(Occasion occasion)
         {
             occasion.CreatedAt = DateTime.UtcNow;
+            occasion.AnchorDay = OccasionDates.ToLocalDay(occasion.AnchorDate, _zone);
 
             if (occasion.IsPinned)
                 await UnpinAllAsync();
@@ -41,6 +45,7 @@ namespace Markd.Core.Services
                 ColorHex = snapshot.ColorHex,
                 IsPinned = snapshot.IsPinned,
                 AnchorDate = snapshot.AnchorDate,
+                AnchorDay = OccasionDates.ToLocalDay(snapshot.AnchorDate, _zone),
                 Direction = snapshot.Direction,
                 Notes = snapshot.Notes,
                 CreatedAt = snapshot.CreatedAt == default ? DateTime.UtcNow : snapshot.CreatedAt,
@@ -260,7 +265,13 @@ namespace Markd.Core.Services
             if (existing == null)
                 throw new InvalidOperationException(string.Format(LocalizationManager.Instance.Culture, Strings.Occasion_NotFoundById, occasion.Id));
 
-            var datesChanged = existing.AnchorDate != occasion.AnchorDate || existing.Direction != occasion.Direction;
+            var anchorChanged = existing.AnchorDate != occasion.AnchorDate;
+            var datesChanged = anchorChanged || existing.Direction != occasion.Direction;
+
+            // The day is fixed when the date is chosen. An edit that keeps the instant keeps the day, even if this
+            // device has since moved to a zone where that instant falls on another day.
+            if (anchorChanged || existing.AnchorDay is null)
+                existing.AnchorDay = OccasionDates.ToLocalDay(occasion.AnchorDate, _zone);
 
             existing.Title = occasion.Title;
             existing.Emoji = occasion.Emoji;

@@ -10,7 +10,8 @@ namespace Markd.Core.Services
         /// Reads the whole dataset as a v2 model. Sync reads tombstones and drops Notified (device-local).
         /// Manual export reads live records only and keeps Notified and the local int ids (SourceId).
         /// Sync snapshots carry SourceId 0: local ids mean nothing on another device.
-        /// Anchors are written as the calendar day they show in <paramref name="zone"/>.
+        /// Anchors are written as the stored calendar day; a row without one (before the startup backfill) uses the
+        /// day its instant shows in <paramref name="zone"/>.
         /// </summary>
         public static async Task<ExportModel> ReadAsync(MarkdDbContext db, bool includeTombstones, bool includeNotified, TimeZoneInfo zone)
         {
@@ -40,7 +41,7 @@ namespace Markd.Core.Services
                 {
                     SourceId = includeNotified ? o.Id : 0, SyncId = o.SyncId, UpdatedAt = o.UpdatedAt, DeletedAt = o.DeletedAt,
                     Title = o.Title, Emoji = o.Emoji, ColorHex = o.ColorHex, IsPinned = o.IsPinned,
-                    AnchorDay = OccasionDates.ToLocalDay(o.AnchorDate, zone), Direction = o.Direction.ToString(), Notes = o.Notes,
+                    AnchorDay = o.AnchorDay ?? OccasionDates.ToLocalDay(o.AnchorDate, zone), Direction = o.Direction.ToString(), Notes = o.Notes,
                     CreatedAt = o.CreatedAt, CategorySourceId = includeNotified ? o.CategoryId : null,
                     CategorySyncId = o.CategoryId is { } cid && (includeTombstones || liveCategories.Contains(cid)) && categorySync.TryGetValue(cid, out var g) ? g : null
                 });

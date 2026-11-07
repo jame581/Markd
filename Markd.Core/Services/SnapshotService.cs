@@ -10,6 +10,8 @@ namespace Markd.Core.Services
     {
         private readonly TimeZoneInfo _zone = zone ?? TimeZoneInfo.Local;
 
+        public TimeZoneInfo Zone => _zone;
+
         public Task<ExportModel> ReadForSyncAsync() =>
             SnapshotReader.ReadAsync(db, includeTombstones: true, includeNotified: false, _zone);
 
@@ -86,12 +88,15 @@ namespace Markd.Core.Services
                     occasion.Emoji = dto.Emoji;
                     occasion.ColorHex = dto.ColorHex;
                     var newDirection = Enum.TryParse<OccasionDirection>(dto.Direction, true, out var direction) ? direction : OccasionDirection.Since;
-                    // Compare calendar days: the same day stored at another device's midnight is not a move.
-                    var dayMoved = occasion.Id == 0 || OccasionDates.ToLocalDay(occasion.AnchorDate, _zone) != dto.AnchorDay;
+                    // Compare calendar days: the same day stored at another device's midnight (or read after this device
+                    // changed time zone) is not a move, so the instant and the Notified flags stay.
+                    var dayMoved = occasion.Id == 0
+                        || (occasion.AnchorDay ?? OccasionDates.ToLocalDay(occasion.AnchorDate, _zone)) != dto.AnchorDay;
                     if (occasion.Id != 0 && (dayMoved || occasion.Direction != newDirection))
                         datesMoved.Add(dto.SyncId);
                     if (dayMoved)
                         occasion.AnchorDate = OccasionDates.LocalMidnightUtc(dto.AnchorDay, _zone);
+                    occasion.AnchorDay = dto.AnchorDay;
                     occasion.Direction = newDirection;
                     occasion.Notes = dto.Notes;
                     occasion.CreatedAt = dto.CreatedAt == default ? dto.UpdatedAt : dto.CreatedAt;
@@ -128,7 +133,7 @@ namespace Markd.Core.Services
                         // A new milestone that is already reached was announced on the device that has it: do not fire it again here.
                         milestone.Notified = options.TakeNotifiedFromTarget
                             ? dto.Notified
-                            : dto.DeletedAt is null && AlreadyReached(parent, dto);
+                            : dto.DeletedAt is null && AlreadyReached(parent, dto, now);
                     }
                     else if (options.TakeNotifiedFromTarget)
                     {
@@ -138,7 +143,7 @@ namespace Markd.Core.Services
                     {
                         // Same rule as OccasionService.UpdateAsync: when the date, direction or threshold moves, reached
                         // milestones count as announced and the rest notify when they land.
-                        milestone.Notified = dto.DeletedAt is null && AlreadyReached(parent, dto);
+                        milestone.Notified = dto.DeletedAt is null && AlreadyReached(parent, dto, now);
                     }
 
                     milestone.OccasionId = parent.Id;
@@ -192,10 +197,10 @@ namespace Markd.Core.Services
             return milestones.Count + occasions.Count + categories.Count;
         }
 
-        private bool AlreadyReached(Occasion occasion, MilestoneDto dto)
+        private bool AlreadyReached(Occasion occasion, MilestoneDto dto, DateTime nowUtc)
         {
             var milestone = new Milestone { ThresholdDays = dto.ThresholdDays };
-            var today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _zone);
+            var today = TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(nowUtc, DateTimeKind.Utc), _zone);
             return OccasionDates.IsMilestoneReached(occasion, milestone, OccasionDates.GetDays(occasion, today, _zone));
         }
 

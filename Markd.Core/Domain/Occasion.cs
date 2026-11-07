@@ -24,6 +24,13 @@
         /// </summary>
         public DateTime AnchorDate { get; set; }
 
+        /// <summary>
+        /// The calendar day the anchor stands for, fixed when the date is chosen (or arrives by sync). Sync sends this
+        /// day, so a device that changes time zone does not see its own events move. Null only before the startup
+        /// backfill has run on rows from 1.0.
+        /// </summary>
+        public DateOnly? AnchorDay { get; set; }
+
         public OccasionDirection Direction { get; set; } = OccasionDirection.Since;
 
         public string? Notes { get; set; }

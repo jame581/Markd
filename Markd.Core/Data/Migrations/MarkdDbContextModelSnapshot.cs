@@ -140,6 +140,9 @@ namespace Markd.Core.Data.Migrations
                     b.Property<DateTime>("AnchorDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateOnly?>("AnchorDay")
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("CategoryId")
                         .HasColumnType("INTEGER");
 

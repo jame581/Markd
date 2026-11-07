@@ -23,26 +23,38 @@ internal sealed class SyncDevice : IDisposable
     private readonly Microsoft.Data.Sqlite.SqliteConnection _connection;
 
     public MarkdDbContext Db { get; }
-    public OccasionService Occasions { get; }
+    public OccasionService Occasions { get; private set; } = null!;
     public CategoryService Categories { get; }
-    public SnapshotService Snapshots { get; }
+    public SnapshotService Snapshots { get; private set; } = null!;
     public SyncStateStore State { get; }
     public FakeSecrets Secrets { get; } = new();
     public FixedTimeProvider Clock { get; } = new(DateTime.UtcNow);
-    public SyncService Sync { get; }
+    public SyncService Sync { get; private set; } = null!;
 
     /// <summary>The device's local time zone: anchors are stored as the UTC instant of a local midnight here.</summary>
-    public TimeZoneInfo Zone { get; }
+    public TimeZoneInfo Zone { get; private set; }
 
     public SyncDevice(string passphrase = "pass", TimeZoneInfo? zone = null)
     {
         Zone = zone ?? TimeZoneInfo.Utc;
         (Db, _connection) = TestDbFactory.CreateSqliteInMemoryContext();
-        Occasions = new OccasionService(Db);
         Categories = new CategoryService(Db);
-        Snapshots = new SnapshotService(Db, Zone);
         State = new SyncStateStore(Db);
         Secrets.Passphrase = passphrase;
+        BuildZonedServices();
+    }
+
+    /// <summary>The device travels (or its zone rules change): same database, services now in the new zone.</summary>
+    public void SwitchZone(TimeZoneInfo zone)
+    {
+        Zone = zone;
+        BuildZonedServices();
+    }
+
+    private void BuildZonedServices()
+    {
+        Occasions = new OccasionService(Db, Zone);
+        Snapshots = new SnapshotService(Db, Zone);
         Sync = new SyncService(Snapshots, State, Secrets, Clock, new SyncOptions { KdfIterations = MarkdPackage.MinIterations }, new SyncGate());
     }
 

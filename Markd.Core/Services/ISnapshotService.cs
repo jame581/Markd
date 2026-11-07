@@ -2,6 +2,9 @@ namespace Markd.Core.Services
 {
     public interface ISnapshotService
     {
+        /// <summary>The device's time zone, which turns stored anchors into calendar days and back.</summary>
+        TimeZoneInfo Zone { get; }
+
         /// <summary>Tombstones included, Notified always false.</summary>
         Task<ExportModel> ReadForSyncAsync();
 

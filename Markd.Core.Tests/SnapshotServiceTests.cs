@@ -236,23 +236,43 @@ public class SnapshotServiceTests
     }
 
     [Fact]
-    public async Task Apply_leaves_a_row_on_the_same_local_day_untouched()
+    public async Task Apply_with_the_same_stored_day_leaves_the_instant_and_Notified_alone()
     {
-        var zone = Zones.Utc(-5);
         var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
         using var _ = conn; using var __ = db;
-        var occ = new OccasionService(db);
-        var noon = new DateTime(2026, 3, 2, 17, 0, 0, DateTimeKind.Utc);   // 12:00 local on 2 March
-        var o = await occ.CreateAsync(new Occasion { Title = "o", AnchorDate = noon });
+        var occ = new OccasionService(db, Zones.Utc(1));
+        var pragueMidnight = new DateTime(2026, 3, 1, 23, 0, 0, DateTimeKind.Utc);   // 2 March in UTC+1, 1 March in UTC-5
+        var o = await occ.CreateAsync(new Occasion { Title = "o", AnchorDate = pragueMidnight });
         var m = await occ.AddMilestoneAsync(o.Id, 1000, "far");
         await occ.MarkMilestoneNotifiedAsync(m.Id);
-        var snap = new SnapshotService(db, zone);
+        var snap = new SnapshotService(db, Zones.Utc(-5));   // the device has since travelled west
         var target = await snap.ReadForSyncAsync();
         target.Occasions[0].AnchorDay = new DateOnly(2026, 3, 2);
+        target.Occasions[0].Notes = "edited elsewhere";
 
         await snap.ApplyAsync(target, new SnapshotApplyOptions(false));
 
-        Assert.Equal(noon, DateTime.SpecifyKind((await db.Occasions.AsNoTracking().SingleAsync()).AnchorDate, DateTimeKind.Utc));
+        var stored = await db.Occasions.AsNoTracking().SingleAsync();
+        Assert.Equal(pragueMidnight, DateTime.SpecifyKind(stored.AnchorDate, DateTimeKind.Utc));
+        Assert.Equal(new DateOnly(2026, 3, 2), stored.AnchorDay);
+        Assert.True((await db.Milestones.SingleAsync()).Notified);
+    }
+
+    [Fact]
+    public async Task Apply_judges_arriving_milestones_at_the_apply_time()
+    {
+        var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
+        using var _ = conn; using var __ = db;
+        var occasionId = Guid.NewGuid();
+        var target = new ExportModel
+        {
+            Occasions = { new OccasionDto { SyncId = occasionId, Title = "o", AnchorDay = new DateOnly(2026, 3, 2), Direction = "Since", UpdatedAt = T } },
+            Milestones = { new MilestoneDto { SyncId = Guid.NewGuid(), OccasionSyncId = occasionId, Label = "far", ThresholdDays = 1000, UpdatedAt = T } },
+        };
+
+        await new SnapshotService(db, Zones.Utc(0)).ApplyAsync(target,
+            new SnapshotApplyOptions(false, NowUtc: new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
+
         Assert.True((await db.Milestones.SingleAsync()).Notified);
     }
 
