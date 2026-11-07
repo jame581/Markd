@@ -1,4 +1,5 @@
 using Markd.Core.Sync;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace Markd.Core.Tests;
@@ -226,6 +227,36 @@ public class SyncReconnectTests
         Assert.NotNull(state.Epoch);
         Assert.Null(a.Secrets.Passphrase);
         Assert.NotNull(cloud.Data);
+    }
+
+    [Fact]
+    public async Task Disconnect_keeping_the_base_records_the_attempt()
+    {
+        var (a, b, cloud) = await PairedAsync("One");
+        using var _a = a;
+        using var _b = b;
+        cloud.Offline = true;
+        Assert.Equal(SyncOutcome.Offline, (await a.Sync.SyncAsync(cloud)).Outcome);
+        cloud.Offline = false;
+        a.Clock.Now = a.Clock.Now.AddMinutes(5);
+
+        await a.Sync.DisconnectAsync(cloud, deleteRemote: false);
+
+        var state = await a.State.LoadAsync();
+        Assert.Equal(nameof(SyncOutcome.Disconnected), state.LastAttemptResult);
+        Assert.Equal(a.Clock.Now, state.LastAttemptUtc);
+    }
+
+    [Fact]
+    public async Task Disconnect_with_delete_leaves_no_state_row()
+    {
+        var (a, b, cloud) = await PairedAsync("One");
+        using var _a = a;
+        using var _b = b;
+
+        await a.Sync.DisconnectAsync(cloud, deleteRemote: true);
+
+        Assert.Equal(0, await a.Db.SyncStates.CountAsync());
     }
 
     [Fact]

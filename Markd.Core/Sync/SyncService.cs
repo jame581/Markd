@@ -316,7 +316,7 @@ namespace Markd.Core.Sync
             await gate.WaitAsync(ct);
             try
             {
-                return await RunAsync(async () =>
+                var disconnectResult = await RunAsync(async () =>
                 {
                     // A failed delete throws before anything is forgotten: the link, the state and the passphrase stay.
                     if (deleteRemote && provider is not null)
@@ -338,6 +338,12 @@ namespace Markd.Core.Sync
                     await secrets.SetPassphraseAsync(null);
                     return new SyncResult(SyncOutcome.Disconnected);
                 }, ct);
+
+                // The kept row would otherwise show the last sync attempt (say, Offline) next to a disconnected link.
+                // After a delete there is no row, and recording would create one.
+                if (!deleteRemote && disconnectResult.Outcome == SyncOutcome.Disconnected)
+                    await RecordAttemptAsync(disconnectResult);
+                return disconnectResult;
             }
             finally
             {
