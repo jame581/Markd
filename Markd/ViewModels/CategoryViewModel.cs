@@ -225,7 +225,7 @@ public class CategoryViewModel : ViewModelBase
             .Select(occasion => occasion.Id)
             .ToList();
 
-        var snapshot = new Category { Name = category.Name, Emoji = category.Emoji, ColorHex = category.ColorHex };
+        var snapshot = new Category { SyncId = category.SyncId, Name = category.Name, Emoji = category.Emoji, ColorHex = category.ColorHex };
         await _categoryService.DeleteAsync(category.Id);
         await LoadAsync();
         WeakReferenceMessenger.Default.Send(new CategoriesChangedMessage(this));
@@ -243,7 +243,7 @@ public class CategoryViewModel : ViewModelBase
 
     private async Task RestoreAsync(Category snapshot, IReadOnlyList<int> affectedOccasionIds)
     {
-        var restored = await _categoryService.CreateAsync(snapshot);
+        var restored = await _categoryService.RestoreAsync(snapshot);
 
         foreach (var occasionId in affectedOccasionIds)
         {

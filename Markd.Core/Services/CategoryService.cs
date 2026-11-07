@@ -52,5 +52,29 @@ namespace Markd.Core.Services
             category.DeletedAt = DateTime.UtcNow;
             await db.SaveChangesAsync();
         }
+
+        public async Task<Category> RestoreAsync(Category snapshot)
+        {
+            // Already live again (undo pressed twice, or a sync brought it back): never a copy.
+            var live = await db.Categories.FirstOrDefaultAsync(c => c.SyncId == snapshot.SyncId);
+            if (live is not null)
+                return live;
+
+            var tombstone = await db.Categories.IgnoreQueryFilters()
+                .FirstOrDefaultAsync(c => c.SyncId == snapshot.SyncId && c.DeletedAt != null);
+            if (tombstone is not null)
+            {
+                tombstone.DeletedAt = null;
+                await db.SaveChangesAsync();
+                return tombstone;
+            }
+
+            return await CreateAsync(new Category
+            {
+                Name = snapshot.Name,
+                Emoji = snapshot.Emoji,
+                ColorHex = snapshot.ColorHex
+            });
+        }
     }
 }
