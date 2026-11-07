@@ -1,4 +1,5 @@
 using Markd.Core.Services;
+using Markd.Core.Sync;
 
 namespace Markd.Core.Tests;
 
@@ -25,6 +26,10 @@ internal static class Snap
     {
         SyncId = G(n), OccasionSyncId = G(occ), ThresholdDays = days, Label = label, UpdatedAt = updated ?? T0, DeletedAt = deleted ? T0 : null
     };
+
+    /// <summary>The same choice for every conflict, bound to the versions those conflicts showed.</summary>
+    public static IReadOnlyCollection<ConflictResolution> Pick(IEnumerable<SyncConflict> conflicts, ConflictChoice choice) =>
+        conflicts.Select(c => c.Resolve(choice)).ToList();
 
     public static ExportModel Model(IEnumerable<CategoryDto>? c = null, IEnumerable<OccasionDto>? o = null, IEnumerable<MilestoneDto>? m = null) => new()
     {

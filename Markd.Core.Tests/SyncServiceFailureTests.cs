@@ -142,7 +142,7 @@ public class SyncServiceFailureTests
         Assert.Equal(new[] { "Trip B" }, await b.TitlesAsync());   // nothing changed while undecided
         Assert.Equal(1, cloud.Uploads - 1);                        // and nothing was uploaded by b
 
-        var done = await b.Sync.SyncAsync(cloud, new Dictionary<Guid, ConflictChoice> { [conflict.SyncId] = ConflictChoice.Remote });
+        var done = await b.Sync.SyncAsync(cloud, [conflict.Resolve(ConflictChoice.Remote)]);
         Assert.Equal(SyncOutcome.Synced, done.Outcome);
         Assert.Equal(new[] { "Trip A" }, await b.TitlesAsync());
         await a.Sync.SyncAsync(cloud);

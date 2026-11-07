@@ -301,4 +301,44 @@ public class SyncServiceTests
         Assert.All(results, r => Assert.True(r.Outcome is SyncOutcome.Synced or SyncOutcome.NoChanges));
         Assert.True(cloud.GetInfoCalls > callsWhileHeld);
     }
+
+    [Fact]
+    public async Task A_choice_is_not_applied_to_a_newer_remote_edit_made_during_the_upload()
+    {
+        using var a = new SyncDevice();
+        using var b = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionAsync("X");
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+        await RenameOnlyAsync(a, "X from A");
+        await RenameOnlyAsync(b, "X from B");
+        await b.Sync.SyncAsync(cloud);
+        var pending = await a.Sync.SyncAsync(cloud);
+        Assert.Equal(SyncOutcome.NeedsConflictResolution, pending.Outcome);
+        var resolutions = Snap.Pick(pending.Conflicts!, ConflictChoice.Local);
+
+        // while a uploads its choice, b edits X again and wins the race
+        cloud.BeforeUpload = () => Task.Run(async () =>
+        {
+            await RenameOnlyAsync(b, "X from B again");
+            await b.Sync.SyncAsync(cloud);
+        }).GetAwaiter().GetResult();
+        var result = await a.Sync.SyncAsync(cloud, resolutions);
+
+        Assert.Equal(SyncOutcome.NeedsConflictResolution, result.Outcome);
+        var conflict = Assert.IsType<OccasionConflict>(Assert.Single(result.Conflicts!));
+        Assert.Equal("X from B again", conflict.Remote!.Title);
+        Assert.Equal(new[] { "X from A" }, await a.TitlesAsync());
+        using var c = new SyncDevice();
+        Assert.True((await c.Sync.SyncAsync(cloud)).IsSuccess);
+        Assert.Equal(new[] { "X from B again" }, await c.TitlesAsync());   // b's second edit is still in the cloud
+    }
+
+    private static async Task RenameOnlyAsync(SyncDevice device, string title)
+    {
+        var occasion = (await device.Occasions.GetAllAsync()).Single();
+        occasion.Title = title;
+        await device.Occasions.UpdateAsync(occasion);
+    }
 }

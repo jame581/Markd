@@ -4,7 +4,7 @@ namespace Markd.Core.Sync
     public interface ISyncService
     {
         Task<SyncResult> SyncAsync(
-            ICloudSyncProvider provider, IReadOnlyDictionary<Guid, ConflictChoice>? resolutions = null, CancellationToken ct = default);
+            ICloudSyncProvider provider, IReadOnlyCollection<ConflictResolution>? resolutions = null, CancellationToken ct = default);
 
         /// <summary>Overwrites the cloud file with this device's data under a new passphrase (forgotten passphrase).</summary>
         Task<SyncResult> ReplaceRemoteAsync(ICloudSyncProvider provider, string newPassphrase, CancellationToken ct = default);

@@ -57,7 +57,7 @@ public class SyncReconnectTests
         Assert.Equal(new[] { "Y" }, await a.TitlesAsync());   // nothing changed while undecided
         Assert.Equal(uploads, work.Uploads);
 
-        var done = await a.Sync.SyncAsync(work, new Dictionary<Guid, ConflictChoice> { [conflict.SyncId] = choice });
+        var done = await a.Sync.SyncAsync(work, [conflict.Resolve(choice)]);
         Assert.Equal(SyncOutcome.Synced, done.Outcome);
         Assert.Equal(expected, await a.TitlesAsync());
         Assert.True((await b.Sync.SyncAsync(work)).IsSuccess);
@@ -87,7 +87,7 @@ public class SyncReconnectTests
         Assert.Equal(new[] { "X", "Y" }, await a.TitlesAsync());   // nothing changed while undecided
         Assert.Equal(uploads, work.Uploads);
 
-        var done = await a.Sync.SyncAsync(work, new Dictionary<Guid, ConflictChoice> { [conflict.SyncId] = choice });
+        var done = await a.Sync.SyncAsync(work, [conflict.Resolve(choice)]);
         Assert.Equal(SyncOutcome.Synced, done.Outcome);
         Assert.True((await b.Sync.SyncAsync(work)).IsSuccess);
         await AssertConvergedAsync(a, b, work, expected);

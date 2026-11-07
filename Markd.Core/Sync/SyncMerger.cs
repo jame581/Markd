@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Markd.Core.Services;
 
 namespace Markd.Core.Sync
@@ -20,9 +22,11 @@ namespace Markd.Core.Sync
         /// </summary>
         public static MergeResult Merge(
             ExportModel? baseModel, ExportModel local, ExportModel remote, DateTime nowUtc,
-            IReadOnlyDictionary<Guid, ConflictChoice>? resolutions = null)
+            IReadOnlyCollection<ConflictResolution>? resolutions = null)
         {
-            var choices = resolutions ?? new Dictionary<Guid, ConflictChoice>();
+            var choices = new Dictionary<Guid, ConflictResolution>();
+            foreach (var resolution in resolutions ?? [])
+                choices[resolution.SyncId] = resolution;
             var remaps = new Dictionary<Guid, Guid>();
             var conflicts = new List<SyncConflict>();
 
@@ -89,7 +93,7 @@ namespace Markd.Core.Sync
         private static Dictionary<Guid, T> MergeKind<T>(
             IEnumerable<T> baseItems, IEnumerable<T> localItems, IEnumerable<T> remoteItems,
             Func<T, Guid> id, Func<T, string> content, Func<T, bool> isDeleted, Func<T, DateTime> updatedAt,
-            IReadOnlyDictionary<Guid, ConflictChoice> choices, List<SyncConflict> conflicts,
+            IReadOnlyDictionary<Guid, ConflictResolution> choices, List<SyncConflict> conflicts,
             Func<T?, T?, Guid, DateTime, DateTime, SyncConflict> conflict,
             HashSet<Guid>? liveOverDead, Func<T, bool>? autoDrop = null, Func<T, bool>? parentDeleted = null) where T : class
         {
@@ -130,8 +134,9 @@ namespace Markd.Core.Sync
                 {
                     chosen = lItem;
                 }
-                else if (choices.TryGetValue(key, out var choice))
+                else if (choices.TryGetValue(key, out var resolution) && resolution.Signature == Signature(sl, sr))
                 {
+                    var choice = resolution.Choice;
                     chosen = choice == ConflictChoice.Local ? lItem : rItem;
                     var other = choice == ConflictChoice.Local ? rItem : lItem;
                     if (liveOverDead is not null && chosen is not null && !isDeleted(chosen) && (other is null || isDeleted(other)))
@@ -149,7 +154,7 @@ namespace Markd.Core.Sync
                 }
                 else
                 {
-                    conflicts.Add(conflict(Shown(lItem), Shown(rItem), key, Stamp(lItem), Stamp(rItem)));
+                    conflicts.Add(conflict(Shown(lItem), Shown(rItem), key, Stamp(lItem), Stamp(rItem)) with { Signature = Signature(sl, sr) });
                     chosen = lItem;
                 }
 
@@ -159,5 +164,9 @@ namespace Markd.Core.Sync
 
             return result;
         }
+
+        /// <summary>Binds a decision to both versions that were shown: a later change on either side asks again.</summary>
+        private static string Signature(string localSig, string remoteSig) =>
+            Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(localSig + "\u001e" + remoteSig)));
     }
 }

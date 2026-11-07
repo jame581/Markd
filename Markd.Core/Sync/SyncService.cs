@@ -9,7 +9,7 @@ namespace Markd.Core.Sync
         : ISyncService
     {
         public async Task<SyncResult> SyncAsync(
-            ICloudSyncProvider provider, IReadOnlyDictionary<Guid, ConflictChoice>? resolutions = null, CancellationToken ct = default)
+            ICloudSyncProvider provider, IReadOnlyCollection<ConflictResolution>? resolutions = null, CancellationToken ct = default)
         {
             await gate.WaitAsync(ct);
             try
@@ -48,7 +48,7 @@ namespace Markd.Core.Sync
         /// user edited while the sync was running.
         /// </summary>
         private async Task<(SyncResult? Result, RetryReason Retry)> TryOnceAsync(
-            ICloudSyncProvider provider, string passphrase, IReadOnlyDictionary<Guid, ConflictChoice>? resolutions, CancellationToken ct)
+            ICloudSyncProvider provider, string passphrase, IReadOnlyCollection<ConflictResolution>? resolutions, CancellationToken ct)
         {
             var now = clock.GetUtcNow().UtcDateTime;
             var state = await store.LoadAsync();

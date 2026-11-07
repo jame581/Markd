@@ -55,11 +55,60 @@ public class SyncMergerTests
         Assert.Equal("mine", ((OccasionConflict)conflict).Local!.Title);
         Assert.Equal(ConflictChoice.Remote, conflict.Newest);
 
-        var mine = SyncMerger.Merge(b, l, r, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
-        var theirs = SyncMerger.Merge(b, l, r, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Remote });
+        var mine = SyncMerger.Merge(b, l, r, Now, Pick(first.Conflicts, ConflictChoice.Local));
+        var theirs = SyncMerger.Merge(b, l, r, Now, Pick(first.Conflicts, ConflictChoice.Remote));
         Assert.Empty(mine.Conflicts);
         Assert.Equal("mine", Titles(mine.Merged));
         Assert.Equal("theirs", Titles(theirs.Merged));
+    }
+
+    [Fact]
+    public void A_resolution_for_the_same_versions_applies()
+    {
+        var b = Model(o: [Occ(1, "a")]);
+        var l = Model(o: [Occ(1, "mine", updated: T0.AddDays(1))]);
+        var r = Model(o: [Occ(1, "theirs", updated: T0.AddDays(2))]);
+        var first = SyncMerger.Merge(b, l, r, Now);
+
+        var result = SyncMerger.Merge(b, l.CloneModel(), r.CloneModel(), Now, Pick(first.Conflicts, ConflictChoice.Remote));
+
+        Assert.Empty(result.Conflicts);
+        Assert.Equal("theirs", Titles(result.Merged));
+    }
+
+    [Fact]
+    public void A_resolution_for_a_remote_that_changed_again_is_asked_again()
+    {
+        var b = Model(o: [Occ(1, "a")]);
+        var l = Model(o: [Occ(1, "mine", updated: T0.AddDays(1))]);
+        var remoteV1 = Model(o: [Occ(1, "theirs", updated: T0.AddDays(2))]);
+        var remoteV2 = Model(o: [Occ(1, "theirs again", updated: T0.AddDays(3))]);
+        var first = SyncMerger.Merge(b, l, remoteV1, Now);
+
+        var result = SyncMerger.Merge(b, l, remoteV2, Now, Pick(first.Conflicts, ConflictChoice.Local));
+
+        var conflict = Assert.IsType<OccasionConflict>(Assert.Single(result.Conflicts));
+        Assert.Equal(G(1), conflict.SyncId);
+        Assert.Equal("theirs again", conflict.Remote!.Title);
+        Assert.Equal("mine", Titles(result.Merged));
+        Assert.NotEqual(Assert.Single(first.Conflicts).Signature, conflict.Signature);
+    }
+
+    [Fact]
+    public void A_resolution_after_a_local_edit_is_asked_again()
+    {
+        var b = Model(o: [Occ(1, "a")]);
+        var localV1 = Model(o: [Occ(1, "mine", updated: T0.AddDays(1))]);
+        var localV2 = Model(o: [Occ(1, "mine, edited while asked", updated: T0.AddDays(3))]);
+        var r = Model(o: [Occ(1, "theirs", updated: T0.AddDays(2))]);
+        var first = SyncMerger.Merge(b, localV1, r, Now);
+
+        var result = SyncMerger.Merge(b, localV2, r, Now, Pick(first.Conflicts, ConflictChoice.Remote));
+
+        var conflict = Assert.IsType<OccasionConflict>(Assert.Single(result.Conflicts));
+        Assert.Equal("mine, edited while asked", conflict.Local!.Title);
+        Assert.Equal("mine, edited while asked", Titles(result.Merged));
+        Assert.NotEqual(Assert.Single(first.Conflicts).Signature, conflict.Signature);
     }
 
     [Fact]
@@ -114,8 +163,8 @@ public class SyncMergerTests
         var conflict = Assert.IsType<OccasionConflict>(Assert.Single(result.Conflicts));
         Assert.NotNull(conflict.Local);
         Assert.Null(conflict.Remote);
-        var keepEdit = SyncMerger.Merge(b, edited, deleted, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
-        var keepDelete = SyncMerger.Merge(b, edited, deleted, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Remote });
+        var keepEdit = SyncMerger.Merge(b, edited, deleted, Now, Pick(result.Conflicts, ConflictChoice.Local));
+        var keepDelete = SyncMerger.Merge(b, edited, deleted, Now, Pick(result.Conflicts, ConflictChoice.Remote));
         Assert.Equal("edited", Titles(keepEdit.Merged));
         Assert.Equal("", Titles(keepDelete.Merged));
     }
@@ -133,8 +182,8 @@ public class SyncMergerTests
         Assert.Equal(G(1), conflict.SyncId);
         Assert.Null(conflict.Local);
         Assert.NotNull(conflict.Remote);
-        var keepDelete = SyncMerger.Merge(null, deleted, live, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
-        var keepRecord = SyncMerger.Merge(null, deleted, live, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Remote });
+        var keepDelete = SyncMerger.Merge(null, deleted, live, Now, Pick(result.Conflicts, ConflictChoice.Local));
+        var keepRecord = SyncMerger.Merge(null, deleted, live, Now, Pick(result.Conflicts, ConflictChoice.Remote));
         Assert.Empty(keepDelete.Conflicts);
         Assert.Equal("", Titles(keepDelete.Merged));
         Assert.Equal("a", Titles(keepRecord.Merged));
@@ -151,8 +200,8 @@ public class SyncMergerTests
         var conflict = Assert.IsType<OccasionConflict>(Assert.Single(result.Conflicts));
         Assert.NotNull(conflict.Local);
         Assert.Null(conflict.Remote);
-        var keepRecord = SyncMerger.Merge(null, live, deleted, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
-        var keepDelete = SyncMerger.Merge(null, live, deleted, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Remote });
+        var keepRecord = SyncMerger.Merge(null, live, deleted, Now, Pick(result.Conflicts, ConflictChoice.Local));
+        var keepDelete = SyncMerger.Merge(null, live, deleted, Now, Pick(result.Conflicts, ConflictChoice.Remote));
         Assert.Empty(keepRecord.Conflicts);
         Assert.Equal("a", Titles(keepRecord.Merged));
         Assert.Equal("", Titles(keepDelete.Merged));
@@ -176,8 +225,8 @@ public class SyncMergerTests
         var live = Model(o: [Occ(1, "a")], m: [Ms(2, 1)]);
 
         var pending = SyncMerger.Merge(null, deleted, live, Now);
-        var keepRecord = SyncMerger.Merge(null, deleted, live, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Remote });
-        var keepDelete = SyncMerger.Merge(null, deleted, live, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
+        var keepRecord = SyncMerger.Merge(null, deleted, live, Now, Pick(pending.Conflicts, ConflictChoice.Remote));
+        var keepDelete = SyncMerger.Merge(null, deleted, live, Now, Pick(pending.Conflicts, ConflictChoice.Local));
 
         Assert.Equal(G(1), Assert.Single(pending.Conflicts).SyncId);
         Assert.Empty(keepRecord.Conflicts);
@@ -186,7 +235,7 @@ public class SyncMergerTests
         Assert.NotNull(Assert.Single(keepDelete.Merged.Milestones).DeletedAt);
 
         var mirrored = SyncMerger.Merge(null, live, deleted, Now);
-        var mirroredKeep = SyncMerger.Merge(null, live, deleted, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
+        var mirroredKeep = SyncMerger.Merge(null, live, deleted, Now, Pick(mirrored.Conflicts, ConflictChoice.Local));
         Assert.Equal(G(1), Assert.Single(mirrored.Conflicts).SyncId);
         Assert.Empty(mirroredKeep.Conflicts);
         Assert.Null(Assert.Single(mirroredKeep.Merged.Milestones).DeletedAt);
@@ -215,7 +264,8 @@ public class SyncMergerTests
         var b = Model(o: [Occ(1, "a")]);
         var l = Model(o: [Occ(1, "mine")]);
         var r = Model(o: [Occ(1, "a", deleted: true)]);
-        var result = SyncMerger.Merge(b, l, r, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
+        var pending = SyncMerger.Merge(b, l, r, Now);
+        var result = SyncMerger.Merge(b, l, r, Now, Pick(pending.Conflicts, ConflictChoice.Local));
         Assert.Equal("mine", l.Occasions[0].Title);
         Assert.Null(l.Occasions[0].DeletedAt);
         Assert.Equal("a", b.Occasions[0].Title);

@@ -7,7 +7,9 @@ namespace Markd.Core.Tests;
 
 public class SyncMergerCascadeTests
 {
-    private static Dictionary<Guid, ConflictChoice> Pick(int n, ConflictChoice c) => new() { [G(n)] = c };
+    /// <summary>Merges once to get the conflicts, then again with the same choice for all of them.</summary>
+    private static ExportModel MergeChoosing(ExportModel b, ExportModel l, ExportModel r, ConflictChoice choice) =>
+        SyncMerger.Merge(b, l, r, Now, Pick(SyncMerger.Merge(b, l, r, Now).Conflicts, choice)).Merged;
 
     [Fact]
     public void Milestones_follow_a_deleted_occasion()
@@ -42,7 +44,7 @@ public class SyncMergerCascadeTests
         var l = Model(o: [Occ(1, "edited")], m: [Ms(1, 1), Ms(2, 1, days: 200)]);
         var r = Model(o: [Occ(1, "a", deleted: true)], m: [Ms(1, 1, deleted: true), Ms(2, 1, days: 200, deleted: true)]);
 
-        var merged = SyncMerger.Merge(b, l, r, Now, Pick(1, ConflictChoice.Local)).Merged;
+        var merged = MergeChoosing(b, l, r, ConflictChoice.Local);
 
         Assert.Equal("edited", merged.Occasions.Single().Title);
         Assert.Equal(2, merged.Milestones.Count(m => m.DeletedAt is null));
@@ -55,7 +57,7 @@ public class SyncMergerCascadeTests
         var l = Model(o: [Occ(1, "edited")], m: [Ms(1, 1)]);
         var r = Model(o: [Occ(1, "a", deleted: true)], m: [Ms(1, 1, deleted: true)]);
 
-        var merged = SyncMerger.Merge(b, l, r, Now, Pick(1, ConflictChoice.Remote)).Merged;
+        var merged = MergeChoosing(b, l, r, ConflictChoice.Remote);
 
         Assert.DoesNotContain(merged.Occasions, o => o.DeletedAt is null);
         Assert.DoesNotContain(merged.Milestones, m => m.DeletedAt is null);
