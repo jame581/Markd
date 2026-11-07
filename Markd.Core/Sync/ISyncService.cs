@@ -9,7 +9,11 @@ namespace Markd.Core.Sync
         /// <summary>Overwrites the cloud file with this device's data under a new passphrase (forgotten passphrase).</summary>
         Task<SyncResult> ReplaceRemoteAsync(ICloudSyncProvider provider, string newPassphrase, CancellationToken ct = default);
 
-        /// <summary>Forgets the link and the passphrase, optionally deleting the cloud file. Local data is never touched.</summary>
+        /// <summary>
+        /// Forgets the passphrase and marks the link disconnected, keeping the base so a reconnect to the same file
+        /// merges against it. With <paramref name="deleteRemote"/> the cloud file is deleted and the whole sync state
+        /// is forgotten. Local data is never touched. Returns <see cref="SyncOutcome.Disconnected"/>.
+        /// </summary>
         Task<SyncResult> DisconnectAsync(ICloudSyncProvider? provider, bool deleteRemote, CancellationToken ct = default);
     }
 }

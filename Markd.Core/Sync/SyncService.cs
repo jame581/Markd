@@ -66,10 +66,14 @@ namespace Markd.Core.Sync
 
             var localChanged = baseModel is null || SyncContent.Fingerprint(local) != SyncContent.Fingerprint(baseModel);
             var remoteChanged = info is not null && info.Revision != state.RemoteRevision;
-            if (info is not null && baseModel is not null && !localChanged && !remoteChanged)
+            // After a disconnect the passphrase was typed again: decode the file to prove it before anything is
+            // uploaded under the same epoch (an unchanged revision would otherwise skip the download). The base stays.
+            var mustDecode = !state.IsConnected;
+            if (info is not null && baseModel is not null && !localChanged && !remoteChanged && !mustDecode)
             {
                 state.LastSyncUtc = now;
                 state.LastResult = nameof(SyncOutcome.NoChanges);
+                state.IsConnected = true;
                 await store.SaveAsync(state);
                 return Done(new SyncResult(SyncOutcome.NoChanges));
             }
@@ -81,7 +85,7 @@ namespace Markd.Core.Sync
             {
                 remote = SyncMerger.Empty();
             }
-            else if (remoteChanged || baseModel is null)
+            else if (remoteChanged || baseModel is null || mustDecode)
             {
                 var file = await provider.DownloadAsync(ct);
                 if (file is null)
@@ -166,6 +170,7 @@ namespace Markd.Core.Sync
             state.Epoch = merged.SyncEpoch;
             state.LastSyncUtc = now;
             state.LastResult = nameof(SyncOutcome.Synced);
+            state.IsConnected = true;
             state.BaseSnapshotJson = ExportModelJson.Serialize(merged, indented: false);
             await store.SaveAsync(state);
             return Done(new SyncResult(SyncOutcome.Synced));
@@ -205,6 +210,7 @@ namespace Markd.Core.Sync
                     state.RemoteRevision = revision;
                     state.LastSyncUtc = now;
                     state.LastResult = nameof(SyncOutcome.Synced);
+                    state.IsConnected = true;
                     state.Epoch = local.SyncEpoch;
                     state.BaseSnapshotJson = ExportModelJson.Serialize(local, indented: false);
                     await store.SaveAsync(state);
@@ -218,8 +224,9 @@ namespace Markd.Core.Sync
         }
 
         /// <summary>
-        /// Forgets the link and the passphrase. Local data is never touched. When deleting the cloud file fails,
-        /// nothing is forgotten and the failure is the outcome.
+        /// Forgets the passphrase and keeps the base (marked disconnected), or with deleteRemote deletes the cloud file
+        /// and forgets the whole state. Local data is never touched. When deleting the cloud file fails, nothing is
+        /// forgotten and the failure is the outcome.
         /// </summary>
         public async Task<SyncResult> DisconnectAsync(ICloudSyncProvider? provider, bool deleteRemote, CancellationToken ct = default)
         {
@@ -232,9 +239,21 @@ namespace Markd.Core.Sync
                     if (deleteRemote && provider is not null)
                         await provider.DeleteAsync(ct);
 
-                    await store.ClearAsync();
+                    if (deleteRemote)
+                    {
+                        await store.ClearAsync();
+                    }
+                    else
+                    {
+                        // Keep the base: a later reconnect to the same file merges against it instead of asking
+                        // about every record both sides changed meanwhile.
+                        var state = await store.LoadAsync();
+                        state.IsConnected = false;
+                        await store.SaveAsync(state);
+                    }
+
                     await secrets.SetPassphraseAsync(null);
-                    return new SyncResult(SyncOutcome.Synced);
+                    return new SyncResult(SyncOutcome.Disconnected);
                 }, ct);
             }
             finally

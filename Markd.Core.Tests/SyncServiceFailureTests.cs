@@ -385,7 +385,7 @@ public class SyncServiceFailureTests
 
         var result = await a.Sync.DisconnectAsync(cloud, deleteRemote: true);
 
-        Assert.Equal(SyncOutcome.Synced, result.Outcome);
+        Assert.Equal(SyncOutcome.Disconnected, result.Outcome);
         Assert.Null(cloud.Data);
         Assert.Null(a.Secrets.Passphrase);
         Assert.Null((await a.State.LoadAsync()).ProviderId);

@@ -70,4 +70,7 @@ internal sealed class InMemoryCloudProvider : ICloudSyncProvider
 
     /// <summary>Replace the remote content directly, as another device (or the user) would.</summary>
     public void Put(byte[] data) { _data = data.ToArray(); _version++; }
+
+    /// <summary>Holds the same encoded file under the same revision as another cloud, as a second account might.</summary>
+    public void CopyFrom(InMemoryCloudProvider source) { _data = source._data?.ToArray(); _version = source._version; }
 }
