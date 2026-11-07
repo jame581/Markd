@@ -37,20 +37,35 @@ namespace Markd.Core.Sync
                 baseModel = Empty();
             }
 
+            // Display lookups come from the working (cloned, aligned) models.
+            string? LiveCategoryName(ExportModel m, Guid? id) =>
+                id is null ? null : m.Categories.FirstOrDefault(c => c.SyncId == id && c.DeletedAt is null)?.Name;
+            string? OccasionTitleOf(Guid id)
+            {
+                var all = local.Occasions.Concat(remote.Occasions).Concat(baseModel.Occasions).Where(o => o.SyncId == id).ToList();
+                return (all.FirstOrDefault(o => o.DeletedAt is null) ?? all.FirstOrDefault())?.Title;
+            }
+
             var liveOverDeadOccasions = new HashSet<Guid>();
             var categories = MergeKind(baseModel.Categories, local.Categories, remote.Categories,
                 c => c.SyncId, SyncContent.Of, c => c.DeletedAt is not null, c => c.UpdatedAt,
-                SyncRecordKind.Category, choices, conflicts, null);
+                choices, conflicts,
+                (l, r, key, lu, ru) => new CategoryConflict(key, l, r, lu, ru), null);
             var occasions = MergeKind(baseModel.Occasions, local.Occasions, remote.Occasions,
                 o => o.SyncId, SyncContent.Of, o => o.DeletedAt is not null, o => o.UpdatedAt,
-                SyncRecordKind.Occasion, choices, conflicts, liveOverDeadOccasions);
+                choices, conflicts,
+                (l, r, key, lu, ru) => new OccasionConflict(key, l, r,
+                    LiveCategoryName(local, l?.CategorySyncId), LiveCategoryName(remote, r?.CategorySyncId), lu, ru),
+                liveOverDeadOccasions);
             // A milestone edit against a delete of its whole occasion is not worth asking about: the occasion's
             // own decision (or its own conflict) settles it, and the cascade tombstones the orphan.
             var liveOccasions = occasions.Values.Where(o => o.DeletedAt is null).Select(o => o.SyncId).ToHashSet();
             var deadOccasions = local.Occasions.Concat(remote.Occasions).Where(o => o.DeletedAt is not null).Select(o => o.SyncId).ToHashSet();
             var milestones = MergeKind(baseModel.Milestones, local.Milestones, remote.Milestones,
                 m => m.SyncId, SyncContent.Of, m => m.DeletedAt is not null, m => m.UpdatedAt,
-                SyncRecordKind.Milestone, choices, conflicts, null, m => !liveOccasions.Contains(m.OccasionSyncId),
+                choices, conflicts,
+                (l, r, key, lu, ru) => new MilestoneConflict(key, l, r, OccasionTitleOf((l ?? r)!.OccasionSyncId), lu, ru),
+                null, m => !liveOccasions.Contains(m.OccasionSyncId),
                 m => deadOccasions.Contains(m.OccasionSyncId));
 
             MergeCascades.Apply(baseModel, local, remote, categories, occasions, milestones, liveOverDeadOccasions, nowUtc);
@@ -74,7 +89,8 @@ namespace Markd.Core.Sync
         private static Dictionary<Guid, T> MergeKind<T>(
             IEnumerable<T> baseItems, IEnumerable<T> localItems, IEnumerable<T> remoteItems,
             Func<T, Guid> id, Func<T, string> content, Func<T, bool> isDeleted, Func<T, DateTime> updatedAt,
-            SyncRecordKind kind, IReadOnlyDictionary<Guid, ConflictChoice> choices, List<SyncConflict> conflicts,
+            IReadOnlyDictionary<Guid, ConflictChoice> choices, List<SyncConflict> conflicts,
+            Func<T?, T?, Guid, DateTime, DateTime, SyncConflict> conflict,
             HashSet<Guid>? liveOverDead, Func<T, bool>? autoDrop = null, Func<T, bool>? parentDeleted = null) where T : class
         {
             var b = baseItems.ToDictionary(id);
@@ -83,7 +99,7 @@ namespace Markd.Core.Sync
             var result = new Dictionary<Guid, T>();
 
             string Sig(T? x) => x is null || isDeleted(x) ? Dead : content(x);
-            object? Shown(T? x) => x is null || isDeleted(x) ? null : x;
+            T? Shown(T? x) => x is null || isDeleted(x) ? null : x;
             DateTime Stamp(T? x) => x is null ? DateTime.MinValue : updatedAt(x);
 
             foreach (var key in b.Keys.Union(l.Keys).Union(r.Keys).OrderBy(k => k))
@@ -133,7 +149,7 @@ namespace Markd.Core.Sync
                 }
                 else
                 {
-                    conflicts.Add(new SyncConflict(key, kind, Shown(lItem), Shown(rItem), Stamp(lItem), Stamp(rItem)));
+                    conflicts.Add(conflict(Shown(lItem), Shown(rItem), key, Stamp(lItem), Stamp(rItem)));
                     chosen = lItem;
                 }
 

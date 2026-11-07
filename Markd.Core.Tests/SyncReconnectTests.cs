@@ -51,7 +51,7 @@ public class SyncReconnectTests
         var pending = await a.Sync.SyncAsync(work);
 
         Assert.Equal(SyncOutcome.NeedsConflictResolution, pending.Outcome);
-        var conflict = Assert.Single(pending.Conflicts!);
+        var conflict = Assert.IsType<OccasionConflict>(Assert.Single(pending.Conflicts!));
         Assert.Null(conflict.Local);
         Assert.NotNull(conflict.Remote);
         Assert.Equal(new[] { "Y" }, await a.TitlesAsync());   // nothing changed while undecided
@@ -81,7 +81,7 @@ public class SyncReconnectTests
         var pending = await a.Sync.SyncAsync(work);
 
         Assert.Equal(SyncOutcome.NeedsConflictResolution, pending.Outcome);
-        var conflict = Assert.Single(pending.Conflicts!);
+        var conflict = Assert.IsType<OccasionConflict>(Assert.Single(pending.Conflicts!));
         Assert.NotNull(conflict.Local);
         Assert.Null(conflict.Remote);
         Assert.Equal(new[] { "X", "Y" }, await a.TitlesAsync());   // nothing changed while undecided

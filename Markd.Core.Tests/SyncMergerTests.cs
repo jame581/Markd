@@ -52,7 +52,7 @@ public class SyncMergerTests
         var conflict = Assert.Single(first.Conflicts);
         Assert.Equal(SyncRecordKind.Occasion, conflict.Kind);
         Assert.Equal(G(1), conflict.SyncId);
-        Assert.Equal("mine", ((OccasionDto)conflict.Local!).Title);
+        Assert.Equal("mine", ((OccasionConflict)conflict).Local!.Title);
         Assert.Equal(ConflictChoice.Remote, conflict.Newest);
 
         var mine = SyncMerger.Merge(b, l, r, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
@@ -77,6 +77,32 @@ public class SyncMergerTests
     }
 
     [Fact]
+    public void An_occasion_conflict_names_the_category_on_each_side()
+    {
+        var b = Model(c: [Cat(10, "Work"), Cat(11, "Home")], o: [Occ(1, "a", cat: 10)]);
+        var l = Model(c: [Cat(10, "Work"), Cat(11, "Home")], o: [Occ(1, "mine", cat: 10, updated: T0.AddDays(1))]);
+        var r = Model(c: [Cat(10, "Work"), Cat(11, "Home")], o: [Occ(1, "theirs", cat: 11, updated: T0.AddDays(2))]);
+
+        var conflict = Assert.IsType<OccasionConflict>(Assert.Single(SyncMerger.Merge(b, l, r, Now).Conflicts));
+
+        Assert.Equal("Work", conflict.LocalCategoryName);
+        Assert.Equal("Home", conflict.RemoteCategoryName);
+    }
+
+    [Fact]
+    public void A_milestone_conflict_names_its_occasion()
+    {
+        var b = Model(o: [Occ(1, "Wedding")], m: [Ms(5, 1, label: "a")]);
+        var l = Model(o: [Occ(1, "Wedding")], m: [Ms(5, 1, label: "mine", updated: T0.AddDays(1))]);
+        var r = Model(o: [Occ(1, "Wedding")], m: [Ms(5, 1, label: "theirs", updated: T0.AddDays(2))]);
+
+        var conflict = Assert.IsType<MilestoneConflict>(Assert.Single(SyncMerger.Merge(b, l, r, Now).Conflicts));
+
+        Assert.Equal("Wedding", conflict.OccasionTitle);
+        Assert.Equal("mine", conflict.Local!.Label);
+    }
+
+    [Fact]
     public void Edit_versus_delete_is_a_conflict_with_the_deleted_side_shown_as_null()
     {
         var b = Model(o: [Occ(1, "a")]);
@@ -85,7 +111,7 @@ public class SyncMergerTests
 
         var result = SyncMerger.Merge(b, edited, deleted, Now);
 
-        var conflict = Assert.Single(result.Conflicts);
+        var conflict = Assert.IsType<OccasionConflict>(Assert.Single(result.Conflicts));
         Assert.NotNull(conflict.Local);
         Assert.Null(conflict.Remote);
         var keepEdit = SyncMerger.Merge(b, edited, deleted, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
@@ -103,7 +129,7 @@ public class SyncMergerTests
 
         var result = SyncMerger.Merge(null, deleted, live, Now);
 
-        var conflict = Assert.Single(result.Conflicts);
+        var conflict = Assert.IsType<OccasionConflict>(Assert.Single(result.Conflicts));
         Assert.Equal(G(1), conflict.SyncId);
         Assert.Null(conflict.Local);
         Assert.NotNull(conflict.Remote);
@@ -122,7 +148,7 @@ public class SyncMergerTests
 
         var result = SyncMerger.Merge(null, live, deleted, Now);
 
-        var conflict = Assert.Single(result.Conflicts);
+        var conflict = Assert.IsType<OccasionConflict>(Assert.Single(result.Conflicts));
         Assert.NotNull(conflict.Local);
         Assert.Null(conflict.Remote);
         var keepRecord = SyncMerger.Merge(null, live, deleted, Now, new Dictionary<Guid, ConflictChoice> { [G(1)] = ConflictChoice.Local });
