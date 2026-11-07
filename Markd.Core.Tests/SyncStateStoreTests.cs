@@ -33,6 +33,23 @@ public class SyncStateStoreTests
     }
 
     [Fact]
+    public async Task Save_and_load_round_trip_connection_and_attempt_fields()
+    {
+        var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
+        using var _ = conn; using var __ = db;
+        var store = new SyncStateStore(db);
+
+        Assert.False((await store.LoadAsync()).IsConnected);
+
+        await store.SaveAsync(new SyncState { IsConnected = true, LastAttemptUtc = Snap.Now, LastAttemptResult = "Offline" });
+        var loaded = await store.LoadAsync();
+
+        Assert.True(loaded.IsConnected);
+        Assert.Equal(Snap.Now, loaded.LastAttemptUtc);
+        Assert.Equal("Offline", loaded.LastAttemptResult);
+    }
+
+    [Fact]
     public void SyncResult_IsSuccess_covers_Synced_and_NoChanges_only()
     {
         Assert.True(new SyncResult(SyncOutcome.Synced).IsSuccess);

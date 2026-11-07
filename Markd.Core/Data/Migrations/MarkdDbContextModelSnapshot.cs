@@ -209,6 +209,15 @@ namespace Markd.Core.Data.Migrations
                     b.Property<Guid?>("Epoch")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsConnected")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LastAttemptResult")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("LastAttemptUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("LastResult")
                         .HasColumnType("TEXT");
 

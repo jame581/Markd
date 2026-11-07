@@ -26,6 +26,9 @@ namespace Markd.Core.Sync
             row.RemoteRevision = state.RemoteRevision;
             row.LastSyncUtc = state.LastSyncUtc;
             row.LastResult = state.LastResult;
+            row.IsConnected = state.IsConnected;
+            row.LastAttemptUtc = state.LastAttemptUtc;
+            row.LastAttemptResult = state.LastAttemptResult;
             row.Epoch = state.Epoch;
             row.BaseSnapshotJson = state.BaseSnapshotJson;
             await db.SaveChangesAsync();
@@ -44,7 +47,8 @@ namespace Markd.Core.Sync
         private static SyncState Copy(SyncState s) => new()
         {
             Id = s.Id, ProviderId = s.ProviderId, AccountName = s.AccountName, RemoteRevision = s.RemoteRevision,
-            LastSyncUtc = s.LastSyncUtc, LastResult = s.LastResult, BaseSnapshotJson = s.BaseSnapshotJson, Epoch = s.Epoch
+            LastSyncUtc = s.LastSyncUtc, LastResult = s.LastResult, BaseSnapshotJson = s.BaseSnapshotJson, Epoch = s.Epoch,
+            IsConnected = s.IsConnected, LastAttemptUtc = s.LastAttemptUtc, LastAttemptResult = s.LastAttemptResult
         };
     }
 }
