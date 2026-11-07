@@ -63,6 +63,24 @@ public class SyncMergerTests
     }
 
     [Fact]
+    public void Keeping_the_local_version_still_takes_the_other_sides_category_move()
+    {
+        var cats = new[] { Cat(5, "Five"), Cat(6, "Six") };
+        var b = Model(cats, [Occ(1, "A", cat: 5)]);
+        var l = Model(cats, [Occ(1, "B", cat: 5, updated: T0.AddDays(1))]);
+        var r = Model(cats, [Occ(1, "C", cat: 6, updated: T0.AddDays(2))]);
+        var first = SyncMerger.Merge(b, l, r, Now);
+        Assert.Single(first.Conflicts);
+
+        var result = SyncMerger.Merge(b, l, r, Now, Pick(first.Conflicts, ConflictChoice.Local));
+
+        Assert.Empty(result.Conflicts);
+        var x = Assert.Single(result.Merged.Occasions);
+        Assert.Equal("B", x.Title);
+        Assert.Equal(G(6), x.CategorySyncId);
+    }
+
+    [Fact]
     public void A_resolution_for_the_same_versions_applies()
     {
         var b = Model(o: [Occ(1, "a")]);

@@ -119,6 +119,24 @@ public class SyncPassphraseChangeTests
     }
 
     [Fact]
+    public async Task A_passphrase_change_on_a_disconnected_device_asks_for_the_passphrase_and_uploads_nothing()
+    {
+        using var a = new SyncDevice("old");
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionAsync("X");
+        await a.Sync.SyncAsync(cloud);
+        await a.Sync.DisconnectAsync(cloud, deleteRemote: false);
+        var uploads = cloud.Uploads;
+
+        var result = await a.Sync.ChangePassphraseAsync(cloud, "new");
+
+        Assert.Equal(SyncOutcome.NeedsPassphrase, result.Outcome);
+        Assert.Equal(uploads, cloud.Uploads);
+        Assert.Null(a.Secrets.Passphrase);
+        Assert.Equal("X", Assert.Single(SyncSnapshotCodec.Decode(cloud.Data!, "old").Occasions).Title);
+    }
+
+    [Fact]
     public async Task A_passphrase_change_with_a_conflict_returns_the_conflict()
     {
         using var a = new SyncDevice("old");
