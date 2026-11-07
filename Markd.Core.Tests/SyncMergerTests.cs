@@ -225,4 +225,18 @@ public class SyncMergerTests
         var c = Model(o: [Occ(1, "different")]);
         Assert.NotEqual(SyncContent.Fingerprint(a), SyncContent.Fingerprint(c));
     }
+
+    [Fact]
+    public void Tombstones_are_kept_for_a_year()
+    {
+        Assert.Equal(TimeSpan.FromDays(365), SyncMerger.TombstoneRetention);
+
+        var recent = Occ(1, "recent", deleted: true); recent.DeletedAt = Now.AddDays(-200);
+        var old = Occ(2, "old", deleted: true); old.DeletedAt = Now.AddDays(-366);
+        var local = Model(o: [recent, old]);
+
+        var merged = SyncMerger.Merge(null, local, SyncMerger.Empty(), Now).Merged;
+
+        Assert.Equal([G(1)], merged.Occasions.Select(o => o.SyncId));
+    }
 }

@@ -7,7 +7,7 @@ namespace Markd.Core.Sync
 
     public static class SyncMerger
     {
-        public static readonly TimeSpan TombstoneRetention = TimeSpan.FromDays(90);
+        public static readonly TimeSpan TombstoneRetention = TimeSpan.FromDays(365);
 
         private const string Dead = "\0dead";
 

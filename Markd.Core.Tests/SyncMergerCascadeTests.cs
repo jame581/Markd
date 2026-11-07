@@ -113,7 +113,7 @@ public class SyncMergerCascadeTests
     [Fact]
     public void Old_tombstones_are_dropped_and_recent_ones_kept()
     {
-        var old = Occ(1, deleted: true); old.DeletedAt = Now.AddDays(-120);
+        var old = Occ(1, deleted: true); old.DeletedAt = Now.AddDays(-400);
         var recent = Occ(2, deleted: true); recent.DeletedAt = Now.AddDays(-5);
         var b = Model();
         var l = Model(o: [old, recent]);
