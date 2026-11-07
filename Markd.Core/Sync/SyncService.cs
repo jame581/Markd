@@ -4,15 +4,14 @@ using Markd.Core.Services;
 namespace Markd.Core.Sync
 {
     public sealed class SyncService(
-        ISnapshotService snapshots, ISyncStateStore store, ISyncSecretStore secrets, TimeProvider clock, SyncOptions options)
+        ISnapshotService snapshots, ISyncStateStore store, ISyncSecretStore secrets, TimeProvider clock, SyncOptions options,
+        SyncGate gate)
         : ISyncService
     {
-        private readonly SemaphoreSlim _gate = new(1, 1);
-
         public async Task<SyncResult> SyncAsync(
             ICloudSyncProvider provider, IReadOnlyDictionary<Guid, ConflictChoice>? resolutions = null, CancellationToken ct = default)
         {
-            await _gate.WaitAsync(ct);
+            await gate.WaitAsync(ct);
             try
             {
                 var syncResult = await RunAsync(async () =>
@@ -38,7 +37,7 @@ namespace Markd.Core.Sync
             }
             finally
             {
-                _gate.Release();
+                gate.Release();
             }
         }
 
@@ -212,7 +211,7 @@ namespace Markd.Core.Sync
             if (string.IsNullOrWhiteSpace(newPassphrase))
                 return new SyncResult(SyncOutcome.NeedsPassphrase);
 
-            await _gate.WaitAsync(ct);
+            await gate.WaitAsync(ct);
             try
             {
                 var replaceResult = await RunAsync(async () =>
@@ -242,7 +241,7 @@ namespace Markd.Core.Sync
             }
             finally
             {
-                _gate.Release();
+                gate.Release();
             }
         }
 
@@ -253,7 +252,7 @@ namespace Markd.Core.Sync
         /// </summary>
         public async Task<SyncResult> DisconnectAsync(ICloudSyncProvider? provider, bool deleteRemote, CancellationToken ct = default)
         {
-            await _gate.WaitAsync(ct);
+            await gate.WaitAsync(ct);
             try
             {
                 return await RunAsync(async () =>
@@ -281,7 +280,7 @@ namespace Markd.Core.Sync
             }
             finally
             {
-                _gate.Release();
+                gate.Release();
             }
         }
 

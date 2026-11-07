@@ -295,6 +295,22 @@ public class CoreIntegrationTests
         Assert.NotNull(scope.ServiceProvider.GetRequiredService<Markd.Core.Sync.ISyncStateStore>());
     }
 
+    [Fact]
+    public void AddMarkdCore_registers_one_gate_for_all_scopes()
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"markd_di_{Guid.NewGuid():N}.db");
+        var services = new ServiceCollection();
+        services.AddMarkdCore(path);
+        using var provider = services.BuildServiceProvider();
+
+        using var scope1 = provider.CreateScope();
+        using var scope2 = provider.CreateScope();
+
+        Assert.Same(
+            scope1.ServiceProvider.GetRequiredService<Markd.Core.Sync.SyncGate>(),
+            scope2.ServiceProvider.GetRequiredService<Markd.Core.Sync.SyncGate>());
+    }
+
     private static Scope CreateScope()
     {
         var (context, connection) = TestDbFactory.CreateSqliteInMemoryContext();

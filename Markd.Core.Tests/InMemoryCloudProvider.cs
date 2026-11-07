@@ -14,6 +14,7 @@ internal sealed class InMemoryCloudProvider : ICloudSyncProvider
     public bool AuthExpired { get; set; }
     public int Uploads { get; private set; }
     public int Downloads { get; private set; }
+    public int GetInfoCalls { get; private set; }
 
     /// <summary>Runs just before an upload is checked, to simulate another device writing first.</summary>
     public Action? BeforeUpload { get; set; }
@@ -33,6 +34,7 @@ internal sealed class InMemoryCloudProvider : ICloudSyncProvider
     public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct)
     {
         Guard();
+        GetInfoCalls++;
         return Task.FromResult<RemoteInfo?>(_data is null ? null : new RemoteInfo(Revision!, DateTime.UtcNow));
     }
 

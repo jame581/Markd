@@ -39,7 +39,7 @@ internal sealed class SyncDevice : IDisposable
         Snapshots = new SnapshotService(Db);
         State = new SyncStateStore(Db);
         Secrets.Passphrase = passphrase;
-        Sync = new SyncService(Snapshots, State, Secrets, Clock, new SyncOptions { KdfIterations = MarkdPackage.MinIterations });
+        Sync = new SyncService(Snapshots, State, Secrets, Clock, new SyncOptions { KdfIterations = MarkdPackage.MinIterations }, new SyncGate());
     }
 
     public async Task<Markd.Core.Domain.Occasion> AddOccasionAsync(string title, int daysAgo = 10) =>

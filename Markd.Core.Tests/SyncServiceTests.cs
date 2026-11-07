@@ -271,4 +271,34 @@ public class SyncServiceTests
         await a.Sync.SyncAsync(cloud);
         Assert.Equal(new[] { "R", "X" }, await a.TitlesAsync());
     }
+
+    [Fact]
+    public async Task Two_service_instances_sharing_a_gate_never_overlap()
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionAsync("Wedding");
+        var gate = new SyncGate();
+        var options = new SyncOptions { KdfIterations = MarkdPackage.MinIterations };
+        var first = new SyncService(a.Snapshots, a.State, a.Secrets, a.Clock, options, gate);
+        var second = new SyncService(a.Snapshots, a.State, a.Secrets, a.Clock, options, gate);
+
+        using var entered = new ManualResetEventSlim();
+        using var release = new ManualResetEventSlim();
+        cloud.BeforeUpload = () => { entered.Set(); release.Wait(TimeSpan.FromSeconds(10)); };
+
+        var sync1 = Task.Run(() => first.SyncAsync(cloud));
+        Assert.True(entered.Wait(TimeSpan.FromSeconds(10)));
+        var callsWhileHeld = cloud.GetInfoCalls;
+
+        var sync2 = Task.Run(() => second.SyncAsync(cloud));
+        await Task.Delay(200);
+        Assert.Equal(callsWhileHeld, cloud.GetInfoCalls);
+
+        release.Set();
+        var results = await Task.WhenAll(sync1, sync2);
+
+        Assert.All(results, r => Assert.True(r.Outcome is SyncOutcome.Synced or SyncOutcome.NoChanges));
+        Assert.True(cloud.GetInfoCalls > callsWhileHeld);
+    }
 }
