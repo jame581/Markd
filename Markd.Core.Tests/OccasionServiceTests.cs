@@ -310,6 +310,47 @@ public class OccasionServiceTests
     }
 
     [Fact]
+    public async Task UpdateAsync_WithTheTrackedEntityItself_SeesTheAnchorMove()
+    {
+        using var tuple = CreateService();
+        var created = await tuple.Service.CreateAsync(new Occasion
+        {
+            Title = "Streak",
+            AnchorDate = LocalMidnightUtc(-10),
+            Direction = OccasionDirection.Since,
+            Milestones = [new Milestone { Label = "One year", ThresholdDays = 365 }]
+        });
+
+        var tracked = (await tuple.Service.GetByIdAsync(created.Id))!;
+        Assert.Same(created, tracked);
+        tracked.AnchorDate = LocalMidnightUtc(-400);
+        await tuple.Service.UpdateAsync(tracked);
+
+        var reloaded = (await tuple.Service.GetByIdAsync(created.Id))!;
+        Assert.Equal(DateOnly.FromDateTime(DateTime.Today.AddDays(-400)), reloaded.AnchorDay);
+        Assert.True(reloaded.Milestones.Single().Notified);
+    }
+
+    [Fact]
+    public async Task RestoreAsync_WithoutTombstone_KeepsTheSnapshotsDayAfterAZoneChange()
+    {
+        var (context, connection) = TestDbFactory.CreateSqliteInMemoryContext();
+        using var scope = new ServiceScope(context, connection, new OccasionService(context, TimeZoneInfo.Utc));
+        var day = new DateOnly(2026, 3, 10);
+        var snapshot = new Occasion
+        {
+            Title = "Trip",
+            AnchorDate = new DateTime(2026, 3, 9, 14, 0, 0, DateTimeKind.Utc),   // midnight of the 10th at UTC+10
+            AnchorDay = day,
+            Direction = OccasionDirection.Since
+        };
+
+        var restored = await scope.Service.RestoreAsync(snapshot);
+
+        Assert.Equal(day, (await scope.Service.GetByIdAsync(restored.Id))!.AnchorDay);
+    }
+
+    [Fact]
     public async Task SetPinnedAsync_MovingThePinToALowerId_KeepsOnePin()
     {
         using var tuple = CreateService();

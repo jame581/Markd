@@ -39,7 +39,7 @@ namespace Markd.Core.Services
                 ColorHex = snapshot.ColorHex,
                 IsPinned = snapshot.IsPinned,
                 AnchorDate = snapshot.AnchorDate,
-                AnchorDay = OccasionDates.ToLocalDay(snapshot.AnchorDate, _zone),
+                AnchorDay = snapshot.AnchorDay ?? OccasionDates.ToLocalDay(snapshot.AnchorDate, _zone),
                 Direction = snapshot.Direction,
                 Notes = snapshot.Notes,
                 CreatedAt = snapshot.CreatedAt == default ? DateTime.UtcNow : snapshot.CreatedAt,
@@ -256,8 +256,10 @@ namespace Markd.Core.Services
             if (existing == null)
                 throw new InvalidOperationException(string.Format(LocalizationManager.Instance.Culture, Strings.Occasion_NotFoundById, occasion.Id));
 
-            var anchorChanged = existing.AnchorDate != occasion.AnchorDate;
-            var datesChanged = anchorChanged || existing.Direction != occasion.Direction;
+            // Compare with the stored values: the caller may pass the tracked entity itself, already edited.
+            var entry = db.Entry(existing);
+            var anchorChanged = entry.Property(o => o.AnchorDate).OriginalValue != occasion.AnchorDate;
+            var datesChanged = anchorChanged || entry.Property(o => o.Direction).OriginalValue != occasion.Direction;
 
             // The day is fixed when the date is chosen. An edit that keeps the instant keeps the day, even if this
             // device has since moved to a zone where that instant falls on another day.
