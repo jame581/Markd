@@ -315,4 +315,140 @@ public class SyncMergerTests
 
         Assert.Equal([G(1)], merged.Occasions.Select(o => o.SyncId));
     }
+
+    private static OccasionDto Only(ExportModel m, int n) => m.Occasions.Single(o => o.SyncId == G(n));
+
+    [Fact]
+    public void A_pin_change_and_a_title_edit_merge()
+    {
+        var b = Model(o: [Occ(1, "X", pinned: true)]);
+        var l = Model(o: [Occ(1, "X", pinned: false, updated: T0.AddDays(1))]);
+        var r = Model(o: [Occ(1, "Renamed", pinned: true, updated: T0.AddDays(2))]);
+
+        foreach (var result in new[] { SyncMerger.Merge(b, l, r, Now), SyncMerger.Merge(b, r, l, Now) })
+        {
+            Assert.Empty(result.Conflicts);
+            var x = Only(result.Merged, 1);
+            Assert.Equal("Renamed", x.Title);
+            Assert.False(x.IsPinned);
+            Assert.Equal(T0.AddDays(2), x.UpdatedAt);
+        }
+    }
+
+    [Fact]
+    public void A_category_cleared_by_a_delete_and_a_notes_edit_merge()
+    {
+        var b = Model(c: [Cat(5)], o: [Occ(1, "X", cat: 5)]);
+        var l = Model(c: [Cat(5, deleted: true)], o: [Occ(1, "X", cat: null, updated: T0.AddDays(1))]);
+        var r = Model(c: [Cat(5)], o: [Occ(1, "X", cat: 5, notes: "kept", updated: T0.AddDays(2))]);
+
+        foreach (var result in new[] { SyncMerger.Merge(b, l, r, Now), SyncMerger.Merge(b, r, l, Now) })
+        {
+            Assert.Empty(result.Conflicts);
+            var x = Only(result.Merged, 1);
+            Assert.Equal("kept", x.Notes);
+            Assert.Null(x.CategorySyncId);
+            Assert.NotNull(Assert.Single(result.Merged.Categories).DeletedAt);
+        }
+    }
+
+    [Fact]
+    public void Two_different_category_changes_still_conflict()
+    {
+        CategoryDto[] cats = [Cat(5, "A"), Cat(6, "B"), Cat(7, "C")];
+        var b = Model(c: cats, o: [Occ(1, "X", cat: 5)]);
+        var l = Model(c: cats, o: [Occ(1, "X", cat: 6, updated: T0.AddDays(1))]);
+        var r = Model(c: cats, o: [Occ(1, "X", cat: 7, updated: T0.AddDays(2))]);
+
+        var result = SyncMerger.Merge(b, l, r, Now);
+
+        var conflict = Assert.IsType<OccasionConflict>(Assert.Single(result.Conflicts));
+        Assert.Equal(G(6), conflict.Local!.CategorySyncId);
+        Assert.Equal(G(7), conflict.Remote!.CategorySyncId);
+    }
+
+    [Fact]
+    public void A_category_deleted_on_one_side_and_reassigned_on_the_other_takes_the_reassignment()
+    {
+        var b = Model(c: [Cat(5, "A"), Cat(6, "B")], o: [Occ(1, "X", cat: 5)]);
+        var l = Model(c: [Cat(5, "A", deleted: true), Cat(6, "B")], o: [Occ(1, "X", cat: null, updated: T0.AddDays(1))]);
+        var r = Model(c: [Cat(5, "A"), Cat(6, "B")], o: [Occ(1, "X", cat: 6, updated: T0.AddDays(2))]);
+
+        foreach (var result in new[] { SyncMerger.Merge(b, l, r, Now), SyncMerger.Merge(b, r, l, Now) })
+        {
+            Assert.Empty(result.Conflicts);
+            Assert.Equal(G(6), Only(result.Merged, 1).CategorySyncId);
+        }
+    }
+
+    [Fact]
+    public void A_side_effect_unpin_against_a_delete_takes_the_delete()
+    {
+        var b = Model(o: [Occ(1, "X", pinned: true)]);
+        var l = Model(o: [Occ(1, "X", pinned: false, updated: T0.AddDays(1))]);
+        var r = Model(o: [Occ(1, "X", pinned: true, deleted: true)]);
+
+        foreach (var result in new[] { SyncMerger.Merge(b, l, r, Now), SyncMerger.Merge(b, r, l, Now) })
+        {
+            Assert.Empty(result.Conflicts);
+            Assert.NotNull(Only(result.Merged, 1).DeletedAt);
+        }
+    }
+
+    [Fact]
+    public void A_content_edit_against_a_delete_still_conflicts()
+    {
+        var b = Model(o: [Occ(1, "X", pinned: true)]);
+        var l = Model(o: [Occ(1, "X", pinned: false, notes: "n", updated: T0.AddDays(1))]);
+        var r = Model(o: [Occ(1, "X", pinned: true, deleted: true)]);
+
+        Assert.Single(SyncMerger.Merge(b, l, r, Now).Conflicts);
+    }
+
+    [Fact]
+    public void Choosing_local_on_a_title_conflict_keeps_the_remote_pin_change()
+    {
+        var b = Model(o: [Occ(1, "A", pinned: false)]);
+        var l = Model(o: [Occ(1, "B", pinned: false, updated: T0.AddDays(1))]);
+        var r = Model(o: [Occ(1, "C", pinned: true, updated: T0.AddDays(2))]);
+        var first = SyncMerger.Merge(b, l, r, Now);
+        Assert.Single(first.Conflicts);
+
+        var mine = SyncMerger.Merge(b, l, r, Now, Pick(first.Conflicts, ConflictChoice.Local));
+        var theirs = SyncMerger.Merge(b, l, r, Now, Pick(first.Conflicts, ConflictChoice.Remote));
+
+        Assert.Empty(mine.Conflicts);
+        Assert.Equal("B", Only(mine.Merged, 1).Title);
+        Assert.True(Only(mine.Merged, 1).IsPinned);
+        Assert.Equal("C", Only(theirs.Merged, 1).Title);
+        Assert.True(Only(theirs.Merged, 1).IsPinned);
+    }
+
+    [Fact]
+    public void A_conflicting_category_follows_the_choice()
+    {
+        CategoryDto[] cats = [Cat(5, "A"), Cat(6, "B"), Cat(7, "C")];
+        var b = Model(c: cats, o: [Occ(1, "A", cat: 5)]);
+        var l = Model(c: cats, o: [Occ(1, "B", cat: 6, updated: T0.AddDays(1))]);
+        var r = Model(c: cats, o: [Occ(1, "C", cat: 7, pinned: true, updated: T0.AddDays(2))]);
+        var first = SyncMerger.Merge(b, l, r, Now);
+
+        var mine = SyncMerger.Merge(b, l, r, Now, Pick(first.Conflicts, ConflictChoice.Local));
+
+        Assert.Empty(mine.Conflicts);
+        var x = Only(mine.Merged, 1);
+        Assert.Equal(("B", (Guid?)G(6), true), (x.Title, x.CategorySyncId, x.IsPinned));
+    }
+
+    [Fact]
+    public void A_title_edit_on_both_sides_still_conflicts()
+    {
+        var b = Model(o: [Occ(1, "A", pinned: true)]);
+        var l = Model(o: [Occ(1, "B", pinned: false, updated: T0.AddDays(1))]);
+        var r = Model(o: [Occ(1, "C", pinned: true, updated: T0.AddDays(2))]);
+
+        var conflict = Assert.IsType<OccasionConflict>(Assert.Single(SyncMerger.Merge(b, l, r, Now).Conflicts));
+        Assert.Equal("B", conflict.Local!.Title);
+        Assert.Equal("C", conflict.Remote!.Title);
+    }
 }

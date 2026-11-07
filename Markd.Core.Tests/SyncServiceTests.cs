@@ -335,6 +335,69 @@ public class SyncServiceTests
         Assert.Equal(new[] { "X from B again" }, await c.TitlesAsync());   // b's second edit is still in the cloud
     }
 
+    [Fact]
+    public async Task Pinning_another_occasion_does_not_conflict_with_an_edit_of_the_old_pin()
+    {
+        using var a = new SyncDevice();
+        using var b = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        var x = await a.AddOccasionAsync("X");
+        var y = await a.AddOccasionAsync("Y");
+        await a.Occasions.SetPinnedAsync(x.Id);
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+
+        await a.Occasions.SetPinnedAsync(y.Id);   // unpins X as a side effect
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);
+        var xOnB = (await b.Occasions.GetAllAsync()).Single(o => o.Title == "X");
+        xOnB.Notes = "from b";
+        await b.Occasions.UpdateAsync(xOnB);
+        var result = await b.Sync.SyncAsync(cloud);
+        Assert.True((await a.Sync.SyncAsync(cloud)).IsSuccess);
+
+        Assert.Equal(SyncOutcome.Synced, result.Outcome);
+        Assert.Empty(result.Conflicts ?? []);
+        foreach (var device in new[] { a, b })
+        {
+            var all = await device.Occasions.GetAllAsync();
+            Assert.Equal("Y", Assert.Single(all, o => o.IsPinned).Title);
+            Assert.Equal("from b", all.Single(o => o.Title == "X").Notes);
+        }
+    }
+
+    [Fact]
+    public async Task Deleting_a_category_does_not_conflict_with_an_edit_of_its_occasion()
+    {
+        using var a = new SyncDevice();
+        using var b = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        var category = await a.Categories.CreateAsync(new Category { Name = "Family" });
+        var x = await a.AddOccasionAsync("X");
+        x.CategoryId = category.Id;
+        await a.Occasions.UpdateAsync(x);
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+
+        await a.Categories.DeleteAsync(category.Id);   // clears X's category as a side effect
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);
+        var xOnB = (await b.Occasions.GetAllAsync()).Single();
+        Assert.NotNull(xOnB.CategoryId);
+        xOnB.Notes = "from b";
+        await b.Occasions.UpdateAsync(xOnB);
+        var result = await b.Sync.SyncAsync(cloud);
+        Assert.True((await a.Sync.SyncAsync(cloud)).IsSuccess);
+
+        Assert.Equal(SyncOutcome.Synced, result.Outcome);
+        Assert.Empty(result.Conflicts ?? []);
+        foreach (var device in new[] { a, b })
+        {
+            var only = Assert.Single(await device.Occasions.GetAllAsync());
+            Assert.Equal("from b", only.Notes);
+            Assert.Null(only.CategoryId);
+            Assert.Empty(await device.Categories.GetAllAsync());
+        }
+    }
+
     private static async Task RenameOnlyAsync(SyncDevice device, string title)
     {
         var occasion = (await device.Occasions.GetAllAsync()).Single();

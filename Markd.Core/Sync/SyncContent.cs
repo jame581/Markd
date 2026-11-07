@@ -13,10 +13,21 @@ namespace Markd.Core.Sync
 
         public static string Of(CategoryDto c) => Join(c.Name, c.Emoji, c.ColorHex);
 
-        public static string Of(OccasionDto o) => Join(
-            o.Title, o.Emoji, o.ColorHex, o.IsPinned ? "1" : "0",
+        public static string Of(OccasionDto o)
+        {
+            var core = CoreParts(o);
+            return Join([.. core[..3], o.IsPinned ? "1" : "0", .. core[3..], o.CategorySyncId?.ToString("N")]);
+        }
+
+        /// <summary>An occasion without its pin and category, which merge on their own.</summary>
+        public static string CoreOf(OccasionDto o) => Join(CoreParts(o));
+
+        // Of keeps its original field order (pin after the colour, category last), so fingerprints do not change.
+        private static string?[] CoreParts(OccasionDto o) =>
+        [
+            o.Title, o.Emoji, o.ColorHex,
             o.AnchorDate.Ticks.ToString(CultureInfo.InvariantCulture), o.Direction, o.Notes,
-            o.CategorySyncId?.ToString("N"));
+        ];
 
         public static string Of(MilestoneDto m) => Join(
             m.OccasionSyncId.ToString("N"), m.ThresholdDays.ToString(CultureInfo.InvariantCulture), m.Label);

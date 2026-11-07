@@ -55,12 +55,17 @@ namespace Markd.Core.Sync
                 c => c.SyncId, SyncContent.Of, c => c.DeletedAt is not null, c => c.UpdatedAt,
                 choices, conflicts,
                 (l, r, key, lu, ru) => new CategoryConflict(key, l, r, lu, ru), null);
+            // Categories merge first, so an occasion's pin and category can merge apart from its other fields.
+            var liveCategories = categories.Values.Where(c => c.DeletedAt is null).Select(c => c.SyncId).ToHashSet();
             var occasions = MergeKind(baseModel.Occasions, local.Occasions, remote.Occasions,
                 o => o.SyncId, SyncContent.Of, o => o.DeletedAt is not null, o => o.UpdatedAt,
                 choices, conflicts,
                 (l, r, key, lu, ru) => new OccasionConflict(key, l, r,
                     LiveCategoryName(local, l?.CategorySyncId), LiveCategoryName(remote, r?.CategorySyncId), lu, ru),
-                liveOverDeadOccasions);
+                liveOverDeadOccasions,
+                combine: (bo, lo, ro) => OccasionFieldMerge.TryCombine(bo, lo, ro, liveCategories),
+                deleteBeats: OccasionFieldMerge.IsSideEffectOnly,
+                applyChoice: (bo, chosen, other) => OccasionFieldMerge.ApplyChoice(bo, chosen, other, liveCategories));
             // A milestone edit against a delete of its whole occasion is not worth asking about: the occasion's
             // own decision (or its own conflict) settles it, and the cascade tombstones the orphan.
             var liveOccasions = occasions.Values.Where(o => o.DeletedAt is null).Select(o => o.SyncId).ToHashSet();
@@ -95,7 +100,8 @@ namespace Markd.Core.Sync
             Func<T, Guid> id, Func<T, string> content, Func<T, bool> isDeleted, Func<T, DateTime> updatedAt,
             IReadOnlyDictionary<Guid, ConflictResolution> choices, List<SyncConflict> conflicts,
             Func<T?, T?, Guid, DateTime, DateTime, SyncConflict> conflict,
-            HashSet<Guid>? liveOverDead, Func<T, bool>? autoDrop = null, Func<T, bool>? parentDeleted = null) where T : class
+            HashSet<Guid>? liveOverDead, Func<T, bool>? autoDrop = null, Func<T, bool>? parentDeleted = null,
+            Func<T, T, T, T?>? combine = null, Func<T, T, bool>? deleteBeats = null, Func<T, T, T, T>? applyChoice = null) where T : class
         {
             var b = baseItems.ToDictionary(id);
             var l = localItems.ToDictionary(id);
@@ -105,6 +111,7 @@ namespace Markd.Core.Sync
             string Sig(T? x) => x is null || isDeleted(x) ? Dead : content(x);
             T? Shown(T? x) => x is null || isDeleted(x) ? null : x;
             DateTime Stamp(T? x) => x is null ? DateTime.MinValue : updatedAt(x);
+            bool IsLive(T? x) => x is not null && !isDeleted(x);
 
             foreach (var key in b.Keys.Union(l.Keys).Union(r.Keys).OrderBy(k => k))
             {
@@ -134,11 +141,25 @@ namespace Markd.Core.Sync
                 {
                     chosen = lItem;
                 }
+                else if (combine is not null && IsLive(bItem) && IsLive(lItem) && IsLive(rItem)
+                         && combine(bItem!, lItem!, rItem!) is { } combined)
+                {
+                    // Both sides changed different parts of the record.
+                    chosen = combined;
+                }
+                else if (deleteBeats is not null && IsLive(bItem) && lItem is not null && rItem is not null
+                         && isDeleted(lItem) != isDeleted(rItem) && deleteBeats(bItem!, isDeleted(lItem) ? rItem : lItem))
+                {
+                    // The live side changed nothing the delete would lose.
+                    chosen = isDeleted(lItem) ? lItem : rItem;
+                }
                 else if (choices.TryGetValue(key, out var resolution) && resolution.Signature == Signature(sl, sr))
                 {
                     var choice = resolution.Choice;
                     chosen = choice == ConflictChoice.Local ? lItem : rItem;
                     var other = choice == ConflictChoice.Local ? rItem : lItem;
+                    if (applyChoice is not null && IsLive(bItem) && IsLive(chosen) && IsLive(other))
+                        chosen = applyChoice(bItem!, chosen!, other!);
                     if (liveOverDead is not null && chosen is not null && !isDeleted(chosen) && (other is null || isDeleted(other)))
                         liveOverDead.Add(key);
                 }
