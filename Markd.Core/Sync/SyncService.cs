@@ -14,26 +14,87 @@ namespace Markd.Core.Sync
             await gate.WaitAsync(ct);
             try
             {
-                var syncResult = await RunAsync(async () =>
-                {
-                    var passphrase = await secrets.GetPassphraseAsync();
-                    if (string.IsNullOrEmpty(passphrase))
-                        return new SyncResult(SyncOutcome.NeedsPassphrase);
-
-                    var retry = RetryReason.RemoteChanged;
-                    for (var attempt = 0; attempt < Math.Max(1, options.MaxUploadAttempts); attempt++)
-                    {
-                        (var result, retry) = await TryOnceAsync(provider, passphrase, resolutions, ct);
-                        if (result is not null)
-                            return result;
-                    }
-
-                    return new SyncResult(SyncOutcome.Failed, Detail: retry == RetryReason.LocalChanged
-                        ? "Local data kept changing during the sync."
-                        : "The remote file kept changing.");
-                }, ct);
+                var syncResult = await RunAsync(() => SyncCoreAsync(provider, resolutions, ct), ct);
                 await RecordAttemptAsync(syncResult);
                 return syncResult;
+            }
+            finally
+            {
+                gate.Release();
+            }
+        }
+
+        /// <summary>The sync loop with the stored passphrase. The caller holds the gate and maps exceptions (RunAsync).</summary>
+        private async Task<SyncResult> SyncCoreAsync(
+            ICloudSyncProvider provider, IReadOnlyCollection<ConflictResolution>? resolutions, CancellationToken ct)
+        {
+            var passphrase = await secrets.GetPassphraseAsync();
+            if (string.IsNullOrEmpty(passphrase))
+                return new SyncResult(SyncOutcome.NeedsPassphrase);
+
+            var retry = RetryReason.RemoteChanged;
+            for (var attempt = 0; attempt < Math.Max(1, options.MaxUploadAttempts); attempt++)
+            {
+                (var result, retry) = await TryOnceAsync(provider, passphrase, resolutions, ct);
+                if (result is not null)
+                    return result;
+            }
+
+            return new SyncResult(SyncOutcome.Failed, Detail: retry == RetryReason.LocalChanged
+                ? "Local data kept changing during the sync."
+                : "The remote file kept changing.");
+        }
+
+        public async Task<SyncResult> ChangePassphraseAsync(ICloudSyncProvider provider, string newPassphrase, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(newPassphrase))
+                return new SyncResult(SyncOutcome.NeedsPassphrase);
+
+            await gate.WaitAsync(ct);
+            try
+            {
+                var changeResult = await RunAsync(async () =>
+                {
+                    for (var attempt = 0; attempt < Math.Max(1, options.MaxUploadAttempts); attempt++)
+                    {
+                        // Bring both sides level first: after a successful sync the base is exactly the cloud content
+                        // at RemoteRevision, so re-encrypting it changes the key and nothing else.
+                        var synced = await SyncCoreAsync(provider, resolutions: null, ct);
+                        if (synced.Outcome is not (SyncOutcome.Synced or SyncOutcome.NoChanges))
+                            return synced;
+
+                        var state = await store.LoadAsync();
+                        var content = ParseBase(state.BaseSnapshotJson);
+                        if (content is null || state.RemoteRevision is null)
+                            return new SyncResult(SyncOutcome.Failed, Detail: "No synced content to re-encrypt.");
+
+                        content.SyncEpoch = state.Epoch;   // same lineage: other devices keep their base
+                        var bytes = await Task.Run(() => SyncSnapshotCodec.Encode(content, newPassphrase, options.KdfIterations), ct);
+                        string revision;
+                        try
+                        {
+                            // Expecting the synced revision means an edit uploaded meanwhile by another device is never
+                            // overwritten: the upload fails and the next round merges that edit first.
+                            revision = await provider.UploadAsync(bytes, state.RemoteRevision, ct);
+                        }
+                        catch (RevisionConflictException)
+                        {
+                            continue;
+                        }
+
+                        await secrets.SetPassphraseAsync(newPassphrase);
+                        state.RemoteRevision = revision;
+                        state.LastSyncUtc = clock.GetUtcNow().UtcDateTime;
+                        state.LastResult = nameof(SyncOutcome.Synced);
+                        state.IsConnected = true;
+                        await store.SaveAsync(state);
+                        return new SyncResult(SyncOutcome.Synced);
+                    }
+
+                    return new SyncResult(SyncOutcome.Failed, Detail: "The remote file kept changing.");
+                }, ct);
+                await RecordAttemptAsync(changeResult);
+                return changeResult;
             }
             finally
             {
