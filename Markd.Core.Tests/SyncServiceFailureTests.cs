@@ -503,4 +503,58 @@ public class SyncServiceFailureTests
         }
         public Task DeleteAsync(CancellationToken ct) => inner.DeleteAsync(ct);
     }
+
+    [Fact]
+    public async Task An_offline_sync_records_the_attempt_and_keeps_the_last_success()
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionAsync("Wedding");
+        var t1 = new DateTime(2026, 5, 1, 10, 0, 0, DateTimeKind.Utc);
+        var t2 = t1.AddHours(3);
+        a.Clock.Now = t1;
+        await a.Sync.SyncAsync(cloud);
+
+        cloud.Offline = true;
+        a.Clock.Now = t2;
+        var result = await a.Sync.SyncAsync(cloud);
+
+        Assert.Equal(SyncOutcome.Offline, result.Outcome);
+        var state = await a.State.LoadAsync();
+        Assert.Equal(t2, state.LastAttemptUtc);
+        Assert.Equal("Offline", state.LastAttemptResult);
+        Assert.Equal(t1, state.LastSyncUtc);
+        Assert.Equal("Synced", state.LastResult);
+    }
+
+    [Fact]
+    public async Task A_successful_sync_records_the_attempt_too()
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionAsync("Wedding");
+
+        await a.Sync.SyncAsync(cloud);
+
+        var state = await a.State.LoadAsync();
+        Assert.Equal("Synced", state.LastAttemptResult);
+        Assert.NotNull(state.LastAttemptUtc);
+        Assert.Equal(state.LastSyncUtc, state.LastAttemptUtc);
+    }
+
+    [Fact]
+    public async Task A_missing_passphrase_records_the_attempt_without_linking()
+    {
+        using var a = new SyncDevice();
+        a.Secrets.Passphrase = null;
+        var cloud = new InMemoryCloudProvider();
+
+        var result = await a.Sync.SyncAsync(cloud);
+
+        Assert.Equal(SyncOutcome.NeedsPassphrase, result.Outcome);
+        var state = await a.State.LoadAsync();
+        Assert.Equal("NeedsPassphrase", state.LastAttemptResult);
+        Assert.Null(state.ProviderId);
+        Assert.False(state.IsConnected);
+    }
 }

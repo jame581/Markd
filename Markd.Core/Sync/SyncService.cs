@@ -15,7 +15,7 @@ namespace Markd.Core.Sync
             await _gate.WaitAsync(ct);
             try
             {
-                return await RunAsync(async () =>
+                var syncResult = await RunAsync(async () =>
                 {
                     var passphrase = await secrets.GetPassphraseAsync();
                     if (string.IsNullOrEmpty(passphrase))
@@ -33,6 +33,8 @@ namespace Markd.Core.Sync
                         ? "Local data kept changing during the sync."
                         : "The remote file kept changing.");
                 }, ct);
+                await RecordAttemptAsync(syncResult);
+                return syncResult;
             }
             finally
             {
@@ -176,6 +178,25 @@ namespace Markd.Core.Sync
             return Done(new SyncResult(SyncOutcome.Synced));
         }
 
+        /// <summary>
+        /// Writes only the two attempt fields onto whatever state row exists (a new empty one otherwise): it never links
+        /// or connects. A failure here is swallowed so it cannot replace the real outcome.
+        /// </summary>
+        private async Task RecordAttemptAsync(SyncResult result)
+        {
+            try
+            {
+                var state = await store.LoadAsync();
+                state.LastAttemptUtc = clock.GetUtcNow().UtcDateTime;
+                state.LastAttemptResult = result.Outcome.ToString();
+                await store.SaveAsync(state);
+            }
+            catch (Exception)
+            {
+                // best effort, see above
+            }
+        }
+
         private static (SyncResult? Result, RetryReason Retry) Done(SyncResult result) => (result, default);
 
         private static ExportModel? ParseBase(string? json)
@@ -194,7 +215,7 @@ namespace Markd.Core.Sync
             await _gate.WaitAsync(ct);
             try
             {
-                return await RunAsync(async () =>
+                var replaceResult = await RunAsync(async () =>
                 {
                     var now = clock.GetUtcNow().UtcDateTime;
                     var info = await provider.GetInfoAsync(ct);
@@ -216,6 +237,8 @@ namespace Markd.Core.Sync
                     await store.SaveAsync(state);
                     return new SyncResult(SyncOutcome.Synced);
                 }, ct);
+                await RecordAttemptAsync(replaceResult);
+                return replaceResult;
             }
             finally
             {
