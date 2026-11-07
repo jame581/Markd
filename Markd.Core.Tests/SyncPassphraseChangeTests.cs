@@ -100,6 +100,25 @@ public class SyncPassphraseChangeTests
     }
 
     [Fact]
+    public async Task A_new_passphrase_the_device_could_not_store_is_reported_with_a_stable_marker()
+    {
+        using var a = new SyncDevice("old");
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionAsync("X");
+        await a.Sync.SyncAsync(cloud);
+        a.Secrets.FailOnSet = true;
+
+        var result = await a.Sync.ChangePassphraseAsync(cloud, "new");
+
+        Assert.Equal(SyncOutcome.Failed, result.Outcome);
+        Assert.Equal(SyncResult.PassphraseNotStoredDetail, result.Detail);
+        Assert.Equal("X", Assert.Single(SyncSnapshotCodec.Decode(cloud.Data!, "new").Occasions).Title);   // the cloud already moved
+        Assert.Equal("old", a.Secrets.Passphrase);
+        a.Secrets.FailOnSet = false;
+        Assert.Equal(SyncOutcome.WrongPassphrase, (await a.Sync.SyncAsync(cloud)).Outcome);   // asks for it again, never re-uploads under the old one
+    }
+
+    [Fact]
     public async Task A_passphrase_change_with_a_conflict_returns_the_conflict()
     {
         using var a = new SyncDevice("old");

@@ -57,8 +57,9 @@ namespace Markd.Core.Sync
                 {
                     for (var attempt = 0; attempt < Math.Max(1, options.MaxUploadAttempts); attempt++)
                     {
-                        // Bring both sides level first: after a successful sync the base is exactly the cloud content
-                        // at RemoteRevision, so re-encrypting it changes the key and nothing else.
+                        // Bring both sides level first: after a successful sync the base holds the same live data as
+                        // the cloud file at RemoteRevision (tombstones and timestamps may differ from the cloud copy),
+                        // so re-encrypting it changes no record another device can see.
                         var synced = await SyncCoreAsync(provider, resolutions: null, ct);
                         if (synced.Outcome is not (SyncOutcome.Synced or SyncOutcome.NoChanges))
                             return synced;
@@ -82,7 +83,17 @@ namespace Markd.Core.Sync
                             continue;
                         }
 
-                        await secrets.SetPassphraseAsync(newPassphrase);
+                        try
+                        {
+                            await secrets.SetPassphraseAsync(newPassphrase);
+                        }
+                        catch (Exception)
+                        {
+                            // The cloud already uses the new passphrase. The state stays as it was, so the next sync
+                            // downloads the file and asks for the passphrase instead of uploading under the old one.
+                            return new SyncResult(SyncOutcome.Failed, Detail: SyncResult.PassphraseNotStoredDetail);
+                        }
+
                         state.RemoteRevision = revision;
                         state.LastSyncUtc = clock.GetUtcNow().UtcDateTime;
                         state.LastResult = nameof(SyncOutcome.Synced);

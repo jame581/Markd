@@ -13,8 +13,19 @@ internal sealed class FixedTimeProvider(DateTime utcNow) : TimeProvider
 internal sealed class FakeSecrets : ISyncSecretStore
 {
     public string? Passphrase { get; set; }
+
+    /// <summary>Simulates a platform secure store that refuses to write.</summary>
+    public bool FailOnSet { get; set; }
+
     public Task<string?> GetPassphraseAsync() => Task.FromResult(Passphrase);
-    public Task SetPassphraseAsync(string? passphrase) { Passphrase = passphrase; return Task.CompletedTask; }
+
+    public Task SetPassphraseAsync(string? passphrase)
+    {
+        if (FailOnSet)
+            throw new InvalidOperationException("The secure store is unavailable.");
+        Passphrase = passphrase;
+        return Task.CompletedTask;
+    }
 }
 
 /// <summary>One simulated phone or PC: its own database, state and passphrase store, sharing a cloud.</summary>
