@@ -22,7 +22,9 @@ namespace Markd.Core.Sync
         /// <summary>An occasion without its pin and category, which merge on their own.</summary>
         public static string CoreOf(OccasionDto o) => Join(CoreParts(o));
 
-        // Of keeps its original field order (pin after the colour, category last), so fingerprints do not change.
+        // Of keeps its original field order (pin after the colour, category last). Fingerprints are never stored: they
+        // are recomputed from both snapshots on every run, so a change in their content (such as the anchor becoming a
+        // calendar day) needs no migration.
         private static string?[] CoreParts(OccasionDto o) =>
         [
             o.Title, o.Emoji, o.ColorHex,
