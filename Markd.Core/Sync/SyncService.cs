@@ -389,10 +389,12 @@ namespace Markd.Core.Sync
             {
                 return await RunAsync(async () =>
                 {
-                    var file = await provider.DownloadAsync(ct);
+                    // No file proves nothing: a single typed field must not become the passphrase of the next upload.
+                    if (await provider.DownloadAsync(ct) is not { } file)
+                        return new SyncResult(SyncOutcome.NoCloudFile);
+
                     // A wrong passphrase throws here and RunAsync maps it to WrongPassphrase: nothing is stored.
-                    if (file is not null)
-                        await Task.Run(() => SyncSnapshotCodec.Decode(file.Data, passphrase), ct);
+                    await Task.Run(() => SyncSnapshotCodec.Decode(file.Data, passphrase), ct);
 
                     await secrets.SetPassphraseAsync(passphrase);
                     return new SyncResult(SyncOutcome.NoChanges);

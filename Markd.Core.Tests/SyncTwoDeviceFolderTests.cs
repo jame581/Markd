@@ -31,11 +31,13 @@ public sealed class SyncTwoDeviceFolderTests : IDisposable
         var cloudA = new LocalFolderCloudProvider(_folder);
         var cloudB = new LocalFolderCloudProvider(_folder);
 
-        // Connect A: no cloud file yet, so A chooses the passphrase and creates the file.
+        // Connect A: no cloud file yet, so unlocking stores nothing; A chooses the passphrase and creates the file.
         var x = await a.AddOccasionAsync("Wedding");
         await a.AddOccasionAsync("Move");
         Assert.Null(await cloudA.GetInfoAsync(default));
-        Assert.Equal(SyncOutcome.NoChanges, (await a.Sync.UnlockAsync(cloudA, Passphrase)).Outcome);
+        Assert.Equal(SyncOutcome.NoCloudFile, (await a.Sync.UnlockAsync(cloudA, Passphrase)).Outcome);
+        Assert.Null(a.Secrets.Passphrase);
+        await a.Secrets.SetPassphraseAsync(Passphrase);
         Assert.True((await a.Sync.SyncAsync(cloudA)).IsSuccess);
         Assert.NotNull(await cloudA.GetInfoAsync(default));
 
@@ -53,7 +55,7 @@ public sealed class SyncTwoDeviceFolderTests : IDisposable
         Assert.True((await b.Sync.SyncAsync(cloudB)).IsSuccess);
         Assert.Equal("Garden party", (await b.Occasions.GetAllAsync()).Single(o => o.Title == "Wedding").Notes);
 
-        // Conflicting edits: B is asked, takes the other device's version, and both converge.
+        // Conflicting edits: B is asked, keeps its own version, and that choice reaches A.
         var onA = (await a.Occasions.GetAllAsync()).Single(o => o.Title == "Move");
         onA.Notes = "From A";
         await a.Occasions.UpdateAsync(onA);
@@ -65,10 +67,10 @@ public sealed class SyncTwoDeviceFolderTests : IDisposable
         var pending = await b.Sync.SyncAsync(cloudB);
         Assert.Equal(SyncOutcome.NeedsConflictResolution, pending.Outcome);
         Assert.IsType<OccasionConflict>(Assert.Single(pending.Conflicts!));
-        Assert.Equal(SyncOutcome.Synced, (await b.Sync.SyncAsync(cloudB, Snap.Pick(pending.Conflicts!, ConflictChoice.Remote))).Outcome);
+        Assert.Equal(SyncOutcome.Synced, (await b.Sync.SyncAsync(cloudB, Snap.Pick(pending.Conflicts!, ConflictChoice.Local))).Outcome);
         Assert.True((await a.Sync.SyncAsync(cloudA)).IsSuccess);
-        Assert.Equal("From A", (await a.Occasions.GetAllAsync()).Single(o => o.Title == "Move").Notes);
-        Assert.Equal("From A", (await b.Occasions.GetAllAsync()).Single(o => o.Title == "Move").Notes);
+        Assert.Equal("From B", (await a.Occasions.GetAllAsync()).Single(o => o.Title == "Move").Notes);
+        Assert.Equal("From B", (await b.Occasions.GetAllAsync()).Single(o => o.Title == "Move").Notes);
 
         // Erase A (forget the link, purge without tombstones): A is empty and unlinked, the cloud and B keep everything.
         Assert.Equal(SyncOutcome.Disconnected, (await a.Sync.ForgetLinkAsync()).Outcome);
@@ -85,9 +87,9 @@ public sealed class SyncTwoDeviceFolderTests : IDisposable
         Assert.Null(back.Conflicts);
         Assert.Equal(new[] { "Move", "Wedding" }, await a.TitlesAsync());
         Assert.Equal("Garden party", (await a.Occasions.GetAllAsync()).Single(o => o.Title == "Wedding").Notes);
-        Assert.Equal("From A", (await a.Occasions.GetAllAsync()).Single(o => o.Title == "Move").Notes);
+        Assert.Equal("From B", (await a.Occasions.GetAllAsync()).Single(o => o.Title == "Move").Notes);
         Assert.True((await b.Sync.SyncAsync(cloudB)).IsSuccess);
         Assert.Equal(new[] { "Move", "Wedding" }, await b.TitlesAsync());
-        Assert.Equal("From A", (await b.Occasions.GetAllAsync()).Single(o => o.Title == "Move").Notes);
+        Assert.Equal("From B", (await b.Occasions.GetAllAsync()).Single(o => o.Title == "Move").Notes);
     }
 }

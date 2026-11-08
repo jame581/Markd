@@ -39,10 +39,11 @@ namespace Markd.Core.Sync
         Task<SyncResult> DisconnectAsync(ICloudSyncProvider? provider, bool deleteRemote, CancellationToken ct = default);
 
         /// <summary>
-        /// Checks a typed passphrase against the cloud file and stores it only when it decodes the file (or there is no
-        /// file yet): <see cref="SyncOutcome.NoChanges"/>, or <see cref="SyncOutcome.WrongPassphrase"/> with nothing
-        /// stored. Never uploads. Call it before syncing whenever the user types a passphrase for an existing cloud
-        /// file, so a typo can never encrypt an upload.
+        /// Checks a typed passphrase against the cloud file and stores it only when it decodes the file:
+        /// <see cref="SyncOutcome.NoChanges"/>, or <see cref="SyncOutcome.WrongPassphrase"/> with nothing stored. When
+        /// there is no file (it vanished since the caller looked), <see cref="SyncOutcome.NoCloudFile"/> with nothing
+        /// stored, since nothing proved the passphrase. Never uploads. Call it before syncing whenever the user types a
+        /// passphrase for an existing cloud file, so a typo can never encrypt an upload.
         /// </summary>
         Task<SyncResult> UnlockAsync(ICloudSyncProvider provider, string passphrase, CancellationToken ct = default);
 

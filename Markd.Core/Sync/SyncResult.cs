@@ -3,7 +3,13 @@ namespace Markd.Core.Sync
     public enum SyncOutcome
     {
         Synced, NoChanges, NeedsConflictResolution, NeedsPassphrase, WrongPassphrase,
-        AuthExpired, Offline, RemoteTooNew, RemoteUnreadable, Failed, Disconnected
+        AuthExpired, Offline, RemoteTooNew, RemoteUnreadable, Failed, Disconnected,
+
+        /// <summary>
+        /// Only from <see cref="ISyncService.UnlockAsync"/>: there is no cloud file to prove the passphrase against, so
+        /// nothing was stored. The caller asks for a new passphrase (typed twice) and stores that instead.
+        /// </summary>
+        NoCloudFile,
     }
 
     /// <summary>What a sync run did. SyncService never throws into the UI: every failure is an outcome.</summary>

@@ -130,8 +130,9 @@ public sealed class SyncCoordinator(
     /// <summary>
     /// Links this device to a provider's cloud file. No file yet: asks for a new passphrase and stores it. A file:
     /// asks for its passphrase until it opens the file (nothing is stored or uploaded before that), or leads to
-    /// <see cref="ReplaceCloudAsync"/> when the user forgot it. Cancelling clears the stored passphrase. Then runs
-    /// the first sync, which links the device. Never throws.
+    /// <see cref="ReplaceCloudAsync"/> when the user forgot it. Cancelling (a prompt, the replace confirm or the first
+    /// run) clears the stored passphrase. Then runs the first sync, which links the device. A link to a provider this
+    /// build does not have is forgotten first. Never throws.
     /// </summary>
     public async Task ConnectAsync(string providerId)
     {
@@ -140,6 +141,8 @@ public sealed class SyncCoordinator(
 
         try
         {
+            await ForgetStaleLinkAsync();
+
             var info = await Task.Run(() => provider.GetInfoAsync(CancellationToken.None));
             if (info is null)
             {
@@ -159,7 +162,8 @@ public sealed class SyncCoordinator(
                         await CancelConnectAsync();
                         return;
                     case UnlockResult.ForgotIt:
-                        await ReplaceCloudCoreAsync(provider);
+                        if (!await ReplaceCloudCoreAsync(provider))
+                            await CancelConnectAsync();
                         return;
                     case UnlockResult.Failed:
                         if (!_isLinked)
@@ -177,6 +181,14 @@ public sealed class SyncCoordinator(
         catch (OperationCanceledException)
         {
             logger.LogInformation("Connecting was cancelled");
+            try
+            {
+                await CancelConnectAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Cancelling the connect failed");
+            }
         }
         catch (Exception ex)
         {
@@ -422,25 +434,28 @@ public sealed class SyncCoordinator(
 
     /// <summary>
     /// The destructive confirm, a new passphrase, then the replace. With <paramref name="connectingTo"/> it is the
-    /// first run of a connect.
+    /// first run of a connect. False when the user cancelled the confirm or the prompt.
     /// </summary>
-    private async Task ReplaceCloudCoreAsync(ICloudSyncProvider? connectingTo)
+    private async Task<bool> ReplaceCloudCoreAsync(ICloudSyncProvider? connectingTo)
     {
         if (!await ConfirmAsync(Strings.Sync_ReplaceConfirmTitle, Strings.Sync_ReplaceConfirmMessage,
                 Strings.Sync_ActionReplaceCloud, Strings.Common_Cancel, destructive: true))
-            return;
+            return false;
 
         if ((await PromptAsync(PassphrasePromptKind.CreateNew, false)).Passphrase is not { } passphrase)
-            return;
+            return false;
 
         if (connectingTo is not null)
             _connecting = connectingTo;
         await RunAsync((sync, provider) => sync.ReplaceRemoteAsync(provider, passphrase));
+        return true;
     }
 
     /// <summary>
     /// Asks for the passphrase of an existing cloud file until <see cref="ISyncService.UnlockAsync"/> accepts it,
-    /// showing the previous failure on each retry. Any outcome other than a wrong passphrase ends the loop.
+    /// showing the previous failure on each retry. Any outcome other than a wrong passphrase ends the loop. When the
+    /// file is gone (<see cref="SyncOutcome.NoCloudFile"/>), the typed passphrase proved nothing: asks for a new one
+    /// typed twice and stores that.
     /// </summary>
     private async Task<UnlockResult> UnlockWithPromptAsync(ICloudSyncProvider provider, PassphrasePromptKind kind)
     {
@@ -467,6 +482,11 @@ public sealed class SyncCoordinator(
             switch (result.Outcome)
             {
                 case SyncOutcome.NoChanges or SyncOutcome.Synced:
+                    return UnlockResult.Unlocked;
+                case SyncOutcome.NoCloudFile:
+                    if ((await PromptAsync(PassphrasePromptKind.CreateNew, false)).Passphrase is not { } created)
+                        return UnlockResult.Cancelled;
+                    await secrets.SetPassphraseAsync(created);
                     return UnlockResult.Unlocked;
                 case SyncOutcome.WrongPassphrase:
                     failed = true;
@@ -497,12 +517,47 @@ public sealed class SyncCoordinator(
         _ => Strings.Backup_UnexpectedError,
     };
 
-    /// <summary>A cancelled connect leaves no passphrase behind and, on a device that is not linked, shows Off.</summary>
+    /// <summary>
+    /// A cancelled connect on a device that is not linked leaves nothing behind: no provider being connected (an
+    /// earlier connect that stopped at conflicts included), no passphrase, and the status shows Off. A linked device
+    /// keeps its link and its passphrase.
+    /// </summary>
     private async Task CancelConnectAsync()
     {
+        if (_isLinked)
+            return;
+
+        _connecting = null;
+        _pendingConflicts = [];
         await secrets.SetPassphraseAsync(null);
-        if (!_isLinked)
-            await SetStatusAsync(OffStatus);
+        await SetStatusAsync(OffStatus);
+    }
+
+    /// <summary>
+    /// A device linked to a provider this build does not have shows Off and drops every run, so a connect would be
+    /// silently ignored: forget that link before connecting.
+    /// </summary>
+    private async Task ForgetStaleLinkAsync()
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var state = await LoadStateAsync();
+            _isLinked = state.IsConnected;
+            if (!state.IsConnected || (state.ProviderId is { } id && catalog.Get(id) is not null))
+                return;
+
+            var result = await Task.Run(() => session.Sync.ForgetLinkAsync());
+            if (result.Outcome != SyncOutcome.Disconnected)
+                throw new InvalidOperationException($"Forgetting the stale sync link failed: {result.Outcome} {result.Detail}");
+
+            _isLinked = false;
+            _pendingConflicts = [];
+        }
+        finally
+        {
+            _gate.Release();
+        }
     }
 
     private async Task<ICloudSyncProvider?> LinkedProviderAsync()

@@ -46,7 +46,7 @@ public class SyncUnlockTests
     }
 
     [Fact]
-    public async Task Unlock_with_no_cloud_file_stores_it()
+    public async Task Unlock_with_no_cloud_file_stores_nothing_and_says_so()
     {
         using var a = new SyncDevice();
         var cloud = new InMemoryCloudProvider();
@@ -55,10 +55,25 @@ public class SyncUnlockTests
 
         var result = await a.Sync.UnlockAsync(cloud, "new");
 
-        Assert.Equal(SyncOutcome.NoChanges, result.Outcome);
-        Assert.Equal("new", a.Secrets.Passphrase);
+        Assert.Equal(SyncOutcome.NoCloudFile, result.Outcome);
+        Assert.Null(a.Secrets.Passphrase);
         Assert.Null(cloud.Data);
         Assert.Equal(0, cloud.Uploads);
+    }
+
+    [Fact]
+    public async Task Unlock_after_the_cloud_file_was_deleted_elsewhere_keeps_the_stored_passphrase()
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionAsync("X");
+        await a.Sync.SyncAsync(cloud);
+        await cloud.DeleteAsync(TestContext.Current.CancellationToken);
+
+        var result = await a.Sync.UnlockAsync(cloud, "typo");
+
+        Assert.Equal(SyncOutcome.NoCloudFile, result.Outcome);
+        Assert.Equal("pass", a.Secrets.Passphrase);
     }
 
     [Fact]

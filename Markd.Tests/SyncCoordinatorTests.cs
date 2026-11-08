@@ -604,10 +604,10 @@ public class SyncCoordinatorTests
     }
 
     [Fact]
-    public async Task Connect_ForgotIt_ConfirmDeclined_ChangesNothing()
+    public async Task Connect_ForgotIt_ConfirmDeclined_CancelsTheConnect()
     {
         var coordinator = Create();
-        _secrets.Value = "kept";
+        _secrets.Value = "left over";
         _prompt.Results.Enqueue(new PassphrasePromptResult(null, true));
         _shell.Answers.Enqueue(false);
 
@@ -616,8 +616,113 @@ public class SyncCoordinatorTests
         Assert.True(Assert.Single(_shell.Calls).Destructive);
         Assert.Single(_prompt.Calls);
         Assert.Empty(_sync.Log);
-        Assert.Equal("kept", _secrets.Value);
-        Assert.Equal(0, _secrets.Sets);
+        Assert.Null(_secrets.Value);
+        Assert.Equal(SyncStatusKind.Off, coordinator.Status.Kind);
+    }
+
+    [Fact]
+    public async Task Connect_ForgotIt_NewPassphraseCancelled_CancelsTheConnect()
+    {
+        var coordinator = Create();
+        _secrets.Value = "left over";
+        _prompt.Results.Enqueue(new PassphrasePromptResult(null, true));
+        _prompt.Results.Enqueue(new PassphrasePromptResult(null, false));
+
+        await coordinator.ConnectAsync(ProviderId);
+
+        Assert.Empty(_sync.Log);
+        Assert.Null(_secrets.Value);
+        Assert.Equal(SyncStatusKind.Off, coordinator.Status.Kind);
+    }
+
+    [Fact]
+    public async Task Connect_CancelledDuringTheFirstRun_ClearsTheSecret_AndForgetsTheConnect()
+    {
+        var coordinator = Create();
+        await coordinator.InitializeAsync();
+        _catalog.Provider.Info = null;
+        _prompt.Results.Enqueue(new PassphrasePromptResult("new secret", false));
+        _sync.Throw = new OperationCanceledException();
+
+        await coordinator.ConnectAsync(ProviderId);
+
+        Assert.Null(_secrets.Value);
+        Assert.Equal(SyncStatusKind.Off, coordinator.Status.Kind);
+        _sync.Throw = null;
+        await coordinator.SyncNowAsync(SyncTrigger.Manual);
+        Assert.Single(_sync.SyncCalls);
+    }
+
+    [Fact]
+    public async Task Connect_CancelledAfterAnEarlierConnectStoppedAtConflicts_ForgetsThatConnect()
+    {
+        DisconnectedWithKeptBase();
+        var coordinator = Create();
+        await coordinator.InitializeAsync();
+        _prompt.Results.Enqueue(new PassphrasePromptResult("right", false));
+        _sync.Results.Enqueue(ConflictResult(Conflict("a")));
+        _resolver.Answers.Enqueue(null);
+        await coordinator.ConnectAsync(ProviderId);
+        Assert.Equal(SyncStatusKind.Conflicts, coordinator.Status.Kind);
+
+        _prompt.Results.Enqueue(new PassphrasePromptResult(null, false));
+        await coordinator.ConnectAsync(ProviderId);
+
+        Assert.Null(_secrets.Value);
+        Assert.Equal(SyncStatusKind.Off, coordinator.Status.Kind);
+        await coordinator.SyncNowAsync(SyncTrigger.Manual);
+        Assert.Single(_sync.SyncCalls);
+    }
+
+    [Fact]
+    public async Task Connect_WhileLinkedToAProviderMissingFromThisBuild_ForgetsTheStaleLinkFirst()
+    {
+        Link();
+        _state.Value.ProviderId = "gone";
+        var coordinator = Create();
+        await coordinator.InitializeAsync();
+        _catalog.Provider.Info = null;
+        _prompt.Results.Enqueue(new PassphrasePromptResult("new secret", false));
+
+        await coordinator.ConnectAsync(ProviderId);
+
+        Assert.Equal(1, _sync.ForgetCalls);
+        Assert.Equal(["sync"], _sync.Log);
+        Assert.Equal(ProviderId, _state.Value.ProviderId);
+        Assert.True(coordinator.IsLinked);
+        Assert.Equal(SyncStatusKind.Idle, coordinator.Status.Kind);
+        Assert.Equal("new secret", _secrets.Value);
+    }
+
+    [Fact]
+    public async Task Connect_FileGoneAfterTheCheck_AsksForANewPassphraseTwice_AndStoresThat()
+    {
+        var coordinator = Create();
+        _sync.UnlockResults.Enqueue(new SyncResult(SyncOutcome.NoCloudFile));
+        _prompt.Results.Enqueue(new PassphrasePromptResult("typed once", false));
+        _prompt.Results.Enqueue(new PassphrasePromptResult("confirmed", false));
+
+        await coordinator.ConnectAsync(ProviderId);
+
+        Assert.Equal([(PassphrasePromptKind.EnterExisting, false), (PassphrasePromptKind.CreateNew, false)], _prompt.Calls);
+        Assert.Equal(["unlock:typed once", "sync"], _sync.Log);
+        Assert.Equal("confirmed", _secrets.Value);
+        Assert.True(coordinator.IsLinked);
+    }
+
+    [Fact]
+    public async Task Connect_FileGoneAfterTheCheck_NewPassphraseCancelled_CancelsTheConnect()
+    {
+        var coordinator = Create();
+        _sync.UnlockResults.Enqueue(new SyncResult(SyncOutcome.NoCloudFile));
+        _prompt.Results.Enqueue(new PassphrasePromptResult("typed once", false));
+        _prompt.Results.Enqueue(new PassphrasePromptResult(null, false));
+
+        await coordinator.ConnectAsync(ProviderId);
+
+        Assert.Equal(["unlock:typed once"], _sync.Log);
+        Assert.Null(_secrets.Value);
+        Assert.Equal(SyncStatusKind.Off, coordinator.Status.Kind);
     }
 
     [Fact]
@@ -774,6 +879,22 @@ public class SyncCoordinatorTests
         Assert.Equal([(PassphrasePromptKind.EnterChanged, false), (PassphrasePromptKind.EnterChanged, true)], _prompt.Calls);
         Assert.Equal(["unlock:old", "unlock:changed", "sync"], _sync.Log);
         Assert.Equal(SyncStatusKind.Idle, coordinator.Status.Kind);
+    }
+
+    [Fact]
+    public async Task EnterPassphrase_CloudFileDeletedElsewhere_AsksForANewPassphraseTwice_AndStoresThat()
+    {
+        var coordinator = await CreateLinkedAsync(lastAttempt: "WrongPassphrase");
+        _secrets.Value = "old";
+        _sync.UnlockResults.Enqueue(new SyncResult(SyncOutcome.NoCloudFile));
+        _prompt.Results.Enqueue(new PassphrasePromptResult("typed once", false));
+        _prompt.Results.Enqueue(new PassphrasePromptResult("confirmed", false));
+
+        await coordinator.EnterPassphraseAsync();
+
+        Assert.Equal([(PassphrasePromptKind.EnterChanged, false), (PassphrasePromptKind.CreateNew, false)], _prompt.Calls);
+        Assert.Equal(["unlock:typed once", "sync"], _sync.Log);
+        Assert.Equal("confirmed", _secrets.Value);
     }
 
     [Fact]
