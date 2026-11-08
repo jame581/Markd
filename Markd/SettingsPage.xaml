@@ -187,7 +187,7 @@
                         </Grid.GestureRecognizers>
                         <Label Text="{loc:Tr Settings_EraseAll}" FontSize="16" Style="{StaticResource DangerText}" />
                     </Grid>
-                    <Label Text="{loc:Tr Settings_DataFootnotePhone}"
+                    <Label Text="{loc:Tr Settings_DataFootnotePhone}" IsVisible="{Binding Sync.IsOff}"
                            Style="{StaticResource M3RowSub}" FontSize="12.5" Padding="16,8,16,0" />
                 </VerticalStackLayout>
 

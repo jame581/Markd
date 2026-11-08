@@ -144,6 +144,35 @@ public class BackupCoordinatorTests
         Assert.Contains(Plural.Format("Import_Skipped", 2, culture), detail);
     }
 
+    [Fact]
+    public async Task Import_WithSyncState_LeavesOutZeroCounts()
+    {
+        _syncLink.HasState = true;
+        _import.Schema = "2";
+        _import.Outcome = new ImportOutcome(true, 0, 1, 1);
+        _picker.File = new PickedFile("backup.json", PlainJson);
+
+        Assert.True(await Create().ImportAsync());
+
+        var culture = LocalizationManager.Instance.Culture;
+        Assert.Equal(
+            Plural.Format("Import_Revived", 1, culture) + " " + Plural.Format("Import_Skipped", 1, culture),
+            Assert.Single(_feedback.Details));
+    }
+
+    [Fact]
+    public async Task Import_WithSyncState_SaysNothingNewWhenEveryCountIsZero()
+    {
+        _syncLink.HasState = true;
+        _import.Schema = "2";
+        _import.Outcome = new ImportOutcome(true, 0, 0, 0);
+        _picker.File = new PickedFile("backup.json", PlainJson);
+
+        Assert.True(await Create().ImportAsync());
+
+        Assert.Equal(Strings.Import_NothingNew, Assert.Single(_feedback.Details));
+    }
+
     [Theory]
     [InlineData("1", true)]
     [InlineData("2", false)]

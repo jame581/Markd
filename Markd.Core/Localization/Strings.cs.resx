@@ -41,6 +41,7 @@
   <data name="Settings_ImportShort" xml:space="preserve"><value>Importovat</value></data>
   <data name="Settings_EraseAllShort" xml:space="preserve"><value>Smazat vše</value></data>
   <data name="Settings_EraseAllSub" xml:space="preserve"><value>Všechny události a milníky. Kategorie a nastavení zůstanou zachovány.</value></data>
+  <data name="Settings_EraseAllSubSynced" xml:space="preserve"><value>Vymaže jen toto zařízení a vypne na něm synchronizaci. Cloud a vaše ostatní zařízení si všechno ponechají.</value></data>
   <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd uchovává jeden soubor SQLite v tomto počítači. Nic se nenahrává, takže se nic nesynchronizuje. Před přechodem na jiný počítač proveďte export.</value></data>
   <data name="Abbr_Year" xml:space="preserve"><value>r</value></data>
   <data name="Abbr_Month" xml:space="preserve"><value>m</value></data>
@@ -410,6 +411,7 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Import_Skipped_One" xml:space="preserve"><value>{0} událost už tu byla.</value></data>
   <data name="Import_Skipped_Few" xml:space="preserve"><value>{0} události už tu byly.</value></data>
   <data name="Import_Skipped_Many" xml:space="preserve"><value>{0} událostí už tu bylo.</value></data>
+  <data name="Import_NothingNew" xml:space="preserve"><value>Nic nového k přidání.</value></data>
   <data name="Sync_ConnectFailed" xml:space="preserve"><value>Nepodařilo se připojit ke cloudu</value></data>
   <data name="Sync_PassphraseChanged" xml:space="preserve"><value>Heslo synchronizace změněno</value></data>
   <data name="Sync_PassphraseNotStored" xml:space="preserve"><value>Cloud teď používá nové heslo. Zadejte ho v tomto zařízení znovu.</value></data>

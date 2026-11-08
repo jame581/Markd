@@ -41,6 +41,7 @@
   <data name="Settings_ImportShort" xml:space="preserve"><value>Importer</value></data>
   <data name="Settings_EraseAllShort" xml:space="preserve"><value>Tout effacer</value></data>
   <data name="Settings_EraseAllSub" xml:space="preserve"><value>Tous les événements et étapes. Les catégories et les paramètres sont conservés.</value></data>
+  <data name="Settings_EraseAllSubSynced" xml:space="preserve"><value>Vide uniquement cet appareil et y désactive la synchronisation. Le cloud et vos autres appareils conservent tout.</value></data>
   <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd conserve un seul fichier SQLite sur ce PC. Rien n'est envoyé en ligne, donc rien n'est synchronisé. Exportez vos données avant de changer d'ordinateur.</value></data>
   <data name="Abbr_Year" xml:space="preserve"><value>a</value></data>
   <data name="Abbr_Month" xml:space="preserve"><value>m</value></data>
@@ -410,6 +411,7 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Import_Skipped_One" xml:space="preserve"><value>{0} événement était déjà présent.</value></data>
   <data name="Import_Skipped_Few" xml:space="preserve"><value>{0} événements étaient déjà présents.</value></data>
   <data name="Import_Skipped_Many" xml:space="preserve"><value>{0} événements étaient déjà présents.</value></data>
+  <data name="Import_NothingNew" xml:space="preserve"><value>Rien de nouveau à ajouter.</value></data>
   <data name="Sync_ConnectFailed" xml:space="preserve"><value>Impossible de se connecter au cloud</value></data>
   <data name="Sync_PassphraseChanged" xml:space="preserve"><value>Phrase secrète de synchronisation modifiée</value></data>
   <data name="Sync_PassphraseNotStored" xml:space="preserve"><value>Le cloud utilise désormais la nouvelle phrase secrète. Saisissez-la à nouveau sur cet appareil.</value></data>

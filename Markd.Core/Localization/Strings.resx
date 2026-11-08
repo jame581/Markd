@@ -41,6 +41,7 @@
   <data name="Settings_ImportShort" xml:space="preserve"><value>Import</value></data>
   <data name="Settings_EraseAllShort" xml:space="preserve"><value>Erase all</value></data>
   <data name="Settings_EraseAllSub" xml:space="preserve"><value>Every occasion and milestone. Categories and settings stay.</value></data>
+  <data name="Settings_EraseAllSubSynced" xml:space="preserve"><value>Clears this device only and turns sync off here. The cloud and your other devices keep everything.</value></data>
   <data name="Settings_DataFootnoteDesktop" xml:space="preserve"><value>Markd keeps one SQLite file on this PC. Nothing is uploaded, so nothing syncs. Export before you move to another machine.</value></data>
   <data name="Abbr_Year" xml:space="preserve"><value>y</value></data>
   <data name="Abbr_Month" xml:space="preserve"><value>mo</value></data>
@@ -410,6 +411,7 @@ Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolk
   <data name="Import_Skipped_One" xml:space="preserve"><value>{0} event was already here.</value></data>
   <data name="Import_Skipped_Few" xml:space="preserve"><value>{0} events were already here.</value></data>
   <data name="Import_Skipped_Many" xml:space="preserve"><value>{0} events were already here.</value></data>
+  <data name="Import_NothingNew" xml:space="preserve"><value>Nothing new to add.</value></data>
   <data name="Sync_ConnectFailed" xml:space="preserve"><value>Couldn't connect to the cloud</value></data>
   <data name="Sync_PassphraseChanged" xml:space="preserve"><value>Sync passphrase changed</value></data>
   <data name="Sync_PassphraseNotStored" xml:space="preserve"><value>The cloud now uses the new passphrase. Enter it again on this device.</value></data>

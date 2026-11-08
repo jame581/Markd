@@ -221,13 +221,14 @@
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                             <VerticalStackLayout Spacing="1" VerticalOptions="Center">
                                 <Label Text="{loc:Tr Settings_EraseAll}" Style="{StaticResource SettingTitle}" />
-                                <Label Text="{loc:Tr Settings_EraseAllSub}" Style="{StaticResource SettingSub}" />
+                                <Label Text="{loc:Tr Settings_EraseAllSub}" Style="{StaticResource SettingSub}" IsVisible="{Binding Sync.IsOff}" />
+                                <Label Text="{loc:Tr Settings_EraseAllSubSynced}" Style="{StaticResource SettingSub}" IsVisible="{Binding Sync.IsConnected}" />
                             </VerticalStackLayout>
                             <Button Grid.Column="1" Text="{loc:Tr Settings_EraseAllShort}" Style="{StaticResource DeskDangerButton}" HeightRequest="32" FontSize="12.5"
                                     Padding="13,0" Command="{Binding EraseAllCommand}" />
                         </Grid>
                     </Border>
-                    <Label Text="{loc:Tr Settings_DataFootnoteDesktop}"
+                    <Label Text="{loc:Tr Settings_DataFootnoteDesktop}" IsVisible="{Binding Sync.IsOff}"
                            FontSize="12.5" LineHeight="1.35" Margin="2,2,0,0" Style="{StaticResource SecondaryText}" />
                 </VerticalStackLayout>
             </VerticalStackLayout>

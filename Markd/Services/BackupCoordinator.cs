@@ -138,15 +138,17 @@ public sealed class BackupCoordinator(
             ? Strings.Import_ConfirmMessageSynced + "\n\n" + Strings.Import_LegacyMayDuplicate
             : Strings.Import_ConfirmMessageSynced;
 
-    /// <summary>"3 events added." plus restored and skipped counts when there are any.</summary>
+    /// <summary>Added, restored and skipped counts, each only when it is not zero.</summary>
     private static string OutcomeText(ImportOutcome outcome, System.Globalization.CultureInfo culture)
     {
-        var parts = new List<string> { Plural.Format("Import_Added", outcome.Added, culture) };
+        var parts = new List<string>();
+        if (outcome.Added > 0)
+            parts.Add(Plural.Format("Import_Added", outcome.Added, culture));
         if (outcome.Revived > 0)
             parts.Add(Plural.Format("Import_Revived", outcome.Revived, culture));
         if (outcome.Skipped > 0)
             parts.Add(Plural.Format("Import_Skipped", outcome.Skipped, culture));
-        return string.Join(" ", parts);
+        return parts.Count == 0 ? Strings.Import_NothingNew : string.Join(" ", parts);
     }
 
     /// <summary>
