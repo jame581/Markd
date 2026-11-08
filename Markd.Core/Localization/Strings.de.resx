@@ -369,7 +369,7 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Sync_Intro" xml:space="preserve"><value>Halten Sie Ihre Anlässe auf allen Geräten gleich, über Ihren eigenen Cloud-Speicher. Verschlüsselt, Markd hat keinen Server.</value></data>
   <data name="Sync_SetupWarning" xml:space="preserve"><value>Wenn Sie die Synchronisierungs-Passphrase verlieren, kann die Kopie in der Cloud nicht gelesen werden. Die Daten auf Ihren Geräten bleiben immer unberührt.</value></data>
   <data name="Sync_StatusOff" xml:space="preserve"><value>Aus</value></data>
-  <data name="Sync_StatusSyncing" xml:space="preserve"><value>Synchronisiert</value></data>
+  <data name="Sync_StatusSyncing" xml:space="preserve"><value>Synchronisierung läuft</value></data>
   <data name="Sync_StatusJustNow" xml:space="preserve"><value>Gerade synchronisiert</value></data>
   <data name="Sync_StatusMinutesAgo_One" xml:space="preserve"><value>Vor {0} Minute synchronisiert</value></data>
   <data name="Sync_StatusMinutesAgo_Few" xml:space="preserve"><value>Vor {0} Minuten synchronisiert</value></data>
@@ -389,7 +389,7 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Sync_StatusUpdateApp" xml:space="preserve"><value>Die Cloud-Daten stammen von einem neueren Markd: App aktualisieren</value></data>
   <data name="Sync_StatusUnreadable" xml:space="preserve"><value>Cloud-Daten können nicht gelesen werden</value></data>
   <data name="Sync_StatusFailed" xml:space="preserve"><value>Synchronisierung fehlgeschlagen, neuer Versuch folgt</value></data>
-  <data name="Sync_ActionResolve" xml:space="preserve"><value>Lösen</value></data>
+  <data name="Sync_ActionResolve" xml:space="preserve"><value>Konflikte lösen</value></data>
   <data name="Sync_ActionEnterPassphrase" xml:space="preserve"><value>Passphrase eingeben</value></data>
   <data name="Sync_ActionSignIn" xml:space="preserve"><value>Erneut anmelden</value></data>
   <data name="Sync_ActionReplaceCloud" xml:space="preserve"><value>Cloud-Daten ersetzen</value></data>

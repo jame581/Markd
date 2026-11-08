@@ -367,7 +367,7 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Sync_ChangedDaysAgo_Few" xml:space="preserve"><value>před {0} dny</value></data>
   <data name="Sync_ChangedDaysAgo_Many" xml:space="preserve"><value>před {0} dny</value></data>
   <data name="Sync_Intro" xml:space="preserve"><value>Mějte své události stejné na všech zařízeních díky vlastnímu cloudovému úložišti. Šifrovaně, Markd nemá žádný server.</value></data>
-  <data name="Sync_SetupWarning" xml:space="preserve"><value>Pokud heslo synchronizace ztratíte, kopii v cloudu nepůjde přečíst. Data na vašich zařízeních se tím nikdy nedotknou.</value></data>
+  <data name="Sync_SetupWarning" xml:space="preserve"><value>Pokud heslo synchronizace ztratíte, kopii v cloudu nepůjde přečíst. Data na vašich zařízeních tím nikdy nebudou dotčena.</value></data>
   <data name="Sync_StatusOff" xml:space="preserve"><value>Vypnuto</value></data>
   <data name="Sync_StatusSyncing" xml:space="preserve"><value>Synchronizuje se</value></data>
   <data name="Sync_StatusJustNow" xml:space="preserve"><value>Synchronizováno před chvílí</value></data>
