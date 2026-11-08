@@ -248,6 +248,109 @@ public class SyncReconnectTests
         Assert.Equal(before.Epoch, after.Epoch);
     }
 
+    private static async Task<(SyncDevice a, InMemoryCloudProvider cloud, Markd.Core.Domain.SyncState before)> LinkedThenSignedOutAsync()
+    {
+        var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider { AccountName = "A", AccountLabel = "a@x.com" };
+        await a.AddOccasionAsync("One");
+        await a.Sync.SyncAsync(cloud);
+        var before = await a.State.LoadAsync();
+        cloud.AccountName = null;
+        return (a, cloud, before);
+    }
+
+    private static async Task AssertUntouchedAsync(SyncDevice a, InMemoryCloudProvider cloud, Markd.Core.Domain.SyncState before,
+        int infoCalls, int downloads, int uploads)
+    {
+        Assert.Equal(infoCalls, cloud.GetInfoCalls);
+        Assert.Equal(downloads, cloud.Downloads);
+        Assert.Equal(uploads, cloud.Uploads);
+        Assert.Equal(0, cloud.Deletes);
+        var after = await a.State.LoadAsync();
+        Assert.Equal("A", after.AccountName);
+        Assert.Equal(before.BaseSnapshotJson, after.BaseSnapshotJson);
+        Assert.Equal(before.RemoteRevision, after.RemoteRevision);
+        Assert.Equal(before.IsConnected, after.IsConnected);
+    }
+
+    [Fact]
+    public async Task Unlock_ProviderWithoutAccountId_IsAuthExpired_AndTouchesNothing()
+    {
+        var (a, cloud, before) = await LinkedThenSignedOutAsync();
+        using var _ = a;
+        var (i, d, u) = (cloud.GetInfoCalls, cloud.Downloads, cloud.Uploads);
+
+        var result = await a.Sync.UnlockAsync(cloud, "pass");
+
+        Assert.Equal(SyncOutcome.AuthExpired, result.Outcome);
+        await AssertUntouchedAsync(a, cloud, before, i, d, u);
+    }
+
+    [Fact]
+    public async Task ReplaceRemote_ProviderWithoutAccountId_IsAuthExpired_AndTouchesNothing()
+    {
+        var (a, cloud, before) = await LinkedThenSignedOutAsync();
+        using var _ = a;
+        var (i, d, u) = (cloud.GetInfoCalls, cloud.Downloads, cloud.Uploads);
+
+        var result = await a.Sync.ReplaceRemoteAsync(cloud, "new");
+
+        Assert.Equal(SyncOutcome.AuthExpired, result.Outcome);
+        await AssertUntouchedAsync(a, cloud, before, i, d, u);
+        Assert.Equal("pass", a.Secrets.Passphrase);
+    }
+
+    [Fact]
+    public async Task DisconnectWithDelete_ProviderWithoutAccountId_IsAuthExpired_AndTouchesNothing()
+    {
+        var (a, cloud, before) = await LinkedThenSignedOutAsync();
+        using var _ = a;
+        var (i, d, u) = (cloud.GetInfoCalls, cloud.Downloads, cloud.Uploads);
+
+        var result = await a.Sync.DisconnectAsync(cloud, deleteRemote: true);
+
+        Assert.Equal(SyncOutcome.AuthExpired, result.Outcome);
+        await AssertUntouchedAsync(a, cloud, before, i, d, u);
+        Assert.Equal("pass", a.Secrets.Passphrase);
+    }
+
+    [Fact]
+    public async Task DisconnectWithoutDelete_ProviderWithoutAccountId_StillDisconnects()
+    {
+        var (a, cloud, _) = await LinkedThenSignedOutAsync();
+        using var _a = a;
+
+        var result = await a.Sync.DisconnectAsync(cloud, deleteRemote: false);
+
+        Assert.Equal(SyncOutcome.Disconnected, result.Outcome);
+        var after = await a.State.LoadAsync();
+        Assert.False(after.IsConnected);
+        Assert.Equal("A", after.AccountName);
+        Assert.NotNull(after.BaseSnapshotJson);
+        Assert.Equal(0, cloud.Deletes);
+    }
+
+    [Fact]
+    public async Task Sync_KeepsTheStoredLabel_WhenTheProviderCannotReadItThisTime()
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider { AccountName = "A", AccountLabel = "a@x.com" };
+        await a.AddOccasionAsync("One");
+        await a.Sync.SyncAsync(cloud);
+        cloud.AccountLabel = null;
+        await a.AddOccasionAsync("Two");
+        await a.Sync.SyncAsync(cloud);
+        Assert.Equal("a@x.com", (await a.State.LoadAsync()).AccountLabel);
+
+        await a.Sync.ReplaceRemoteAsync(cloud, "new");
+        Assert.Equal("a@x.com", (await a.State.LoadAsync()).AccountLabel);
+
+        // another account must not inherit it
+        cloud.AccountName = "B";
+        await a.Sync.ReplaceRemoteAsync(cloud, "new2");
+        Assert.Null((await a.State.LoadAsync()).AccountLabel);
+    }
+
     [Fact]
     public async Task Disconnect_returns_Disconnected_and_marks_the_state()
     {

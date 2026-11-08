@@ -145,8 +145,8 @@ namespace Markd.Core.Sync
             if (!string.Equals(state.ProviderId, provider.Id, StringComparison.Ordinal)
                 || !string.Equals(state.AccountName, provider.AccountName, StringComparison.Ordinal))
                 state = new SyncState { ProviderId = provider.Id, AccountName = provider.AccountName };
-            // The label is display only and may change while the id stays.
-            state.AccountLabel = provider.AccountLabel;
+            // The label is display only and may change while the id stays. A call that could not read it keeps the old one.
+            state.AccountLabel = provider.AccountLabel ?? state.AccountLabel;
 
             var info = await provider.GetInfoAsync(ct);
             var local = await snapshots.ReadForSyncAsync();
@@ -327,9 +327,11 @@ namespace Markd.Core.Sync
 
                     await secrets.SetPassphraseAsync(newPassphrase);
                     var state = await store.LoadAsync();
+                    var sameAccount = string.Equals(state.ProviderId, provider.Id, StringComparison.Ordinal)
+                        && string.Equals(state.AccountName, provider.AccountName, StringComparison.Ordinal);
                     state.ProviderId = provider.Id;
                     state.AccountName = provider.AccountName;
-                    state.AccountLabel = provider.AccountLabel;
+                    state.AccountLabel = provider.AccountLabel ?? (sameAccount ? state.AccountLabel : null);
                     state.RemoteRevision = revision;
                     state.LastSyncUtc = now;
                     state.LastResult = nameof(SyncOutcome.Synced);

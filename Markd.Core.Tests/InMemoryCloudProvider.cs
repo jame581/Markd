@@ -16,6 +16,7 @@ internal sealed class InMemoryCloudProvider : ICloudSyncProvider
     public int Uploads { get; private set; }
     public int Downloads { get; private set; }
     public int GetInfoCalls { get; private set; }
+    public int Deletes { get; private set; }
 
     /// <summary>Runs just before an upload is checked, to simulate another device writing first.</summary>
     public Action? BeforeUpload { get; set; }
@@ -67,6 +68,7 @@ internal sealed class InMemoryCloudProvider : ICloudSyncProvider
     public Task DeleteAsync(CancellationToken ct)
     {
         Guard();
+        Deletes++;
         _data = null;
         return Task.CompletedTask;
     }
