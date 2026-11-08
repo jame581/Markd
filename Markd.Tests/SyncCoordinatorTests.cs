@@ -647,8 +647,116 @@ public class SyncCoordinatorTests
         await coordinator.ConnectAsync(ProviderId);
 
         Assert.Equal(Strings.Sync_ConnectFailed, Assert.Single(_feedback.Titles));
+        Assert.Equal(Strings.Sync_FailOffline, Assert.Single(_feedback.Details));
         Assert.Empty(_prompt.Calls);
         Assert.Empty(_sync.Log);
+    }
+
+    [Fact]
+    public async Task Connect_UnlockFailsForAnotherReason_ShowsTheCause_AndAbandons()
+    {
+        var coordinator = Create();
+        _sync.UnlockResults.Enqueue(new SyncResult(SyncOutcome.RemoteUnreadable));
+        _prompt.Results.Enqueue(new PassphrasePromptResult("right", false));
+
+        await coordinator.ConnectAsync(ProviderId);
+
+        Assert.Equal(Strings.Sync_ConnectFailed, Assert.Single(_feedback.Titles));
+        Assert.Equal(Strings.Sync_StatusUnreadable, Assert.Single(_feedback.Details));
+        Assert.Equal(["unlock:right"], _sync.Log);
+        Assert.Null(_secrets.Value);
+        Assert.Equal(SyncStatusKind.Off, coordinator.Status.Kind);
+    }
+
+    public static TheoryData<SyncOutcome, string> FailedFirstRuns => new()
+    {
+        { SyncOutcome.Offline, Strings.Sync_FailOffline },
+        { SyncOutcome.RemoteUnreadable, Strings.Sync_StatusUnreadable },
+        { SyncOutcome.RemoteTooNew, Strings.Sync_StatusUpdateApp },
+        { SyncOutcome.AuthExpired, Strings.Sync_StatusSignInAgain },
+        { SyncOutcome.WrongPassphrase, Strings.Sync_FailWrongPassphrase },
+        { SyncOutcome.Failed, Strings.Backup_UnexpectedError },
+    };
+
+    [Theory]
+    [MemberData(nameof(FailedFirstRuns))]
+    public async Task Connect_FirstRunThatNeitherLinksNorStopsAtConflicts_AbandonsTheConnect(SyncOutcome outcome, string detail)
+    {
+        var coordinator = Create();
+        _catalog.Provider.Info = null;
+        _prompt.Results.Enqueue(new PassphrasePromptResult("new secret", false));
+        _sync.Results.Enqueue(new SyncResult(outcome));
+
+        await coordinator.ConnectAsync(ProviderId);
+
+        Assert.Null(_secrets.Value);
+        Assert.Equal(SyncStatusKind.Off, coordinator.Status.Kind);
+        Assert.False(coordinator.IsLinked);
+        Assert.Equal(Strings.Sync_ConnectFailed, Assert.Single(_feedback.Titles));
+        Assert.Equal(detail, Assert.Single(_feedback.Details));
+
+        // Nothing keeps running for the abandoned connect.
+        await coordinator.SyncNowAsync(SyncTrigger.Manual);
+        Assert.Single(_sync.SyncCalls);
+    }
+
+    /// <summary>A device that disconnected with a kept base reconnects, and both sides changed the same record.</summary>
+    private void DisconnectedWithKeptBase()
+    {
+        Link();
+        _state.Value.IsConnected = false;
+    }
+
+    [Fact]
+    public async Task Connect_FirstRunWithConflicts_AppliesTheAnswersAndLinks()
+    {
+        DisconnectedWithKeptBase();
+        var coordinator = Create();
+        await coordinator.InitializeAsync();
+        var conflict = Conflict("a");
+        ConflictResolution[] answers = [new(conflict.SyncId, ConflictChoice.Local, "a")];
+        _prompt.Results.Enqueue(new PassphrasePromptResult("right", false));
+        _sync.Results.Enqueue(ConflictResult(conflict));
+        _sync.Results.Enqueue(new SyncResult(SyncOutcome.Synced));
+        _resolver.Answers.Enqueue(answers);
+
+        await coordinator.ConnectAsync(ProviderId);
+
+        Assert.Equal(2, _sync.SyncCalls.Count);
+        Assert.Null(_sync.SyncCalls[0]);
+        Assert.Equal(answers, _sync.SyncCalls[1]);
+        Assert.True(coordinator.IsLinked);
+        Assert.Equal(SyncStatusKind.Idle, coordinator.Status.Kind);
+        Assert.Equal("right", _secrets.Value);
+    }
+
+    [Fact]
+    public async Task Connect_FirstRunWithConflicts_Later_ThenResolve_Applies()
+    {
+        DisconnectedWithKeptBase();
+        var coordinator = Create();
+        await coordinator.InitializeAsync();
+        var conflict = Conflict("a");
+        ConflictResolution[] answers = [new(conflict.SyncId, ConflictChoice.Remote, "a")];
+        _prompt.Results.Enqueue(new PassphrasePromptResult("right", false));
+        _sync.Results.Enqueue(ConflictResult(conflict));
+        _resolver.Answers.Enqueue(null);
+
+        await coordinator.ConnectAsync(ProviderId);
+
+        Assert.Equal(SyncStatusKind.Conflicts, coordinator.Status.Kind);
+        Assert.False(coordinator.IsLinked);
+        Assert.Equal("right", _secrets.Value);
+        Assert.Empty(_feedback.Titles);
+
+        _sync.Results.Enqueue(new SyncResult(SyncOutcome.Synced));
+        _resolver.Answers.Enqueue(answers);
+        await coordinator.OpenConflictsAsync();
+
+        Assert.Equal(2, _sync.SyncCalls.Count);
+        Assert.Equal(answers, _sync.SyncCalls[1]);
+        Assert.True(coordinator.IsLinked);
+        Assert.Equal(SyncStatusKind.Idle, coordinator.Status.Kind);
     }
 
     // ---- Passphrase ----
@@ -917,6 +1025,13 @@ public class SyncCoordinatorTests
 
             var result = Results.TryDequeue(out var r) ? r : new SyncResult(SyncOutcome.NoChanges);
             state.Value.LastAttemptResult = result.Outcome.ToString();
+            // Like the real one: a successful run links the device.
+            if (result.Outcome is SyncOutcome.Synced or SyncOutcome.NoChanges)
+            {
+                state.Value.ProviderId = provider.Id;
+                state.Value.IsConnected = true;
+            }
+
             return result;
         }
 

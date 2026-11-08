@@ -409,7 +409,7 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Import_Skipped_One" xml:space="preserve"><value>{0} événement était déjà présent.</value></data>
   <data name="Import_Skipped_Few" xml:space="preserve"><value>{0} événements étaient déjà présents.</value></data>
   <data name="Import_Skipped_Many" xml:space="preserve"><value>{0} événements étaient déjà présents.</value></data>
-  <data name="Sync_ConnectFailed" xml:space="preserve"><value>Impossible de joindre le cloud. Veuillez réessayer.</value></data>
+  <data name="Sync_ConnectFailed" xml:space="preserve"><value>Impossible de se connecter au cloud</value></data>
   <data name="Sync_PassphraseChanged" xml:space="preserve"><value>Phrase secrète de synchronisation modifiée</value></data>
   <data name="Sync_PassphraseNotStored" xml:space="preserve"><value>Le cloud utilise désormais la nouvelle phrase secrète. Saisissez-la à nouveau sur cet appareil.</value></data>
   <data name="Sync_ReplaceConfirmTitle" xml:space="preserve"><value>Remplacer les données du cloud par cet appareil ?</value></data>
@@ -422,4 +422,6 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Sync_DeleteCloud" xml:space="preserve"><value>Supprimer les données du cloud</value></data>
   <data name="Sync_KeepCloud" xml:space="preserve"><value>Les garder</value></data>
   <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Échec de la déconnexion. Veuillez réessayer.</value></data>
+  <data name="Sync_FailOffline" xml:space="preserve"><value>Impossible de joindre le cloud. Vérifiez la connexion et réessayez.</value></data>
+  <data name="Sync_FailWrongPassphrase" xml:space="preserve"><value>La phrase secrète de synchronisation n'ouvre pas les données du cloud.</value></data>
 </root>

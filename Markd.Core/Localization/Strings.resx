@@ -409,7 +409,7 @@ Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolk
   <data name="Import_Skipped_One" xml:space="preserve"><value>{0} event was already here.</value></data>
   <data name="Import_Skipped_Few" xml:space="preserve"><value>{0} events were already here.</value></data>
   <data name="Import_Skipped_Many" xml:space="preserve"><value>{0} events were already here.</value></data>
-  <data name="Sync_ConnectFailed" xml:space="preserve"><value>Couldn't reach the cloud. Try again.</value></data>
+  <data name="Sync_ConnectFailed" xml:space="preserve"><value>Couldn't connect to the cloud</value></data>
   <data name="Sync_PassphraseChanged" xml:space="preserve"><value>Sync passphrase changed</value></data>
   <data name="Sync_PassphraseNotStored" xml:space="preserve"><value>The cloud now uses the new passphrase. Enter it again on this device.</value></data>
   <data name="Sync_ReplaceConfirmTitle" xml:space="preserve"><value>Replace cloud data with this device?</value></data>
@@ -422,4 +422,6 @@ Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolk
   <data name="Sync_DeleteCloud" xml:space="preserve"><value>Delete cloud data</value></data>
   <data name="Sync_KeepCloud" xml:space="preserve"><value>Keep it</value></data>
   <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Couldn't disconnect. Try again.</value></data>
+  <data name="Sync_FailOffline" xml:space="preserve"><value>Couldn't reach the cloud. Check the connection and try again.</value></data>
+  <data name="Sync_FailWrongPassphrase" xml:space="preserve"><value>The sync passphrase doesn't open the cloud data.</value></data>
 </root>

@@ -409,7 +409,7 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Import_Skipped_One" xml:space="preserve"><value>{0} Anlass war schon vorhanden.</value></data>
   <data name="Import_Skipped_Few" xml:space="preserve"><value>{0} Anlässe waren schon vorhanden.</value></data>
   <data name="Import_Skipped_Many" xml:space="preserve"><value>{0} Anlässe waren schon vorhanden.</value></data>
-  <data name="Sync_ConnectFailed" xml:space="preserve"><value>Die Cloud ist nicht erreichbar. Bitte versuchen Sie es erneut.</value></data>
+  <data name="Sync_ConnectFailed" xml:space="preserve"><value>Verbindung zur Cloud fehlgeschlagen</value></data>
   <data name="Sync_PassphraseChanged" xml:space="preserve"><value>Synchronisierungs-Passphrase geändert</value></data>
   <data name="Sync_PassphraseNotStored" xml:space="preserve"><value>Die Cloud verwendet jetzt die neue Passphrase. Geben Sie sie auf diesem Gerät erneut ein.</value></data>
   <data name="Sync_ReplaceConfirmTitle" xml:space="preserve"><value>Cloud-Daten durch dieses Gerät ersetzen?</value></data>
@@ -422,4 +422,6 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Sync_DeleteCloud" xml:space="preserve"><value>Cloud-Daten löschen</value></data>
   <data name="Sync_KeepCloud" xml:space="preserve"><value>Behalten</value></data>
   <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Trennen fehlgeschlagen. Bitte versuchen Sie es erneut.</value></data>
+  <data name="Sync_FailOffline" xml:space="preserve"><value>Die Cloud ist nicht erreichbar. Prüfen Sie die Verbindung und versuchen Sie es erneut.</value></data>
+  <data name="Sync_FailWrongPassphrase" xml:space="preserve"><value>Die Synchronisierungs-Passphrase öffnet die Cloud-Daten nicht.</value></data>
 </root>

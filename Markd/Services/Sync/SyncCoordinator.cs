@@ -47,6 +47,9 @@ public sealed class SyncCoordinator(
     private volatile bool _isLinked;
     private volatile IReadOnlyList<SyncConflict> _pendingConflicts = [];
 
+    // The provider a connect is linking to, until the device is linked or the connect is abandoned.
+    private volatile ICloudSyncProvider? _connecting;
+
     public SyncStatus Status => _status;
 
     public event EventHandler? StatusChanged;
@@ -159,11 +162,17 @@ public sealed class SyncCoordinator(
                         await ReplaceCloudCoreAsync(provider);
                         return;
                     case UnlockResult.Failed:
+                        if (!_isLinked)
+                            await CancelConnectAsync();
                         return;
                 }
             }
 
-            await SyncAndResolveAsync(provider);
+            // Until the device is linked, every run (the conflict apply and a later Resolve included) goes to this
+            // provider. RunAsync forgets it once linked, or abandons the connect when a run neither links nor stops
+            // at conflicts.
+            _connecting = provider;
+            await SyncAndResolveAsync();
         }
         catch (OperationCanceledException)
         {
@@ -172,7 +181,9 @@ public sealed class SyncCoordinator(
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Connecting to {Provider} failed", providerId);
-            await ShowFeedbackAsync(Strings.Sync_ConnectFailed);
+            if (!_isLinked)
+                _connecting = null;
+            await ShowFeedbackAsync(Strings.Sync_ConnectFailed, FailureDetail(ex));
         }
     }
 
@@ -270,11 +281,12 @@ public sealed class SyncCoordinator(
             try
             {
                 var state = await LoadStateAsync();
-                var provider = state.ProviderId is { } id ? catalog.Get(id) : null;
+                var provider = (state.ProviderId is { } id ? catalog.Get(id) : null) ?? _connecting;
                 result = await Task.Run(() => session.Sync.DisconnectAsync(provider, deleteRemote));
                 _isLinked = (await LoadStateAsync()).IsConnected;
                 if (result.Outcome == SyncOutcome.Disconnected)
                 {
+                    _connecting = null;
                     _pendingConflicts = [];
                     await SetStatusAsync(OffStatus);
                 }
@@ -333,6 +345,7 @@ public sealed class SyncCoordinator(
                 throw new InvalidOperationException($"Forgetting the sync link failed: {result.Outcome} {result.Detail}");
 
             _isLinked = false;
+            _connecting = null;
             _pendingConflicts = [];
             await SetStatusAsync(OffStatus);
         }
@@ -400,14 +413,17 @@ public sealed class SyncCoordinator(
         }
     }
 
-    private async Task SyncAndResolveAsync(ICloudSyncProvider? connectingTo = null)
+    private async Task SyncAndResolveAsync()
     {
-        var result = await RunAsync((sync, provider) => sync.SyncAsync(provider), connectingTo);
+        var result = await RunAsync((sync, provider) => sync.SyncAsync(provider));
         if (result?.Outcome == SyncOutcome.NeedsConflictResolution)
             await ResolveConflictsAsync();
     }
 
-    /// <summary>The destructive confirm, a new passphrase, then the replace (a first run when connecting).</summary>
+    /// <summary>
+    /// The destructive confirm, a new passphrase, then the replace. With <paramref name="connectingTo"/> it is the
+    /// first run of a connect.
+    /// </summary>
     private async Task ReplaceCloudCoreAsync(ICloudSyncProvider? connectingTo)
     {
         if (!await ConfirmAsync(Strings.Sync_ReplaceConfirmTitle, Strings.Sync_ReplaceConfirmMessage,
@@ -417,7 +433,9 @@ public sealed class SyncCoordinator(
         if ((await PromptAsync(PassphrasePromptKind.CreateNew, false)).Passphrase is not { } passphrase)
             return;
 
-        await RunAsync((sync, provider) => sync.ReplaceRemoteAsync(provider, passphrase), connectingTo);
+        if (connectingTo is not null)
+            _connecting = connectingTo;
+        await RunAsync((sync, provider) => sync.ReplaceRemoteAsync(provider, passphrase));
     }
 
     /// <summary>
@@ -455,11 +473,29 @@ public sealed class SyncCoordinator(
                     continue;
                 default:
                     logger.LogWarning("Unlocking failed: {Outcome} {Detail}", result.Outcome, result.Detail);
-                    await ShowFeedbackAsync(Strings.Sync_ConnectFailed);
+                    await ShowFeedbackAsync(Strings.Sync_ConnectFailed, FailureDetail(result.Outcome));
                     return UnlockResult.Failed;
             }
         }
     }
+
+    /// <summary>Why a connect or unlock failed, in the user's words.</summary>
+    private static string FailureDetail(SyncOutcome outcome) => outcome switch
+    {
+        SyncOutcome.Offline => Strings.Sync_FailOffline,
+        SyncOutcome.RemoteUnreadable => Strings.Sync_StatusUnreadable,
+        SyncOutcome.RemoteTooNew => Strings.Sync_StatusUpdateApp,
+        SyncOutcome.AuthExpired => Strings.Sync_StatusSignInAgain,
+        SyncOutcome.WrongPassphrase or SyncOutcome.NeedsPassphrase => Strings.Sync_FailWrongPassphrase,
+        _ => Strings.Backup_UnexpectedError,
+    };
+
+    private static string FailureDetail(Exception ex) => ex switch
+    {
+        SyncOfflineException => FailureDetail(SyncOutcome.Offline),
+        SyncAuthException => FailureDetail(SyncOutcome.AuthExpired),
+        _ => Strings.Backup_UnexpectedError,
+    };
 
     /// <summary>A cancelled connect leaves no passphrase behind and, on a device that is not linked, shows Off.</summary>
     private async Task CancelConnectAsync()
@@ -540,24 +576,35 @@ public sealed class SyncCoordinator(
     }
 
     /// <summary>
-    /// Runs one core operation under the gate: re-reads the sync state, drops the run when the device is not linked
-    /// (unless <paramref name="connectingTo"/> is given, for a first run that links it) or this build has no such
-    /// provider, refreshes the UI when local data changed, and updates <see cref="Status"/>. Null when dropped.
+    /// Runs one core operation under the gate: re-reads the sync state, drops the run when the device is neither
+    /// linked nor being connected (<see cref="_connecting"/>) or this build has no such provider, refreshes the UI
+    /// when local data changed, and updates <see cref="Status"/>. Null when dropped. A connect run that links the
+    /// device ends the connect; one that neither links nor stops at conflicts abandons it: no passphrase is left
+    /// behind, the status is Off and the cause is shown.
     /// </summary>
-    private async Task<SyncResult?> RunAsync(
-        Func<ISyncService, ICloudSyncProvider, Task<SyncResult>> operation, ICloudSyncProvider? connectingTo = null)
+    private async Task<SyncResult?> RunAsync(Func<ISyncService, ICloudSyncProvider, Task<SyncResult>> operation)
+    {
+        var result = await RunUnderGateAsync(operation);
+        if (result is { Abandoned: true, Result: { } failed })
+            await ShowFeedbackAsync(Strings.Sync_ConnectFailed, FailureDetail(failed.Outcome));
+        return result.Result;
+    }
+
+    private async Task<(SyncResult? Result, bool Abandoned)> RunUnderGateAsync(
+        Func<ISyncService, ICloudSyncProvider, Task<SyncResult>> operation)
     {
         await _gate.WaitAsync();
         try
         {
             var state = await LoadStateAsync();
             _isLinked = state.IsConnected;
-            var provider = connectingTo ?? (state.IsConnected && state.ProviderId is { } id ? catalog.Get(id) : null);
+            var connecting = !state.IsConnected ? _connecting : null;
+            var provider = connecting ?? (state.IsConnected && state.ProviderId is { } id ? catalog.Get(id) : null);
             if (provider is null)
             {
                 _pendingConflicts = [];
                 await SetStatusAsync(OffStatus);
-                return null;
+                return (null, false);
             }
 
             await SetStatusAsync(BuildStatus(SyncStatusKind.Syncing, state, provider.Id, 0));
@@ -595,12 +642,25 @@ public sealed class SyncCoordinator(
             _isLinked = after.IsConnected;
             _pendingConflicts = result.Outcome == SyncOutcome.NeedsConflictResolution ? result.Conflicts ?? [] : [];
 
+            if (after.IsConnected)
+            {
+                _connecting = null;
+            }
+            else if (connecting is not null && result.Outcome != SyncOutcome.NeedsConflictResolution)
+            {
+                logger.LogWarning("Connecting failed: {Outcome} {Detail}", result.Outcome, result.Detail);
+                _connecting = null;
+                await secrets.SetPassphraseAsync(null);
+                await SetStatusAsync(OffStatus);
+                return (result, true);
+            }
+
             // The cloud took a new passphrase this device could not store: the user has to enter it again.
             var kind = IsPassphraseNotStored(result) ? SyncStatusKind.NeedsPassphrase : KindOf(result.Outcome);
             await SetStatusAsync(kind == SyncStatusKind.Off
                 ? OffStatus
                 : BuildStatus(kind, after, after.ProviderId ?? provider.Id, _pendingConflicts.Count));
-            return result;
+            return (result, false);
         }
         finally
         {
