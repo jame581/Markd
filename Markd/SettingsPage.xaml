@@ -4,6 +4,7 @@
              xmlns:vm="clr-namespace:Markd.ViewModels"
              xmlns:m="clr-namespace:Markd.Controls.Mobile"
              xmlns:loc="clr-namespace:Markd.Localization"
+             xmlns:sync="clr-namespace:Markd.Services.Sync"
              x:Class="Markd.SettingsPage"
              x:Name="RootPage"
              x:DataType="vm:SettingsViewModel"
@@ -81,6 +82,76 @@
                 </VerticalStackLayout>
 
                 <BoxView Style="{StaticResource SectionDivider}" />
+
+                <VerticalStackLayout IsVisible="{Binding Sync.IsVisible}">
+                    <Label Text="{loc:Tr Sync_SectionTitle}" Style="{StaticResource M3SectionHeader}" Padding="16,4,16,10" />
+
+                    <!-- Off: what sync is, and the providers to connect to -->
+                    <VerticalStackLayout IsVisible="{Binding Sync.IsOff}">
+                        <Label Text="{loc:Tr Sync_Intro}" Style="{StaticResource M3RowSub}" FontSize="14" Padding="16,0,16,4" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Sync.Providers}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="sync:CloudProviderOption">
+                                    <Grid Style="{StaticResource RowGrid}">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={x:Reference RootPage}, Path=BindingContext.Sync.ConnectCommand, x:DataType=ContentPage}"
+                                                                  CommandParameter="{Binding .}" />
+                                        </Grid.GestureRecognizers>
+                                        <VerticalStackLayout Spacing="3">
+                                            <Label Text="{Binding DisplayName}" FontSize="16" />
+                                            <Label Text="{loc:Tr Sync_ConnectSub}" Style="{StaticResource M3RowSub}" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+
+                    <!-- Connected, or needs you: status (with its action), then the device actions -->
+                    <VerticalStackLayout IsVisible="{Binding Sync.IsConnected}">
+                        <Grid Style="{StaticResource RowGrid}" ColumnDefinitions="*,Auto">
+                            <VerticalStackLayout Spacing="3" VerticalOptions="Center">
+                                <Label Text="{Binding Sync.AccountText}" FontSize="16" />
+                                <Label Text="{Binding Sync.StatusText}" Style="{StaticResource M3RowSub}">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding Sync.IsStatusWarning}" Value="True">
+                                            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+                            </VerticalStackLayout>
+                            <Button Grid.Column="1" Text="{Binding Sync.ActionText}" Command="{Binding Sync.ActionCommand}"
+                                    Style="{StaticResource M3TextButton}" Padding="12,0" VerticalOptions="Center"
+                                    IsVisible="{Binding Sync.ActionText, Converter={StaticResource HasText}}" />
+                        </Grid>
+                        <Grid Style="{StaticResource RowGrid}">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Sync.SyncNowCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Text="{loc:Tr Sync_SyncNow}" Style="{StaticResource M3ListText}" />
+                        </Grid>
+                        <Grid Style="{StaticResource RowGrid}">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Sync.ChangePassphraseCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Text="{loc:Tr Sync_ChangePassphrase}" Style="{StaticResource M3ListText}" />
+                        </Grid>
+                        <Grid Style="{StaticResource RowGrid}">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Sync.DisconnectCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Text="{loc:Tr Sync_DisconnectDevice}" Style="{StaticResource M3ListText}" />
+                        </Grid>
+                        <Grid Style="{StaticResource RowGrid}">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding Sync.ReplaceCloudCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Label Text="{loc:Tr Sync_ReplaceWithThisDevice}" FontSize="16" Style="{StaticResource DangerText}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <BoxView Style="{StaticResource SectionDivider}" IsVisible="{Binding Sync.IsVisible}" />
 
                 <VerticalStackLayout>
                     <Label Text="{loc:Tr Settings_YourData}" Style="{StaticResource M3SectionHeader}" Padding="16,4,16,10" />

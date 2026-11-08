@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             xmlns:loc="clr-namespace:Markd.Localization"
+             x:Class="Markd.Pages.ConflictListPage"
+             x:DataType="vm:ConflictListViewModel"
+             Shell.NavBarIsVisible="False"
+             Shell.PresentationMode="ModalNotAnimated">
+
+    <ContentPage.Resources>
+        <Style x:Key="ShortcutButton" TargetType="Button" BasedOn="{StaticResource M3TonalButton}">
+            <Setter Property="HeightRequest" Value="36" />
+            <Setter Property="CornerRadius" Value="18" />
+            <Setter Property="FontSize" Value="13.5" />
+            <Setter Property="Padding" Value="14,0" />
+            <Setter Property="Margin" Value="0,0,8,8" />
+        </Style>
+        <Style x:Key="Chip" TargetType="Border">
+            <Setter Property="StrokeShape" Value="RoundRectangle 12" />
+            <Setter Property="StrokeThickness" Value="1.2" />
+            <Setter Property="Padding" Value="12,9" />
+            <Setter Property="BackgroundColor" Value="Transparent" />
+            <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource CardBorderLight}, Dark={StaticResource CardBorderDark}}" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <m:SmallTopAppBar LeadingGlyph="Close" LeadingCommand="{Binding LaterCommand}" />
+
+        <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
+            <VerticalStackLayout Padding="16,0,16,16" Spacing="12">
+                <VerticalStackLayout Spacing="6" Padding="4,0">
+                    <Label Text="{Binding HeaderText}" FontFamily="FigtreeSemiBold" FontSize="22" />
+                    <Label Text="{loc:Tr Sync_ConflictsExplain}" Style="{StaticResource M3RowSub}" FontSize="14" />
+                </VerticalStackLayout>
+
+                <FlexLayout Wrap="Wrap" JustifyContent="Start" Padding="4,4,0,0">
+                    <Button Text="{loc:Tr Sync_AllFromThisDevice}" Style="{StaticResource ShortcutButton}" Command="{Binding ChooseAllLocalCommand}" />
+                    <Button Text="{loc:Tr Sync_AllFromOtherDevice}" Style="{StaticResource ShortcutButton}" Command="{Binding ChooseAllRemoteCommand}" />
+                    <Button Text="{loc:Tr Sync_AllNewest}" Style="{StaticResource ShortcutButton}" Command="{Binding ChooseAllNewestCommand}" />
+                </FlexLayout>
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Rows}" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ConflictRowViewModel">
+                            <Border Style="{StaticResource M3Card}" Padding="16,14,16,6">
+                                <VerticalStackLayout Spacing="10">
+                                    <VerticalStackLayout Spacing="2">
+                                        <Label Text="{Binding Title}" Style="{StaticResource M3RowTitle}" />
+                                        <Label Text="{Binding KindText}" Style="{StaticResource M3RowSub}" />
+                                    </VerticalStackLayout>
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                        <Border Style="{StaticResource Chip}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding ChooseLocalCommand}" />
+                                            </Border.GestureRecognizers>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsLocalChosen}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryContainerLight}, Dark={StaticResource PrimaryContainerDark}}" />
+                                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <VerticalStackLayout Spacing="2">
+                                                <Label Text="{Binding LocalChipText}" FontFamily="FigtreeSemiBold" FontSize="14" />
+                                                <Label Text="{Binding NewerText}" Style="{StaticResource M3RowSub}" FontSize="12" IsVisible="{Binding IsLocalNewer}" />
+                                            </VerticalStackLayout>
+                                        </Border>
+                                        <Border Grid.Column="1" Style="{StaticResource Chip}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding ChooseRemoteCommand}" />
+                                            </Border.GestureRecognizers>
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsRemoteChosen}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryContainerLight}, Dark={StaticResource PrimaryContainerDark}}" />
+                                                    <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource AccentFillLight}, Dark={StaticResource AccentFillDark}}" />
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <VerticalStackLayout Spacing="2">
+                                                <Label Text="{Binding RemoteChipText}" FontFamily="FigtreeSemiBold" FontSize="14" />
+                                                <Label Text="{Binding NewerText}" Style="{StaticResource M3RowSub}" FontSize="12" IsVisible="{Binding IsRemoteNewer}" />
+                                            </VerticalStackLayout>
+                                        </Border>
+                                    </Grid>
+                                    <Button Text="{loc:Tr Sync_Compare}" Style="{StaticResource M3TextButton}" Command="{Binding CompareCommand}"
+                                            HorizontalOptions="Start" Padding="10,0" Margin="-10,0,0,0" />
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <HorizontalStackLayout Grid.Row="2" Spacing="6" Padding="16,8,16,16" HorizontalOptions="End">
+            <Button Text="{loc:Tr Sync_Later}" Style="{StaticResource M3TextButton}" Command="{Binding LaterCommand}" />
+            <Button Text="{loc:Tr Sync_Apply}" Style="{StaticResource M3FilledButton}" HeightRequest="42" CornerRadius="21"
+                    FontSize="14.5" Command="{Binding ApplyCommand}">
+                <Button.Triggers>
+                    <Trigger TargetType="Button" Property="IsEnabled" Value="False">
+                        <Setter Property="Opacity" Value="0.4" />
+                    </Trigger>
+                </Button.Triggers>
+            </Button>
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>

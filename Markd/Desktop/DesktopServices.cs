@@ -1,4 +1,6 @@
+using Markd.Core.Sync;
 using Markd.Services;
+using Markd.Services.Sync;
 using Markd.ViewModels;
 using Microsoft.Maui.Devices;
 
@@ -17,7 +19,24 @@ public static class DesktopRegistration
         services.AddSingleton<IFileExportService, FileSaverExportService>();
         services.AddSingleton<IActionMenuService, ActionSheetMenuService>();
         services.AddSingleton<IPasswordPromptService, DesktopPasswordPromptService>();
+        // TEMPORARY until the desktop sync dialogs exist: Later and cancel, so the sync coordinator resolves.
+        services.AddSingleton<IConflictResolutionService, DesktopLaterConflictResolutionService>();
+        services.AddSingleton<ISyncPassphrasePromptService, DesktopCancelledPassphrasePromptService>();
     }
+}
+
+/// <summary>TEMPORARY no-op until the desktop conflict dialog exists: always "Later".</summary>
+public sealed class DesktopLaterConflictResolutionService : IConflictResolutionService
+{
+    public Task<IReadOnlyList<ConflictResolution>?> ResolveAsync(IReadOnlyList<SyncConflict> conflicts) =>
+        Task.FromResult<IReadOnlyList<ConflictResolution>?>(null);
+}
+
+/// <summary>TEMPORARY no-op until the desktop passphrase dialog exists: always cancelled.</summary>
+public sealed class DesktopCancelledPassphrasePromptService : ISyncPassphrasePromptService
+{
+    public Task<PassphrasePromptResult> PromptAsync(PassphrasePromptKind kind, bool previousAttemptFailed) =>
+        Task.FromResult(new PassphrasePromptResult(null, false));
 }
 
 /// <summary>Routes and dialogs for view models, resolved lazily so the page can itself depend on view models.</summary>

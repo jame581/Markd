@@ -424,4 +424,31 @@ Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolk
   <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Couldn't disconnect. Try again.</value></data>
   <data name="Sync_FailOffline" xml:space="preserve"><value>Couldn't reach the cloud. Check the connection and try again.</value></data>
   <data name="Sync_FailWrongPassphrase" xml:space="preserve"><value>The sync passphrase doesn't open the cloud data.</value></data>
+  <data name="Sync_SectionTitle" xml:space="preserve"><value>Sync</value></data>
+  <data name="Sync_ConnectSub" xml:space="preserve"><value>Connect this device</value></data>
+  <data name="Sync_SyncNow" xml:space="preserve"><value>Sync now</value></data>
+  <data name="Sync_ChangePassphrase" xml:space="preserve"><value>Change sync passphrase</value></data>
+  <data name="Sync_DisconnectDevice" xml:space="preserve"><value>Disconnect this device</value></data>
+  <data name="Sync_ReplaceWithThisDevice" xml:space="preserve"><value>Replace cloud data with this device</value></data>
+  <data name="Sync_ConflictsExplain" xml:space="preserve"><value>Sync is paused until you choose. A device's version settles the event's content, while a pin or category change made separately on the other device is still kept.</value></data>
+  <data name="Sync_AllFromThisDevice" xml:space="preserve"><value>All from this device</value></data>
+  <data name="Sync_AllFromOtherDevice" xml:space="preserve"><value>All from the other device</value></data>
+  <data name="Sync_AllNewest" xml:space="preserve"><value>All newest</value></data>
+  <data name="Sync_Compare" xml:space="preserve"><value>Compare</value></data>
+  <data name="Sync_Apply" xml:space="preserve"><value>Apply</value></data>
+  <data name="Sync_Later" xml:space="preserve"><value>Later</value></data>
+  <data name="Sync_PassphraseCreateTitle" xml:space="preserve"><value>Choose a sync passphrase</value></data>
+  <data name="Sync_PassphraseCreateMessage" xml:space="preserve"><value>It encrypts your events in the cloud. Your other devices need it to connect.</value></data>
+  <data name="Sync_PassphraseEnterTitle" xml:space="preserve"><value>Enter the sync passphrase</value></data>
+  <data name="Sync_PassphraseEnterMessage" xml:space="preserve"><value>The cloud already holds synced events. Enter the passphrase you chose on your other device.</value></data>
+  <data name="Sync_PassphraseChangedTitle" xml:space="preserve"><value>Enter the new sync passphrase</value></data>
+  <data name="Sync_PassphraseChangedMessage" xml:space="preserve"><value>The passphrase was changed on another device. Enter the new one to keep syncing.</value></data>
+  <data name="Sync_PassphraseChangeTitle" xml:space="preserve"><value>Change the sync passphrase</value></data>
+  <data name="Sync_PassphraseChangeMessage" xml:space="preserve"><value>Your other devices will ask for the new passphrase on their next sync.</value></data>
+  <data name="Sync_PassphraseField" xml:space="preserve"><value>Sync passphrase</value></data>
+  <data name="Sync_PassphraseRepeat" xml:space="preserve"><value>Repeat passphrase</value></data>
+  <data name="Sync_PassphraseForgot" xml:space="preserve"><value>Forgot it?</value></data>
+  <data name="Sync_PassphraseTooShort" xml:space="preserve"><value>Use at least 8 characters.</value></data>
+  <data name="Sync_PassphraseMismatch" xml:space="preserve"><value>The passphrases don't match.</value></data>
+  <data name="Sync_PassphraseContinue" xml:space="preserve"><value>Continue</value></data>
 </root>

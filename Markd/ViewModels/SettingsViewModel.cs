@@ -30,8 +30,10 @@ public class SettingsViewModel : ViewModelBase
         IAppSettingsService settingsService,
         IAppShellService shellService,
         BackupCoordinator backup,
-        NotificationService notificationService)
+        NotificationService notificationService,
+        SyncSettingsViewModel sync)
     {
+        Sync = sync;
         _settingsService = settingsService;
         _shellService = shellService;
         _backup = backup;
@@ -51,6 +53,9 @@ public class SettingsViewModel : ViewModelBase
         OpenAboutCommand = new AsyncRelayCommand(() => _shellService.GoToAsync(nameof(AboutPage)));
         EraseAllCommand = new AsyncRelayCommand(EraseAllAsync);
     }
+
+    /// <summary>The Sync section. Views attach it while shown and detach it when they disappear.</summary>
+    public SyncSettingsViewModel Sync { get; }
 
     public IReadOnlyList<ThemeOption> ThemeOptions { get; }
 

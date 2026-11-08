@@ -14,7 +14,10 @@
     <Grid RowDefinitions="Auto,*,Auto">
 
         <m:MediumTopAppBar Title="Markd">
-            <c:IconButton x:Name="OverflowButton" Glyph="Dots" Clicked="OnOverflowClicked" IsVisible="{Binding HasOccasions}" />
+            <HorizontalStackLayout>
+                <c:SyncActivityIcon Tapped="OnSyncIconTapped" />
+                <c:IconButton x:Name="OverflowButton" Glyph="Dots" Clicked="OnOverflowClicked" IsVisible="{Binding HasOccasions}" />
+            </HorizontalStackLayout>
         </m:MediumTopAppBar>
 
         <!-- Populated -->

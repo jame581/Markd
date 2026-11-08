@@ -1,5 +1,6 @@
 using Markd.Core.Localization;
 using Markd.Services;
+using Markd.Services.Sync;
 using Markd.ViewModels;
 
 namespace Markd;
@@ -34,6 +35,15 @@ public partial class MainPage : ContentPage
     {
         if (_viewModel.FeaturedSummary is { } featured)
             await _viewModel.OpenDetailCommand.ExecuteAsync(featured);
+    }
+
+    private async void OnSyncIconTapped(object? sender, EventArgs e)
+    {
+        var sync = ServiceHelper.GetRequiredService<SyncCoordinator>();
+        if (sync.Status.Kind == SyncStatusKind.Conflicts)
+            await sync.OpenConflictsAsync();
+        else
+            await Shell.Current.GoToAsync("//settings", false);
     }
 
     private async void OnOverflowClicked(object? sender, EventArgs e)

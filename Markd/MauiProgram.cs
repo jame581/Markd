@@ -89,6 +89,18 @@ namespace Markd
             builder.Services.AddSingleton<INetworkStatus, MauiNetworkStatus>();
             // Sync runs on its own scope and DbContext; never inject ISyncService into app classes.
             builder.Services.AddSingleton<ISyncSession, SyncScope>();
+            // One coordinator for the app: settings, backups and the scheduler all talk to the same instance.
+            builder.Services.AddSingleton<SyncCoordinator>();
+            builder.Services.AddSingleton<ISyncController>(sp => sp.GetRequiredService<SyncCoordinator>());
+            builder.Services.AddSingleton<ISyncLink>(sp => sp.GetRequiredService<SyncCoordinator>());
+            // Changes a sync applied, and the notification service's own reschedule messages, are not local edits.
+            builder.Services.AddSingleton(sp => new SyncScheduler(
+                sp.GetRequiredService<ISyncController>(),
+                sp.GetRequiredService<INetworkStatus>(),
+                sp.GetRequiredService<TimeProvider>(),
+                sp.GetRequiredService<IUiDispatcher>(),
+                source => source is MauiSyncDataRefresher or NotificationService));
+            builder.Services.AddTransient<SyncSettingsViewModel>();
 
             builder.Services.AddSingleton<NotificationService>();
             builder.Services.AddSingleton<IShareService, ShareService>();
@@ -115,6 +127,8 @@ namespace Markd
             builder.Services.AddTransient<IMilestoneEditorService, MilestoneEditorService>();
             builder.Services.AddTransient<MilestoneEditorPage>();
             builder.Services.AddSingleton<IPasswordPromptService, PhonePasswordPromptService>();
+            builder.Services.AddSingleton<IConflictResolutionService, PhoneConflictResolutionService>();
+            builder.Services.AddSingleton<ISyncPassphrasePromptService, PhoneSyncPassphrasePromptService>();
 #if ANDROID
             builder.Services.AddSingleton<IActionMenuService, Platforms.Android.ActionMenuService>();
             builder.Services.AddSingleton<IFileExportService, Platforms.Android.DocumentExportService>();

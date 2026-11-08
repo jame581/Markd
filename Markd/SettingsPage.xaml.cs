@@ -19,6 +19,13 @@ public partial class SettingsPage : ContentPage
         base.OnAppearing();
         SystemBars.Apply(withNavigationBar: true);
         SnackbarFeedbackService.Anchor = NavBar;
+        _viewModel.Sync.Attach();
         await _viewModel.LoadAsync();
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        _viewModel.Sync.Detach();
     }
 }

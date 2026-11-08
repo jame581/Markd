@@ -424,4 +424,31 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Échec de la déconnexion. Veuillez réessayer.</value></data>
   <data name="Sync_FailOffline" xml:space="preserve"><value>Impossible de joindre le cloud. Vérifiez la connexion et réessayez.</value></data>
   <data name="Sync_FailWrongPassphrase" xml:space="preserve"><value>La phrase secrète de synchronisation n'ouvre pas les données du cloud.</value></data>
+  <data name="Sync_SectionTitle" xml:space="preserve"><value>Synchronisation</value></data>
+  <data name="Sync_ConnectSub" xml:space="preserve"><value>Connecter cet appareil</value></data>
+  <data name="Sync_SyncNow" xml:space="preserve"><value>Synchroniser maintenant</value></data>
+  <data name="Sync_ChangePassphrase" xml:space="preserve"><value>Modifier la phrase secrète de synchronisation</value></data>
+  <data name="Sync_DisconnectDevice" xml:space="preserve"><value>Déconnecter cet appareil</value></data>
+  <data name="Sync_ReplaceWithThisDevice" xml:space="preserve"><value>Remplacer les données du cloud par cet appareil</value></data>
+  <data name="Sync_ConflictsExplain" xml:space="preserve"><value>La synchronisation est en pause jusqu'à votre choix. La version d'un appareil détermine le contenu de l'événement, mais un épinglage ou un changement de catégorie fait séparément sur l'autre appareil est conservé.</value></data>
+  <data name="Sync_AllFromThisDevice" xml:space="preserve"><value>Tout depuis cet appareil</value></data>
+  <data name="Sync_AllFromOtherDevice" xml:space="preserve"><value>Tout depuis l'autre appareil</value></data>
+  <data name="Sync_AllNewest" xml:space="preserve"><value>Toujours la plus récente</value></data>
+  <data name="Sync_Compare" xml:space="preserve"><value>Comparer</value></data>
+  <data name="Sync_Apply" xml:space="preserve"><value>Appliquer</value></data>
+  <data name="Sync_Later" xml:space="preserve"><value>Plus tard</value></data>
+  <data name="Sync_PassphraseCreateTitle" xml:space="preserve"><value>Choisissez une phrase secrète de synchronisation</value></data>
+  <data name="Sync_PassphraseCreateMessage" xml:space="preserve"><value>Elle chiffre vos événements dans le cloud. Vos autres appareils en auront besoin pour se connecter.</value></data>
+  <data name="Sync_PassphraseEnterTitle" xml:space="preserve"><value>Saisissez la phrase secrète de synchronisation</value></data>
+  <data name="Sync_PassphraseEnterMessage" xml:space="preserve"><value>Le cloud contient déjà des événements synchronisés. Saisissez la phrase secrète choisie sur votre autre appareil.</value></data>
+  <data name="Sync_PassphraseChangedTitle" xml:space="preserve"><value>Saisissez la nouvelle phrase secrète de synchronisation</value></data>
+  <data name="Sync_PassphraseChangedMessage" xml:space="preserve"><value>La phrase secrète a été modifiée sur un autre appareil. Saisissez la nouvelle pour continuer la synchronisation.</value></data>
+  <data name="Sync_PassphraseChangeTitle" xml:space="preserve"><value>Modifier la phrase secrète de synchronisation</value></data>
+  <data name="Sync_PassphraseChangeMessage" xml:space="preserve"><value>Vos autres appareils demanderont la nouvelle phrase secrète à la prochaine synchronisation.</value></data>
+  <data name="Sync_PassphraseField" xml:space="preserve"><value>Phrase secrète</value></data>
+  <data name="Sync_PassphraseRepeat" xml:space="preserve"><value>Répétez la phrase secrète</value></data>
+  <data name="Sync_PassphraseForgot" xml:space="preserve"><value>Oubliée ?</value></data>
+  <data name="Sync_PassphraseTooShort" xml:space="preserve"><value>Utilisez au moins 8 caractères.</value></data>
+  <data name="Sync_PassphraseMismatch" xml:space="preserve"><value>Les phrases secrètes ne correspondent pas.</value></data>
+  <data name="Sync_PassphraseContinue" xml:space="preserve"><value>Continuer</value></data>
 </root>

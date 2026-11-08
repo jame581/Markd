@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:m="clr-namespace:Markd.Controls.Mobile"
+             x:Class="Markd.Pages.ConflictComparePage"
+             Shell.NavBarIsVisible="False"
+             Shell.PresentationMode="ModalNotAnimated">
+    <Grid RowDefinitions="Auto,*">
+        <m:SmallTopAppBar x:Name="AppBar" LeadingGlyph="Close" />
+        <ScrollView Grid.Row="1" VerticalScrollBarVisibility="Never">
+            <Grid x:Name="Table" ColumnDefinitions="*,*" ColumnSpacing="14" Padding="20,4,20,24" />
+        </ScrollView>
+    </Grid>
+</ContentPage>

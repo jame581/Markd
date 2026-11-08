@@ -424,4 +424,31 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Odpojení se nepodařilo. Zkuste to znovu.</value></data>
   <data name="Sync_FailOffline" xml:space="preserve"><value>Cloud není dostupný. Zkontrolujte připojení a zkuste to znovu.</value></data>
   <data name="Sync_FailWrongPassphrase" xml:space="preserve"><value>Heslo synchronizace data v cloudu neotevře.</value></data>
+  <data name="Sync_SectionTitle" xml:space="preserve"><value>Synchronizace</value></data>
+  <data name="Sync_ConnectSub" xml:space="preserve"><value>Připojit toto zařízení</value></data>
+  <data name="Sync_SyncNow" xml:space="preserve"><value>Synchronizovat teď</value></data>
+  <data name="Sync_ChangePassphrase" xml:space="preserve"><value>Změnit heslo synchronizace</value></data>
+  <data name="Sync_DisconnectDevice" xml:space="preserve"><value>Odpojit toto zařízení</value></data>
+  <data name="Sync_ReplaceWithThisDevice" xml:space="preserve"><value>Nahradit data v cloudu tímto zařízením</value></data>
+  <data name="Sync_ConflictsExplain" xml:space="preserve"><value>Synchronizace čeká na vaši volbu. Verze zvoleného zařízení rozhodne o obsahu události, připnutí nebo změna kategorie provedená zvlášť na druhém zařízení se ale zachová.</value></data>
+  <data name="Sync_AllFromThisDevice" xml:space="preserve"><value>Vše z tohoto zařízení</value></data>
+  <data name="Sync_AllFromOtherDevice" xml:space="preserve"><value>Vše z druhého zařízení</value></data>
+  <data name="Sync_AllNewest" xml:space="preserve"><value>Vždy novější</value></data>
+  <data name="Sync_Compare" xml:space="preserve"><value>Porovnat</value></data>
+  <data name="Sync_Apply" xml:space="preserve"><value>Použít</value></data>
+  <data name="Sync_Later" xml:space="preserve"><value>Později</value></data>
+  <data name="Sync_PassphraseCreateTitle" xml:space="preserve"><value>Zvolte heslo synchronizace</value></data>
+  <data name="Sync_PassphraseCreateMessage" xml:space="preserve"><value>Šifruje vaše události v cloudu. Ostatní zařízení ho budou potřebovat k připojení.</value></data>
+  <data name="Sync_PassphraseEnterTitle" xml:space="preserve"><value>Zadejte heslo synchronizace</value></data>
+  <data name="Sync_PassphraseEnterMessage" xml:space="preserve"><value>V cloudu už jsou synchronizované události. Zadejte heslo, které jste zvolili na druhém zařízení.</value></data>
+  <data name="Sync_PassphraseChangedTitle" xml:space="preserve"><value>Zadejte nové heslo synchronizace</value></data>
+  <data name="Sync_PassphraseChangedMessage" xml:space="preserve"><value>Heslo bylo změněno na jiném zařízení. Zadejte nové, aby synchronizace pokračovala.</value></data>
+  <data name="Sync_PassphraseChangeTitle" xml:space="preserve"><value>Změna hesla synchronizace</value></data>
+  <data name="Sync_PassphraseChangeMessage" xml:space="preserve"><value>Ostatní zařízení si o nové heslo řeknou při další synchronizaci.</value></data>
+  <data name="Sync_PassphraseField" xml:space="preserve"><value>Heslo synchronizace</value></data>
+  <data name="Sync_PassphraseRepeat" xml:space="preserve"><value>Heslo znovu</value></data>
+  <data name="Sync_PassphraseForgot" xml:space="preserve"><value>Zapomněli jste ho?</value></data>
+  <data name="Sync_PassphraseTooShort" xml:space="preserve"><value>Použijte alespoň 8 znaků.</value></data>
+  <data name="Sync_PassphraseMismatch" xml:space="preserve"><value>Hesla se neshodují.</value></data>
+  <data name="Sync_PassphraseContinue" xml:space="preserve"><value>Pokračovat</value></data>
 </root>
