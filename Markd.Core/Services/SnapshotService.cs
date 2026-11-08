@@ -41,6 +41,14 @@ namespace Markd.Core.Services
                     foreach (var m in milestones) if (remaps.TryGetValue(m.SyncId, out var to)) m.SyncId = to;
                 }
 
+                if (options.Additive)
+                {
+                    await ApplyAdditionsAsync(target, options, categories, occasions, milestones, now);
+                    await transaction.CommitAsync();
+                    db.ChangeTracker.Clear();
+                    return;
+                }
+
                 // Free the single pin first: the unique index would reject an intermediate state with two pins.
                 // Tombstones are outside that index and keep their pin, so undo can restore it.
                 foreach (var o in occasions.Where(o => o.IsPinned && o.DeletedAt is null))
@@ -182,6 +190,104 @@ namespace Markd.Core.Services
             {
                 db.StampTimestamps = true;
             }
+        }
+
+        /// <summary>
+        /// The additive restore (<see cref="SnapshotApplyOptions.Additive"/>): adds unknown records, revives local
+        /// tombstones with the target's content and leaves live records alone. A live pin never moves, so an added or
+        /// revived occasion is stored unpinned while a live one is pinned.
+        /// </summary>
+        private async Task ApplyAdditionsAsync(ExportModel target, SnapshotApplyOptions options, List<Category> categories,
+            List<Occasion> occasions, List<Milestone> milestones, DateTime now)
+        {
+            var categoryBySync = categories.ToDictionary(c => c.SyncId);
+            foreach (var dto in target.Categories.Where(c => c.DeletedAt is null))
+            {
+                if (categoryBySync.TryGetValue(dto.SyncId, out var category) && category.DeletedAt is null)
+                    continue;
+
+                if (category is null)
+                {
+                    category = new Category { SyncId = dto.SyncId };
+                    db.Categories.Add(category);
+                    categoryBySync[dto.SyncId] = category;
+                }
+
+                category.Name = dto.Name;
+                category.Emoji = dto.Emoji;
+                category.ColorHex = dto.ColorHex;
+                category.UpdatedAt = now;
+                category.DeletedAt = null;
+            }
+
+            await db.SaveChangesAsync();
+
+            var pinTaken = occasions.Any(o => o.IsPinned && o.DeletedAt is null);
+            var occasionBySync = occasions.ToDictionary(o => o.SyncId);
+            var applied = new Dictionary<Guid, Occasion>();
+            foreach (var dto in target.Occasions.Where(o => o.DeletedAt is null))
+            {
+                if (occasionBySync.TryGetValue(dto.SyncId, out var occasion) && occasion.DeletedAt is null)
+                    continue;
+
+                if (occasion is null)
+                {
+                    occasion = new Occasion { SyncId = dto.SyncId };
+                    db.Occasions.Add(occasion);
+                    occasionBySync[dto.SyncId] = occasion;
+                }
+
+                occasion.Title = dto.Title;
+                occasion.Emoji = dto.Emoji;
+                occasion.ColorHex = dto.ColorHex;
+                if (occasion.Id == 0 || (occasion.AnchorDay ?? OccasionDates.ToLocalDay(occasion.AnchorDate, _zone)) != dto.AnchorDay)
+                    occasion.AnchorDate = OccasionDates.LocalMidnightUtc(dto.AnchorDay, _zone);
+                occasion.AnchorDay = dto.AnchorDay;
+                occasion.Direction = Enum.TryParse<OccasionDirection>(dto.Direction, true, out var direction) ? direction : OccasionDirection.Since;
+                occasion.Notes = dto.Notes;
+                occasion.CreatedAt = dto.CreatedAt == default ? dto.UpdatedAt : dto.CreatedAt;
+                occasion.UpdatedAt = now;
+                occasion.DeletedAt = null;
+                occasion.IsPinned = dto.IsPinned && !pinTaken;
+                pinTaken |= occasion.IsPinned;
+                occasion.CategoryId = dto.CategorySyncId is { } categorySyncId
+                    && categoryBySync.TryGetValue(categorySyncId, out var category) && category.DeletedAt is null
+                        ? category.Id
+                        : null;
+                applied[dto.SyncId] = occasion;
+            }
+
+            await db.SaveChangesAsync();
+
+            // Milestones come back only with their event: one the user deleted from a live event stays deleted.
+            var milestoneBySync = milestones.ToDictionary(m => m.SyncId);
+            foreach (var dto in target.Milestones.Where(m => m.DeletedAt is null))
+            {
+                if (!applied.TryGetValue(dto.OccasionSyncId, out var parent))
+                    continue;
+
+                if (milestoneBySync.TryGetValue(dto.SyncId, out var milestone) && milestone.DeletedAt is null)
+                    continue;
+
+                if (milestone is null)
+                {
+                    milestone = new Milestone { SyncId = dto.SyncId };
+                    db.Milestones.Add(milestone);
+                    milestoneBySync[dto.SyncId] = milestone;
+                }
+
+                milestone.Notified = options.TakeNotifiedFromTarget ? dto.Notified : AlreadyReached(parent, dto, now);
+                milestone.OccasionId = parent.Id;
+                milestone.ThresholdDays = dto.ThresholdDays;
+                milestone.Label = dto.Label;
+                milestone.UpdatedAt = now;
+                milestone.DeletedAt = null;
+            }
+
+            if (options.ApplySettings)
+                await ApplySettingsAsync(target.Settings ?? new AppSettingsDto());
+
+            await db.SaveChangesAsync();
         }
 
         public async Task<int> PurgeTombstonesAsync(DateTime olderThanUtc)

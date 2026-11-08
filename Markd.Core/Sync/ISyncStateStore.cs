@@ -9,5 +9,8 @@ namespace Markd.Core.Sync
         Task SaveAsync(SyncState state);
 
         Task ClearAsync();
+
+        /// <summary>True when a row with a provider exists: the device is linked, or disconnected with a kept base.</summary>
+        Task<bool> HasSyncStateAsync();
     }
 }

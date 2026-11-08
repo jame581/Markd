@@ -217,12 +217,12 @@ public class BackupCoordinatorTests
             return Task.FromResult(new ExportModel { SchemaVersion = "1" });
         }
 
-        public Task ApplyImportAsync(ExportModel model)
+        public Task<ImportOutcome> ApplyImportAsync(ExportModel model)
         {
             if (ApplyError is not null)
                 throw ApplyError;
             Applied = true;
-            return Task.CompletedTask;
+            return Task.FromResult(new ImportOutcome(false, model.Occasions.Count, 0, 0));
         }
     }
 

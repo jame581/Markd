@@ -44,6 +44,9 @@ namespace Markd.Core.Sync
             }
         }
 
+        public Task<bool> HasSyncStateAsync() =>
+            db.SyncStates.AsNoTracking().AnyAsync(s => s.ProviderId != null);
+
         public async Task ClearAsync()
         {
             var row = await db.SyncStates.FirstOrDefaultAsync();
