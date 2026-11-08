@@ -491,7 +491,8 @@ namespace Markd.Core.Sync
             }
             catch (Exception ex)
             {
-                return new SyncResult(SyncOutcome.Failed, Detail: ex.Message);
+                // Detail is logged: only the type, since a provider's message may carry the account's email.
+                return new SyncResult(SyncOutcome.Failed, Detail: ex.GetType().Name);
             }
         }
     }
