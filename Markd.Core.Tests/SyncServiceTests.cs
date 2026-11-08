@@ -108,6 +108,50 @@ public class SyncServiceTests
     }
 
     [Fact]
+    public async Task A_form_opened_before_a_sync_saves_only_its_own_change()
+    {
+        using var a = new SyncDevice();
+        using var b = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        var x = await a.AddOccasionAsync("A-title");
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+
+        // A opens the edit form: what it shows is the baseline its save compares against.
+        var loadedOnA = (await a.Occasions.GetByIdAsync(x.Id))!;
+        var loadedTitle = loadedOnA.Title;
+        var loadedNotes = loadedOnA.Notes;
+
+        var onB = Assert.Single(await b.Occasions.GetAllAsync());
+        onB.Title = "B-title";
+        await b.Occasions.UpdateAsync(onB);
+        await b.Sync.SyncAsync(cloud);
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);
+
+        // A saves with only the note changed: the edit lands on the re-read record, field by field (OccasionEdit's rule).
+        const string editedTitle = "A-title";
+        const string editedNotes = "from a";
+        var current = (await a.Occasions.GetByIdAsync(x.Id))!;
+        if (editedTitle != loadedTitle)
+            current.Title = editedTitle;
+        if (editedNotes != loadedNotes)
+            current.Notes = editedNotes;
+        await a.Occasions.UpdateAsync(current);
+
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);
+        await b.Sync.SyncAsync(cloud);
+
+        foreach (var device in new[] { a, b })
+        {
+            var occasion = Assert.Single(await device.Occasions.GetAllAsync());
+            Assert.Equal("B-title", occasion.Title);
+            Assert.Equal("from a", occasion.Notes);
+        }
+        Assert.Equal(SyncOutcome.NoChanges, (await a.Sync.SyncAsync(cloud)).Outcome);
+        Assert.Equal(SyncOutcome.NoChanges, (await b.Sync.SyncAsync(cloud)).Outcome);
+    }
+
+    [Fact]
     public async Task Edits_to_different_records_on_both_devices_merge_silently()
     {
         using var a = new SyncDevice();

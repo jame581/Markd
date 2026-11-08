@@ -23,6 +23,8 @@ public class CategoryViewModel : ViewModelBase
     private string? _editorEmoji;
     private string? _editorColorHex;
     private string? _editorError;
+    // What the editor showed when it opened an existing category: a save writes only the fields that differ from it.
+    private CategoryFields? _loadedFields;
     private bool _hasLoaded;
 
     public CategoryViewModel(
@@ -142,6 +144,7 @@ public class CategoryViewModel : ViewModelBase
     public void BeginNew()
     {
         _editingId = 0;
+        _loadedFields = null;
         EditorName = string.Empty;
         EditorEmoji = DefaultEmoji[Rows.Count % DefaultEmoji.Length];
         EditorColorHex = OccasionFormViewModel.ColorSwatches[Rows.Count % OccasionFormViewModel.ColorSwatches.Count];
@@ -154,6 +157,7 @@ public class CategoryViewModel : ViewModelBase
         EditorName = row.Name;
         EditorEmoji = row.Emoji;
         EditorColorHex = row.ColorHex;
+        _loadedFields = EditedFields();
         OpenEditor();
     }
 
@@ -175,20 +179,27 @@ public class CategoryViewModel : ViewModelBase
             return;
         }
 
-        var name = EditorName.Trim();
+        var edited = EditedFields();
+        var name = edited.Name;
         var isNew = _editingId == 0;
-        var category = new Category
-        {
-            Id = _editingId,
-            Name = name,
-            Emoji = string.IsNullOrWhiteSpace(EditorEmoji) ? null : EditorEmoji,
-            ColorHex = EditorColorHex
-        };
 
         if (isNew)
-            await _categoryService.CreateAsync(category);
+        {
+            await _categoryService.CreateAsync(new Category { Name = edited.Name, Emoji = edited.Emoji, ColorHex = edited.ColorHex });
+        }
         else
-            await _categoryService.UpdateAsync(category);
+        {
+            // Re-read: a sync may have applied another device's edit since the editor opened.
+            var current = await _categoryService.GetByIdAsync(_editingId);
+            if (current is null || _loadedFields is null)
+            {
+                // Deleted by a sync while the editor was open.
+                EditorError = string.Format(LocalizationManager.Instance.Culture, Strings.Category_NotFoundById, _loadedFields?.Name ?? name);
+                return;
+            }
+
+            await _categoryService.UpdateAsync(CategoryEdit.ApplyChanges(current, _loadedFields, edited));
+        }
 
         IsEditorOpen = false;
         await LoadAsync();
@@ -199,6 +210,11 @@ public class CategoryViewModel : ViewModelBase
                 isNew ? Strings.Category_AddedTitle : Strings.Category_SavedTitle,
                 isNew ? string.Format(LocalizationManager.Instance.Culture, Strings.Category_ReadyDetail, name) : null);
     }
+
+    private CategoryFields EditedFields() => new(
+        EditorName.Trim(),
+        string.IsNullOrWhiteSpace(EditorEmoji) ? null : EditorEmoji,
+        EditorColorHex);
 
     private async Task DeleteAsync(CategoryRow? row)
     {

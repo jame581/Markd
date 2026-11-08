@@ -26,6 +26,8 @@ public class OccasionFormViewModel : ViewModelBase
     // The stored anchor of the occasion being edited and the date it was shown as, so a save that leaves the date
     // alone keeps the instant (and with it the stored calendar day, even after the device changed time zone).
     private (DateTime Stored, DateTime Shown)? _loadedAnchor;
+    // What the form showed when it opened: a save writes only the fields that differ from it (OccasionEdit).
+    private OccasionFields? _loadedFields;
     private OccasionDirection _direction = OccasionDirection.Since;
     private string? _notes;
     private bool _isPinned;
@@ -211,6 +213,7 @@ public class OccasionFormViewModel : ViewModelBase
         await LoadCategoriesAsync();
 
         _loadedAnchor = null;
+        _loadedFields = null;
         if (id == 0)
         {
             Title = string.Empty;
@@ -242,6 +245,7 @@ public class OccasionFormViewModel : ViewModelBase
             SelectedCategory = occasion.CategoryId.HasValue
                 ? Categories.FirstOrDefault(c => c.Id == occasion.CategoryId.Value) ?? _noneCategory
                 : _noneCategory;
+            _loadedFields = EditedFields();
         }
 
         UpdateColorSelection();
@@ -268,25 +272,35 @@ public class OccasionFormViewModel : ViewModelBase
             IsBusy = true;
             ErrorMessage = null;
 
-            var occasion = new Occasion
-            {
-                Id = OccasionId,
-                Title = Title.Trim(),
-                Emoji = string.IsNullOrWhiteSpace(Emoji) ? null : Emoji.Trim(),
-                ColorHex = string.IsNullOrWhiteSpace(ColorHex) ? null : ColorHex.Trim(),
-                AnchorDate = _loadedAnchor is { } loaded && loaded.Shown == AnchorDate.Date
-                    ? loaded.Stored
-                    : DateTime.SpecifyKind(AnchorDate.Date, DateTimeKind.Local).ToUniversalTime(),
-                Direction = Direction,
-                Notes = string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
-                IsPinned = IsPinned,
-                CategoryId = SelectedCategory is { Id: > 0 } category ? category.Id : null
-            };
-
+            var edited = EditedFields();
             var isNew = OccasionId == 0;
-            var saved = isNew
-                ? await _occasionService.CreateAsync(occasion)
-                : await _occasionService.UpdateAsync(occasion);
+            Occasion saved;
+            if (isNew)
+            {
+                saved = await _occasionService.CreateAsync(new Occasion
+                {
+                    Title = edited.Title,
+                    Emoji = edited.Emoji,
+                    ColorHex = edited.ColorHex,
+                    AnchorDate = edited.AnchorDate,
+                    Direction = edited.Direction,
+                    Notes = edited.Notes,
+                    IsPinned = edited.IsPinned,
+                    CategoryId = edited.CategoryId
+                });
+            }
+            else
+            {
+                // Re-read: a sync may have applied another device's edit since the form opened.
+                var current = await _occasionService.GetByIdAsync(OccasionId);
+                if (current is null || _loadedFields is null)
+                {
+                    ErrorMessage = Strings.Occasion_NotFound;
+                    return;
+                }
+
+                saved = await _occasionService.UpdateAsync(OccasionEdit.ApplyChanges(current, _loadedFields, edited));
+            }
 
             WeakReferenceMessenger.Default.Send(new OccasionsChangedMessage(saved.Id, this));
             await _shellService.GoToAsync("..");
@@ -311,6 +325,22 @@ public class OccasionFormViewModel : ViewModelBase
             IsBusy = false;
         }
     }
+
+    /// <summary>
+    /// The form's values as they would be stored. A date left as shown keeps the loaded instant, so it reads as
+    /// unchanged and the record keeps its stored instant (and calendar day, even after a time zone change).
+    /// </summary>
+    private OccasionFields EditedFields() => new(
+        Title.Trim(),
+        string.IsNullOrWhiteSpace(Emoji) ? null : Emoji.Trim(),
+        string.IsNullOrWhiteSpace(ColorHex) ? null : ColorHex.Trim(),
+        _loadedAnchor is { } loaded && loaded.Shown == AnchorDate.Date
+            ? loaded.Stored
+            : DateTime.SpecifyKind(AnchorDate.Date, DateTimeKind.Local).ToUniversalTime(),
+        Direction,
+        string.IsNullOrWhiteSpace(Notes) ? null : Notes.Trim(),
+        IsPinned,
+        SelectedCategory is { Id: > 0 } category ? category.Id : null);
 
     private void SelectColor(string? hex)
     {
