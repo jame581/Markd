@@ -366,4 +366,31 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Sync_ChangedDaysAgo_One" xml:space="preserve"><value>před {0} dnem</value></data>
   <data name="Sync_ChangedDaysAgo_Few" xml:space="preserve"><value>před {0} dny</value></data>
   <data name="Sync_ChangedDaysAgo_Many" xml:space="preserve"><value>před {0} dny</value></data>
+  <data name="Sync_Intro" xml:space="preserve"><value>Mějte své události stejné na všech zařízeních díky vlastnímu cloudovému úložišti. Šifrovaně, Markd nemá žádný server.</value></data>
+  <data name="Sync_SetupWarning" xml:space="preserve"><value>Pokud heslo synchronizace ztratíte, kopii v cloudu nepůjde přečíst. Data na vašich zařízeních se tím nikdy nedotknou.</value></data>
+  <data name="Sync_StatusOff" xml:space="preserve"><value>Vypnuto</value></data>
+  <data name="Sync_StatusSyncing" xml:space="preserve"><value>Synchronizuje se</value></data>
+  <data name="Sync_StatusJustNow" xml:space="preserve"><value>Synchronizováno před chvílí</value></data>
+  <data name="Sync_StatusMinutesAgo_One" xml:space="preserve"><value>Synchronizováno před {0} minutou</value></data>
+  <data name="Sync_StatusMinutesAgo_Few" xml:space="preserve"><value>Synchronizováno před {0} minutami</value></data>
+  <data name="Sync_StatusMinutesAgo_Many" xml:space="preserve"><value>Synchronizováno před {0} minutami</value></data>
+  <data name="Sync_StatusHoursAgo_One" xml:space="preserve"><value>Synchronizováno před {0} hodinou</value></data>
+  <data name="Sync_StatusHoursAgo_Few" xml:space="preserve"><value>Synchronizováno před {0} hodinami</value></data>
+  <data name="Sync_StatusHoursAgo_Many" xml:space="preserve"><value>Synchronizováno před {0} hodinami</value></data>
+  <data name="Sync_StatusDaysAgo_One" xml:space="preserve"><value>Synchronizováno před {0} dnem</value></data>
+  <data name="Sync_StatusDaysAgo_Few" xml:space="preserve"><value>Synchronizováno před {0} dny</value></data>
+  <data name="Sync_StatusDaysAgo_Many" xml:space="preserve"><value>Synchronizováno před {0} dny</value></data>
+  <data name="Sync_StatusConflicts_One" xml:space="preserve"><value>Synchronizace pozastavena: {0} konflikt k vyřešení</value></data>
+  <data name="Sync_StatusConflicts_Few" xml:space="preserve"><value>Synchronizace pozastavena: {0} konflikty k vyřešení</value></data>
+  <data name="Sync_StatusConflicts_Many" xml:space="preserve"><value>Synchronizace pozastavena: {0} konfliktů k vyřešení</value></data>
+  <data name="Sync_StatusNeedsPassphrase" xml:space="preserve"><value>Zadejte heslo synchronizace</value></data>
+  <data name="Sync_StatusSignInAgain" xml:space="preserve"><value>Přihlaste se znovu</value></data>
+  <data name="Sync_StatusOffline" xml:space="preserve"><value>Offline, zkusí to znovu</value></data>
+  <data name="Sync_StatusUpdateApp" xml:space="preserve"><value>Data v cloudu jsou z novější verze Markd: aktualizujte aplikaci</value></data>
+  <data name="Sync_StatusUnreadable" xml:space="preserve"><value>Data v cloudu nejde přečíst</value></data>
+  <data name="Sync_StatusFailed" xml:space="preserve"><value>Synchronizace selhala, zkusí to znovu</value></data>
+  <data name="Sync_ActionResolve" xml:space="preserve"><value>Vyřešit</value></data>
+  <data name="Sync_ActionEnterPassphrase" xml:space="preserve"><value>Zadat heslo</value></data>
+  <data name="Sync_ActionSignIn" xml:space="preserve"><value>Přihlásit se znovu</value></data>
+  <data name="Sync_ActionReplaceCloud" xml:space="preserve"><value>Nahradit data v cloudu</value></data>
 </root>

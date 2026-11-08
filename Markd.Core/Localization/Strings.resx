@@ -366,4 +366,31 @@ Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolk
   <data name="Sync_ChangedDaysAgo_One" xml:space="preserve"><value>{0} day ago</value></data>
   <data name="Sync_ChangedDaysAgo_Few" xml:space="preserve"><value>{0} days ago</value></data>
   <data name="Sync_ChangedDaysAgo_Many" xml:space="preserve"><value>{0} days ago</value></data>
+  <data name="Sync_Intro" xml:space="preserve"><value>Keep your events the same on all your devices through your own cloud storage. Encrypted, Markd has no server.</value></data>
+  <data name="Sync_SetupWarning" xml:space="preserve"><value>If you lose the sync passphrase, the cloud copy can't be read. Data on your devices is never affected.</value></data>
+  <data name="Sync_StatusOff" xml:space="preserve"><value>Off</value></data>
+  <data name="Sync_StatusSyncing" xml:space="preserve"><value>Syncing</value></data>
+  <data name="Sync_StatusJustNow" xml:space="preserve"><value>Synced just now</value></data>
+  <data name="Sync_StatusMinutesAgo_One" xml:space="preserve"><value>Synced {0} minute ago</value></data>
+  <data name="Sync_StatusMinutesAgo_Few" xml:space="preserve"><value>Synced {0} minutes ago</value></data>
+  <data name="Sync_StatusMinutesAgo_Many" xml:space="preserve"><value>Synced {0} minutes ago</value></data>
+  <data name="Sync_StatusHoursAgo_One" xml:space="preserve"><value>Synced {0} hour ago</value></data>
+  <data name="Sync_StatusHoursAgo_Few" xml:space="preserve"><value>Synced {0} hours ago</value></data>
+  <data name="Sync_StatusHoursAgo_Many" xml:space="preserve"><value>Synced {0} hours ago</value></data>
+  <data name="Sync_StatusDaysAgo_One" xml:space="preserve"><value>Synced {0} day ago</value></data>
+  <data name="Sync_StatusDaysAgo_Few" xml:space="preserve"><value>Synced {0} days ago</value></data>
+  <data name="Sync_StatusDaysAgo_Many" xml:space="preserve"><value>Synced {0} days ago</value></data>
+  <data name="Sync_StatusConflicts_One" xml:space="preserve"><value>Sync paused: {0} conflict to resolve</value></data>
+  <data name="Sync_StatusConflicts_Few" xml:space="preserve"><value>Sync paused: {0} conflicts to resolve</value></data>
+  <data name="Sync_StatusConflicts_Many" xml:space="preserve"><value>Sync paused: {0} conflicts to resolve</value></data>
+  <data name="Sync_StatusNeedsPassphrase" xml:space="preserve"><value>Enter the sync passphrase</value></data>
+  <data name="Sync_StatusSignInAgain" xml:space="preserve"><value>Sign in again</value></data>
+  <data name="Sync_StatusOffline" xml:space="preserve"><value>Offline, will retry</value></data>
+  <data name="Sync_StatusUpdateApp" xml:space="preserve"><value>Cloud data is from a newer Markd: update the app</value></data>
+  <data name="Sync_StatusUnreadable" xml:space="preserve"><value>Cloud data can't be read</value></data>
+  <data name="Sync_StatusFailed" xml:space="preserve"><value>Sync failed, will retry</value></data>
+  <data name="Sync_ActionResolve" xml:space="preserve"><value>Resolve</value></data>
+  <data name="Sync_ActionEnterPassphrase" xml:space="preserve"><value>Enter passphrase</value></data>
+  <data name="Sync_ActionSignIn" xml:space="preserve"><value>Sign in again</value></data>
+  <data name="Sync_ActionReplaceCloud" xml:space="preserve"><value>Replace cloud data</value></data>
 </root>

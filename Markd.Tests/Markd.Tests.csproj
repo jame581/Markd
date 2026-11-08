@@ -15,6 +15,7 @@
     <PackageReference Include="xunit.v3.mtp-v2" Version="4.0.1" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.100" />
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,6 +58,9 @@
     <Compile Include="..\Markd\Services\Sync\SyncStatus.cs" Link="Services\Sync\SyncStatus.cs" />
     <Compile Include="..\Markd\Services\Sync\SyncCoordinator.cs" Link="Services\Sync\SyncCoordinator.cs" />
     <Compile Include="..\Markd\ViewModels\ConflictListViewModel.cs" Link="ViewModels\ConflictListViewModel.cs" />
+    <Compile Include="..\Markd\Services\Sync\ISyncController.cs" Link="Services\Sync\ISyncController.cs" />
+    <Compile Include="..\Markd\ViewModels\SyncStatusText.cs" Link="ViewModels\SyncStatusText.cs" />
+    <Compile Include="..\Markd\ViewModels\SyncSettingsViewModel.cs" Link="ViewModels\SyncSettingsViewModel.cs" />
   </ItemGroup>
 
 </Project>

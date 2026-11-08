@@ -366,4 +366,31 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Sync_ChangedDaysAgo_One" xml:space="preserve"><value>il y a {0} jour</value></data>
   <data name="Sync_ChangedDaysAgo_Few" xml:space="preserve"><value>il y a {0} jours</value></data>
   <data name="Sync_ChangedDaysAgo_Many" xml:space="preserve"><value>il y a {0} jours</value></data>
+  <data name="Sync_Intro" xml:space="preserve"><value>Gardez vos événements identiques sur tous vos appareils grâce à votre propre stockage cloud. Chiffré, Markd n'a aucun serveur.</value></data>
+  <data name="Sync_SetupWarning" xml:space="preserve"><value>Si vous perdez la phrase secrète de synchronisation, la copie dans le cloud sera illisible. Les données de vos appareils ne sont jamais touchées.</value></data>
+  <data name="Sync_StatusOff" xml:space="preserve"><value>Désactivée</value></data>
+  <data name="Sync_StatusSyncing" xml:space="preserve"><value>Synchronisation en cours</value></data>
+  <data name="Sync_StatusJustNow" xml:space="preserve"><value>Synchronisé à l'instant</value></data>
+  <data name="Sync_StatusMinutesAgo_One" xml:space="preserve"><value>Synchronisé il y a {0} minute</value></data>
+  <data name="Sync_StatusMinutesAgo_Few" xml:space="preserve"><value>Synchronisé il y a {0} minutes</value></data>
+  <data name="Sync_StatusMinutesAgo_Many" xml:space="preserve"><value>Synchronisé il y a {0} minutes</value></data>
+  <data name="Sync_StatusHoursAgo_One" xml:space="preserve"><value>Synchronisé il y a {0} heure</value></data>
+  <data name="Sync_StatusHoursAgo_Few" xml:space="preserve"><value>Synchronisé il y a {0} heures</value></data>
+  <data name="Sync_StatusHoursAgo_Many" xml:space="preserve"><value>Synchronisé il y a {0} heures</value></data>
+  <data name="Sync_StatusDaysAgo_One" xml:space="preserve"><value>Synchronisé il y a {0} jour</value></data>
+  <data name="Sync_StatusDaysAgo_Few" xml:space="preserve"><value>Synchronisé il y a {0} jours</value></data>
+  <data name="Sync_StatusDaysAgo_Many" xml:space="preserve"><value>Synchronisé il y a {0} jours</value></data>
+  <data name="Sync_StatusConflicts_One" xml:space="preserve"><value>Synchronisation en pause : {0} conflit à résoudre</value></data>
+  <data name="Sync_StatusConflicts_Few" xml:space="preserve"><value>Synchronisation en pause : {0} conflits à résoudre</value></data>
+  <data name="Sync_StatusConflicts_Many" xml:space="preserve"><value>Synchronisation en pause : {0} conflits à résoudre</value></data>
+  <data name="Sync_StatusNeedsPassphrase" xml:space="preserve"><value>Saisissez la phrase secrète de synchronisation</value></data>
+  <data name="Sync_StatusSignInAgain" xml:space="preserve"><value>Reconnectez-vous</value></data>
+  <data name="Sync_StatusOffline" xml:space="preserve"><value>Hors ligne, nouvel essai à venir</value></data>
+  <data name="Sync_StatusUpdateApp" xml:space="preserve"><value>Les données du cloud viennent d'un Markd plus récent : mettez l'application à jour</value></data>
+  <data name="Sync_StatusUnreadable" xml:space="preserve"><value>Les données du cloud sont illisibles</value></data>
+  <data name="Sync_StatusFailed" xml:space="preserve"><value>Échec de la synchronisation, nouvel essai à venir</value></data>
+  <data name="Sync_ActionResolve" xml:space="preserve"><value>Résoudre</value></data>
+  <data name="Sync_ActionEnterPassphrase" xml:space="preserve"><value>Saisir la phrase secrète</value></data>
+  <data name="Sync_ActionSignIn" xml:space="preserve"><value>Se reconnecter</value></data>
+  <data name="Sync_ActionReplaceCloud" xml:space="preserve"><value>Remplacer les données du cloud</value></data>
 </root>
