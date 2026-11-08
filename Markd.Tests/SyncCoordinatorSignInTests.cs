@@ -28,6 +28,7 @@ public class SyncCoordinatorSignInTests
         _catalog.Auth = _auth;
         _auth.Order = _order;
         _catalog.Provider.Order = _order;
+        _sync.Order = _order;
     }
 
     private SyncCoordinator Create() =>
@@ -332,7 +333,9 @@ public class SyncCoordinatorSignInTests
         Assert.Equal([PassphrasePromptKind.EnterExisting], _prompt.Calls.Select(c => c.Kind));
         Assert.Equal(SyncStatusKind.Off, coordinator.Status.Kind);
         Assert.False(_state.Value.IsConnected);
-        Assert.NotEqual("pw-b", _secrets.Value);
+        Assert.Null(_secrets.Value);
+        Assert.Equal(1, _auth.SignOutCalls);
+        Assert.Null(_auth.Account);
         var infoCalls = _catalog.Provider.InfoCalls;
 
         await coordinator.SyncNowAsync(SyncTrigger.Timer);
@@ -370,7 +373,7 @@ public class SyncCoordinatorSignInTests
         await coordinator.DisconnectAsync();
 
         Assert.Equal(["disconnect:False"], _sync.Log);
-        Assert.Equal(1, _auth.SignOutCalls);
+        Assert.Equal(["disconnect", "signout"], _order);
         Assert.False(_state.Value.IsConnected);
         Assert.Equal(SyncStatusKind.Off, coordinator.Status.Kind);
     }

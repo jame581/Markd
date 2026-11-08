@@ -279,7 +279,8 @@ public sealed class SyncCoordinator(
     /// For <see cref="SyncStatusKind.SignInAgain"/>: an interactive sign-in for the linked provider, hinted with the
     /// stored account label. The same account resumes syncing. Another account is another cloud file: this device is
     /// disconnected first (keeping its base and the cloud data, without asking), then connects as new, so nothing
-    /// syncs against the old account's base. A cancelled sign-in changes nothing. A provider without a sign-in just
+    /// syncs against the old account's base; when that connect ends without a link, the new account is signed out
+    /// again. A cancelled sign-in changes nothing. A provider without a sign-in just
     /// syncs again. Never throws.
     /// </summary>
     public async Task SignInAgainAsync()
@@ -310,11 +311,19 @@ public sealed class SyncCoordinator(
             if (result.Outcome != SyncOutcome.Disconnected)
             {
                 logger.LogWarning("Disconnecting the previous account failed: {Outcome} {Detail}", result.Outcome, result.Detail);
+                // Still linked to the previous account: its runs must not go to the new one.
+                await SignOutQuietlyAsync(auth);
                 await ShowFeedbackAsync(Strings.Sync_ConnectFailed, Strings.Backup_UnexpectedError);
                 return;
             }
 
             await ConnectAsync(providerId);
+
+            // A connect that ended without a link (cancelled or abandoned, not stopped at conflicts) must not leave the
+            // new account signed in, or a later Connect would silently reuse it.
+            var after = await LoadStateUnderGateAsync();
+            if (!after.IsConnected && _connecting is null)
+                await SignOutQuietlyAsync(auth);
         }
         catch (SignInFailedException ex)
         {
@@ -394,18 +403,7 @@ public sealed class SyncCoordinator(
             if (result.Outcome == SyncOutcome.Disconnected)
             {
                 if (providerId is not null && catalog.AuthFor(providerId) is { } auth)
-                {
-                    try
-                    {
-                        await auth.SignOutAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        // Never throws by contract; the device is disconnected either way.
-                        logger.LogWarning(ex, "Signing out after disconnecting failed");
-                    }
-                }
-
+                    await SignOutQuietlyAsync(auth);
                 return;
             }
 
@@ -732,9 +730,24 @@ public sealed class SyncCoordinator(
             }
             catch (Exception ex)
             {
-                // LoadAsync never throws by contract; a broken one must not stop the others or the status.
-                logger.LogError(ex, "Reading a stored sign-in failed");
+                // LoadAsync never throws by contract; a broken one must not stop the others or the status. Only the
+                // type is logged: auth messages may carry the account's email.
+                logger.LogError("Reading a stored sign-in failed: {Error}", ex.GetType().Name);
             }
+        }
+    }
+
+    /// <summary>Signs this device out of a provider (never revoking). SignOutAsync never throws by contract.</summary>
+    private async Task SignOutQuietlyAsync(ICloudAuthService auth)
+    {
+        try
+        {
+            await auth.SignOutAsync();
+        }
+        catch (Exception ex)
+        {
+            // Only the type: auth messages may carry the account's email.
+            logger.LogWarning("Signing out failed: {Error}", ex.GetType().Name);
         }
     }
 

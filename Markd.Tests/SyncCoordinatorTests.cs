@@ -1173,6 +1173,8 @@ public class SyncCoordinatorTests
 
         /// <summary>Every core call except forget, in order.</summary>
         public List<string> Log { get; } = [];
+        /// <summary>A trace shared with other fakes (only disconnects are recorded).</summary>
+        public List<string>? Order { get; set; }
         public Queue<SyncResult> UnlockResults { get; } = new();
         public SyncResult ChangeResult { get; set; } = new(SyncOutcome.Synced);
         public Queue<SyncResult> Results { get; } = new();
@@ -1248,6 +1250,7 @@ public class SyncCoordinatorTests
         public Task<SyncResult> DisconnectAsync(ICloudSyncProvider? provider, bool deleteRemote, CancellationToken ct = default)
         {
             Log.Add($"disconnect:{deleteRemote}");
+            Order?.Add("disconnect");
             if (deleteRemote && provider is not null && IsSignedOut(provider))
                 return Task.FromResult(new SyncResult(SyncOutcome.AuthExpired));
             if (deleteRemote)
