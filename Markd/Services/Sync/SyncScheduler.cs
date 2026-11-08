@@ -56,9 +56,22 @@ public sealed class SyncScheduler(
         }
     }
 
-    public Task OnAppStartAsync() => RunAsync(SyncTrigger.Start);
+    public Task OnAppStartAsync() => RunIfStartedAsync(SyncTrigger.Start);
 
-    public Task OnAppResumedAsync() => RunAsync(SyncTrigger.Resume);
+    public Task OnAppResumedAsync() => RunIfStartedAsync(SyncTrigger.Resume);
+
+    private Task RunIfStartedAsync(SyncTrigger trigger)
+    {
+        lock (_gate)
+        {
+            if (!_running)
+            {
+                return Task.CompletedTask;
+            }
+        }
+
+        return RunAsync(trigger);
+    }
 
     private void OnLocalChange(object? source)
     {
@@ -94,8 +107,9 @@ public sealed class SyncScheduler(
         {
             await dispatcher.InvokeAsync(() => controller.SyncNowAsync(trigger));
         }
-        catch
+        catch (Exception ex)
         {
+            System.Diagnostics.Debug.WriteLine($"Sync scheduler: {trigger} run failed: {ex}");
             // The controller never throws, so only a dispatcher failure lands here and must not crash a timer callback.
         }
     }

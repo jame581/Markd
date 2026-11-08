@@ -6,26 +6,28 @@ using Microsoft.Extensions.Time.Testing;
 
 namespace Markd.Tests;
 
-// Messenger registrations are global, so tests that send messages must not run alongside each other.
+// The messenger is global and other test classes run in parallel and send the same messages, so the
+// scheduler under test only accepts messages carrying a test-owned source and ignores everything else.
 [Collection(nameof(SyncSchedulerCollection))]
 public class SyncSchedulerTests : IDisposable
 {
     private readonly FakeTimeProvider _time = new();
     private readonly FakeController _controller = new();
     private readonly FakeNetwork _network = new();
+    private readonly object _owned = new();
     private readonly object _ignored = new();
     private readonly SyncScheduler _scheduler;
 
     public SyncSchedulerTests()
     {
-        _scheduler = new SyncScheduler(_controller, _network, _time, new InlineDispatcher(), s => ReferenceEquals(s, _ignored));
+        _scheduler = new SyncScheduler(_controller, _network, _time, new InlineDispatcher(), s => !ReferenceEquals(s, _owned));
         _scheduler.Start();
     }
 
     public void Dispose() => _scheduler.Stop();
 
-    private static void Change(object? source = null) =>
-        WeakReferenceMessenger.Default.Send(new OccasionsChangedMessage(Source: source));
+    private void Change(object? source = null) =>
+        WeakReferenceMessenger.Default.Send(new OccasionsChangedMessage(Source: source ?? _owned));
 
     [Fact]
     public void Three_changes_within_the_debounce_make_one_run_after_the_last()
@@ -48,7 +50,7 @@ public class SyncSchedulerTests : IDisposable
     [Fact]
     public void Category_changes_also_debounce()
     {
-        WeakReferenceMessenger.Default.Send(new CategoriesChangedMessage());
+        WeakReferenceMessenger.Default.Send(new CategoriesChangedMessage(_owned));
         _time.Advance(SyncScheduler.LocalChangeDebounce);
         Assert.Equal([SyncTrigger.LocalChange], _controller.Triggers);
     }
@@ -57,7 +59,9 @@ public class SyncSchedulerTests : IDisposable
     public void Ignored_sources_trigger_nothing()
     {
         Change(_ignored);
+        Change(new object());
         WeakReferenceMessenger.Default.Send(new CategoriesChangedMessage(_ignored));
+        WeakReferenceMessenger.Default.Send(new CategoriesChangedMessage());
         _time.Advance(TimeSpan.FromSeconds(30));
         Assert.Empty(_controller.Triggers);
     }
@@ -95,6 +99,15 @@ public class SyncSchedulerTests : IDisposable
         Change();
         _network.RaiseOnline();
         _time.Advance(TimeSpan.FromHours(1));
+        Assert.Empty(_controller.Triggers);
+    }
+
+    [Fact]
+    public async Task Start_and_resume_do_nothing_after_stop()
+    {
+        _scheduler.Stop();
+        await _scheduler.OnAppStartAsync();
+        await _scheduler.OnAppResumedAsync();
         Assert.Empty(_controller.Triggers);
     }
 
