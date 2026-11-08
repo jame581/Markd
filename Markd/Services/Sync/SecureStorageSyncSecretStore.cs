@@ -23,14 +23,19 @@ public sealed class SecureStorageSyncSecretStore(ILogger<SecureStorageSyncSecret
         }
     }
 
-    public Task SetPassphraseAsync(string? passphrase)
+    public async Task SetPassphraseAsync(string? passphrase)
     {
-        if (passphrase is null)
+        try
         {
-            SecureStorage.Default.Remove(Key);
-            return Task.CompletedTask;
+            if (passphrase is null)
+                SecureStorage.Default.Remove(Key);
+            else
+                await SecureStorage.Default.SetAsync(Key, passphrase);
         }
-
-        return SecureStorage.Default.SetAsync(Key, passphrase);
+        catch (Exception ex)
+        {
+            // Never crash a sync or a cancel over the secure store: a passphrase that was not kept is asked for again.
+            logger.LogWarning(ex, "Writing the sync passphrase to secure storage failed");
+        }
     }
 }
