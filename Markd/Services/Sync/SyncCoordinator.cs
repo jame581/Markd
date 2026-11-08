@@ -238,7 +238,7 @@ public sealed class SyncCoordinator(
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Connecting to {Provider} failed", providerId);
+            logger.LogWarning("Connecting to {Provider} failed: {Error}", providerId, ex.GetType().Name);
             if (!_isLinked)
                 _connecting = null;
             await ShowFeedbackAsync(Strings.Sync_ConnectFailed, FailureDetail(ex));
@@ -414,7 +414,7 @@ public sealed class SyncCoordinator(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Disconnecting failed");
+            logger.LogError("Disconnecting failed: {Error}", ex.GetType().Name);
             await ShowFeedbackAsync(Strings.Sync_DisconnectFailed);
         }
     }
@@ -538,7 +538,7 @@ public sealed class SyncCoordinator(
             return;
         }
 
-        logger.LogError(ex, "Sync failed unexpectedly");
+        logger.LogError("Sync failed unexpectedly: {Error}", ex.GetType().Name);
         if (_status.Kind == SyncStatusKind.Off)
             return;
 
@@ -911,8 +911,8 @@ public sealed class SyncCoordinator(
             catch (Exception ex)
             {
                 // ISyncService never throws for sync failures; this is a bug, so show Failed and refresh in case.
-                logger.LogError(ex, "Sync operation threw");
-                result = new SyncResult(SyncOutcome.Failed, Detail: ex.Message) { LocalDataChanged = true };
+                logger.LogError("Sync operation threw: {Error}", ex.GetType().Name);
+                result = new SyncResult(SyncOutcome.Failed, Detail: ex.GetType().Name) { LocalDataChanged = true };
             }
 
             if (result.LocalDataChanged)
