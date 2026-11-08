@@ -60,7 +60,8 @@ public sealed class SyncActivityIcon : Border
 
     /// <summary>The kinds where sync waits for the user: the warning glyph.</summary>
     public static bool NeedsUser(SyncStatusKind kind) => kind is SyncStatusKind.Conflicts or SyncStatusKind.NeedsPassphrase
-        or SyncStatusKind.SignInAgain or SyncStatusKind.UpdateApp or SyncStatusKind.Unreadable;
+        or SyncStatusKind.SignInAgain or SyncStatusKind.UpdateApp or SyncStatusKind.Unreadable
+        or SyncStatusKind.ProviderUnavailable;
 
     private void OnLoaded(object? sender, EventArgs e)
     {

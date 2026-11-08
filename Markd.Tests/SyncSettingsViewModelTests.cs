@@ -32,6 +32,7 @@ public class SyncSettingsViewModelTests
     {
         public IReadOnlyList<CloudProviderOption> Available { get; } = options;
         public ICloudSyncProvider? Get(string providerId) => null;
+        public string? DisplayNameOf(string providerId) => options.FirstOrDefault(o => o.Id == providerId)?.DisplayName;
     }
 
     private static readonly CloudProviderOption Folder = new("folder", "Local folder");
@@ -148,6 +149,27 @@ public class SyncSettingsViewModelTests
     }
 
     [Fact]
+    public void AccountText_ShowsProviderAndEmail()
+    {
+        var (vm, _, _) = Create(new SyncStatus(SyncStatusKind.Idle, Now, 0, "Google Drive", "me@gmail.com"));
+        Assert.Equal("Google Drive · me@gmail.com", vm.AccountText);
+
+        var (noLabel, _, _) = Create(new SyncStatus(SyncStatusKind.Idle, Now, 0, "Google Drive", null));
+        Assert.Equal("Google Drive", noLabel.AccountText);
+    }
+
+    [Fact]
+    public void ProviderUnavailable_OffersDisconnectWithoutAnAction()
+    {
+        var (vm, _, _) = Create(new SyncStatus(SyncStatusKind.ProviderUnavailable, Now, 0, "Google Drive", "me@gmail.com"));
+
+        Assert.Null(vm.ActionText);
+        Assert.True(vm.IsConnected);
+        Assert.True(vm.NeedsAttention);
+        Assert.Equal("Google Drive isn't available on this device", vm.StatusText);
+    }
+
+    [Fact]
     public void State_FollowsTheStatus()
     {
         var (vm, ctl, _) = Create(null, Folder);
@@ -160,7 +182,7 @@ public class SyncSettingsViewModelTests
         Assert.True(vm.IsConnected);
         Assert.False(vm.NeedsAttention);
         Assert.False(vm.IsStatusWarning);
-        Assert.Equal("Local folder, me@example.com", vm.AccountText);
+        Assert.Equal("Local folder · me@example.com", vm.AccountText);
 
         ctl.Raise(S(SyncStatusKind.Conflicts, null, 1));
         Assert.True(vm.NeedsAttention);

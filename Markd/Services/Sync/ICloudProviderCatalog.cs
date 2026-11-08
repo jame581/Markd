@@ -12,4 +12,10 @@ public interface ICloudProviderCatalog
 
     /// <summary>Null when this build has no provider with that id.</summary>
     ICloudSyncProvider? Get(string providerId);
+
+    /// <summary>
+    /// The provider's name even when it is not available in this build or on this device (a link made elsewhere
+    /// still shows it). Null for ids this app has never known.
+    /// </summary>
+    string? DisplayNameOf(string providerId);
 }

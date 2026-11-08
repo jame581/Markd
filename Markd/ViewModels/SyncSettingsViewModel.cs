@@ -46,11 +46,12 @@ public sealed class SyncSettingsViewModel : ViewModelBase
     public bool IsConnected => !IsOff;
 
     public bool NeedsAttention => _sync.Status.Kind is SyncStatusKind.Conflicts or SyncStatusKind.NeedsPassphrase
-        or SyncStatusKind.SignInAgain or SyncStatusKind.UpdateApp or SyncStatusKind.Unreadable;
+        or SyncStatusKind.SignInAgain or SyncStatusKind.UpdateApp or SyncStatusKind.Unreadable
+        or SyncStatusKind.ProviderUnavailable;
 
     public bool IsStatusWarning => NeedsAttention || _sync.Status.Kind == SyncStatusKind.Failed;
 
-    public string AccountText => string.Join(", ", new[] { _sync.Status.ProviderName, _sync.Status.AccountName }
+    public string AccountText => string.Join(" · ", new[] { _sync.Status.ProviderName, _sync.Status.AccountLabel }
         .Where(s => !string.IsNullOrWhiteSpace(s)));
 
     public string StatusText => SyncStatusText.Describe(_sync.Status, _time.GetUtcNow().UtcDateTime);

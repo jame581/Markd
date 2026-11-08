@@ -20,6 +20,7 @@ public static class SyncStatusText
             SyncStatusKind.Offline => Strings.Sync_StatusOffline,
             SyncStatusKind.UpdateApp => Strings.Sync_StatusUpdateApp,
             SyncStatusKind.Unreadable => Strings.Sync_StatusUnreadable,
+            SyncStatusKind.ProviderUnavailable => string.Format(culture, Strings.Sync_StatusProviderUnavailable, status.ProviderName),
             _ => Strings.Sync_StatusFailed,
         };
     }

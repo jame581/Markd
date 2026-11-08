@@ -389,6 +389,7 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Sync_StatusOffline" xml:space="preserve"><value>Offline, zkusí to znovu</value></data>
   <data name="Sync_StatusUpdateApp" xml:space="preserve"><value>Data v cloudu jsou z novější verze Markd: aktualizujte aplikaci</value></data>
   <data name="Sync_StatusUnreadable" xml:space="preserve"><value>Data v cloudu nejde přečíst</value></data>
+  <data name="Sync_StatusProviderUnavailable" xml:space="preserve"><value>{0} není na tomto zařízení k dispozici</value></data>
   <data name="Sync_StatusFailed" xml:space="preserve"><value>Synchronizace selhala, zkusí to znovu</value></data>
   <data name="Sync_StatusDescription" xml:space="preserve"><value>Stav synchronizace</value></data>
   <data name="Sync_ActionResolve" xml:space="preserve"><value>Vyřešit</value></data>

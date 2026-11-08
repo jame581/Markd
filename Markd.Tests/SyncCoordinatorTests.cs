@@ -42,6 +42,7 @@ public class SyncCoordinatorTests
     {
         _state.Value.ProviderId = ProviderId;
         _state.Value.AccountName = "me@example.com";
+        _state.Value.AccountLabel = "me@example.com";
         _state.Value.IsConnected = true;
         _state.Value.LastSyncUtc = LastSync;
         _state.Value.LastResult = "Synced";
@@ -108,7 +109,7 @@ public class SyncCoordinatorTests
     }
 
     [Fact]
-    public async Task Init_ProviderMissingFromThisBuild_IsOffAndNothingRuns()
+    public async Task Init_ProviderMissingFromThisBuild_KeepsTheLinkAndNothingRuns()
     {
         Link();
         _state.Value.ProviderId = "gone";
@@ -117,8 +118,64 @@ public class SyncCoordinatorTests
 
         await coordinator.SyncNowAsync(SyncTrigger.Manual);
 
-        Assert.Equal(SyncStatusKind.Off, coordinator.Status.Kind);
+        Assert.Equal(SyncStatusKind.ProviderUnavailable, coordinator.Status.Kind);
+        Assert.True(coordinator.IsLinked);
+        Assert.True(_state.Value.IsConnected);
         Assert.Empty(_sync.SyncCalls);
+    }
+
+    private SyncCoordinator CreateWithUnavailableProvider()
+    {
+        Link();
+        _state.Value.BaseSnapshotJson = "{}";
+        _catalog.Unavailable = true;
+        return Create();
+    }
+
+    [Fact]
+    public async Task StoredLink_ToAnUnavailableProvider_ShowsProviderUnavailable()
+    {
+        var coordinator = CreateWithUnavailableProvider();
+
+        await coordinator.InitializeAsync();
+
+        Assert.Equal(SyncStatusKind.ProviderUnavailable, coordinator.Status.Kind);
+        Assert.Equal("Test cloud", coordinator.Status.ProviderName);
+        Assert.Equal("me@example.com", coordinator.Status.AccountLabel);
+        Assert.True(_state.Value.IsConnected);
+        Assert.Equal("{}", _state.Value.BaseSnapshotJson);
+    }
+
+    [Theory]
+    [InlineData(SyncTrigger.Timer)]
+    [InlineData(SyncTrigger.Manual)]
+    public async Task ProviderUnavailable_PausesAutomaticTriggers_AndKeepsTheLink(SyncTrigger trigger)
+    {
+        var coordinator = CreateWithUnavailableProvider();
+        await coordinator.InitializeAsync();
+
+        await coordinator.SyncNowAsync(trigger);
+
+        Assert.Empty(_sync.SyncCalls);
+        Assert.Equal(SyncStatusKind.ProviderUnavailable, coordinator.Status.Kind);
+        Assert.True(coordinator.IsLinked);
+        Assert.True(_state.Value.IsConnected);
+    }
+
+    [Fact]
+    public async Task Disconnect_ProviderUnavailable_DoesNotOfferCloudDelete()
+    {
+        var coordinator = CreateWithUnavailableProvider();
+        await coordinator.InitializeAsync();
+        _shell.Answers.Enqueue(true);
+
+        await coordinator.DisconnectAsync();
+
+        Assert.Single(_shell.Calls);
+        Assert.Equal(["disconnect:False"], _sync.Log);
+        Assert.Equal(SyncStatusKind.Off, coordinator.Status.Kind);
+        Assert.False(_state.Value.IsConnected);
+        Assert.Equal("{}", _state.Value.BaseSnapshotJson);
     }
 
     // ---- Outcome mapping ----
@@ -1265,7 +1322,11 @@ public class SyncCoordinatorTests
 
         public IReadOnlyList<CloudProviderOption> Available { get; } = [new(ProviderId, "Test cloud")];
 
-        public ICloudSyncProvider? Get(string providerId) => providerId == ProviderId ? Provider : null;
+        public bool Unavailable { get; set; }
+
+        public ICloudSyncProvider? Get(string providerId) => providerId == ProviderId && !Unavailable ? Provider : null;
+
+        public string? DisplayNameOf(string providerId) => providerId == ProviderId ? "Test cloud" : null;
     }
 
     private sealed class FakeProvider : ICloudSyncProvider

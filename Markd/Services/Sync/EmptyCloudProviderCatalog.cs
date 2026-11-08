@@ -8,4 +8,6 @@ public sealed class EmptyCloudProviderCatalog : ICloudProviderCatalog
     public IReadOnlyList<CloudProviderOption> Available { get; } = [];
 
     public ICloudSyncProvider? Get(string providerId) => null;
+
+    public string? DisplayNameOf(string providerId) => null;
 }

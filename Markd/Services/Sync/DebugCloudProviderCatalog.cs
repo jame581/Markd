@@ -14,6 +14,8 @@ public sealed class DebugCloudProviderCatalog : ICloudProviderCatalog
     // Developer-only label: never ships, so it is not localized.
     public IReadOnlyList<CloudProviderOption> Available { get; } = [new(LocalFolderId, "Local folder (developer)")];
 
+    public string? DisplayNameOf(string providerId) => providerId == LocalFolderId ? Available[0].DisplayName : null;
+
     public ICloudSyncProvider? Get(string providerId)
     {
         if (providerId != LocalFolderId) return null;

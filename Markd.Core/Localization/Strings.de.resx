@@ -389,6 +389,7 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Sync_StatusOffline" xml:space="preserve"><value>Offline, neuer Versuch folgt</value></data>
   <data name="Sync_StatusUpdateApp" xml:space="preserve"><value>Die Cloud-Daten stammen von einem neueren Markd: App aktualisieren</value></data>
   <data name="Sync_StatusUnreadable" xml:space="preserve"><value>Cloud-Daten können nicht gelesen werden</value></data>
+  <data name="Sync_StatusProviderUnavailable" xml:space="preserve"><value>{0} ist auf diesem Gerät nicht verfügbar</value></data>
   <data name="Sync_StatusFailed" xml:space="preserve"><value>Synchronisierung fehlgeschlagen, neuer Versuch folgt</value></data>
   <data name="Sync_StatusDescription" xml:space="preserve"><value>Synchronisierungsstatus</value></data>
   <data name="Sync_ActionResolve" xml:space="preserve"><value>Konflikte lösen</value></data>

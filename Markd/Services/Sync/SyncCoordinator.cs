@@ -285,8 +285,11 @@ public sealed class SyncCoordinator(
                     Strings.Sync_Disconnect, Strings.Common_Cancel, destructive: false))
                 return;
 
-            var deleteRemote = await ConfirmAsync(Strings.Sync_DeleteCloudTitle, Strings.Sync_DeleteCloudMessage,
-                Strings.Sync_DeleteCloud, Strings.Sync_KeepCloud, destructive: true);
+            // Without the provider there is no cloud file to reach: disconnect and keep the base.
+            var deleteRemote = false;
+            if (_status.Kind != SyncStatusKind.ProviderUnavailable)
+                deleteRemote = await ConfirmAsync(Strings.Sync_DeleteCloudTitle, Strings.Sync_DeleteCloudMessage,
+                    Strings.Sync_DeleteCloud, Strings.Sync_KeepCloud, destructive: true);
 
             SyncResult result;
             await _gate.WaitAsync();
@@ -294,6 +297,8 @@ public sealed class SyncCoordinator(
             {
                 var state = await LoadStateAsync();
                 var provider = (state.ProviderId is { } id ? catalog.Get(id) : null) ?? _connecting;
+                if (provider is null)
+                    deleteRemote = false;
                 result = await Task.Run(() => session.Sync.DisconnectAsync(provider, deleteRemote));
                 _isLinked = (await LoadStateAsync()).IsConnected;
                 if (result.Outcome == SyncOutcome.Disconnected)
@@ -658,7 +663,10 @@ public sealed class SyncCoordinator(
             if (provider is null)
             {
                 _pendingConflicts = [];
-                await SetStatusAsync(OffStatus);
+                // A link to a provider this device lacks stays (with its base); only the status says so.
+                await SetStatusAsync(state.IsConnected && state.ProviderId is { } missingId
+                    ? BuildStatus(SyncStatusKind.ProviderUnavailable, state, missingId, 0)
+                    : OffStatus);
                 return (null, false);
             }
 
@@ -730,7 +738,8 @@ public sealed class SyncCoordinator(
         trigger is SyncTrigger.Manual or SyncTrigger.Start;
 
     private static bool NeedsUser(SyncStatusKind kind) => kind is SyncStatusKind.Conflicts or SyncStatusKind.NeedsPassphrase
-        or SyncStatusKind.SignInAgain or SyncStatusKind.UpdateApp or SyncStatusKind.Unreadable;
+        or SyncStatusKind.SignInAgain or SyncStatusKind.UpdateApp or SyncStatusKind.Unreadable
+        or SyncStatusKind.ProviderUnavailable;
 
     /// <summary>The follow-up keeps the first queued trigger unless a later one would run where it would not.</summary>
     private static SyncTrigger Stronger(SyncTrigger? queued, SyncTrigger incoming) =>
@@ -755,8 +764,11 @@ public sealed class SyncCoordinator(
     /// </summary>
     private SyncStatus StatusFromStoredState(SyncState state)
     {
-        if (!state.IsConnected || state.ProviderId is not { } providerId || catalog.Available.All(o => o.Id != providerId))
+        if (!state.IsConnected || state.ProviderId is not { } providerId)
             return OffStatus;
+
+        if (catalog.Get(providerId) is null)
+            return BuildStatus(SyncStatusKind.ProviderUnavailable, state, providerId, 0);
 
         var kind = Enum.TryParse<SyncOutcome>(state.LastAttemptResult, out var outcome) ? KindOf(outcome) : SyncStatusKind.Idle;
         return kind == SyncStatusKind.Off ? OffStatus : BuildStatus(kind, state, providerId, 0);
@@ -764,7 +776,8 @@ public sealed class SyncCoordinator(
 
     private SyncStatus BuildStatus(SyncStatusKind kind, SyncState state, string providerId, int conflictCount) =>
         new(kind, state.LastSyncUtc, conflictCount,
-            catalog.Available.FirstOrDefault(o => o.Id == providerId)?.DisplayName, state.AccountName);
+            catalog.DisplayNameOf(providerId) ?? (kind == SyncStatusKind.ProviderUnavailable ? providerId : null),
+            state.AccountLabel);
 
     private Task<SyncState> LoadStateAsync() => Task.Run(() => session.State.LoadAsync());
 

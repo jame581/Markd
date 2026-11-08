@@ -389,6 +389,7 @@ Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolk
   <data name="Sync_StatusOffline" xml:space="preserve"><value>Offline, will retry</value></data>
   <data name="Sync_StatusUpdateApp" xml:space="preserve"><value>Cloud data is from a newer Markd: update the app</value></data>
   <data name="Sync_StatusUnreadable" xml:space="preserve"><value>Cloud data can't be read</value></data>
+  <data name="Sync_StatusProviderUnavailable" xml:space="preserve"><value>{0} isn't available on this device</value></data>
   <data name="Sync_StatusFailed" xml:space="preserve"><value>Sync failed, will retry</value></data>
   <data name="Sync_StatusDescription" xml:space="preserve"><value>Sync status</value></data>
   <data name="Sync_ActionResolve" xml:space="preserve"><value>Resolve</value></data>
