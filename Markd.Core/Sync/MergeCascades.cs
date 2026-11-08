@@ -8,9 +8,10 @@ namespace Markd.Core.Sync
         public static void Apply(
             ExportModel baseModel, ExportModel local, ExportModel remote,
             Dictionary<Guid, CategoryDto> categories, Dictionary<Guid, OccasionDto> occasions, Dictionary<Guid, MilestoneDto> milestones,
-            HashSet<Guid> liveOverDeadOccasions, DateTime nowUtc)
+            HashSet<Guid> liveOverDeadCategories, HashSet<Guid> liveOverDeadOccasions, DateTime nowUtc)
         {
             var redirect = CollapseDuplicateCategories(baseModel, categories, nowUtc);
+            RestoreCategoryMemberships(baseModel, local, remote, categories, occasions, liveOverDeadCategories, nowUtc);
             RepointCategories(categories, occasions, redirect, nowUtc);
             FollowOccasions(local, remote, occasions, milestones, liveOverDeadOccasions, nowUtc);
             KeepOnePin(occasions, nowUtc);
@@ -45,6 +46,51 @@ namespace Markd.Core.Sync
             }
 
             return redirect;
+        }
+
+        /// <summary>
+        /// The user kept a category against a delete: the delete had also cleared its occasions' category, and that
+        /// side effect merged without a conflict. Put back each occasion that was in it before and still is on the
+        /// keeping side. An occasion whose core came from neither side, or that was moved elsewhere, is left alone.
+        /// </summary>
+        private static void RestoreCategoryMemberships(
+            ExportModel baseModel, ExportModel local, ExportModel remote,
+            Dictionary<Guid, CategoryDto> categories, Dictionary<Guid, OccasionDto> occasions,
+            HashSet<Guid> liveOverDeadCategories, DateTime nowUtc)
+        {
+            if (liveOverDeadCategories.Count == 0)
+                return;
+
+            var baseOccasions = baseModel.Occasions.ToDictionary(o => o.SyncId);
+            var localOccasions = local.Occasions.ToDictionary(o => o.SyncId);
+            var remoteOccasions = remote.Occasions.ToDictionary(o => o.SyncId);
+            foreach (var categoryId in liveOverDeadCategories)
+            {
+                if (!categories.TryGetValue(categoryId, out var category) || category.DeletedAt is not null)
+                    continue;
+                var keptLocally = local.Categories.Any(c => c.SyncId == categoryId && c.DeletedAt is null);
+                var kept = keptLocally ? localOccasions : remoteOccasions;
+
+                foreach (var key in occasions.Keys.ToList())
+                {
+                    var occasion = occasions[key];
+                    if (occasion.DeletedAt is not null || occasion.CategorySyncId is not null
+                        || !baseOccasions.TryGetValue(key, out var before) || before.CategorySyncId != categoryId
+                        || !kept.TryGetValue(key, out var keeper) || keeper.DeletedAt is not null || keeper.CategorySyncId != categoryId)
+                        continue;
+
+                    var core = SyncContent.CoreOf(occasion);
+                    var fromASide = (localOccasions.TryGetValue(key, out var l) && SyncContent.CoreOf(l) == core)
+                                    || (remoteOccasions.TryGetValue(key, out var r) && SyncContent.CoreOf(r) == core);
+                    if (!fromASide)
+                        continue;
+
+                    var copy = occasion.Clone();
+                    copy.CategorySyncId = categoryId;
+                    copy.UpdatedAt = nowUtc;
+                    occasions[key] = copy;
+                }
+            }
         }
 
         /// <summary>An occasion never keeps a reference to a dead or missing category. It becomes uncategorised.</summary>

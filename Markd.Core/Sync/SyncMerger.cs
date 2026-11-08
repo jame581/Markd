@@ -50,11 +50,12 @@ namespace Markd.Core.Sync
                 return (all.FirstOrDefault(o => o.DeletedAt is null) ?? all.FirstOrDefault())?.Title;
             }
 
+            var liveOverDeadCategories = new HashSet<Guid>();
             var liveOverDeadOccasions = new HashSet<Guid>();
             var categories = MergeKind(baseModel.Categories, local.Categories, remote.Categories,
                 c => c.SyncId, SyncContent.Of, c => c.DeletedAt is not null, c => c.UpdatedAt,
                 choices, conflicts,
-                (l, r, key, lu, ru) => new CategoryConflict(key, l, r, lu, ru), null);
+                (l, r, key, lu, ru) => new CategoryConflict(key, l, r, lu, ru), liveOverDeadCategories);
             // Categories merge first, so an occasion's pin and category can merge apart from its other fields.
             var liveCategories = categories.Values.Where(c => c.DeletedAt is null).Select(c => c.SyncId).ToHashSet();
             var occasions = MergeKind(baseModel.Occasions, local.Occasions, remote.Occasions,
@@ -77,7 +78,7 @@ namespace Markd.Core.Sync
                 null, m => !liveOccasions.Contains(m.OccasionSyncId),
                 m => deadOccasions.Contains(m.OccasionSyncId));
 
-            MergeCascades.Apply(baseModel, local, remote, categories, occasions, milestones, liveOverDeadOccasions, nowUtc);
+            MergeCascades.Apply(baseModel, local, remote, categories, occasions, milestones, liveOverDeadCategories, liveOverDeadOccasions, nowUtc);
 
             var cutoff = nowUtc - TombstoneRetention;
             bool Keep(DateTime? deletedAt) => deletedAt is null || deletedAt >= cutoff;

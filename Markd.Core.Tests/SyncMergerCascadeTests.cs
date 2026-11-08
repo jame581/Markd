@@ -75,6 +75,70 @@ public class SyncMergerCascadeTests
         Assert.Null(merged.Occasions.Single().CategorySyncId);
     }
 
+    /// <summary>Local deleted category 1 (clearing X and Y), remote renamed it.</summary>
+    private static (ExportModel B, ExportModel L, ExportModel R) DeletedHereRenamedThere()
+    {
+        var later = T0.AddDays(1);
+        var b = Model(c: [Cat(1, "Family")], o: [Occ(1, "X", cat: 1), Occ(2, "Y", cat: 1)]);
+        var l = Model(c: [Cat(1, "Family", deleted: true)], o: [Occ(1, "X", updated: later), Occ(2, "Y", updated: later)]);
+        var r = Model(c: [Cat(1, "Kin", updated: later)], o: [Occ(1, "X", cat: 1), Occ(2, "Y", cat: 1)]);
+        return (b, l, r);
+    }
+
+    [Fact]
+    public void Keeping_a_category_against_its_delete_restores_its_occasions()
+    {
+        var (b, l, r) = DeletedHereRenamedThere();
+        Assert.IsType<CategoryConflict>(Assert.Single(SyncMerger.Merge(b, l, r, Now).Conflicts));
+
+        var merged = MergeChoosing(b, l, r, ConflictChoice.Remote);
+
+        var category = Assert.Single(merged.Categories);
+        Assert.Null(category.DeletedAt);
+        Assert.Equal("Kin", category.Name);
+        Assert.All(merged.Occasions, o => Assert.Equal(G(1), o.CategorySyncId));
+    }
+
+    [Fact]
+    public void Keeping_the_delete_of_a_category_leaves_its_occasions_uncategorised()
+    {
+        var (b, l, r) = DeletedHereRenamedThere();
+
+        var merged = MergeChoosing(b, l, r, ConflictChoice.Local);
+
+        Assert.NotNull(Assert.Single(merged.Categories).DeletedAt);
+        Assert.All(merged.Occasions, o => Assert.Null(o.CategorySyncId));
+    }
+
+    [Fact]
+    public void Keeping_a_category_does_not_undo_a_move_to_another_category()
+    {
+        var later = T0.AddDays(1);
+        var b = Model(c: [Cat(1, "Family"), Cat(2, "Work")], o: [Occ(1, "X", cat: 1), Occ(2, "Y", cat: 1)]);
+        var l = Model(c: [Cat(1, "Family", deleted: true), Cat(2, "Work")],
+            o: [Occ(1, "X", cat: 2, updated: later), Occ(2, "Y", updated: later)]);   // X moved to Work before the delete
+        var r = Model(c: [Cat(1, "Kin", updated: later), Cat(2, "Work")], o: [Occ(1, "X", cat: 1), Occ(2, "Y", cat: 1)]);
+
+        var merged = MergeChoosing(b, l, r, ConflictChoice.Remote);
+
+        Assert.Equal(G(2), merged.Occasions.Single(o => o.SyncId == G(1)).CategorySyncId);
+        Assert.Equal(G(1), merged.Occasions.Single(o => o.SyncId == G(2)).CategorySyncId);
+    }
+
+    [Fact]
+    public void Keeping_a_category_does_not_bring_back_an_occasion_the_keeping_side_took_out_of_it()
+    {
+        var later = T0.AddDays(1);
+        var b = Model(c: [Cat(1, "Family")], o: [Occ(1, "X", cat: 1), Occ(2, "Y", cat: 1)]);
+        var l = Model(c: [Cat(1, "Family", deleted: true)], o: [Occ(1, "X", updated: later), Occ(2, "Y", updated: later)]);
+        var r = Model(c: [Cat(1, "Kin", updated: later)], o: [Occ(1, "X", cat: 1), Occ(2, "Y", updated: later)]);
+
+        var merged = MergeChoosing(b, l, r, ConflictChoice.Remote);
+
+        Assert.Equal(G(1), merged.Occasions.Single(o => o.SyncId == G(1)).CategorySyncId);
+        Assert.Null(merged.Occasions.Single(o => o.SyncId == G(2)).CategorySyncId);
+    }
+
     [Fact]
     public void Identical_categories_created_on_both_devices_collapse_and_occasions_are_repointed()
     {

@@ -421,6 +421,46 @@ public class SyncServiceTests
         }
     }
 
+    [Fact]
+    public async Task Keeping_a_deleted_category_on_one_device_keeps_its_events_in_it_on_both()
+    {
+        using var a = new SyncDevice();
+        using var b = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        var category = await a.Categories.CreateAsync(new Category { Name = "Family" });
+        foreach (var title in new[] { "X", "Y" })
+        {
+            var occasion = await a.AddOccasionAsync(title);
+            occasion.CategoryId = category.Id;
+            await a.Occasions.UpdateAsync(occasion);
+        }
+        await a.Sync.SyncAsync(cloud);
+        await b.Sync.SyncAsync(cloud);
+
+        await a.Categories.DeleteAsync(category.Id);   // clears X's and Y's category as a side effect
+        Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);
+        var onB = Assert.Single(await b.Categories.GetAllAsync());
+        onB.Name = "Kin";
+        await b.Categories.UpdateAsync(onB);
+        var pending = await b.Sync.SyncAsync(cloud);
+        Assert.Equal(SyncOutcome.NeedsConflictResolution, pending.Outcome);
+        Assert.IsType<CategoryConflict>(Assert.Single(pending.Conflicts!));
+
+        Assert.Equal(SyncOutcome.Synced, (await b.Sync.SyncAsync(cloud, Snap.Pick(pending.Conflicts!, ConflictChoice.Local))).Outcome);
+        Assert.True((await a.Sync.SyncAsync(cloud)).IsSuccess);
+
+        foreach (var device in new[] { a, b })
+        {
+            var kept = Assert.Single(await device.Categories.GetAllAsync());
+            Assert.Equal("Kin", kept.Name);
+            var occasions = await device.Occasions.GetAllAsync();
+            Assert.Equal(2, occasions.Count);
+            Assert.All(occasions, o => Assert.Equal(kept.Id, o.CategoryId));
+        }
+        Assert.Equal(SyncOutcome.NoChanges, (await a.Sync.SyncAsync(cloud)).Outcome);
+        Assert.Equal(SyncOutcome.NoChanges, (await b.Sync.SyncAsync(cloud)).Outcome);
+    }
+
     private static async Task RenameOnlyAsync(SyncDevice device, string title)
     {
         var occasion = (await device.Occasions.GetAllAsync()).Single();
