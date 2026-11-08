@@ -26,6 +26,7 @@ public class SyncSettingsViewModelTests
         public Task ChangePassphraseAsync() { Calls.Add("ChangePassphrase"); return Task.CompletedTask; }
         public Task ReplaceCloudAsync() { Calls.Add("ReplaceCloud"); return Task.CompletedTask; }
         public Task DisconnectAsync() { Calls.Add("Disconnect"); return Task.CompletedTask; }
+        public Task SignInAgainAsync() { Calls.Add("SignInAgain"); return Task.CompletedTask; }
     }
 
     private sealed class FakeCatalog(params CloudProviderOption[] options) : ICloudProviderCatalog
@@ -33,6 +34,7 @@ public class SyncSettingsViewModelTests
         public IReadOnlyList<CloudProviderOption> Available { get; } = options;
         public ICloudSyncProvider? Get(string providerId) => null;
         public string? DisplayNameOf(string providerId) => options.FirstOrDefault(o => o.Id == providerId)?.DisplayName;
+        public ICloudAuthService? AuthFor(string providerId) => null;
     }
 
     private static readonly CloudProviderOption Folder = new("folder", "Local folder");
@@ -131,7 +133,7 @@ public class SyncSettingsViewModelTests
         ctl.Raise(S(SyncStatusKind.Unreadable));
         await vm.ActionCommand.ExecuteAsync(null);
 
-        Assert.Equal(["OpenConflicts", "EnterPassphrase", "Connect:folder", "ReplaceCloud"], ctl.Calls);
+        Assert.Equal(["OpenConflicts", "EnterPassphrase", "SignInAgain", "ReplaceCloud"], ctl.Calls);
     }
 
     [Fact]

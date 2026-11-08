@@ -428,6 +428,9 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Trennen fehlgeschlagen. Bitte versuchen Sie es erneut.</value></data>
   <data name="Sync_FailOffline" xml:space="preserve"><value>Die Cloud ist nicht erreichbar. Prüfen Sie die Verbindung und versuchen Sie es erneut.</value></data>
   <data name="Sync_FailWrongPassphrase" xml:space="preserve"><value>Die Synchronisierungs-Passphrase öffnet die Cloud-Daten nicht.</value></data>
+  <data name="Sync_SignInWaiting" xml:space="preserve"><value>Warten auf die Anmeldung im Browser…</value></data>
+  <data name="Sync_SignInFailedDetail" xml:space="preserve"><value>Die Anmeldung hat nicht funktioniert. Prüfen Sie die Verbindung und versuchen Sie es erneut.</value></data>
+  <data name="Sync_DisconnectSignInFirst" xml:space="preserve"><value>Melden Sie sich erneut an, um die Cloud-Kopie zu löschen, oder trennen Sie das Gerät und behalten Sie die Kopie.</value></data>
   <data name="Sync_SectionTitle" xml:space="preserve"><value>Synchronisierung</value></data>
   <data name="Sync_ConnectSub" xml:space="preserve"><value>Dieses Gerät verbinden</value></data>
   <data name="Sync_SyncNow" xml:space="preserve"><value>Jetzt synchronisieren</value></data>

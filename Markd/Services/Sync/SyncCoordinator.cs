@@ -25,6 +25,7 @@ public sealed class SyncCoordinator(
     IUiDispatcher dispatcher,
     ISyncSecretStore secrets,
     ISyncPassphrasePromptService passphrasePrompt,
+    ISignInWaitService signInWait,
     IAppShellService shell,
     IFeedbackService feedback,
     ILogger<SyncCoordinator> logger) : ISyncController, ISyncLink
@@ -50,6 +51,9 @@ public sealed class SyncCoordinator(
     // The provider a connect is linking to, until the device is linked or the connect is abandoned.
     private volatile ICloudSyncProvider? _connecting;
 
+    /// <summary>An interactive sign-in still running after this long counts as cancelled.</summary>
+    internal TimeSpan SignInTimeout { get; set; } = TimeSpan.FromMinutes(5);
+
     public SyncStatus Status => _status;
 
     public event EventHandler? StatusChanged;
@@ -59,12 +63,16 @@ public sealed class SyncCoordinator(
     /// <summary>Whether <see cref="SyncState.IsConnected"/> was true at the last read.</summary>
     public bool IsLinked => _isLinked;
 
-    /// <summary>Builds <see cref="Status"/> from the stored sync state, without touching the network. Never throws.</summary>
+    /// <summary>
+    /// Reads every provider's stored sign-in, then builds <see cref="Status"/> from the stored sync state, without
+    /// touching the network. No run starts before the accounts are read. Never throws.
+    /// </summary>
     public async Task InitializeAsync()
     {
         await _gate.WaitAsync();
         try
         {
+            await LoadAccountsAsync();
             var state = await LoadStateAsync();
             _isLinked = state.IsConnected;
             _pendingConflicts = [];
@@ -128,22 +136,53 @@ public sealed class SyncCoordinator(
     }
 
     /// <summary>
-    /// Links this device to a provider's cloud file. No file yet: asks for a new passphrase and stores it. A file:
-    /// asks for its passphrase until it opens the file (nothing is stored or uploaded before that), or leads to
-    /// <see cref="ReplaceCloudAsync"/> when the user forgot it. Cancelling (a prompt, the replace confirm or the first
-    /// run) clears the stored passphrase. Then runs the first sync, which links the device. A link to a provider this
-    /// build does not have is forgotten first. Never throws.
+    /// Links this device to a provider's cloud file. Signs in first when the provider has no session, or once when the
+    /// stored session is refused; a cancelled or timed-out sign-in is a quiet cancel. No file yet: asks for a new
+    /// passphrase and stores it. A file: asks for its passphrase until it opens the file (nothing is stored or uploaded
+    /// before that), or leads to <see cref="ReplaceCloudAsync"/> when the user forgot it. Cancelling (the sign-in, a
+    /// prompt, the replace confirm or the first run) clears the stored passphrase. Then runs the first sync, which links
+    /// the device. A link to a provider this build does not have is forgotten first. Never throws.
     /// </summary>
     public async Task ConnectAsync(string providerId)
     {
         if (catalog.Get(providerId) is not { } provider)
             return;
 
+        var auth = catalog.AuthFor(providerId);
         try
         {
+            var signedIn = false;
+            if (auth is { Account: null })
+            {
+                if (await SignInAsync(auth, providerId, null) is null)
+                {
+                    await CancelConnectAsync();
+                    return;
+                }
+
+                signedIn = true;
+            }
+
             await ForgetStaleLinkAsync();
 
-            var info = await Task.Run(() => provider.GetInfoAsync(CancellationToken.None));
+            RemoteInfo? info;
+            try
+            {
+                info = await Task.Run(() => provider.GetInfoAsync(CancellationToken.None));
+            }
+            catch (SyncAuthException) when (auth is not null && !signedIn)
+            {
+                // The stored session was refused (revoked, or expired for good): one interactive sign-in, one retry.
+                logger.LogInformation("The stored sign-in was refused, signing in again");
+                if (await SignInAsync(auth, providerId, null) is null)
+                {
+                    await CancelConnectAsync();
+                    return;
+                }
+
+                info = await Task.Run(() => provider.GetInfoAsync(CancellationToken.None));
+            }
+
             if (info is null)
             {
                 if ((await PromptAsync(PassphrasePromptKind.CreateNew, false)).Passphrase is not { } created)
@@ -190,6 +229,13 @@ public sealed class SyncCoordinator(
                 logger.LogWarning(ex, "Cancelling the connect failed");
             }
         }
+        catch (SignInFailedException ex)
+        {
+            logger.LogWarning("Signing in to {Provider} failed: {Error}", providerId, ex.InnerException?.GetType().Name);
+            if (!_isLinked)
+                _connecting = null;
+            await ShowFeedbackAsync(Strings.Sync_ConnectFailed, FailureDetail(ex));
+        }
         catch (Exception ex)
         {
             logger.LogWarning(ex, "Connecting to {Provider} failed", providerId);
@@ -227,6 +273,58 @@ public sealed class SyncCoordinator(
         }
 
         await SyncNowAsync(SyncTrigger.Manual);
+    }
+
+    /// <summary>
+    /// For <see cref="SyncStatusKind.SignInAgain"/>: an interactive sign-in for the linked provider, hinted with the
+    /// stored account label. The same account resumes syncing. Another account is another cloud file: this device is
+    /// disconnected first (keeping its base and the cloud data, without asking), then connects as new, so nothing
+    /// syncs against the old account's base. A cancelled sign-in changes nothing. A provider without a sign-in just
+    /// syncs again. Never throws.
+    /// </summary>
+    public async Task SignInAgainAsync()
+    {
+        try
+        {
+            var state = await LoadStateUnderGateAsync();
+            if (!state.IsConnected || state.ProviderId is not { } providerId || catalog.Get(providerId) is null)
+                return;
+
+            if (catalog.AuthFor(providerId) is not { } auth)
+            {
+                await SyncNowAsync(SyncTrigger.Manual);
+                return;
+            }
+
+            if (await SignInAsync(auth, providerId, state.AccountLabel) is not { } account)
+                return;
+
+            if (string.Equals(account.Id, state.AccountName, StringComparison.Ordinal))
+            {
+                await SyncNowAsync(SyncTrigger.Manual);
+                return;
+            }
+
+            logger.LogInformation("Signed in to another account, connecting it as a new link");
+            var (result, _) = await DisconnectCoreAsync(deleteRemote: false);
+            if (result.Outcome != SyncOutcome.Disconnected)
+            {
+                logger.LogWarning("Disconnecting the previous account failed: {Outcome} {Detail}", result.Outcome, result.Detail);
+                await ShowFeedbackAsync(Strings.Sync_ConnectFailed, Strings.Backup_UnexpectedError);
+                return;
+            }
+
+            await ConnectAsync(providerId);
+        }
+        catch (SignInFailedException ex)
+        {
+            logger.LogWarning("Signing in again failed: {Error}", ex.InnerException?.GetType().Name);
+            await ShowFeedbackAsync(Strings.Sync_ConnectFailed, FailureDetail(ex));
+        }
+        catch (Exception ex)
+        {
+            await ShowFailureAsync(ex);
+        }
     }
 
     /// <summary>
@@ -275,7 +373,8 @@ public sealed class SyncCoordinator(
 
     /// <summary>
     /// Disconnects after a confirm, then asks separately whether to delete the cloud file too (default: keep it).
-    /// Local data is never touched. Never throws.
+    /// Local data is never touched. Once disconnected, signs this device out of that provider (never revoking, so the
+    /// other devices stay signed in). Never throws.
     /// </summary>
     public async Task DisconnectAsync()
     {
@@ -291,38 +390,64 @@ public sealed class SyncCoordinator(
                 deleteRemote = await ConfirmAsync(Strings.Sync_DeleteCloudTitle, Strings.Sync_DeleteCloudMessage,
                     Strings.Sync_DeleteCloud, Strings.Sync_KeepCloud, destructive: true);
 
-            SyncResult result;
-            await _gate.WaitAsync();
-            try
+            var (result, providerId) = await DisconnectCoreAsync(deleteRemote);
+            if (result.Outcome == SyncOutcome.Disconnected)
             {
-                var state = await LoadStateAsync();
-                var provider = (state.ProviderId is { } id ? catalog.Get(id) : null) ?? _connecting;
-                if (provider is null)
-                    deleteRemote = false;
-                result = await Task.Run(() => session.Sync.DisconnectAsync(provider, deleteRemote));
-                _isLinked = (await LoadStateAsync()).IsConnected;
-                if (result.Outcome == SyncOutcome.Disconnected)
+                if (providerId is not null && catalog.AuthFor(providerId) is { } auth)
                 {
-                    _connecting = null;
-                    _pendingConflicts = [];
-                    await SetStatusAsync(OffStatus);
+                    try
+                    {
+                        await auth.SignOutAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        // Never throws by contract; the device is disconnected either way.
+                        logger.LogWarning(ex, "Signing out after disconnecting failed");
+                    }
                 }
-            }
-            finally
-            {
-                _gate.Release();
+
+                return;
             }
 
-            if (result.Outcome != SyncOutcome.Disconnected)
-            {
-                logger.LogWarning("Disconnecting failed: {Outcome} {Detail}", result.Outcome, result.Detail);
-                await ShowFeedbackAsync(Strings.Sync_DisconnectFailed);
-            }
+            logger.LogWarning("Disconnecting failed: {Outcome} {Detail}", result.Outcome, result.Detail);
+            // Signed out, so the cloud file cannot be deleted: the link stays until the user signs in or keeps the file.
+            await ShowFeedbackAsync(Strings.Sync_DisconnectFailed,
+                result.Outcome == SyncOutcome.AuthExpired ? Strings.Sync_DisconnectSignInFirst : null);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Disconnecting failed");
             await ShowFeedbackAsync(Strings.Sync_DisconnectFailed);
+        }
+    }
+
+    /// <summary>
+    /// The disconnect itself, under the gate and without prompts. Returns the result and the provider id the device was
+    /// linked (or connecting) to. On success the status is Off.
+    /// </summary>
+    private async Task<(SyncResult Result, string? ProviderId)> DisconnectCoreAsync(bool deleteRemote)
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var state = await LoadStateAsync();
+            var provider = (state.ProviderId is { } id ? catalog.Get(id) : null) ?? _connecting;
+            if (provider is null)
+                deleteRemote = false;
+            var result = await Task.Run(() => session.Sync.DisconnectAsync(provider, deleteRemote));
+            _isLinked = (await LoadStateAsync()).IsConnected;
+            if (result.Outcome == SyncOutcome.Disconnected)
+            {
+                _connecting = null;
+                _pendingConflicts = [];
+                await SetStatusAsync(OffStatus);
+            }
+
+            return (result, state.ProviderId ?? provider?.Id);
+        }
+        finally
+        {
+            _gate.Release();
         }
     }
 
@@ -517,6 +642,7 @@ public sealed class SyncCoordinator(
 
     private static string FailureDetail(Exception ex) => ex switch
     {
+        SignInFailedException => Strings.Sync_SignInFailedDetail,
         SyncOfflineException => FailureDetail(SyncOutcome.Offline),
         SyncAuthException => FailureDetail(SyncOutcome.AuthExpired),
         _ => Strings.Backup_UnexpectedError,
@@ -579,6 +705,84 @@ public sealed class SyncCoordinator(
             _gate.Release();
         }
     }
+
+    private async Task<SyncState> LoadStateUnderGateAsync()
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var state = await LoadStateAsync();
+            _isLinked = state.IsConnected;
+            return state;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    /// <summary>Reads each provider's stored sign-in once (providers may share one).</summary>
+    private async Task LoadAccountsAsync()
+    {
+        foreach (var auth in catalog.Available.Select(o => catalog.AuthFor(o.Id)).OfType<ICloudAuthService>().Distinct())
+        {
+            try
+            {
+                await auth.LoadAsync();
+            }
+            catch (Exception ex)
+            {
+                // LoadAsync never throws by contract; a broken one must not stop the others or the status.
+                logger.LogError(ex, "Reading a stored sign-in failed");
+            }
+        }
+    }
+
+    /// <summary>
+    /// The interactive sign-in, outside the gate and through the dispatcher: behind the waiting panel when it leaves
+    /// the app, and cancelled after <see cref="SignInTimeout"/>. Null when cancelled or timed out. Any other failure
+    /// is a <see cref="SignInFailedException"/>.
+    /// </summary>
+    private async Task<CloudAccount?> SignInAsync(ICloudAuthService auth, string providerId, string? loginHint)
+    {
+        var providerName = catalog.DisplayNameOf(providerId) ?? providerId;
+        CloudAccount? account = null;
+        try
+        {
+            await dispatcher.InvokeAsync(async () => account = auth.SignInLeavesApp
+                ? await signInWait.RunAsync(providerName, ct => SignInWithTimeoutAsync(auth, loginHint, ct))
+                : await SignInWithTimeoutAsync(auth, loginHint, CancellationToken.None));
+        }
+        catch (OperationCanceledException)
+        {
+            account = null;
+        }
+        catch (Exception ex)
+        {
+            throw new SignInFailedException(ex);
+        }
+
+        if (account is null)
+            logger.LogInformation("Signing in to {Provider} was cancelled or timed out", providerId);
+        return account;
+    }
+
+    private async Task<CloudAccount?> SignInWithTimeoutAsync(ICloudAuthService auth, string? loginHint, CancellationToken ct)
+    {
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeout.CancelAfter(SignInTimeout);
+        try
+        {
+            return await auth.SignInAsync(loginHint, timeout.Token);
+        }
+        catch (OperationCanceledException) when (timeout.IsCancellationRequested)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>An interactive sign-in failed (it was not cancelled).</summary>
+    private sealed class SignInFailedException(Exception inner) : Exception("Signing in failed.", inner);
 
     private async Task<PassphrasePromptResult> PromptAsync(PassphrasePromptKind kind, bool previousAttemptFailed)
     {

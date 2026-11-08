@@ -10,4 +10,6 @@ public sealed class EmptyCloudProviderCatalog : ICloudProviderCatalog
     public ICloudSyncProvider? Get(string providerId) => null;
 
     public string? DisplayNameOf(string providerId) => null;
+
+    public ICloudAuthService? AuthFor(string providerId) => null;
 }

@@ -428,6 +428,9 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Échec de la déconnexion. Veuillez réessayer.</value></data>
   <data name="Sync_FailOffline" xml:space="preserve"><value>Impossible de joindre le cloud. Vérifiez la connexion et réessayez.</value></data>
   <data name="Sync_FailWrongPassphrase" xml:space="preserve"><value>La phrase secrète de synchronisation n'ouvre pas les données du cloud.</value></data>
+  <data name="Sync_SignInWaiting" xml:space="preserve"><value>En attente de la connexion dans votre navigateur…</value></data>
+  <data name="Sync_SignInFailedDetail" xml:space="preserve"><value>La connexion au compte a échoué. Vérifiez votre accès à Internet et réessayez.</value></data>
+  <data name="Sync_DisconnectSignInFirst" xml:space="preserve"><value>Reconnectez-vous pour supprimer la copie du cloud, ou déconnectez-vous en la gardant.</value></data>
   <data name="Sync_SectionTitle" xml:space="preserve"><value>Synchronisation</value></data>
   <data name="Sync_ConnectSub" xml:space="preserve"><value>Connecter cet appareil</value></data>
   <data name="Sync_SyncNow" xml:space="preserve"><value>Synchroniser maintenant</value></data>

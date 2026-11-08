@@ -428,6 +428,9 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Odpojení se nepodařilo. Zkuste to znovu.</value></data>
   <data name="Sync_FailOffline" xml:space="preserve"><value>Cloud není dostupný. Zkontrolujte připojení a zkuste to znovu.</value></data>
   <data name="Sync_FailWrongPassphrase" xml:space="preserve"><value>Heslo synchronizace data v cloudu neotevře.</value></data>
+  <data name="Sync_SignInWaiting" xml:space="preserve"><value>Čekání na přihlášení v prohlížeči…</value></data>
+  <data name="Sync_SignInFailedDetail" xml:space="preserve"><value>Přihlášení se nepodařilo. Zkontrolujte připojení a zkuste to znovu.</value></data>
+  <data name="Sync_DisconnectSignInFirst" xml:space="preserve"><value>Pro smazání kopie v cloudu se znovu přihlaste, nebo se odpojte a kopii ponechte.</value></data>
   <data name="Sync_SectionTitle" xml:space="preserve"><value>Synchronizace</value></data>
   <data name="Sync_ConnectSub" xml:space="preserve"><value>Připojit toto zařízení</value></data>
   <data name="Sync_SyncNow" xml:space="preserve"><value>Synchronizovat teď</value></data>

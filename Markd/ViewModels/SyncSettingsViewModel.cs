@@ -126,14 +126,8 @@ public sealed class SyncSettingsViewModel : ViewModelBase
     {
         SyncStatusKind.Conflicts => _sync.OpenConflictsAsync(),
         SyncStatusKind.NeedsPassphrase => _sync.EnterPassphraseAsync(),
-        SyncStatusKind.SignInAgain => SignInAgainAsync(),
+        SyncStatusKind.SignInAgain => _sync.SignInAgainAsync(),
         SyncStatusKind.Unreadable => _sync.ReplaceCloudAsync(),
         _ => Task.CompletedTask,
     };
-
-    // Reconnecting through the provider that is already linked refreshes its sign-in.
-    private Task SignInAgainAsync() =>
-        Providers.FirstOrDefault(p => p.DisplayName == _sync.Status.ProviderName) is { } provider
-            ? _sync.ConnectAsync(provider.Id)
-            : _sync.SyncNowAsync(SyncTrigger.Manual);
 }

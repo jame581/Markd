@@ -16,6 +16,8 @@ public sealed class DebugCloudProviderCatalog : ICloudProviderCatalog
 
     public string? DisplayNameOf(string providerId) => providerId == LocalFolderId ? Available[0].DisplayName : null;
 
+    public ICloudAuthService? AuthFor(string providerId) => null;
+
     public ICloudSyncProvider? Get(string providerId)
     {
         if (providerId != LocalFolderId) return null;

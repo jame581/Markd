@@ -11,8 +11,8 @@ namespace Markd.Tests;
 
 public class SyncCoordinatorTests
 {
-    private const string ProviderId = "test";
-    private static readonly DateTime LastSync = new(2026, 11, 1, 8, 30, 0, DateTimeKind.Utc);
+    internal const string ProviderId = "test";
+    internal static readonly DateTime LastSync = new(2026, 11, 1, 8, 30, 0, DateTimeKind.Utc);
 
     private readonly FakeStateStore _state = new();
     private readonly FakeSyncService _sync;
@@ -35,7 +35,7 @@ public class SyncCoordinatorTests
         _shell.Dispatcher = _dispatcher;
         _resolver.SyncCallCount = () => _sync.SyncCalls.Count;
         return new SyncCoordinator(new FakeSession(_sync, _state), _catalog, _resolver, _refresher, _dispatcher,
-            _secrets, _prompt, _shell, _feedback, NullLogger<SyncCoordinator>.Instance);
+            _secrets, _prompt, new FakeSignInWait(), _shell, _feedback, NullLogger<SyncCoordinator>.Instance);
     }
 
     private void Link(string? lastAttempt = "Synced")
@@ -1107,7 +1107,7 @@ public class SyncCoordinatorTests
 
     // ---- Fakes ----
 
-    private sealed class FakeDispatcher : IUiDispatcher
+    internal sealed class FakeDispatcher : IUiDispatcher
     {
         private readonly AsyncLocal<bool> _inside = new();
 
@@ -1127,14 +1127,14 @@ public class SyncCoordinatorTests
         }
     }
 
-    private sealed class FakeSession(ISyncService sync, ISyncStateStore state) : ISyncSession
+    internal sealed class FakeSession(ISyncService sync, ISyncStateStore state) : ISyncSession
     {
         public ISyncService Sync => sync;
 
         public ISyncStateStore State => state;
     }
 
-    private sealed class FakeStateStore : ISyncStateStore
+    internal sealed class FakeStateStore : ISyncStateStore
     {
         public SyncState Value { get; set; } = new();
         public int Loads { get; private set; }
@@ -1167,7 +1167,7 @@ public class SyncCoordinatorTests
         public Task<bool> HasSyncStateAsync() => Task.FromResult(Value.ProviderId is not null);
     }
 
-    private sealed class FakeSyncService(FakeStateStore state, FakeSecrets secrets) : ISyncService
+    internal sealed class FakeSyncService(FakeStateStore state, FakeSecrets secrets) : ISyncService
     {
         private TaskCompletionSource<SyncResult>? _block;
 
@@ -1201,17 +1201,26 @@ public class SyncCoordinatorTests
                 return await block.Task;
             }
 
-            var result = Results.TryDequeue(out var r) ? r : new SyncResult(SyncOutcome.NoChanges);
+            // Like the real one: signed out changes nothing.
+            var result = IsSignedOut(provider)
+                ? new SyncResult(SyncOutcome.AuthExpired)
+                : Results.TryDequeue(out var r) ? r : new SyncResult(SyncOutcome.NoChanges);
             state.Value.LastAttemptResult = result.Outcome.ToString();
-            // Like the real one: a successful run links the device.
+            // Like the real one: a successful run links the device and refreshes the account label.
             if (result.Outcome is SyncOutcome.Synced or SyncOutcome.NoChanges)
             {
                 state.Value.ProviderId = provider.Id;
+                state.Value.AccountName = provider.AccountName;
+                state.Value.AccountLabel = provider.AccountLabel ?? state.Value.AccountLabel;
                 state.Value.IsConnected = true;
             }
 
             return result;
         }
+
+        /// <summary>Like the real one: linked to an account, but the provider has none now.</summary>
+        private bool IsSignedOut(ICloudSyncProvider provider) =>
+            state.Value.AccountName is not null && provider.AccountName is null && state.Value.ProviderId == provider.Id;
 
         public Task<SyncResult> ForgetLinkAsync(CancellationToken ct = default)
         {
@@ -1239,6 +1248,8 @@ public class SyncCoordinatorTests
         public Task<SyncResult> DisconnectAsync(ICloudSyncProvider? provider, bool deleteRemote, CancellationToken ct = default)
         {
             Log.Add($"disconnect:{deleteRemote}");
+            if (deleteRemote && provider is not null && IsSignedOut(provider))
+                return Task.FromResult(new SyncResult(SyncOutcome.AuthExpired));
             if (deleteRemote)
                 state.Value = new SyncState();
             else
@@ -1257,7 +1268,7 @@ public class SyncCoordinatorTests
         }
     }
 
-    private sealed class FakeResolver : IConflictResolutionService
+    internal sealed class FakeResolver : IConflictResolutionService
     {
         private TaskCompletionSource<IReadOnlyList<ConflictResolution>?>? _block;
 
@@ -1301,7 +1312,7 @@ public class SyncCoordinatorTests
         }
     }
 
-    private sealed class FakeRefresher : ISyncDataRefresher
+    internal sealed class FakeRefresher : ISyncDataRefresher
     {
         public FakeDispatcher? Dispatcher { get; set; }
         public int Calls { get; private set; }
@@ -1316,7 +1327,7 @@ public class SyncCoordinatorTests
         }
     }
 
-    private sealed class FakeCatalog : ICloudProviderCatalog
+    internal sealed class FakeCatalog : ICloudProviderCatalog
     {
         public FakeProvider Provider { get; } = new();
 
@@ -1324,28 +1335,48 @@ public class SyncCoordinatorTests
 
         public bool Unavailable { get; set; }
 
+        /// <summary>The provider's sign-in, when set (the provider then reports its account).</summary>
+        public FakeAuth? Auth
+        {
+            get => Provider.Auth;
+            set => Provider.Auth = value;
+        }
+
         public ICloudSyncProvider? Get(string providerId) => providerId == ProviderId && !Unavailable ? Provider : null;
 
         public string? DisplayNameOf(string providerId) => providerId == ProviderId ? "Test cloud" : null;
+
+        public ICloudAuthService? AuthFor(string providerId) => providerId == ProviderId ? Auth : null;
     }
 
-    private sealed class FakeProvider : ICloudSyncProvider
+    internal sealed class FakeProvider : ICloudSyncProvider
     {
         public RemoteInfo? Info { get; set; } = new("rev-1", LastSync);
         public Exception? InfoError { get; set; }
+        /// <summary>Thrown by the next GetInfoAsync calls, one each, before <see cref="InfoError"/>.</summary>
+        public Queue<Exception> NextInfoErrors { get; } = new();
+        public int InfoCalls { get; private set; }
+        public List<string>? Order { get; set; }
+        public FakeAuth? Auth { get; set; }
         public string Id => ProviderId;
-        public string? AccountName => "me@example.com";
-        public string? AccountLabel => "me@example.com";
+        public string? AccountName => Auth is null ? "me@example.com" : Auth.Account?.Id;
+        public string? AccountLabel => Auth is null ? "me@example.com" : Auth.Account?.Email;
 
-        public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct) =>
-            InfoError is { } error ? Task.FromException<RemoteInfo?>(error) : Task.FromResult(Info);
+        public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct)
+        {
+            InfoCalls++;
+            Order?.Add("info");
+            if (NextInfoErrors.TryDequeue(out var next))
+                return Task.FromException<RemoteInfo?>(next);
+            return InfoError is { } error ? Task.FromException<RemoteInfo?>(error) : Task.FromResult(Info);
+        }
 
         public Task<RemoteFile?> DownloadAsync(CancellationToken ct) => throw new NotSupportedException();
         public Task<string> UploadAsync(byte[] data, string? expectedRevision, CancellationToken ct) => throw new NotSupportedException();
         public Task DeleteAsync(CancellationToken ct) => throw new NotSupportedException();
     }
 
-    private sealed class FakeSecrets : ISyncSecretStore
+    internal sealed class FakeSecrets : ISyncSecretStore
     {
         public string? Value { get; set; }
         public int Sets { get; private set; }
@@ -1360,7 +1391,7 @@ public class SyncCoordinatorTests
         }
     }
 
-    private sealed class FakePassphrasePrompt : ISyncPassphrasePromptService
+    internal sealed class FakePassphrasePrompt : ISyncPassphrasePromptService
     {
         public FakeDispatcher? Dispatcher { get; set; }
         public Queue<PassphrasePromptResult> Results { get; } = new();
@@ -1376,7 +1407,7 @@ public class SyncCoordinatorTests
         }
     }
 
-    private sealed class FakeShell : IAppShellService
+    internal sealed class FakeShell : IAppShellService
     {
         public FakeDispatcher? Dispatcher { get; set; }
         public Queue<bool> Answers { get; } = new();
@@ -1397,7 +1428,7 @@ public class SyncCoordinatorTests
         public Task ShowMessageAsync(string title, string message, string close) => Task.CompletedTask;
     }
 
-    private sealed class FakeFeedback : IFeedbackService
+    internal sealed class FakeFeedback : IFeedbackService
     {
         public List<string> Titles { get; } = [];
         public List<string?> Details { get; } = [];
@@ -1410,5 +1441,60 @@ public class SyncCoordinatorTests
         }
 
         public Task<bool> ShowUndoAsync(string message) => Task.FromResult(false);
+    }
+
+    /// <summary>A provider's sign-in: <see cref="OnSignIn"/> scripts the interactive flow (default: cancelled).</summary>
+    internal sealed class FakeAuth : ICloudAuthService
+    {
+        public CloudAccount? Account { get; set; }
+        public bool SignInLeavesApp { get; set; }
+        public Func<string?, CancellationToken, Task<CloudAccount?>> OnSignIn { get; set; } =
+            (_, _) => Task.FromResult<CloudAccount?>(null);
+        public List<string?> SignInHints { get; } = [];
+        public int SignOutCalls { get; private set; }
+        public bool Loaded { get; private set; }
+        public List<string>? Order { get; set; }
+
+        public async Task LoadAsync()
+        {
+            await Task.Yield();
+            Loaded = true;
+        }
+
+        public async Task<CloudAccount?> SignInAsync(string? loginHint, CancellationToken ct)
+        {
+            SignInHints.Add(loginHint);
+            Order?.Add("signin");
+            var account = await OnSignIn(loginHint, ct);
+            if (account is not null)
+                Account = account;
+            return account;
+        }
+
+        public Task SignOutAsync()
+        {
+            SignOutCalls++;
+            Order?.Add("signout");
+            Account = null;
+            return Task.CompletedTask;
+        }
+
+        public Task<string> GetAccessTokenAsync(bool forceRefresh, CancellationToken ct) => Task.FromResult("token");
+    }
+
+    /// <summary>The waiting panel: runs the sign-in, or cancels it at once when <see cref="Cancel"/> is set.</summary>
+    internal sealed class FakeSignInWait : ISignInWaitService
+    {
+        public List<string> Calls { get; } = [];
+        public bool Cancel { get; set; }
+
+        public async Task<T?> RunAsync<T>(string providerName, Func<CancellationToken, Task<T?>> signIn) where T : class
+        {
+            Calls.Add(providerName);
+            using var cts = new CancellationTokenSource();
+            if (Cancel)
+                await cts.CancelAsync();
+            return await signIn(cts.Token);
+        }
     }
 }

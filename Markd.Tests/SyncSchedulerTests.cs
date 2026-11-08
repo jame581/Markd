@@ -153,6 +153,7 @@ public class SyncSchedulerTests : IDisposable
         public Task ChangePassphraseAsync() => throw new NotSupportedException();
         public Task ReplaceCloudAsync() => throw new NotSupportedException();
         public Task DisconnectAsync() => throw new NotSupportedException();
+        public Task SignInAgainAsync() => throw new NotSupportedException();
     }
 }
 

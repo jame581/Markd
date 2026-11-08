@@ -21,6 +21,7 @@ public static class DesktopRegistration
         services.AddSingleton<IPasswordPromptService, DesktopPasswordPromptService>();
         services.AddSingleton<IConflictResolutionService, DesktopConflictResolutionService>();
         services.AddSingleton<ISyncPassphrasePromptService, DesktopSyncPassphrasePromptService>();
+        services.AddSingleton<ISignInWaitService, PassThroughSignInWaitService>();
     }
 }
 

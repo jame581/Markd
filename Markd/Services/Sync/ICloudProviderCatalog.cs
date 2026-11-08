@@ -18,4 +18,7 @@ public interface ICloudProviderCatalog
     /// still shows it). Null for ids this app has never known.
     /// </summary>
     string? DisplayNameOf(string providerId);
+
+    /// <summary>The provider's sign-in, or null when it needs none (the local folder) or this build lacks it.</summary>
+    ICloudAuthService? AuthFor(string providerId);
 }

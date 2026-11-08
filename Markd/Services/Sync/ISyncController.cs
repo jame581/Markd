@@ -19,5 +19,7 @@ public interface ISyncController
 
     Task ReplaceCloudAsync();
 
+    Task SignInAgainAsync();
+
     Task DisconnectAsync();
 }
