@@ -1,11 +1,13 @@
 using Markd.Core.Localization;
 using Markd.Core.Services;
+using Markd.Services.Sync;
+using Microsoft.Maui.Devices;
 
 namespace Markd.Services;
 
 /// <summary>
-/// Export and import without platform APIs: every dialog, picker and file destination is a seam,
-/// so the whole flow runs in unit tests.
+/// Export, import and erase without platform APIs: every dialog, picker and file destination is a seam,
+/// so the whole flow runs in unit tests. Import and erase follow the sync rules on a device with sync state.
 /// </summary>
 public sealed class BackupCoordinator(
     IExportService exportService,
@@ -14,8 +16,55 @@ public sealed class BackupCoordinator(
     IFilePickService picker,
     IFileExportService files,
     IFeedbackService feedback,
-    IAppShellService shell)
+    IAppShellService shell,
+    IOccasionService occasions,
+    ISyncLink syncLink)
 {
+    /// <summary>
+    /// Erases every occasion on this device after a confirm. With sync state it clears this device only: a linked
+    /// device syncs first (and warns when that failed), then the link is forgotten BEFORE the purge, so a failure in
+    /// between never leaves an empty device that a sync would read as deletes. Returns true when data was erased.
+    /// </summary>
+    public async Task<bool> EraseAllAsync()
+    {
+        try
+        {
+            var synced = await syncLink.HasSyncStateAsync();
+            var message = Strings.Settings_EraseConfirmMessage;
+            if (synced)
+            {
+                message = Strings.Settings_EraseConfirmMessageSynced;
+                if (syncLink.IsLinked && !await syncLink.TrySyncNowAsync())
+                    message += "\n\n" + Strings.Settings_EraseUnsyncedWarning;
+            }
+
+            var confirmed = await shell.DisplayAlertAsync(
+                Strings.Settings_EraseConfirmTitle, message, Strings.Settings_EraseAllShort, Strings.Common_Cancel, destructive: true);
+            if (!confirmed)
+                return false;
+
+            if (synced)
+            {
+                await syncLink.ForgetLinkForEraseAsync();
+                await occasions.PurgeAllAsync();
+            }
+            else
+            {
+                await occasions.DeleteAllAsync();
+            }
+        }
+        catch (Exception)
+        {
+            // Nothing an erase throws (a failed forget included) is useful to show verbatim.
+            await feedback.ShowAsync(Strings.Settings_EraseFailed, Strings.Backup_UnexpectedError);
+            return false;
+        }
+
+        if (shell.Platform != DevicePlatform.Android)
+            await feedback.ShowAsync(Strings.Settings_ErasedTitle, Strings.Settings_ErasedDetail);
+        return true;
+    }
+
     public async Task ExportAsync()
     {
         try
@@ -44,7 +93,10 @@ public sealed class BackupCoordinator(
         }
     }
 
-    /// <summary>Returns true when the data on this device was replaced.</summary>
+    /// <summary>
+    /// Returns true when the data on this device changed: replaced, or (with sync state) added to, with a warning
+    /// first that a 1.0 backup may double events changed since.
+    /// </summary>
     public async Task<bool> ImportAsync()
     {
         try
@@ -57,13 +109,21 @@ public sealed class BackupCoordinator(
             if (model is null)
                 return false;
 
-            var confirmed = await shell.DisplayAlertAsync(
-                Strings.Import_ConfirmTitle, Strings.Import_ConfirmMessage, Strings.Import_Replace, Strings.Common_Cancel, destructive: true);
+            var additive = await syncLink.HasSyncStateAsync();
+            var confirmed = additive
+                ? await shell.DisplayAlertAsync(Strings.Import_ConfirmTitleSynced, AdditiveConfirmMessage(model),
+                    Strings.Import_Add, Strings.Common_Cancel, destructive: false)
+                : await shell.DisplayAlertAsync(Strings.Import_ConfirmTitle, Strings.Import_ConfirmMessage,
+                    Strings.Import_Replace, Strings.Common_Cancel, destructive: true);
             if (!confirmed)
                 return false;
 
-            await importService.ApplyImportAsync(model);
-            await feedback.ShowAsync(Strings.Import_Complete, string.Format(LocalizationManager.Instance.Culture, Strings.Import_Loaded, file.FileName));
+            var outcome = await importService.ApplyImportAsync(model);
+            var culture = LocalizationManager.Instance.Culture;
+            var detail = outcome.Additive
+                ? OutcomeText(outcome, culture)
+                : string.Format(culture, Strings.Import_Loaded, file.FileName);
+            await feedback.ShowAsync(Strings.Import_Complete, detail);
             return true;
         }
         catch (Exception ex)
@@ -71,6 +131,22 @@ public sealed class BackupCoordinator(
             await feedback.ShowAsync(Strings.Import_Failed, DetailFor(ex));
             return false;
         }
+    }
+
+    private static string AdditiveConfirmMessage(ExportModel model) =>
+        ImportService.IsLegacy(model)
+            ? Strings.Import_ConfirmMessageSynced + "\n\n" + Strings.Import_LegacyMayDuplicate
+            : Strings.Import_ConfirmMessageSynced;
+
+    /// <summary>"3 events added." plus restored and skipped counts when there are any.</summary>
+    private static string OutcomeText(ImportOutcome outcome, System.Globalization.CultureInfo culture)
+    {
+        var parts = new List<string> { Plural.Format("Import_Added", outcome.Added, culture) };
+        if (outcome.Revived > 0)
+            parts.Add(Plural.Format("Import_Revived", outcome.Revived, culture));
+        if (outcome.Skipped > 0)
+            parts.Add(Plural.Format("Import_Skipped", outcome.Skipped, culture));
+        return string.Join(" ", parts);
     }
 
     /// <summary>

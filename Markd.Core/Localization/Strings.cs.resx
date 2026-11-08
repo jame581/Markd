@@ -393,4 +393,33 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Sync_ActionEnterPassphrase" xml:space="preserve"><value>Zadat heslo</value></data>
   <data name="Sync_ActionSignIn" xml:space="preserve"><value>Přihlásit se znovu</value></data>
   <data name="Sync_ActionReplaceCloud" xml:space="preserve"><value>Nahradit data v cloudu</value></data>
+  <data name="Settings_EraseConfirmMessageSynced" xml:space="preserve"><value>Smaže se jen toto zařízení a synchronizace se na něm vypne: všechny události, milníky a kategorie z něj zmizí. Cloud a vaše ostatní zařízení si všechno ponechají a po novém připojení se data vrátí. Nastavení zůstanou zachována.</value></data>
+  <data name="Settings_EraseUnsyncedWarning" xml:space="preserve"><value>Změny v tomto zařízení, které se ještě nesynchronizovaly, budou ztraceny.</value></data>
+  <data name="Settings_EraseFailed" xml:space="preserve"><value>Události se nepodařilo smazat</value></data>
+  <data name="Import_ConfirmTitleSynced" xml:space="preserve"><value>Přidat tuto zálohu?</value></data>
+  <data name="Import_ConfirmMessageSynced" xml:space="preserve"><value>Záloha se přidá k tomu, co už vaše zařízení mají. Nic se nesmaže a události, které tu už jsou, si ponechají svou současnou podobu.</value></data>
+  <data name="Import_Add" xml:space="preserve"><value>Přidat</value></data>
+  <data name="Import_LegacyMayDuplicate" xml:space="preserve"><value>Tato záloha pochází z Markd 1.0. Události změněné od jejího vytvoření se mohou objevit dvakrát.</value></data>
+  <data name="Import_Added_One" xml:space="preserve"><value>Přidána {0} událost.</value></data>
+  <data name="Import_Added_Few" xml:space="preserve"><value>Přidány {0} události.</value></data>
+  <data name="Import_Added_Many" xml:space="preserve"><value>Přidáno {0} událostí.</value></data>
+  <data name="Import_Revived_One" xml:space="preserve"><value>Obnovena {0} smazaná událost.</value></data>
+  <data name="Import_Revived_Few" xml:space="preserve"><value>Obnoveny {0} smazané události.</value></data>
+  <data name="Import_Revived_Many" xml:space="preserve"><value>Obnoveno {0} smazaných událostí.</value></data>
+  <data name="Import_Skipped_One" xml:space="preserve"><value>{0} událost už tu byla.</value></data>
+  <data name="Import_Skipped_Few" xml:space="preserve"><value>{0} události už tu byly.</value></data>
+  <data name="Import_Skipped_Many" xml:space="preserve"><value>{0} událostí už tu bylo.</value></data>
+  <data name="Sync_ConnectFailed" xml:space="preserve"><value>Nepodařilo se připojit ke cloudu. Zkuste to znovu.</value></data>
+  <data name="Sync_PassphraseChanged" xml:space="preserve"><value>Heslo synchronizace změněno</value></data>
+  <data name="Sync_PassphraseNotStored" xml:space="preserve"><value>Cloud teď používá nové heslo. Zadejte ho v tomto zařízení znovu.</value></data>
+  <data name="Sync_ReplaceConfirmTitle" xml:space="preserve"><value>Nahradit data v cloudu tímto zařízením?</value></data>
+  <data name="Sync_ReplaceConfirmMessage" xml:space="preserve"><value>Cloud dostane události z tohoto zařízení pod novým heslem synchronizace. Vaše ostatní zařízení budou potřebovat nové heslo a pak přidají zpět své vlastní události, takže se události smazané zde mohou vrátit.</value></data>
+  <data name="Sync_DisconnectConfirmTitle" xml:space="preserve"><value>Odpojit toto zařízení?</value></data>
+  <data name="Sync_DisconnectConfirmMessage" xml:space="preserve"><value>Vaše události v tomto zařízení zůstanou. Synchronizace se tu zastaví, dokud se znovu nepřipojíte.</value></data>
+  <data name="Sync_Disconnect" xml:space="preserve"><value>Odpojit</value></data>
+  <data name="Sync_DeleteCloudTitle" xml:space="preserve"><value>Smazat i data v cloudu?</value></data>
+  <data name="Sync_DeleteCloudMessage" xml:space="preserve"><value>Vaše ostatní zařízení si své události ponechají, ale přestanou se synchronizovat, dokud se jedno z nich znovu nepřipojí. Tuto akci nelze vrátit zpět.</value></data>
+  <data name="Sync_DeleteCloud" xml:space="preserve"><value>Smazat data v cloudu</value></data>
+  <data name="Sync_KeepCloud" xml:space="preserve"><value>Ponechat</value></data>
+  <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Odpojení se nepodařilo. Zkuste to znovu.</value></data>
 </root>

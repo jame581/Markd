@@ -393,4 +393,33 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Sync_ActionEnterPassphrase" xml:space="preserve"><value>Passphrase eingeben</value></data>
   <data name="Sync_ActionSignIn" xml:space="preserve"><value>Erneut anmelden</value></data>
   <data name="Sync_ActionReplaceCloud" xml:space="preserve"><value>Cloud-Daten ersetzen</value></data>
+  <data name="Settings_EraseConfirmMessageSynced" xml:space="preserve"><value>Nur dieses Gerät wird geleert und die Synchronisierung hier ausgeschaltet: Alle Anlässe, Meilensteine und Kategorien werden von diesem Gerät entfernt. Die Cloud und Ihre anderen Geräte behalten alles, und beim erneuten Verbinden kommt es zurück. Einstellungen bleiben erhalten.</value></data>
+  <data name="Settings_EraseUnsyncedWarning" xml:space="preserve"><value>Änderungen auf diesem Gerät, die noch nicht synchronisiert wurden, gehen verloren.</value></data>
+  <data name="Settings_EraseFailed" xml:space="preserve"><value>Anlässe konnten nicht gelöscht werden</value></data>
+  <data name="Import_ConfirmTitleSynced" xml:space="preserve"><value>Diese Sicherung hinzufügen?</value></data>
+  <data name="Import_ConfirmMessageSynced" xml:space="preserve"><value>Die Sicherung wird zu dem hinzugefügt, was Ihre Geräte bereits haben. Nichts wird gelöscht, und Anlässe, die schon hier sind, behalten ihren aktuellen Stand.</value></data>
+  <data name="Import_Add" xml:space="preserve"><value>Hinzufügen</value></data>
+  <data name="Import_LegacyMayDuplicate" xml:space="preserve"><value>Diese Sicherung stammt aus Markd 1.0. Anlässe, die seitdem geändert wurden, können doppelt erscheinen.</value></data>
+  <data name="Import_Added_One" xml:space="preserve"><value>{0} Anlass hinzugefügt.</value></data>
+  <data name="Import_Added_Few" xml:space="preserve"><value>{0} Anlässe hinzugefügt.</value></data>
+  <data name="Import_Added_Many" xml:space="preserve"><value>{0} Anlässe hinzugefügt.</value></data>
+  <data name="Import_Revived_One" xml:space="preserve"><value>{0} gelöschter Anlass wiederhergestellt.</value></data>
+  <data name="Import_Revived_Few" xml:space="preserve"><value>{0} gelöschte Anlässe wiederhergestellt.</value></data>
+  <data name="Import_Revived_Many" xml:space="preserve"><value>{0} gelöschte Anlässe wiederhergestellt.</value></data>
+  <data name="Import_Skipped_One" xml:space="preserve"><value>{0} Anlass war schon vorhanden.</value></data>
+  <data name="Import_Skipped_Few" xml:space="preserve"><value>{0} Anlässe waren schon vorhanden.</value></data>
+  <data name="Import_Skipped_Many" xml:space="preserve"><value>{0} Anlässe waren schon vorhanden.</value></data>
+  <data name="Sync_ConnectFailed" xml:space="preserve"><value>Die Cloud ist nicht erreichbar. Bitte versuchen Sie es erneut.</value></data>
+  <data name="Sync_PassphraseChanged" xml:space="preserve"><value>Synchronisierungs-Passphrase geändert</value></data>
+  <data name="Sync_PassphraseNotStored" xml:space="preserve"><value>Die Cloud verwendet jetzt die neue Passphrase. Geben Sie sie auf diesem Gerät erneut ein.</value></data>
+  <data name="Sync_ReplaceConfirmTitle" xml:space="preserve"><value>Cloud-Daten durch dieses Gerät ersetzen?</value></data>
+  <data name="Sync_ReplaceConfirmMessage" xml:space="preserve"><value>Die Cloud erhält die Anlässe dieses Geräts unter einer neuen Synchronisierungs-Passphrase. Ihre anderen Geräte brauchen die neue Passphrase und fügen dann ihre eigenen Anlässe wieder hinzu, sodass hier gelöschte Anlässe zurückkommen können.</value></data>
+  <data name="Sync_DisconnectConfirmTitle" xml:space="preserve"><value>Dieses Gerät trennen?</value></data>
+  <data name="Sync_DisconnectConfirmMessage" xml:space="preserve"><value>Ihre Anlässe bleiben auf diesem Gerät. Die Synchronisierung endet hier, bis Sie sich wieder verbinden.</value></data>
+  <data name="Sync_Disconnect" xml:space="preserve"><value>Trennen</value></data>
+  <data name="Sync_DeleteCloudTitle" xml:space="preserve"><value>Auch die Cloud-Daten löschen?</value></data>
+  <data name="Sync_DeleteCloudMessage" xml:space="preserve"><value>Ihre anderen Geräte behalten ihre Anlässe, synchronisieren aber nicht mehr, bis sich eines von ihnen wieder verbindet. Dies kann nicht rückgängig gemacht werden.</value></data>
+  <data name="Sync_DeleteCloud" xml:space="preserve"><value>Cloud-Daten löschen</value></data>
+  <data name="Sync_KeepCloud" xml:space="preserve"><value>Behalten</value></data>
+  <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Trennen fehlgeschlagen. Bitte versuchen Sie es erneut.</value></data>
 </root>

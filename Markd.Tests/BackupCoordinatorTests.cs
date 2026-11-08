@@ -1,5 +1,8 @@
+using Markd.Core.Domain;
+using Markd.Core.Localization;
 using Markd.Core.Services;
 using Markd.Services;
+using Markd.Services.Sync;
 using Microsoft.Maui.Devices;
 using Xunit;
 
@@ -13,6 +16,8 @@ public class BackupCoordinatorTests
     private static byte[] EncryptedFixture(string password = "right") =>
         MarkdPackage.Encrypt(PlainJson, password, MarkdPackage.MinIterations);
 
+    /// <summary>Calls on the occasion service and the sync link, in order.</summary>
+    private readonly List<string> _log = [];
     private readonly FakeExport _export = new();
     private readonly FakeImport _import = new();
     private readonly FakePrompts _prompts = new();
@@ -20,8 +25,161 @@ public class BackupCoordinatorTests
     private readonly FakeFiles _files = new();
     private readonly FakeFeedback _feedback = new();
     private readonly FakeShell _shell = new();
+    private readonly FakeOccasions _occasions;
+    private readonly FakeSyncLink _syncLink;
 
-    private BackupCoordinator Create() => new(_export, _import, _prompts, _picker, _files, _feedback, _shell);
+    public BackupCoordinatorTests()
+    {
+        _occasions = new FakeOccasions(_log);
+        _syncLink = new FakeSyncLink(_log);
+    }
+
+    private BackupCoordinator Create() =>
+        new(_export, _import, _prompts, _picker, _files, _feedback, _shell, _occasions, _syncLink);
+
+    // ---- Erase ----
+
+    [Fact]
+    public async Task Erase_WithoutSyncState_DeletesAllWithTheUsualCopy()
+    {
+        Assert.True(await Create().EraseAllAsync());
+
+        Assert.Equal(["delete-all"], _log);
+        Assert.Equal(Strings.Settings_EraseConfirmMessage, _shell.LastMessage);
+        Assert.True(_shell.LastDestructive);
+    }
+
+    [Fact]
+    public async Task Erase_Declined_DoesNothing()
+    {
+        _shell.Answer = false;
+
+        Assert.False(await Create().EraseAllAsync());
+
+        Assert.Empty(_log);
+    }
+
+    [Fact]
+    public async Task Erase_Synced_SyncsFirst_ThenForgetsTheLinkBeforePurging()
+    {
+        _syncLink.HasState = true;
+        _syncLink.IsLinked = true;
+
+        Assert.True(await Create().EraseAllAsync());
+
+        Assert.Equal(["sync", "forget", "purge"], _log);
+        Assert.Equal(Strings.Settings_EraseConfirmMessageSynced, _shell.LastMessage);
+        Assert.True(_shell.LastDestructive);
+    }
+
+    [Fact]
+    public async Task Erase_SyncedButTheSyncFailed_WarnsAboutUnsyncedChanges()
+    {
+        _syncLink.HasState = true;
+        _syncLink.IsLinked = true;
+        _syncLink.SyncSucceeds = false;
+
+        Assert.True(await Create().EraseAllAsync());
+
+        Assert.Contains(Strings.Settings_EraseConfirmMessageSynced, _shell.LastMessage);
+        Assert.Contains(Strings.Settings_EraseUnsyncedWarning, _shell.LastMessage);
+        Assert.Equal(["sync", "forget", "purge"], _log);
+    }
+
+    [Fact]
+    public async Task Erase_DisconnectedWithAKeptBase_ForgetsAndPurgesWithoutSyncing()
+    {
+        _syncLink.HasState = true;
+
+        Assert.True(await Create().EraseAllAsync());
+
+        Assert.Equal(["forget", "purge"], _log);
+        Assert.Equal(Strings.Settings_EraseConfirmMessageSynced, _shell.LastMessage);
+    }
+
+    [Fact]
+    public async Task Erase_Synced_Declined_KeepsTheLinkAndTheData()
+    {
+        _syncLink.HasState = true;
+        _syncLink.IsLinked = true;
+        _shell.Answer = false;
+
+        Assert.False(await Create().EraseAllAsync());
+
+        Assert.Equal(["sync"], _log);
+    }
+
+    [Fact]
+    public async Task Erase_ForgettingTheLinkFails_NeverPurges()
+    {
+        _syncLink.HasState = true;
+        _syncLink.ForgetError = new InvalidOperationException("still linked");
+
+        Assert.False(await Create().EraseAllAsync());
+
+        Assert.Equal(["forget"], _log);
+        Assert.Equal(Strings.Settings_EraseFailed, Assert.Single(_feedback.Titles));
+    }
+
+    // ---- Import with sync state ----
+
+    [Fact]
+    public async Task Import_WithSyncState_AddsWithTheSyncedCopy_NotDestructive()
+    {
+        _syncLink.HasState = true;
+        _import.Schema = "2";
+        _import.Outcome = new ImportOutcome(true, 3, 1, 2);
+        _picker.File = new PickedFile("backup.json", PlainJson);
+
+        Assert.True(await Create().ImportAsync());
+
+        Assert.Equal(Strings.Import_ConfirmMessageSynced, _shell.LastMessage);
+        Assert.False(_shell.LastDestructive);
+        Assert.True(_import.Applied);
+        Assert.Equal(Strings.Import_Complete, Assert.Single(_feedback.Titles));
+        var detail = Assert.Single(_feedback.Details);
+        var culture = LocalizationManager.Instance.Culture;
+        Assert.Contains(Plural.Format("Import_Added", 3, culture), detail);
+        Assert.Contains(Plural.Format("Import_Revived", 1, culture), detail);
+        Assert.Contains(Plural.Format("Import_Skipped", 2, culture), detail);
+    }
+
+    [Theory]
+    [InlineData("1", true)]
+    [InlineData("2", false)]
+    public async Task Import_WithSyncState_WarnsAboutDuplicatesOnlyForLegacyBackups(string schema, bool warns)
+    {
+        _syncLink.HasState = true;
+        _import.Schema = schema;
+        _picker.File = new PickedFile("backup.json", PlainJson);
+
+        Assert.True(await Create().ImportAsync());
+
+        Assert.Equal(warns, _shell.Messages.Any(m => m.Contains(Strings.Import_LegacyMayDuplicate)));
+    }
+
+    [Fact]
+    public async Task Import_WithSyncState_Declined_LeavesDataAlone()
+    {
+        _syncLink.HasState = true;
+        _shell.Answer = false;
+        _picker.File = new PickedFile("backup.json", PlainJson);
+
+        Assert.False(await Create().ImportAsync());
+
+        Assert.False(_import.Applied);
+    }
+
+    [Fact]
+    public async Task Import_WithoutSyncState_KeepsTheReplaceCopy()
+    {
+        _picker.File = new PickedFile("backup.json", PlainJson);
+
+        Assert.True(await Create().ImportAsync());
+
+        Assert.Equal(Strings.Import_ConfirmMessage, _shell.LastMessage);
+        Assert.DoesNotContain(_shell.Messages, m => m.Contains(Strings.Import_LegacyMayDuplicate));
+    }
 
     [Fact]
     public async Task Export_Cancelled_DoesNothing()
@@ -207,6 +365,8 @@ public class BackupCoordinatorTests
         public Exception? ParseError { get; set; }
         public Exception? ApplyError { get; set; }
         public bool Applied { get; private set; }
+        public string Schema { get; set; } = "1";
+        public ImportOutcome? Outcome { get; set; }
 
         public Task<ExportModel> ParseImportPackageAsync(byte[] package, string? passphrase = null)
         {
@@ -214,7 +374,7 @@ public class BackupCoordinatorTests
                 throw ParseError;
             if (MarkdPackage.IsEncrypted(package) && passphrase != CorrectPassword)
                 throw new MarkdPackageException(PackageError.WrongPassword, "Wrong password");
-            return Task.FromResult(new ExportModel { SchemaVersion = "1" });
+            return Task.FromResult(new ExportModel { SchemaVersion = Schema });
         }
 
         public Task<ImportOutcome> ApplyImportAsync(ExportModel model)
@@ -222,8 +382,60 @@ public class BackupCoordinatorTests
             if (ApplyError is not null)
                 throw ApplyError;
             Applied = true;
-            return Task.FromResult(new ImportOutcome(false, model.Occasions.Count, 0, 0));
+            return Task.FromResult(Outcome ?? new ImportOutcome(false, model.Occasions.Count, 0, 0));
         }
+    }
+
+    private sealed class FakeSyncLink(List<string> log) : ISyncLink
+    {
+        public bool HasState { get; set; }
+        public bool IsLinked { get; set; }
+        public bool SyncSucceeds { get; set; } = true;
+        public Exception? ForgetError { get; set; }
+
+        public Task<bool> HasSyncStateAsync() => Task.FromResult(HasState);
+
+        public Task<bool> TrySyncNowAsync()
+        {
+            log.Add("sync");
+            return Task.FromResult(SyncSucceeds);
+        }
+
+        public Task ForgetLinkForEraseAsync()
+        {
+            log.Add("forget");
+            return ForgetError is { } error ? Task.FromException(error) : Task.CompletedTask;
+        }
+    }
+
+    /// <summary>Only the erase calls; nothing else is used by the coordinator.</summary>
+    private sealed class FakeOccasions(List<string> log) : IOccasionService
+    {
+        public Task DeleteAllAsync()
+        {
+            log.Add("delete-all");
+            return Task.CompletedTask;
+        }
+
+        public Task PurgeAllAsync()
+        {
+            log.Add("purge");
+            return Task.CompletedTask;
+        }
+
+        public Task<List<Occasion>> GetAllAsync() => throw new NotSupportedException();
+        public Task<Occasion?> GetByIdAsync(int id) => throw new NotSupportedException();
+        public Task<Occasion> CreateAsync(Occasion occasion) => throw new NotSupportedException();
+        public Task<Occasion> UpdateAsync(Occasion occasion) => throw new NotSupportedException();
+        public Task DeleteAsync(int id) => throw new NotSupportedException();
+        public Task<Occasion> RestoreAsync(Occasion snapshot) => throw new NotSupportedException();
+        public Task SetPinnedAsync(int id) => throw new NotSupportedException();
+        public Task<Milestone> AddMilestoneAsync(int occasionId, int thresholdDays, string label) => throw new NotSupportedException();
+        public Task RemoveMilestoneAsync(int milestoneId) => throw new NotSupportedException();
+        public Task<IReadOnlyList<CalendarMark>> GetCalendarMarksAsync(int year, int month) => throw new NotSupportedException();
+        public int GetDays(Occasion occasion) => throw new NotSupportedException();
+        public Task<List<(Occasion, Milestone)>> GetPendingMilestonesAsync() => throw new NotSupportedException();
+        public Task MarkMilestoneNotifiedAsync(int milestoneId) => throw new NotSupportedException();
     }
 
     private sealed class FakePrompts : IPasswordPromptService
@@ -291,6 +503,8 @@ public class BackupCoordinatorTests
     {
         public bool Answer { get; set; } = true;
         public bool LastDestructive { get; private set; }
+        public List<string> Messages { get; } = [];
+        public string? LastMessage => Messages.LastOrDefault();
         public DevicePlatform Platform => DevicePlatform.Android;
 
         public Task GoToAsync(string route) => Task.CompletedTask;
@@ -298,6 +512,7 @@ public class BackupCoordinatorTests
         public Task<bool> DisplayAlertAsync(string title, string message, string accept, string cancel, bool destructive = false)
         {
             LastDestructive = destructive;
+            Messages.Add(message);
             return Task.FromResult(Answer);
         }
 

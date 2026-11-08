@@ -7,7 +7,6 @@ using Markd.Core.Domain;
 using Markd.Core.Localization;
 using Markd.Core.Services;
 using Markd.Services;
-using Microsoft.Maui.Devices;
 
 namespace Markd.ViewModels;
 
@@ -16,9 +15,7 @@ public class SettingsViewModel : ViewModelBase
     private const string TimeFormat = @"hh\:mm";
 
     private readonly IAppSettingsService _settingsService;
-    private readonly IOccasionService _occasionService;
     private readonly IAppShellService _shellService;
-    private readonly IFeedbackService _feedbackService;
     private readonly BackupCoordinator _backup;
     private readonly NotificationService _notificationService;
     private readonly SemaphoreSlim _saveGate = new(1, 1);
@@ -31,16 +28,12 @@ public class SettingsViewModel : ViewModelBase
 
     public SettingsViewModel(
         IAppSettingsService settingsService,
-        IOccasionService occasionService,
         IAppShellService shellService,
-        IFeedbackService feedbackService,
         BackupCoordinator backup,
         NotificationService notificationService)
     {
         _settingsService = settingsService;
-        _occasionService = occasionService;
         _shellService = shellService;
-        _feedbackService = feedbackService;
         _backup = backup;
         _notificationService = notificationService;
 
@@ -252,21 +245,13 @@ public class SettingsViewModel : ViewModelBase
 
     private async Task EraseAllAsync()
     {
-        var confirmed = await _shellService.DisplayAlertAsync(
-            Strings.Settings_EraseConfirmTitle,
-            Strings.Settings_EraseConfirmMessage,
-            Strings.Settings_EraseAllShort,
-            Strings.Common_Cancel,
-            destructive: true);
-        if (!confirmed)
+        if (!await _backup.EraseAllAsync())
             return;
 
-        await _occasionService.DeleteAllAsync();
+        // A synced erase also removes categories.
+        WeakReferenceMessenger.Default.Send(new CategoriesChangedMessage(this));
         WeakReferenceMessenger.Default.Send(new OccasionsChangedMessage(null, this));
         await _notificationService.RescheduleAsync();
-
-        if (_shellService.Platform != DevicePlatform.Android)
-            await _feedbackService.ShowAsync(Strings.Settings_ErasedTitle, Strings.Settings_ErasedDetail);
     }
 
     protected override void OnLanguageChanged()

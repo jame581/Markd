@@ -393,4 +393,33 @@ Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolk
   <data name="Sync_ActionEnterPassphrase" xml:space="preserve"><value>Enter passphrase</value></data>
   <data name="Sync_ActionSignIn" xml:space="preserve"><value>Sign in again</value></data>
   <data name="Sync_ActionReplaceCloud" xml:space="preserve"><value>Replace cloud data</value></data>
+  <data name="Settings_EraseConfirmMessageSynced" xml:space="preserve"><value>This clears this device only and turns sync off here: every occasion, milestone and category is removed from this device. The cloud and your other devices keep everything, and connecting again brings it back. Settings stay.</value></data>
+  <data name="Settings_EraseUnsyncedWarning" xml:space="preserve"><value>Changes on this device that have not synced yet will be lost.</value></data>
+  <data name="Settings_EraseFailed" xml:space="preserve"><value>Couldn't erase the occasions</value></data>
+  <data name="Import_ConfirmTitleSynced" xml:space="preserve"><value>Add this backup?</value></data>
+  <data name="Import_ConfirmMessageSynced" xml:space="preserve"><value>This adds the backup to what your devices already have. Nothing is deleted, and events that are already here keep their current version.</value></data>
+  <data name="Import_Add" xml:space="preserve"><value>Add</value></data>
+  <data name="Import_LegacyMayDuplicate" xml:space="preserve"><value>This backup is from Markd 1.0. Events changed since this backup may appear twice.</value></data>
+  <data name="Import_Added_One" xml:space="preserve"><value>{0} event added.</value></data>
+  <data name="Import_Added_Few" xml:space="preserve"><value>{0} events added.</value></data>
+  <data name="Import_Added_Many" xml:space="preserve"><value>{0} events added.</value></data>
+  <data name="Import_Revived_One" xml:space="preserve"><value>{0} deleted event restored.</value></data>
+  <data name="Import_Revived_Few" xml:space="preserve"><value>{0} deleted events restored.</value></data>
+  <data name="Import_Revived_Many" xml:space="preserve"><value>{0} deleted events restored.</value></data>
+  <data name="Import_Skipped_One" xml:space="preserve"><value>{0} event was already here.</value></data>
+  <data name="Import_Skipped_Few" xml:space="preserve"><value>{0} events were already here.</value></data>
+  <data name="Import_Skipped_Many" xml:space="preserve"><value>{0} events were already here.</value></data>
+  <data name="Sync_ConnectFailed" xml:space="preserve"><value>Couldn't reach the cloud. Try again.</value></data>
+  <data name="Sync_PassphraseChanged" xml:space="preserve"><value>Sync passphrase changed</value></data>
+  <data name="Sync_PassphraseNotStored" xml:space="preserve"><value>The cloud now uses the new passphrase. Enter it again on this device.</value></data>
+  <data name="Sync_ReplaceConfirmTitle" xml:space="preserve"><value>Replace cloud data with this device?</value></data>
+  <data name="Sync_ReplaceConfirmMessage" xml:space="preserve"><value>The cloud gets this device's events under a new sync passphrase. Your other devices need the new passphrase and then add their own events back, so events deleted here may return.</value></data>
+  <data name="Sync_DisconnectConfirmTitle" xml:space="preserve"><value>Disconnect this device?</value></data>
+  <data name="Sync_DisconnectConfirmMessage" xml:space="preserve"><value>Your events stay on this device. Sync stops here until you connect again.</value></data>
+  <data name="Sync_Disconnect" xml:space="preserve"><value>Disconnect</value></data>
+  <data name="Sync_DeleteCloudTitle" xml:space="preserve"><value>Also delete the cloud data?</value></data>
+  <data name="Sync_DeleteCloudMessage" xml:space="preserve"><value>Your other devices keep their events but stop syncing until one of them connects again. This can't be undone.</value></data>
+  <data name="Sync_DeleteCloud" xml:space="preserve"><value>Delete cloud data</value></data>
+  <data name="Sync_KeepCloud" xml:space="preserve"><value>Keep it</value></data>
+  <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Couldn't disconnect. Try again.</value></data>
 </root>

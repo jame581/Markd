@@ -393,4 +393,33 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Sync_ActionEnterPassphrase" xml:space="preserve"><value>Saisir la phrase secrète</value></data>
   <data name="Sync_ActionSignIn" xml:space="preserve"><value>Se reconnecter</value></data>
   <data name="Sync_ActionReplaceCloud" xml:space="preserve"><value>Remplacer les données du cloud</value></data>
+  <data name="Settings_EraseConfirmMessageSynced" xml:space="preserve"><value>Seul cet appareil est vidé et la synchronisation y est désactivée : tous les événements, étapes et catégories sont supprimés de cet appareil. Le cloud et vos autres appareils conservent tout, et une nouvelle connexion le rétablit. Les paramètres sont conservés.</value></data>
+  <data name="Settings_EraseUnsyncedWarning" xml:space="preserve"><value>Les modifications de cet appareil qui n'ont pas encore été synchronisées seront perdues.</value></data>
+  <data name="Settings_EraseFailed" xml:space="preserve"><value>Impossible d'effacer les événements</value></data>
+  <data name="Import_ConfirmTitleSynced" xml:space="preserve"><value>Ajouter cette sauvegarde ?</value></data>
+  <data name="Import_ConfirmMessageSynced" xml:space="preserve"><value>La sauvegarde s'ajoute à ce que vos appareils ont déjà. Rien n'est supprimé, et les événements déjà présents gardent leur version actuelle.</value></data>
+  <data name="Import_Add" xml:space="preserve"><value>Ajouter</value></data>
+  <data name="Import_LegacyMayDuplicate" xml:space="preserve"><value>Cette sauvegarde provient de Markd 1.0. Les événements modifiés depuis peuvent apparaître en double.</value></data>
+  <data name="Import_Added_One" xml:space="preserve"><value>{0} événement ajouté.</value></data>
+  <data name="Import_Added_Few" xml:space="preserve"><value>{0} événements ajoutés.</value></data>
+  <data name="Import_Added_Many" xml:space="preserve"><value>{0} événements ajoutés.</value></data>
+  <data name="Import_Revived_One" xml:space="preserve"><value>{0} événement supprimé restauré.</value></data>
+  <data name="Import_Revived_Few" xml:space="preserve"><value>{0} événements supprimés restaurés.</value></data>
+  <data name="Import_Revived_Many" xml:space="preserve"><value>{0} événements supprimés restaurés.</value></data>
+  <data name="Import_Skipped_One" xml:space="preserve"><value>{0} événement était déjà présent.</value></data>
+  <data name="Import_Skipped_Few" xml:space="preserve"><value>{0} événements étaient déjà présents.</value></data>
+  <data name="Import_Skipped_Many" xml:space="preserve"><value>{0} événements étaient déjà présents.</value></data>
+  <data name="Sync_ConnectFailed" xml:space="preserve"><value>Impossible de joindre le cloud. Veuillez réessayer.</value></data>
+  <data name="Sync_PassphraseChanged" xml:space="preserve"><value>Phrase secrète de synchronisation modifiée</value></data>
+  <data name="Sync_PassphraseNotStored" xml:space="preserve"><value>Le cloud utilise désormais la nouvelle phrase secrète. Saisissez-la à nouveau sur cet appareil.</value></data>
+  <data name="Sync_ReplaceConfirmTitle" xml:space="preserve"><value>Remplacer les données du cloud par cet appareil ?</value></data>
+  <data name="Sync_ReplaceConfirmMessage" xml:space="preserve"><value>Le cloud reçoit les événements de cet appareil sous une nouvelle phrase secrète de synchronisation. Vos autres appareils auront besoin de la nouvelle phrase secrète, puis rajouteront leurs propres événements : des événements supprimés ici peuvent donc revenir.</value></data>
+  <data name="Sync_DisconnectConfirmTitle" xml:space="preserve"><value>Déconnecter cet appareil ?</value></data>
+  <data name="Sync_DisconnectConfirmMessage" xml:space="preserve"><value>Vos événements restent sur cet appareil. La synchronisation s'arrête ici jusqu'à ce que vous vous reconnectiez.</value></data>
+  <data name="Sync_Disconnect" xml:space="preserve"><value>Déconnecter</value></data>
+  <data name="Sync_DeleteCloudTitle" xml:space="preserve"><value>Supprimer aussi les données du cloud ?</value></data>
+  <data name="Sync_DeleteCloudMessage" xml:space="preserve"><value>Vos autres appareils gardent leurs événements mais ne se synchronisent plus jusqu'à ce que l'un d'eux se reconnecte. Cette action est irréversible.</value></data>
+  <data name="Sync_DeleteCloud" xml:space="preserve"><value>Supprimer les données du cloud</value></data>
+  <data name="Sync_KeepCloud" xml:space="preserve"><value>Les garder</value></data>
+  <data name="Sync_DisconnectFailed" xml:space="preserve"><value>Échec de la déconnexion. Veuillez réessayer.</value></data>
 </root>

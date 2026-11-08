@@ -1,4 +1,5 @@
 using Markd.Core.Domain;
+using Markd.Core.Localization;
 using Markd.Core.Sync;
 using Microsoft.Extensions.Logging;
 
@@ -12,8 +13,9 @@ public enum SyncTrigger { Start, Resume, LocalChange, Timer, Manual, Connectivit
 
 /// <summary>
 /// Runs syncs for the whole app (singleton): one at a time, triggers during a run coalesce into one follow-up.
-/// Maps outcomes to <see cref="Status"/> and walks the user through conflicts. Core calls run off the UI thread;
-/// every seam call and <see cref="StatusChanged"/> goes through <see cref="IUiDispatcher"/>.
+/// Maps outcomes to <see cref="Status"/> and walks the user through conflicts, connecting, passphrases, replacing the
+/// cloud data and disconnecting. Core calls run off the UI thread; every seam call and <see cref="StatusChanged"/>
+/// goes through <see cref="IUiDispatcher"/>.
 /// </summary>
 public sealed class SyncCoordinator(
     ISyncSession session,
@@ -21,8 +23,14 @@ public sealed class SyncCoordinator(
     IConflictResolutionService conflictResolver,
     ISyncDataRefresher refresher,
     IUiDispatcher dispatcher,
-    ILogger<SyncCoordinator> logger)
+    ISyncSecretStore secrets,
+    ISyncPassphrasePromptService passphrasePrompt,
+    IAppShellService shell,
+    IFeedbackService feedback,
+    ILogger<SyncCoordinator> logger) : ISyncController, ISyncLink
 {
+    private enum UnlockResult { Unlocked, Cancelled, ForgotIt, Failed }
+
     private static readonly SyncStatus OffStatus = new(SyncStatusKind.Off, null, 0, null, null);
 
     private readonly object _lock = new();
@@ -117,6 +125,201 @@ public sealed class SyncCoordinator(
     }
 
     /// <summary>
+    /// Links this device to a provider's cloud file. No file yet: asks for a new passphrase and stores it. A file:
+    /// asks for its passphrase until it opens the file (nothing is stored or uploaded before that), or leads to
+    /// <see cref="ReplaceCloudAsync"/> when the user forgot it. Cancelling clears the stored passphrase. Then runs
+    /// the first sync, which links the device. Never throws.
+    /// </summary>
+    public async Task ConnectAsync(string providerId)
+    {
+        if (catalog.Get(providerId) is not { } provider)
+            return;
+
+        try
+        {
+            var info = await Task.Run(() => provider.GetInfoAsync(CancellationToken.None));
+            if (info is null)
+            {
+                if ((await PromptAsync(PassphrasePromptKind.CreateNew, false)).Passphrase is not { } created)
+                {
+                    await CancelConnectAsync();
+                    return;
+                }
+
+                await secrets.SetPassphraseAsync(created);
+            }
+            else
+            {
+                switch (await UnlockWithPromptAsync(provider, PassphrasePromptKind.EnterExisting))
+                {
+                    case UnlockResult.Cancelled:
+                        await CancelConnectAsync();
+                        return;
+                    case UnlockResult.ForgotIt:
+                        await ReplaceCloudCoreAsync(provider);
+                        return;
+                    case UnlockResult.Failed:
+                        return;
+                }
+            }
+
+            await SyncAndResolveAsync(provider);
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogInformation("Connecting was cancelled");
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Connecting to {Provider} failed", providerId);
+            await ShowFeedbackAsync(Strings.Sync_ConnectFailed);
+        }
+    }
+
+    /// <summary>
+    /// For a passphrase changed on another device: asks for it until it opens the cloud file, then syncs. Never throws.
+    /// </summary>
+    public async Task EnterPassphraseAsync()
+    {
+        try
+        {
+            if (await LinkedProviderAsync() is not { } provider)
+                return;
+
+            switch (await UnlockWithPromptAsync(provider, PassphrasePromptKind.EnterChanged))
+            {
+                case UnlockResult.ForgotIt:
+                    await ReplaceCloudCoreAsync(null);
+                    return;
+                case UnlockResult.Unlocked:
+                    break;
+                default:
+                    return;
+            }
+        }
+        catch (Exception ex)
+        {
+            await ShowFailureAsync(ex);
+            return;
+        }
+
+        await SyncNowAsync(SyncTrigger.Manual);
+    }
+
+    /// <summary>
+    /// Re-encrypts the cloud data under a new passphrase. When the cloud took it but this device could not store it,
+    /// the status asks for the passphrase and a hint says why. Never throws.
+    /// </summary>
+    public async Task ChangePassphraseAsync()
+    {
+        try
+        {
+            if ((await PromptAsync(PassphrasePromptKind.ChangeOwn, false)).Passphrase is not { } passphrase)
+                return;
+
+            var result = await RunAsync((sync, provider) => sync.ChangePassphraseAsync(provider, passphrase));
+            if (result is null)
+                return;
+
+            if (IsPassphraseNotStored(result))
+                await ShowFeedbackAsync(Strings.Sync_StatusNeedsPassphrase, Strings.Sync_PassphraseNotStored);
+            else if (result.Outcome is SyncOutcome.Synced or SyncOutcome.NoChanges)
+                await ShowFeedbackAsync(Strings.Sync_PassphraseChanged);
+            else if (result.Outcome == SyncOutcome.NeedsConflictResolution)
+                await ResolveConflictsAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowFailureAsync(ex);
+        }
+    }
+
+    /// <summary>
+    /// Overwrites the cloud data with this device's under a new passphrase, after a destructive confirm that says the
+    /// other devices add their own events back. For a forgotten passphrase or unreadable cloud data. Never throws.
+    /// </summary>
+    public async Task ReplaceCloudAsync()
+    {
+        try
+        {
+            await ReplaceCloudCoreAsync(null);
+        }
+        catch (Exception ex)
+        {
+            await ShowFailureAsync(ex);
+        }
+    }
+
+    /// <summary>
+    /// Disconnects after a confirm, then asks separately whether to delete the cloud file too (default: keep it).
+    /// Local data is never touched. Never throws.
+    /// </summary>
+    public async Task DisconnectAsync()
+    {
+        try
+        {
+            if (!await ConfirmAsync(Strings.Sync_DisconnectConfirmTitle, Strings.Sync_DisconnectConfirmMessage,
+                    Strings.Sync_Disconnect, Strings.Common_Cancel, destructive: false))
+                return;
+
+            var deleteRemote = await ConfirmAsync(Strings.Sync_DeleteCloudTitle, Strings.Sync_DeleteCloudMessage,
+                Strings.Sync_DeleteCloud, Strings.Sync_KeepCloud, destructive: true);
+
+            SyncResult result;
+            await _gate.WaitAsync();
+            try
+            {
+                var state = await LoadStateAsync();
+                var provider = state.ProviderId is { } id ? catalog.Get(id) : null;
+                result = await Task.Run(() => session.Sync.DisconnectAsync(provider, deleteRemote));
+                _isLinked = (await LoadStateAsync()).IsConnected;
+                if (result.Outcome == SyncOutcome.Disconnected)
+                {
+                    _pendingConflicts = [];
+                    await SetStatusAsync(OffStatus);
+                }
+            }
+            finally
+            {
+                _gate.Release();
+            }
+
+            if (result.Outcome != SyncOutcome.Disconnected)
+            {
+                logger.LogWarning("Disconnecting failed: {Outcome} {Detail}", result.Outcome, result.Detail);
+                await ShowFeedbackAsync(Strings.Sync_DisconnectFailed);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Disconnecting failed");
+            await ShowFeedbackAsync(Strings.Sync_DisconnectFailed);
+        }
+    }
+
+    /// <summary>True when a sync state row with a provider exists (linked, or disconnected with a kept base).</summary>
+    public async Task<bool> HasSyncStateAsync()
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            _isLinked = (await LoadStateAsync()).IsConnected;
+            return await Task.Run(() => session.State.HasSyncStateAsync());
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    /// <summary>Runs a manual sync and tells whether it ended synced. Never throws.</summary>
+    public async Task<bool> TrySyncNowAsync()
+    {
+        await SyncNowAsync(SyncTrigger.Manual);
+        return _status.Kind == SyncStatusKind.Idle;
+    }
+
+    /// <summary>
     /// Forgets the sync link before an erase (<see cref="ISyncService.ForgetLinkAsync"/>). Throws when it did not
     /// disconnect, so the caller never purges a device that is still linked.
     /// </summary>
@@ -197,12 +400,110 @@ public sealed class SyncCoordinator(
         }
     }
 
-    private async Task SyncAndResolveAsync()
+    private async Task SyncAndResolveAsync(ICloudSyncProvider? connectingTo = null)
     {
-        var result = await RunAsync((sync, provider) => sync.SyncAsync(provider));
+        var result = await RunAsync((sync, provider) => sync.SyncAsync(provider), connectingTo);
         if (result?.Outcome == SyncOutcome.NeedsConflictResolution)
             await ResolveConflictsAsync();
     }
+
+    /// <summary>The destructive confirm, a new passphrase, then the replace (a first run when connecting).</summary>
+    private async Task ReplaceCloudCoreAsync(ICloudSyncProvider? connectingTo)
+    {
+        if (!await ConfirmAsync(Strings.Sync_ReplaceConfirmTitle, Strings.Sync_ReplaceConfirmMessage,
+                Strings.Sync_ActionReplaceCloud, Strings.Common_Cancel, destructive: true))
+            return;
+
+        if ((await PromptAsync(PassphrasePromptKind.CreateNew, false)).Passphrase is not { } passphrase)
+            return;
+
+        await RunAsync((sync, provider) => sync.ReplaceRemoteAsync(provider, passphrase), connectingTo);
+    }
+
+    /// <summary>
+    /// Asks for the passphrase of an existing cloud file until <see cref="ISyncService.UnlockAsync"/> accepts it,
+    /// showing the previous failure on each retry. Any outcome other than a wrong passphrase ends the loop.
+    /// </summary>
+    private async Task<UnlockResult> UnlockWithPromptAsync(ICloudSyncProvider provider, PassphrasePromptKind kind)
+    {
+        var failed = false;
+        while (true)
+        {
+            var answer = await PromptAsync(kind, failed);
+            if (answer.ForgotIt)
+                return UnlockResult.ForgotIt;
+            if (answer.Passphrase is not { } passphrase)
+                return UnlockResult.Cancelled;
+
+            SyncResult result;
+            await _gate.WaitAsync();
+            try
+            {
+                result = await Task.Run(() => session.Sync.UnlockAsync(provider, passphrase));
+            }
+            finally
+            {
+                _gate.Release();
+            }
+
+            switch (result.Outcome)
+            {
+                case SyncOutcome.NoChanges or SyncOutcome.Synced:
+                    return UnlockResult.Unlocked;
+                case SyncOutcome.WrongPassphrase:
+                    failed = true;
+                    continue;
+                default:
+                    logger.LogWarning("Unlocking failed: {Outcome} {Detail}", result.Outcome, result.Detail);
+                    await ShowFeedbackAsync(Strings.Sync_ConnectFailed);
+                    return UnlockResult.Failed;
+            }
+        }
+    }
+
+    /// <summary>A cancelled connect leaves no passphrase behind and, on a device that is not linked, shows Off.</summary>
+    private async Task CancelConnectAsync()
+    {
+        await secrets.SetPassphraseAsync(null);
+        if (!_isLinked)
+            await SetStatusAsync(OffStatus);
+    }
+
+    private async Task<ICloudSyncProvider?> LinkedProviderAsync()
+    {
+        await _gate.WaitAsync();
+        try
+        {
+            var state = await LoadStateAsync();
+            _isLinked = state.IsConnected;
+            return state.IsConnected && state.ProviderId is { } id ? catalog.Get(id) : null;
+        }
+        finally
+        {
+            _gate.Release();
+        }
+    }
+
+    private async Task<PassphrasePromptResult> PromptAsync(PassphrasePromptKind kind, bool previousAttemptFailed)
+    {
+        var result = new PassphrasePromptResult(null, false);
+        await dispatcher.InvokeAsync(async () => result = await passphrasePrompt.PromptAsync(kind, previousAttemptFailed));
+        return result;
+    }
+
+    private async Task<bool> ConfirmAsync(string title, string message, string accept, string cancel, bool destructive)
+    {
+        var confirmed = false;
+        await dispatcher.InvokeAsync(async () =>
+            confirmed = await shell.DisplayAlertAsync(title, message, accept, cancel, destructive));
+        return confirmed;
+    }
+
+    private Task ShowFeedbackAsync(string title, string? detail = null) =>
+        dispatcher.InvokeAsync(() => feedback.ShowAsync(title, detail));
+
+    private static bool IsPassphraseNotStored(SyncResult result) =>
+        result is { Outcome: SyncOutcome.Failed, Detail: SyncResult.PassphraseNotStoredDetail };
 
     /// <summary>
     /// The conflict loop: show the list, apply the answers, and show it again when applying finds new conflicts.
@@ -294,7 +595,8 @@ public sealed class SyncCoordinator(
             _isLinked = after.IsConnected;
             _pendingConflicts = result.Outcome == SyncOutcome.NeedsConflictResolution ? result.Conflicts ?? [] : [];
 
-            var kind = KindOf(result.Outcome);
+            // The cloud took a new passphrase this device could not store: the user has to enter it again.
+            var kind = IsPassphraseNotStored(result) ? SyncStatusKind.NeedsPassphrase : KindOf(result.Outcome);
             await SetStatusAsync(kind == SyncStatusKind.Off
                 ? OffStatus
                 : BuildStatus(kind, after, after.ProviderId ?? provider.Id, _pendingConflicts.Count));
