@@ -195,10 +195,113 @@ public class SyncCoordinatorTests
         var coordinator = await CreateLinkedAsync();
         _sync.Throw = new OperationCanceledException();
 
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => coordinator.SyncNowAsync(SyncTrigger.Manual));
+        await coordinator.SyncNowAsync(SyncTrigger.Manual);
 
         Assert.Equal(1, _refresher.Calls);
-        Assert.NotEqual(SyncStatusKind.Syncing, coordinator.Status.Kind);
+        Assert.Equal(SyncStatusKind.Idle, coordinator.Status.Kind);   // restored from the stored "Synced"
+    }
+
+    [Fact]
+    public async Task Run_CancelledWithKnownConflicts_KeepsTheCountConsistent()
+    {
+        var coordinator = await CreateLinkedAsync();
+        _sync.Results.Enqueue(ConflictResult(Conflict("a")));
+        _resolver.Answers.Enqueue(null);
+        await coordinator.SyncNowAsync(SyncTrigger.Manual);
+        _sync.Throw = new OperationCanceledException();
+
+        await coordinator.SyncNowAsync(SyncTrigger.Manual);
+
+        Assert.Equal(SyncStatusKind.Conflicts, coordinator.Status.Kind);
+        Assert.Equal(1, coordinator.Status.ConflictCount);
+        Assert.Single(coordinator.PendingConflicts);
+    }
+
+    [Fact]
+    public async Task Init_ClearsPendingConflicts()
+    {
+        var coordinator = await CreateLinkedAsync();
+        _sync.Results.Enqueue(ConflictResult(Conflict("a")));
+        _resolver.Answers.Enqueue(null);
+        await coordinator.SyncNowAsync(SyncTrigger.Manual);
+
+        await coordinator.InitializeAsync();
+
+        Assert.Empty(coordinator.PendingConflicts);
+        Assert.Equal(0, coordinator.Status.ConflictCount);
+    }
+
+    [Fact]
+    public async Task ApplyTrigger_IsIgnored()
+    {
+        var coordinator = await CreateLinkedAsync();
+
+        await coordinator.SyncNowAsync(SyncTrigger.Apply);
+
+        Assert.Empty(_sync.SyncCalls);
+    }
+
+    // ---- Unexpected exceptions ----
+
+    [Fact]
+    public async Task RunThatThrows_DoesNotFaultCoalescedCallers_ShowsFailed_AndRunsTheFollowUp()
+    {
+        var coordinator = await CreateLinkedAsync();
+        var seen = new List<SyncStatusKind>();
+        coordinator.StatusChanged += (_, _) => seen.Add(coordinator.Status.Kind);
+        var release = _sync.BlockNext();
+
+        var manual = coordinator.SyncNowAsync(SyncTrigger.Manual);
+        await _sync.Entered.Task;
+        var timer = coordinator.SyncNowAsync(SyncTrigger.Timer);
+        _state.FailNextLoad = true;   // the state read after the operation throws
+        release.SetResult(new SyncResult(SyncOutcome.Synced));
+        await manual;
+        await timer;
+
+        Assert.True(timer.IsCompletedSuccessfully);
+        Assert.Contains(SyncStatusKind.Failed, seen);
+        Assert.Equal(2, _sync.SyncCalls.Count);
+        Assert.Equal(SyncStatusKind.Idle, coordinator.Status.Kind);
+    }
+
+    [Fact]
+    public async Task ThrowingStatusSubscriber_DoesNotBreakRunsOrCoalescedCallers()
+    {
+        var coordinator = await CreateLinkedAsync();
+        var otherCalls = 0;
+        coordinator.StatusChanged += (_, _) => throw new InvalidOperationException("broken subscriber");
+        coordinator.StatusChanged += (_, _) => otherCalls++;
+        var release = _sync.BlockNext();
+
+        var manual = coordinator.SyncNowAsync(SyncTrigger.Manual);
+        await _sync.Entered.Task;
+        var timer = coordinator.SyncNowAsync(SyncTrigger.Timer);
+        release.SetResult(new SyncResult(SyncOutcome.Synced));
+        await manual;
+        await timer;
+
+        Assert.True(timer.IsCompletedSuccessfully);
+        Assert.Equal(2, _sync.SyncCalls.Count);
+        Assert.Equal(SyncStatusKind.Idle, coordinator.Status.Kind);
+        Assert.True(otherCalls > 0);
+    }
+
+    [Fact]
+    public async Task ThrowingResolver_ShowsFailedWithoutThrowing()
+    {
+        var coordinator = await CreateLinkedAsync();
+        _sync.Results.Enqueue(ConflictResult(Conflict("a")));
+        _resolver.Throw = new InvalidOperationException("broken list");
+
+        await coordinator.SyncNowAsync(SyncTrigger.Manual);
+
+        Assert.Equal(SyncStatusKind.Failed, coordinator.Status.Kind);
+        Assert.Empty(coordinator.PendingConflicts);
+
+        _sync.Results.Enqueue(new SyncResult(SyncOutcome.Synced));
+        await coordinator.SyncNowAsync(SyncTrigger.Manual);
+        Assert.Equal(SyncStatusKind.Idle, coordinator.Status.Kind);
     }
 
     // ---- Dispatcher ----
@@ -460,10 +563,17 @@ public class SyncCoordinatorTests
     {
         public SyncState Value { get; set; } = new();
         public int Loads { get; private set; }
+        public bool FailNextLoad { get; set; }
 
         public Task<SyncState> LoadAsync()
         {
             Loads++;
+            if (FailNextLoad)
+            {
+                FailNextLoad = false;
+                throw new IOException("database locked");
+            }
+
             return Task.FromResult(Value);
         }
 
@@ -540,6 +650,8 @@ public class SyncCoordinatorTests
     {
         private TaskCompletionSource<IReadOnlyList<ConflictResolution>?>? _block;
 
+        public Exception? Throw { get; set; }
+
         public FakeDispatcher? Dispatcher { get; set; }
         public Func<int>? SyncCallCount { get; set; }
         public Queue<IReadOnlyList<ConflictResolution>?> Answers { get; } = new();
@@ -562,6 +674,12 @@ public class SyncCoordinatorTests
             if (Dispatcher?.IsInside != true)
                 CallsOutsideDispatcher++;
             Entered.TrySetResult();
+            if (Throw is { } ex)
+            {
+                Throw = null;
+                throw ex;
+            }
+
             if (_block is { } block)
             {
                 _block = null;

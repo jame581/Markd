@@ -4,6 +4,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Markd.Services.Sync;
 
+/// <summary>
+/// What asked for a sync. <see cref="Apply"/> stands for the run that applies conflict answers, which only the
+/// coordinator makes from its conflict list: <see cref="SyncCoordinator.SyncNowAsync"/> ignores it.
+/// </summary>
 public enum SyncTrigger { Start, Resume, LocalChange, Timer, Manual, Connectivity, Apply }
 
 /// <summary>
@@ -44,7 +48,7 @@ public sealed class SyncCoordinator(
     /// <summary>Whether <see cref="SyncState.IsConnected"/> was true at the last read.</summary>
     public bool IsLinked => _isLinked;
 
-    /// <summary>Builds <see cref="Status"/> from the stored sync state, without touching the network.</summary>
+    /// <summary>Builds <see cref="Status"/> from the stored sync state, without touching the network. Never throws.</summary>
     public async Task InitializeAsync()
     {
         await _gate.WaitAsync();
@@ -52,7 +56,12 @@ public sealed class SyncCoordinator(
         {
             var state = await LoadStateAsync();
             _isLinked = state.IsConnected;
+            _pendingConflicts = [];
             await SetStatusAsync(StatusFromStoredState(state));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Reading the sync state failed");
         }
         finally
         {
@@ -62,15 +71,16 @@ public sealed class SyncCoordinator(
 
     /// <summary>
     /// Syncs now, or queues one follow-up when a run is in progress. Automatic triggers are ignored when the device is
-    /// not linked or waits for the user; <see cref="SyncTrigger.Manual"/>, <see cref="SyncTrigger.Start"/> and
-    /// <see cref="SyncTrigger.Apply"/> always run when linked. Completes when the run (and any follow-up) finished.
+    /// not linked or waits for the user; <see cref="SyncTrigger.Manual"/> and <see cref="SyncTrigger.Start"/> always run
+    /// when linked, and <see cref="SyncTrigger.Apply"/> is ignored. Completes when the run (and any follow-up) finished.
+    /// Never throws: failures show as <see cref="SyncStatusKind.Failed"/>.
     /// </summary>
     public Task SyncNowAsync(SyncTrigger trigger)
     {
         TaskCompletionSource done;
         lock (_lock)
         {
-            if (!ShouldRun(trigger))
+            if (trigger == SyncTrigger.Apply || !ShouldRun(trigger))
                 return Task.CompletedTask;
 
             if (_loopDone is { } running)
@@ -85,9 +95,26 @@ public sealed class SyncCoordinator(
         return RunLoopAsync(trigger, done);
     }
 
-    /// <summary>Shows the conflict list for <see cref="PendingConflicts"/>, syncing first when none are known yet.</summary>
-    public Task OpenConflictsAsync() =>
-        PendingConflicts.Count == 0 ? SyncNowAsync(SyncTrigger.Manual) : ResolveConflictsAsync();
+    /// <summary>
+    /// Shows the conflict list for <see cref="PendingConflicts"/>, syncing first when none are known yet. Never throws.
+    /// </summary>
+    public async Task OpenConflictsAsync()
+    {
+        if (PendingConflicts.Count == 0)
+        {
+            await SyncNowAsync(SyncTrigger.Manual);
+            return;
+        }
+
+        try
+        {
+            await ResolveConflictsAsync();
+        }
+        catch (Exception ex)
+        {
+            await ShowFailureAsync(ex);
+        }
+    }
 
     /// <summary>
     /// Forgets the sync link before an erase (<see cref="ISyncService.ForgetLinkAsync"/>). Throws when it did not
@@ -112,37 +139,61 @@ public sealed class SyncCoordinator(
         }
     }
 
+    /// <summary>
+    /// Runs the trigger and then each queued follow-up. A failing run is logged and shown as Failed; it never faults
+    /// the callers waiting on this loop and never drops the follow-up.
+    /// </summary>
     private async Task RunLoopAsync(SyncTrigger trigger, TaskCompletionSource done)
     {
-        try
+        SyncTrigger? next = trigger;
+        while (next is { } current)
         {
-            SyncTrigger? next = trigger;
-            while (next is { } current)
+            try
             {
                 if (ShouldRun(current))
                     await SyncAndResolveAsync();
-
-                lock (_lock)
-                {
-                    next = _followUp;
-                    _followUp = null;
-                    if (next is null)
-                        _loopDone = null;
-                }
+            }
+            catch (Exception ex)
+            {
+                await ShowFailureAsync(ex);
             }
 
-            done.SetResult();
-        }
-        catch (Exception ex)
-        {
             lock (_lock)
             {
+                next = _followUp;
                 _followUp = null;
-                _loopDone = null;
+                if (next is null)
+                    _loopDone = null;
             }
+        }
 
-            done.SetException(ex);
-            throw;
+        done.SetResult();
+    }
+
+    /// <summary>
+    /// After an unexpected exception (not a core sync failure, which is a result): log it and never leave the status
+    /// at Syncing. A cancelled run already restored its status.
+    /// </summary>
+    private async Task ShowFailureAsync(Exception ex)
+    {
+        if (ex is OperationCanceledException && _status.Kind != SyncStatusKind.Syncing)
+        {
+            logger.LogInformation("Sync was cancelled");
+            return;
+        }
+
+        logger.LogError(ex, "Sync failed unexpectedly");
+        if (_status.Kind == SyncStatusKind.Off)
+            return;
+
+        _pendingConflicts = [];
+        try
+        {
+            await SetStatusAsync(_status with { Kind = SyncStatusKind.Failed, ConflictCount = 0 });
+        }
+        catch (Exception statusEx)
+        {
+            logger.LogError(statusEx, "Showing the sync failure failed");
         }
     }
 
@@ -221,7 +272,12 @@ public sealed class SyncCoordinator(
                 await RefreshAsync();
                 var stored = await LoadStateAsync();
                 _isLinked = stored.IsConnected;
-                await SetStatusAsync(StatusFromStoredState(stored));
+                var restored = StatusFromStoredState(stored);
+                if (restored.Kind == SyncStatusKind.Conflicts)
+                    restored = restored with { ConflictCount = _pendingConflicts.Count };
+                else
+                    _pendingConflicts = [];
+                await SetStatusAsync(restored);
                 throw;
             }
             catch (Exception ex)
@@ -254,7 +310,7 @@ public sealed class SyncCoordinator(
         IsForced(trigger) || (_isLinked && !NeedsUser(_status.Kind));
 
     private static bool IsForced(SyncTrigger trigger) =>
-        trigger is SyncTrigger.Manual or SyncTrigger.Start or SyncTrigger.Apply;
+        trigger is SyncTrigger.Manual or SyncTrigger.Start;
 
     private static bool NeedsUser(SyncStatusKind kind) => kind is SyncStatusKind.Conflicts or SyncStatusKind.NeedsPassphrase
         or SyncStatusKind.SignInAgain or SyncStatusKind.UpdateApp or SyncStatusKind.Unreadable;
@@ -315,7 +371,19 @@ public sealed class SyncCoordinator(
         _status = status;
         return dispatcher.InvokeAsync(() =>
         {
-            StatusChanged?.Invoke(this, EventArgs.Empty);
+            // One failing subscriber must not stop the others or the run.
+            foreach (var handler in StatusChanged?.GetInvocationList() ?? [])
+            {
+                try
+                {
+                    ((EventHandler)handler)(this, EventArgs.Empty);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "A sync status subscriber failed");
+                }
+            }
+
             return Task.CompletedTask;
         });
     }
