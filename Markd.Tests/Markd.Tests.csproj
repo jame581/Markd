@@ -55,6 +55,7 @@
     <Compile Include="..\Markd\Services\Sync\ISyncSession.cs" Link="Services\Sync\ISyncSession.cs" />
     <Compile Include="..\Markd\Services\Sync\SyncScope.cs" Link="Services\Sync\SyncScope.cs" />
     <Compile Include="..\Markd\Services\Sync\SyncStatus.cs" Link="Services\Sync\SyncStatus.cs" />
+    <Compile Include="..\Markd\Services\Sync\SyncCoordinator.cs" Link="Services\Sync\SyncCoordinator.cs" />
   </ItemGroup>
 
 </Project>
