@@ -1,4 +1,6 @@
+using Markd.Localization;
 using Markd.Services.Sync;
+using Markd.ViewModels;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Markd.Controls;
@@ -6,7 +8,8 @@ namespace Markd.Controls;
 /// <summary>
 /// The sync activity mark for both layouts: a spinning sync glyph while a sync runs, a warning glyph when sync needs
 /// the user, hidden otherwise. Follows <see cref="SyncCoordinator.StatusChanged"/> while it is loaded and raises
-/// <see cref="Tapped"/>; the host decides what a tap opens.
+/// <see cref="Tapped"/>; the host decides what a tap opens. Screen readers hear "Sync status" with the status text as
+/// the hint.
 /// </summary>
 public sealed class SyncActivityIcon : Border
 {
@@ -35,6 +38,7 @@ public sealed class SyncActivityIcon : Border
         Content = _icon;
         IsVisible = false;
         ApplySize(48);
+        SetBinding(SemanticProperties.DescriptionProperty, Tr.Bind("Sync_StatusDescription"));
 
         var tap = new TapGestureRecognizer();
         tap.Tapped += (_, _) => Tapped?.Invoke(this, EventArgs.Empty);
@@ -95,6 +99,8 @@ public sealed class SyncActivityIcon : Border
     private void Update()
     {
         var kind = Kind;
+        if (_sync is not null)
+            SemanticProperties.SetHint(this, SyncStatusText.Describe(_sync.Status, DateTime.UtcNow));
         if (kind == SyncStatusKind.Syncing)
         {
             _icon.Glyph = SyncGlyph;

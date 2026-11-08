@@ -369,12 +369,13 @@ public partial class DesktopShellPage : ContentPage
         SemanticProperties.SetDescription(ThemeItem, label);
     }
 
-    /// <summary>The sync mark's tooltip is the status it stands for ("Syncing", "Sync paused: 2 conflicts to resolve").</summary>
+    /// <summary>
+    /// The sync mark's tooltip is the status it stands for ("Syncing", "Sync paused: 2 conflicts to resolve"). Screen
+    /// readers get the same text from the mark itself, as its hint.
+    /// </summary>
     private void UpdateSyncItem()
     {
-        var label = SyncStatusText.Describe(_sync.Status, DateTime.UtcNow);
-        ToolTipProperties.SetText(SyncItem, label);
-        SemanticProperties.SetDescription(SyncItem, label);
+        ToolTipProperties.SetText(SyncItem, SyncStatusText.Describe(_sync.Status, DateTime.UtcNow));
     }
 
     /// <summary>Conflicts reopen the list; any other state needing the user is explained and acted on in Settings.</summary>

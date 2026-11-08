@@ -85,6 +85,9 @@ public partial class SyncPassphraseDialog : ContentView
         ErrorLabel.IsVisible = true;
     }
 
+    /// <summary>An error is about what was typed: editing either field clears it.</summary>
+    private void OnFieldEdited(object? sender, TextChangedEventArgs e) => ErrorLabel.IsVisible = false;
+
     /// <summary>Clears both entries either way, like the phone page.</summary>
     private void Complete(PassphrasePromptResult result)
     {

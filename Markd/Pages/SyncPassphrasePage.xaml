@@ -15,10 +15,10 @@
                 </VerticalStackLayout>
                 <VerticalStackLayout Spacing="14" Padding="0,0,8,0">
                     <m:OutlinedField Label="{loc:Tr Sync_PassphraseField}">
-                        <Entry x:Name="PassphraseEntry" IsPassword="True" FontSize="16" Completed="OnPassphraseCompleted" />
+                        <Entry x:Name="PassphraseEntry" IsPassword="True" FontSize="16" Completed="OnPassphraseCompleted" TextChanged="OnFieldEdited" />
                     </m:OutlinedField>
                     <m:OutlinedField x:Name="RepeatField" Label="{loc:Tr Sync_PassphraseRepeat}" IsVisible="False">
-                        <Entry x:Name="RepeatEntry" IsPassword="True" FontSize="16" Completed="OnOkClicked" />
+                        <Entry x:Name="RepeatEntry" IsPassword="True" FontSize="16" Completed="OnOkClicked" TextChanged="OnFieldEdited" />
                     </m:OutlinedField>
                     <Label x:Name="ErrorLabel" Style="{StaticResource DangerText}" FontSize="13" IsVisible="False" />
                     <Label x:Name="WarningLabel" Text="{loc:Tr Sync_SetupWarning}" Style="{StaticResource M3RowSub}" FontSize="13" IsVisible="False" />

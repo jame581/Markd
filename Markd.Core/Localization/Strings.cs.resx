@@ -347,9 +347,9 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Form_ChangesSavedTitle" xml:space="preserve"><value>Změny uloženy</value></data>
   <data name="Form_SavedSince" xml:space="preserve"><value>{0} · počítá se od {1}</value></data>
   <data name="Form_SavedUntil" xml:space="preserve"><value>{0} · počítá se do {1}</value></data>
-  <data name="Sync_ConflictsHeader_One" xml:space="preserve"><value>{0} událost se změnila na obou zařízeních</value></data>
-  <data name="Sync_ConflictsHeader_Few" xml:space="preserve"><value>{0} události se změnily na obou zařízeních</value></data>
-  <data name="Sync_ConflictsHeader_Many" xml:space="preserve"><value>{0} událostí se změnilo na obou zařízeních</value></data>
+  <data name="Sync_ConflictsHeader_One" xml:space="preserve"><value>{0} položka se změnila na obou zařízeních</value></data>
+  <data name="Sync_ConflictsHeader_Few" xml:space="preserve"><value>{0} položky se změnily na obou zařízeních</value></data>
+  <data name="Sync_ConflictsHeader_Many" xml:space="preserve"><value>{0} položek se změnilo na obou zařízeních</value></data>
   <data name="Sync_KindOccasion" xml:space="preserve"><value>Událost</value></data>
   <data name="Sync_KindCategory" xml:space="preserve"><value>Kategorie</value></data>
   <data name="Sync_KindMilestone" xml:space="preserve"><value>Milník</value></data>
@@ -361,7 +361,7 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Sync_FieldDate" xml:space="preserve"><value>Datum</value></data>
   <data name="Sync_FieldDirection" xml:space="preserve"><value>Směr</value></data>
   <data name="Sync_FieldChanged" xml:space="preserve"><value>Změněno</value></data>
-  <data name="Sync_ValueNone" xml:space="preserve"><value>Žádné</value></data>
+  <data name="Sync_ValueNone" xml:space="preserve"><value>Nenastaveno</value></data>
   <data name="Sync_ChangedToday" xml:space="preserve"><value>Dnes</value></data>
   <data name="Sync_ChangedDaysAgo_One" xml:space="preserve"><value>před {0} dnem</value></data>
   <data name="Sync_ChangedDaysAgo_Few" xml:space="preserve"><value>před {0} dny</value></data>
@@ -389,6 +389,7 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Sync_StatusUpdateApp" xml:space="preserve"><value>Data v cloudu jsou z novější verze Markd: aktualizujte aplikaci</value></data>
   <data name="Sync_StatusUnreadable" xml:space="preserve"><value>Data v cloudu nejde přečíst</value></data>
   <data name="Sync_StatusFailed" xml:space="preserve"><value>Synchronizace selhala, zkusí to znovu</value></data>
+  <data name="Sync_StatusDescription" xml:space="preserve"><value>Stav synchronizace</value></data>
   <data name="Sync_ActionResolve" xml:space="preserve"><value>Vyřešit</value></data>
   <data name="Sync_ActionEnterPassphrase" xml:space="preserve"><value>Zadat heslo</value></data>
   <data name="Sync_ActionSignIn" xml:space="preserve"><value>Přihlásit se znovu</value></data>

@@ -9,10 +9,10 @@
                 <Label x:Name="TitleLabel" FontFamily="FigtreeSemiBold" FontSize="19" />
                 <Label x:Name="MessageLabel" FontSize="14" LineHeight="1.35" Style="{StaticResource SecondaryText}" />
                 <Label Text="{loc:Tr Sync_PassphraseField}" FontSize="12.5" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" />
-                <Entry x:Name="PassphraseEntry" IsPassword="True" FontSize="14" Completed="OnPassphraseCompleted" />
+                <Entry x:Name="PassphraseEntry" IsPassword="True" FontSize="14" Completed="OnPassphraseCompleted" TextChanged="OnFieldEdited" />
                 <VerticalStackLayout x:Name="RepeatPanel" Spacing="10" IsVisible="False">
                     <Label Text="{loc:Tr Sync_PassphraseRepeat}" FontSize="12.5" Style="{StaticResource SecondaryText}" />
-                    <Entry x:Name="RepeatEntry" IsPassword="True" FontSize="14" Completed="OnContinueClicked" />
+                    <Entry x:Name="RepeatEntry" IsPassword="True" FontSize="14" Completed="OnContinueClicked" TextChanged="OnFieldEdited" />
                 </VerticalStackLayout>
                 <Label x:Name="ErrorLabel" Style="{StaticResource DangerText}" FontSize="12.5" IsVisible="False" />
                 <Label x:Name="WarningLabel" Text="{loc:Tr Sync_SetupWarning}" FontSize="12.5" LineHeight="1.4"

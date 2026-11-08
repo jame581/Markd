@@ -23,8 +23,8 @@ public class ConflictListViewModelTests
     {
         using var _ = new CultureScope("en-GB");
 
-        Assert.Equal("1 event changed on both devices", Create(OccasionConflictOf("a", "b")).HeaderText);
-        Assert.Equal("2 events changed on both devices",
+        Assert.Equal("1 item changed on both devices", Create(OccasionConflictOf("a", "b")).HeaderText);
+        Assert.Equal("2 items changed on both devices",
             Create(OccasionConflictOf("a", "b"), new CategoryConflict(Guid.NewGuid(), new CategoryDto { Name = "c" }, null, Now, Now)).HeaderText);
     }
 
@@ -36,8 +36,8 @@ public class ConflictListViewModelTests
         var four = Enumerable.Range(0, 4).Select(i => (SyncConflict)OccasionConflictOf("a" + i, "b")).ToArray();
         var five = Enumerable.Range(0, 5).Select(i => (SyncConflict)OccasionConflictOf("a" + i, "b")).ToArray();
 
-        Assert.Equal("4 události se změnily na obou zařízeních", Create(four).HeaderText);
-        Assert.Equal("5 událostí se změnilo na obou zařízeních", Create(five).HeaderText);
+        Assert.Equal("4 položky se změnily na obou zařízeních", Create(four).HeaderText);
+        Assert.Equal("5 položek se změnilo na obou zařízeních", Create(five).HeaderText);
     }
 
     [Fact]

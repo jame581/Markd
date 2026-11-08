@@ -347,9 +347,9 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Form_ChangesSavedTitle" xml:space="preserve"><value>Modifications enregistrées</value></data>
   <data name="Form_SavedSince" xml:space="preserve"><value>{0} · décompte depuis le {1}</value></data>
   <data name="Form_SavedUntil" xml:space="preserve"><value>{0} · décompte jusqu'au {1}</value></data>
-  <data name="Sync_ConflictsHeader_One" xml:space="preserve"><value>{0} événement modifié sur les deux appareils</value></data>
-  <data name="Sync_ConflictsHeader_Few" xml:space="preserve"><value>{0} événements modifiés sur les deux appareils</value></data>
-  <data name="Sync_ConflictsHeader_Many" xml:space="preserve"><value>{0} événements modifiés sur les deux appareils</value></data>
+  <data name="Sync_ConflictsHeader_One" xml:space="preserve"><value>{0} élément modifié sur les deux appareils</value></data>
+  <data name="Sync_ConflictsHeader_Few" xml:space="preserve"><value>{0} éléments modifiés sur les deux appareils</value></data>
+  <data name="Sync_ConflictsHeader_Many" xml:space="preserve"><value>{0} éléments modifiés sur les deux appareils</value></data>
   <data name="Sync_KindOccasion" xml:space="preserve"><value>Événement</value></data>
   <data name="Sync_KindCategory" xml:space="preserve"><value>Catégorie</value></data>
   <data name="Sync_KindMilestone" xml:space="preserve"><value>Étape</value></data>
@@ -361,7 +361,7 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Sync_FieldDate" xml:space="preserve"><value>Date</value></data>
   <data name="Sync_FieldDirection" xml:space="preserve"><value>Sens</value></data>
   <data name="Sync_FieldChanged" xml:space="preserve"><value>Modifié</value></data>
-  <data name="Sync_ValueNone" xml:space="preserve"><value>Aucune</value></data>
+  <data name="Sync_ValueNone" xml:space="preserve"><value>Non défini</value></data>
   <data name="Sync_ChangedToday" xml:space="preserve"><value>Aujourd'hui</value></data>
   <data name="Sync_ChangedDaysAgo_One" xml:space="preserve"><value>il y a {0} jour</value></data>
   <data name="Sync_ChangedDaysAgo_Few" xml:space="preserve"><value>il y a {0} jours</value></data>
@@ -389,6 +389,7 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Sync_StatusUpdateApp" xml:space="preserve"><value>Les données du cloud viennent d'un Markd plus récent : mettez l'application à jour</value></data>
   <data name="Sync_StatusUnreadable" xml:space="preserve"><value>Les données du cloud sont illisibles</value></data>
   <data name="Sync_StatusFailed" xml:space="preserve"><value>Échec de la synchronisation, nouvel essai à venir</value></data>
+  <data name="Sync_StatusDescription" xml:space="preserve"><value>État de la synchronisation</value></data>
   <data name="Sync_ActionResolve" xml:space="preserve"><value>Résoudre</value></data>
   <data name="Sync_ActionEnterPassphrase" xml:space="preserve"><value>Saisir la phrase secrète</value></data>
   <data name="Sync_ActionSignIn" xml:space="preserve"><value>Se reconnecter</value></data>

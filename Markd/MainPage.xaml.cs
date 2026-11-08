@@ -39,11 +39,19 @@ public partial class MainPage : ContentPage
 
     private async void OnSyncIconTapped(object? sender, EventArgs e)
     {
-        var sync = ServiceHelper.GetRequiredService<SyncCoordinator>();
-        if (sync.Status.Kind == SyncStatusKind.Conflicts)
-            await sync.OpenConflictsAsync();
-        else
-            await Shell.Current.GoToAsync("//settings", false);
+        try
+        {
+            var sync = ServiceHelper.GetRequiredService<SyncCoordinator>();
+            if (sync.Status.Kind == SyncStatusKind.Conflicts)
+                await sync.OpenConflictsAsync();
+            else
+                await Shell.Current.GoToAsync("//settings", false);
+        }
+        catch (Exception ex)
+        {
+            // An async void handler must never take the app down.
+            System.Diagnostics.Debug.WriteLine($"Opening sync from the home page failed: {ex}");
+        }
     }
 
     private async void OnOverflowClicked(object? sender, EventArgs e)

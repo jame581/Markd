@@ -112,6 +112,9 @@ public partial class SyncPassphrasePage : ContentPage, IAbandonablePrompt
         ErrorLabel.IsVisible = true;
     }
 
+    /// <summary>An error is about what was typed: editing either field clears it.</summary>
+    private void OnFieldEdited(object? sender, TextChangedEventArgs e) => ErrorLabel.IsVisible = false;
+
     private async Task CloseAsync(PassphrasePromptResult result)
     {
         // Claimed before the await, so a second tap during the pop cannot pop the page underneath.
