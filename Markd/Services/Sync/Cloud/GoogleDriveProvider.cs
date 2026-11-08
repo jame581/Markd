@@ -3,6 +3,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Markd.Core.Sync;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Markd.Services.Sync.Cloud;
 
@@ -15,8 +17,11 @@ namespace Markd.Services.Sync.Cloud;
 /// forced refresh) or a grant without Drive app data access <see cref="SyncAuthException"/>, and the caller's
 /// cancellation passes through as OperationCanceledException.
 /// </summary>
-public sealed class GoogleDriveProvider(HttpClient http, IAccessTokenSource tokens) : ICloudSyncProvider
+public sealed class GoogleDriveProvider(
+    HttpClient http, IAccessTokenSource tokens, ILogger<GoogleDriveProvider>? logger = null) : ICloudSyncProvider
 {
+    private readonly ILogger _logger = logger ?? NullLogger<GoogleDriveProvider>.Instance;
+
     private const string FileName = "markd-sync.markd";
     private const string FilesV2 = "https://www.googleapis.com/drive/v2/files";
     private const string UploadV2 = "https://www.googleapis.com/upload/drive/v2/files";
@@ -156,6 +161,8 @@ public sealed class GoogleDriveProvider(HttpClient http, IAccessTokenSource toke
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
+            // The type only: messages can carry the file id.
+            _logger.LogDebug("Deleting the losing copy of a Google Drive create race failed: {Error}", ex.GetType().Name);
         }
     }
 

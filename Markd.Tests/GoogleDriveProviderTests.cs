@@ -3,6 +3,7 @@ using System.Text;
 using Markd.Core.Sync;
 using Markd.Services.Sync;
 using Markd.Services.Sync.Cloud;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace Markd.Tests;
@@ -26,11 +27,23 @@ public class GoogleDriveProviderTests
         }
     }
 
-    private static (GoogleDriveProvider Provider, FakeHttpHandler Http, FakeTokens Tokens) Create()
+    private sealed class CapturingLogger : ILogger<GoogleDriveProvider>
+    {
+        public List<(LogLevel Level, string Message)> Entries { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
+            Entries.Add((logLevel, formatter(state, exception)));
+    }
+
+    private static (GoogleDriveProvider Provider, FakeHttpHandler Http, FakeTokens Tokens) Create(ILogger<GoogleDriveProvider>? logger = null)
     {
         var http = new FakeHttpHandler();
         var tokens = new FakeTokens();
-        return (new GoogleDriveProvider(new HttpClient(http), tokens), http, tokens);
+        return (new GoogleDriveProvider(new HttpClient(http), tokens, logger), http, tokens);
     }
 
     private static string Item(string id, string etag, string created = OldDate, string modified = NewDate) =>
@@ -252,6 +265,48 @@ public class GoogleDriveProviderTests
     }
 
     [Fact]
+    public async Task Update_Unauthorized_RetriesWithTheSameIfMatchAndBody()
+    {
+        var (provider, http, tokens) = Create();
+        http.Respond(HttpStatusCode.OK, List(Item("f1", "\"E1\"")))
+            .Respond(HttpStatusCode.Unauthorized)
+            .Respond(HttpStatusCode.OK, Item("f1", "\"E2\""));
+
+        var revision = await provider.UploadAsync([5, 6, 7], "f1:\"E1\"", TestContext.Current.CancellationToken);
+
+        Assert.Equal("f1:\"E2\"", revision);
+        Assert.Equal([false, false, true], tokens.Calls);
+        var puts = http.Requests.Where(r => r.Method == HttpMethod.Put).ToList();
+        Assert.Equal(2, puts.Count);
+        Assert.Equal("Bearer token-3", puts[1].Authorization);
+        Assert.All(puts, put =>
+        {
+            Assert.Equal("https://www.googleapis.com/upload/drive/v2/files/f1?uploadType=media", put.Url);
+            Assert.Equal("\"E1\"", put.IfMatch);
+            Assert.Equal([5, 6, 7], put.Body);
+        });
+    }
+
+    [Fact]
+    public async Task Create_LosingCopyDeleteFails_LogsAtDebugWithoutIdsAndStillConflicts()
+    {
+        var logger = new CapturingLogger();
+        var (provider, http, _) = Create(logger);
+        http.Respond(HttpStatusCode.OK, List())
+            .Respond(HttpStatusCode.OK, """{"id":"mine"}""")
+            .Respond(HttpStatusCode.OK, List(Item("mine", "\"M1\"", created: NewDate), Item("theirs", "\"T1\"", created: OldDate)))
+            .Throw(new HttpRequestException("no route to mine"));
+
+        await Assert.ThrowsAsync<RevisionConflictException>(
+            () => provider.UploadAsync([1], null, TestContext.Current.CancellationToken));
+
+        var entry = Assert.Single(logger.Entries);
+        Assert.Equal(LogLevel.Debug, entry.Level);
+        Assert.DoesNotContain("mine", entry.Message);
+        Assert.DoesNotContain("token", entry.Message);
+    }
+
+    [Fact]
     public async Task Update_404_IsRevisionConflict()
     {
         var (provider, http, _) = Create();
@@ -318,6 +373,16 @@ public class GoogleDriveProviderTests
     {
         var (provider, http, _) = Create();
         http.Respond(HttpStatusCode.Forbidden, Error(403, "insufficientPermissions"));
+
+        await Assert.ThrowsAsync<SyncAuthException>(() => provider.GetInfoAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task ScopeInsufficientDetail_MapsToSyncAuthException()
+    {
+        var (provider, http, _) = Create();
+        http.Respond(HttpStatusCode.Forbidden,
+            """{"error":{"code":403,"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_SCOPE_INSUFFICIENT"}]}}""");
 
         await Assert.ThrowsAsync<SyncAuthException>(() => provider.GetInfoAsync(TestContext.Current.CancellationToken));
     }
