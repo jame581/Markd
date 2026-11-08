@@ -129,7 +129,7 @@ namespace Markd
             builder.Services.AddSingleton<IPasswordPromptService, PhonePasswordPromptService>();
             builder.Services.AddSingleton<IConflictResolutionService, PhoneConflictResolutionService>();
             builder.Services.AddSingleton<ISyncPassphrasePromptService, PhoneSyncPassphrasePromptService>();
-            builder.Services.AddSingleton<ISignInWaitService, PassThroughSignInWaitService>();
+            builder.Services.AddSingleton<ISignInWaitService, PhoneSignInWaitService>();
 #if ANDROID
             builder.Services.AddSingleton<IActionMenuService, Platforms.Android.ActionMenuService>();
             builder.Services.AddSingleton<IFileExportService, Platforms.Android.DocumentExportService>();

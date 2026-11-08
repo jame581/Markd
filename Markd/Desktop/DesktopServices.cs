@@ -1,3 +1,4 @@
+using Markd.Desktop.Dialogs;
 using Markd.Core.Sync;
 using Markd.Services;
 using Markd.Services.Sync;
@@ -21,7 +22,7 @@ public static class DesktopRegistration
         services.AddSingleton<IPasswordPromptService, DesktopPasswordPromptService>();
         services.AddSingleton<IConflictResolutionService, DesktopConflictResolutionService>();
         services.AddSingleton<ISyncPassphrasePromptService, DesktopSyncPassphrasePromptService>();
-        services.AddSingleton<ISignInWaitService, PassThroughSignInWaitService>();
+        services.AddSingleton<ISignInWaitService, DesktopSignInWaitService>();
     }
 }
 
@@ -41,6 +42,54 @@ public sealed class DesktopSyncPassphrasePromptService(IServiceProvider services
     public Task<PassphrasePromptResult> PromptAsync(PassphrasePromptKind kind, bool previousAttemptFailed) =>
         MainThread.InvokeOnMainThreadAsync(() =>
             services.GetRequiredService<DesktopShellPage>().PromptSyncPassphraseAsync(kind, previousAttemptFailed));
+}
+
+/// <summary>
+/// Runs a browser sign-in behind a waiting overlay. The overlay's scrim swallows clicks, so the screen that started
+/// the sign-in cannot start a second one; a call that still arrives while one runs is treated as cancelled.
+/// </summary>
+public sealed class DesktopSignInWaitService(IServiceProvider services) : ISignInWaitService
+{
+    private bool _active;
+
+    public Task<T?> RunAsync<T>(string providerName, Func<CancellationToken, Task<T?>> signIn) where T : class =>
+        MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            if (_active)
+                return null;
+
+            _active = true;
+            try
+            {
+                using var cts = new CancellationTokenSource();
+                var shell = services.GetRequiredService<DesktopShellPage>();
+                var dialog = new SignInWaitDialog(providerName, cts.Cancel);
+                var layer = shell.ShowOverlay(dialog, dialog.Cancel);
+                var window = shell.Window;
+                void OnDestroying(object? sender, EventArgs e) => cts.Cancel();
+                if (window is not null)
+                    window.Destroying += OnDestroying;
+
+                try
+                {
+                    return await signIn(cts.Token);
+                }
+                catch (OperationCanceledException) when (cts.IsCancellationRequested)
+                {
+                    return null;
+                }
+                finally
+                {
+                    if (window is not null)
+                        window.Destroying -= OnDestroying;
+                    await layer.CloseAsync();
+                }
+            }
+            finally
+            {
+                _active = false;
+            }
+        });
 }
 
 /// <summary>Routes and dialogs for view models, resolved lazily so the page can itself depend on view models.</summary>

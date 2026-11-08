@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:loc="clr-namespace:Markd.Localization"
+             x:Class="Markd.Pages.SignInWaitPage"
+             Style="{StaticResource M3DialogPage}"
+             Shell.PresentationMode="ModalNotAnimated">
+    <Grid>
+        <Border Style="{StaticResource M3DialogCard}" Padding="24,24,16,14">
+            <VerticalStackLayout Spacing="18">
+                <VerticalStackLayout Spacing="14" Padding="0,0,8,0">
+                    <Label x:Name="TitleLabel" FontFamily="FigtreeSemiBold" FontSize="22" />
+                    <HorizontalStackLayout Spacing="14">
+                        <ActivityIndicator IsRunning="True" VerticalOptions="Center" />
+                        <Label Text="{loc:Tr Sync_SignInWaiting}" Style="{StaticResource M3RowSub}" FontSize="14" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+                <Button Text="{loc:Tr Common_Cancel}" Style="{StaticResource M3TextButton}" HorizontalOptions="End" Clicked="OnCancelClicked" />
+            </VerticalStackLayout>
+        </Border>
+    </Grid>
+</ContentPage>
