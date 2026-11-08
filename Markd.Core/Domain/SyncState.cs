@@ -6,6 +6,9 @@ namespace Markd.Core.Domain
         public int Id { get; set; } = 1;
         public string? ProviderId { get; set; }
         public string? AccountName { get; set; }
+
+        /// <summary>The account's email as last reported by the provider. Display only.</summary>
+        public string? AccountLabel { get; set; }
         public string? RemoteRevision { get; set; }
         public DateTime? LastSyncUtc { get; set; }
         public string? LastResult { get; set; }

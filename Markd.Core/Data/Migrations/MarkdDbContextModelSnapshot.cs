@@ -203,6 +203,9 @@ namespace Markd.Core.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("AccountLabel")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("AccountName")
                         .HasColumnType("TEXT");
 

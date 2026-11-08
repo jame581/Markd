@@ -484,6 +484,7 @@ public class SyncServiceFailureTests
         public InMemoryCloudProvider Inner => inner;
         public string Id => "other";
         public string? AccountName => "me@other";
+        public string? AccountLabel => null;
         public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct) => inner.GetInfoAsync(ct);
         public Task<RemoteFile?> DownloadAsync(CancellationToken ct) => inner.DownloadAsync(ct);
         public Task<string> UploadAsync(byte[] data, string? expected, CancellationToken ct) => inner.UploadAsync(data, expected, ct);
@@ -495,6 +496,7 @@ public class SyncServiceFailureTests
     {
         public string Id => inner.Id;
         public string? AccountName => inner.AccountName;
+        public string? AccountLabel => inner.AccountLabel;
         public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct) => inner.GetInfoAsync(ct);
         public Task<RemoteFile?> DownloadAsync(CancellationToken ct)
         {
@@ -510,6 +512,7 @@ public class SyncServiceFailureTests
     {
         public string Id => "test";
         public string? AccountName => null;
+        public string? AccountLabel => null;
         public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct) => inner.GetInfoAsync(ct);
         public Task<RemoteFile?> DownloadAsync(CancellationToken ct) => inner.DownloadAsync(ct);
         public Task<string> UploadAsync(byte[] data, string? expected, CancellationToken ct)

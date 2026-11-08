@@ -1274,6 +1274,7 @@ public class SyncCoordinatorTests
         public Exception? InfoError { get; set; }
         public string Id => ProviderId;
         public string? AccountName => "me@example.com";
+        public string? AccountLabel => "me@example.com";
 
         public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct) =>
             InfoError is { } error ? Task.FromException<RemoteInfo?>(error) : Task.FromResult(Info);

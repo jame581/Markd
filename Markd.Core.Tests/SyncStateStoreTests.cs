@@ -33,6 +33,18 @@ public class SyncStateStoreTests
     }
 
     [Fact]
+    public async Task AccountLabel_RoundTrips()
+    {
+        var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();
+        using var _ = conn; using var __ = db;
+        var store = new SyncStateStore(db);
+
+        await store.SaveAsync(new SyncState { ProviderId = "onedrive", AccountName = "id-1", AccountLabel = "me@example.com" });
+
+        Assert.Equal("me@example.com", (await store.LoadAsync()).AccountLabel);
+    }
+
+    [Fact]
     public async Task Save_and_load_round_trip_connection_and_attempt_fields()
     {
         var (db, conn) = TestDbFactory.CreateSqliteInMemoryContext();

@@ -136,11 +136,17 @@ namespace Markd.Core.Sync
         {
             var now = clock.GetUtcNow().UtcDateTime;
             var state = await store.LoadAsync();
+            // No account id for a linked provider means signed out, not another account: change nothing.
+            if (IsSignedOut(state, provider))
+                return Done(new SyncResult(SyncOutcome.AuthExpired));
+
             // Another provider or another account on the same provider is another file: its revision strings say
             // nothing about ours, so start over as a first sync (no base, no revision, no epoch) and merge.
             if (!string.Equals(state.ProviderId, provider.Id, StringComparison.Ordinal)
                 || !string.Equals(state.AccountName, provider.AccountName, StringComparison.Ordinal))
                 state = new SyncState { ProviderId = provider.Id, AccountName = provider.AccountName };
+            // The label is display only and may change while the id stays.
+            state.AccountLabel = provider.AccountLabel;
 
             var info = await provider.GetInfoAsync(ct);
             var local = await snapshots.ReadForSyncAsync();
@@ -281,6 +287,14 @@ namespace Markd.Core.Sync
             }
         }
 
+        /// <summary>
+        /// True when this device is linked to the provider's account but the provider reports no account id now (the
+        /// user is signed out). That must never be read as "another account", which would reset the link.
+        /// </summary>
+        private static bool IsSignedOut(SyncState state, ICloudSyncProvider provider) =>
+            state.AccountName is not null && provider.AccountName is null
+            && string.Equals(state.ProviderId, provider.Id, StringComparison.Ordinal);
+
         private static (SyncResult? Result, RetryReason Retry) Done(SyncResult result) => (result, default);
 
         private static ExportModel? ParseBase(string? json)
@@ -301,6 +315,9 @@ namespace Markd.Core.Sync
             {
                 var replaceResult = await RunAsync(async () =>
                 {
+                    if (IsSignedOut(await store.LoadAsync(), provider))
+                        return new SyncResult(SyncOutcome.AuthExpired);
+
                     var now = clock.GetUtcNow().UtcDateTime;
                     var info = await provider.GetInfoAsync(ct);
                     var local = await snapshots.ReadForSyncAsync();
@@ -312,6 +329,7 @@ namespace Markd.Core.Sync
                     var state = await store.LoadAsync();
                     state.ProviderId = provider.Id;
                     state.AccountName = provider.AccountName;
+                    state.AccountLabel = provider.AccountLabel;
                     state.RemoteRevision = revision;
                     state.LastSyncUtc = now;
                     state.LastResult = nameof(SyncOutcome.Synced);
@@ -342,6 +360,9 @@ namespace Markd.Core.Sync
             {
                 var disconnectResult = await RunAsync(async () =>
                 {
+                    if (deleteRemote && provider is not null && IsSignedOut(await store.LoadAsync(), provider))
+                        return new SyncResult(SyncOutcome.AuthExpired);
+
                     // A failed delete throws before anything is forgotten: the link, the state and the passphrase stay.
                     if (deleteRemote && provider is not null)
                         await provider.DeleteAsync(ct);
@@ -389,6 +410,9 @@ namespace Markd.Core.Sync
             {
                 return await RunAsync(async () =>
                 {
+                    if (IsSignedOut(await store.LoadAsync(), provider))
+                        return new SyncResult(SyncOutcome.AuthExpired);
+
                     // No file proves nothing: a single typed field must not become the passphrase of the next upload.
                     if (await provider.DownloadAsync(ct) is not { } file)
                         return new SyncResult(SyncOutcome.NoCloudFile);

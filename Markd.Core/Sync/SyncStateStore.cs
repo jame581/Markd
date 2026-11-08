@@ -23,6 +23,7 @@ namespace Markd.Core.Sync
 
             row.ProviderId = state.ProviderId;
             row.AccountName = state.AccountName;
+            row.AccountLabel = state.AccountLabel;
             row.RemoteRevision = state.RemoteRevision;
             row.LastSyncUtc = state.LastSyncUtc;
             row.LastResult = state.LastResult;
@@ -59,7 +60,7 @@ namespace Markd.Core.Sync
 
         private static SyncState Copy(SyncState s) => new()
         {
-            Id = s.Id, ProviderId = s.ProviderId, AccountName = s.AccountName, RemoteRevision = s.RemoteRevision,
+            Id = s.Id, ProviderId = s.ProviderId, AccountName = s.AccountName, AccountLabel = s.AccountLabel, RemoteRevision = s.RemoteRevision,
             LastSyncUtc = s.LastSyncUtc, LastResult = s.LastResult, BaseSnapshotJson = s.BaseSnapshotJson, Epoch = s.Epoch,
             IsConnected = s.IsConnected, LastAttemptUtc = s.LastAttemptUtc, LastAttemptResult = s.LastAttemptResult
         };

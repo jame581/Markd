@@ -20,6 +20,9 @@ namespace Markd.Core.Sync
         /// </summary>
         string? AccountName { get; }
 
+        /// <summary>The account's email or folder, for display only. It may change while <see cref="AccountName"/> stays.</summary>
+        string? AccountLabel { get; }
+
         /// <summary>Cheap metadata call. Null when no file exists yet.</summary>
         Task<RemoteInfo?> GetInfoAsync(CancellationToken ct);
 

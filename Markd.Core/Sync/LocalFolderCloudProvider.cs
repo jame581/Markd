@@ -19,6 +19,8 @@ namespace Markd.Core.Sync
 
         public string? AccountName => _folder;
 
+        public string? AccountLabel => _folder;
+
         private string FilePath => Path.Combine(_folder, FileName);
 
         public Task<RemoteInfo?> GetInfoAsync(CancellationToken ct) =>

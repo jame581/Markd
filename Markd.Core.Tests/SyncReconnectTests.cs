@@ -208,6 +208,47 @@ public class SyncReconnectTests
     }
 
     [Fact]
+    public async Task Sync_StoresTheProvidersAccountLabel()
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider { AccountLabel = "a@x.com" };
+        await a.AddOccasionAsync("One");
+        await a.Sync.SyncAsync(cloud);
+        Assert.Equal("a@x.com", (await a.State.LoadAsync()).AccountLabel);
+
+        cloud.AccountLabel = "b@x.com";
+        await a.AddOccasionAsync("Two");
+        await a.Sync.SyncAsync(cloud);
+
+        var state = await a.State.LoadAsync();
+        Assert.Equal("b@x.com", state.AccountLabel);
+        Assert.NotNull(state.BaseSnapshotJson);
+        Assert.Equal(new[] { "One", "Two" }, await a.TitlesAsync());
+    }
+
+    [Fact]
+    public async Task Sync_ProviderWithoutAccountId_IsAuthExpired_AndKeepsTheBase()
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider { AccountName = "A", AccountLabel = "a@x.com" };
+        await a.AddOccasionAsync("One");
+        await a.Sync.SyncAsync(cloud);
+        var before = await a.State.LoadAsync();
+        var infoCalls = cloud.GetInfoCalls;
+        cloud.AccountName = null;
+
+        var result = await a.Sync.SyncAsync(cloud);
+
+        Assert.Equal(SyncOutcome.AuthExpired, result.Outcome);
+        Assert.Equal(infoCalls, cloud.GetInfoCalls);
+        var after = await a.State.LoadAsync();
+        Assert.Equal("A", after.AccountName);
+        Assert.Equal(before.BaseSnapshotJson, after.BaseSnapshotJson);
+        Assert.Equal(before.RemoteRevision, after.RemoteRevision);
+        Assert.Equal(before.Epoch, after.Epoch);
+    }
+
+    [Fact]
     public async Task Disconnect_returns_Disconnected_and_marks_the_state()
     {
         var (a, b, cloud) = await PairedAsync("One");
