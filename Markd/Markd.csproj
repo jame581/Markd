@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+	<!-- Untracked cloud client ids (see Markd.Secrets.props.example). Absent means the providers are left out. -->
+	<Import Project="..\Markd.Secrets.props" Condition="Exists('..\Markd.Secrets.props')" />
+
 	<PropertyGroup>
 		<TargetFrameworks>net10.0-android</TargetFrameworks>
 		<TargetFrameworks Condition="!$([MSBuild]::IsOSPlatform('linux'))">$(TargetFrameworks);net10.0-ios;net10.0-maccatalyst</TargetFrameworks>
@@ -113,5 +116,31 @@
 	  <None Include="Desktop\**" />
 	</ItemGroup>
 
+	<!-- Bakes the optional cloud client ids into Services/Sync/CloudConfig. Empty means not configured. -->
+	<Target Name="GenerateCloudConfig" BeforeTargets="CoreCompile;BeforeCompile">
+		<PropertyGroup>
+			<_CloudConfigFile>$(IntermediateOutputPath)CloudConfig.g.cs</_CloudConfigFile>
+			<_CfgGoogleId>$(MarkdGoogleDesktopClientId.Replace('\', '\\').Replace('&quot;', '\&quot;'))</_CfgGoogleId>
+			<_CfgGoogleSecret>$(MarkdGoogleDesktopClientSecret.Replace('\', '\\').Replace('&quot;', '\&quot;'))</_CfgGoogleSecret>
+			<_CfgMicrosoftId>$(MarkdMicrosoftClientId.Replace('\', '\\').Replace('&quot;', '\&quot;'))</_CfgMicrosoftId>
+		</PropertyGroup>
+		<ItemGroup>
+			<_CloudConfigLine Include="// &lt;auto-generated /&gt;" />
+			<_CloudConfigLine Include="namespace Markd.Services.Sync%3B" />
+			<_CloudConfigLine Include="internal static class CloudConfig" />
+			<_CloudConfigLine Include="{" />
+			<_CloudConfigLine Include="public const string GoogleDesktopClientId = &quot;$(_CfgGoogleId)&quot;%3B" />
+			<_CloudConfigLine Include="public const string GoogleDesktopClientSecret = &quot;$(_CfgGoogleSecret)&quot;%3B" />
+			<_CloudConfigLine Include="public const string MicrosoftClientId = &quot;$(_CfgMicrosoftId)&quot;%3B" />
+			<_CloudConfigLine Include="public static bool HasGoogleDesktop =&gt; GoogleDesktopClientId.Length &gt; 0%3B" />
+			<_CloudConfigLine Include="public static bool HasMicrosoft =&gt; MicrosoftClientId.Length &gt; 0%3B" />
+			<_CloudConfigLine Include="}" />
+		</ItemGroup>
+		<WriteLinesToFile File="$(_CloudConfigFile)" Lines="@(_CloudConfigLine)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+		<ItemGroup>
+			<Compile Include="$(_CloudConfigFile)" />
+			<FileWrites Include="$(_CloudConfigFile)" />
+		</ItemGroup>
+	</Target>
 
 </Project>

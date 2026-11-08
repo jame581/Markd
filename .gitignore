@@ -367,3 +367,6 @@ FodyWeavers.xsd
 # Android signing keys
 *.keystore
 *.jks
+
+# Cloud client ids for local builds (see Markd.Secrets.props.example)
+Markd.Secrets.props

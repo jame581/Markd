@@ -98,6 +98,24 @@ jobs:
           done
           echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/markd.keystore"
 
+      # Cloud client ids come from repository secrets and are never echoed. An empty value
+      # leaves that provider out of the build.
+      - name: Write cloud client configuration
+        shell: bash
+        env:
+          GOOGLE_ID: ${{ secrets.MARKD_GOOGLE_DESKTOP_CLIENT_ID }}
+          GOOGLE_SECRET: ${{ secrets.MARKD_GOOGLE_DESKTOP_CLIENT_SECRET }}
+          MICROSOFT_ID: ${{ secrets.MARKD_MICROSOFT_CLIENT_ID }}
+        run: |
+          xml() { local v="$1"; v="${v//&/&amp;}"; v="${v//</&lt;}"; v="${v//>/&gt;}"; printf '%s' "$v"; }
+          {
+            echo '<Project><PropertyGroup>'
+            echo "<MarkdGoogleDesktopClientId>$(xml "$GOOGLE_ID")</MarkdGoogleDesktopClientId>"
+            echo "<MarkdGoogleDesktopClientSecret>$(xml "$GOOGLE_SECRET")</MarkdGoogleDesktopClientSecret>"
+            echo "<MarkdMicrosoftClientId>$(xml "$MICROSOFT_ID")</MarkdMicrosoftClientId>"
+            echo '</PropertyGroup></Project>'
+          } > Markd.Secrets.props
+
       # PKCS12 keystores (keytool's default) use one password for the store and the key.
       - name: Publish
         run: >
@@ -140,6 +158,23 @@ jobs:
       - name: Install MAUI workloads
         run: dotnet workload install maui
 
+      # Cloud client ids come from repository secrets and are never echoed. An empty value
+      # leaves that provider out of the build.
+      - name: Write cloud client configuration
+        shell: bash
+        env:
+          GOOGLE_ID: ${{ secrets.MARKD_GOOGLE_DESKTOP_CLIENT_ID }}
+          GOOGLE_SECRET: ${{ secrets.MARKD_GOOGLE_DESKTOP_CLIENT_SECRET }}
+          MICROSOFT_ID: ${{ secrets.MARKD_MICROSOFT_CLIENT_ID }}
+        run: |
+          xml() { local v="$1"; v="${v//&/&amp;}"; v="${v//</&lt;}"; v="${v//>/&gt;}"; printf '%s' "$v"; }
+          {
+            echo '<Project><PropertyGroup>'
+            echo "<MarkdGoogleDesktopClientId>$(xml "$GOOGLE_ID")</MarkdGoogleDesktopClientId>"
+            echo "<MarkdGoogleDesktopClientSecret>$(xml "$GOOGLE_SECRET")</MarkdGoogleDesktopClientSecret>"
+            echo "<MarkdMicrosoftClientId>$(xml "$MICROSOFT_ID")</MarkdMicrosoftClientId>"
+            echo '</PropertyGroup></Project>'
+          } > Markd.Secrets.props
       # Unpackaged and self-contained (including the Windows App SDK), so the zip
       # runs on a clean machine without installing any runtime. -r would apply the RID
       # to every target framework during restore, hence RuntimeIdentifierOverride.
@@ -186,6 +221,23 @@ jobs:
             exit 1
           fi
 
+      # Cloud client ids come from repository secrets and are never echoed. An empty value
+      # leaves that provider out of the build.
+      - name: Write cloud client configuration
+        shell: bash
+        env:
+          GOOGLE_ID: ${{ secrets.MARKD_GOOGLE_DESKTOP_CLIENT_ID }}
+          GOOGLE_SECRET: ${{ secrets.MARKD_GOOGLE_DESKTOP_CLIENT_SECRET }}
+          MICROSOFT_ID: ${{ secrets.MARKD_MICROSOFT_CLIENT_ID }}
+        run: |
+          xml() { local v="$1"; v="${v//&/&amp;}"; v="${v//</&lt;}"; v="${v//>/&gt;}"; printf '%s' "$v"; }
+          {
+            echo '<Project><PropertyGroup>'
+            echo "<MarkdGoogleDesktopClientId>$(xml "$GOOGLE_ID")</MarkdGoogleDesktopClientId>"
+            echo "<MarkdGoogleDesktopClientSecret>$(xml "$GOOGLE_SECRET")</MarkdGoogleDesktopClientSecret>"
+            echo "<MarkdMicrosoftClientId>$(xml "$MICROSOFT_ID")</MarkdMicrosoftClientId>"
+            echo '</PropertyGroup></Project>'
+          } > Markd.Secrets.props
       # ApplicationVersion=0 because the Store rejects a package whose version revision is not 0,
       # so the version is the tag alone. Self-contained (including the Windows App SDK) so the
       # package runs without separately installed runtimes. AppxSymbolPackageEnabled=false because
