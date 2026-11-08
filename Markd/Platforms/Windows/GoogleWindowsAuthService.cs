@@ -90,9 +90,17 @@ namespace Markd.Platforms.Windows
                 var tokens = await _client.RefreshAsync(stored.RefreshToken, ct);
                 if (!string.IsNullOrEmpty(tokens.RefreshToken) && tokens.RefreshToken != stored.RefreshToken)
                 {
+                    // Kept in memory even when the file cannot be written, so this session goes on with the new one.
                     var rotated = stored with { RefreshToken = tokens.RefreshToken };
-                    await SaveAsync(rotated);
                     _stored = rotated;
+                    try
+                    {
+                        await SaveAsync(rotated);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning("Saving the rotated Google refresh token failed: {Error}", ex.GetType().Name);
+                    }
                 }
 
                 _accessToken = tokens.AccessToken;
@@ -108,7 +116,8 @@ namespace Markd.Platforms.Windows
         public async Task<CloudAccount?> SignInAsync(string? loginHint, CancellationToken ct)
         {
             await LoadAsync();
-            ct.ThrowIfCancellationRequested();
+            if (ct.IsCancellationRequested)
+                return null;
 
             using var listener = StartListener(out var redirectUri);
             // Stopping the listener ends the pending GetContextAsync, so Cancel on the waiting panel returns at once.
@@ -166,10 +175,11 @@ namespace Markd.Platforms.Windows
                     }
                 }
             }
-            catch (Exception ex) when (ct.IsCancellationRequested && ex is not OperationCanceledException)
+            catch (Exception) when (ct.IsCancellationRequested)
             {
-                // The stopped listener throws HttpListenerException or ObjectDisposedException.
-                throw new OperationCanceledException(ct);
+                // Cancelled (the stopped listener throws HttpListenerException or ObjectDisposedException, the token
+                // calls OperationCanceledException): null, as the contract says.
+                return null;
             }
             finally
             {

@@ -132,6 +132,33 @@ public class GoogleOAuthClientTests
     }
 
     [Fact]
+    public async Task Exchange_WithoutScopeField_IsAccepted()
+    {
+        var (client, _) = Create(HttpStatusCode.OK, """{"access_token":"at","refresh_token":"rt","expires_in":3599}""");
+
+        var tokens = await client.ExchangeCodeAsync("code", "verifier", Redirect, CancellationToken.None);
+
+        Assert.Equal("rt", tokens.RefreshToken);
+    }
+
+    [Fact]
+    public async Task Exchange_InvalidGrant_ThrowsSyncAuthException()
+    {
+        var (client, _) = Create(HttpStatusCode.BadRequest, """{"error":"invalid_grant","error_description":"Bad Request"}""");
+
+        await Assert.ThrowsAsync<SyncAuthException>(() =>
+            client.ExchangeCodeAsync("code", "verifier", Redirect, CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task GetAccount_Unauthorized_ThrowsSyncAuthException()
+    {
+        var (client, _) = Create(HttpStatusCode.Unauthorized, """{"error":"invalid_token"}""");
+
+        await Assert.ThrowsAsync<SyncAuthException>(() => client.GetAccountAsync("at", CancellationToken.None));
+    }
+
+    [Fact]
     public async Task Refresh_ReturnsAccessToken_AndPostsTheRefreshToken()
     {
         var (client, handler) = Create(HttpStatusCode.OK,
