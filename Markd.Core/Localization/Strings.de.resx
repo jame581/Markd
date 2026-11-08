@@ -347,4 +347,23 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Form_ChangesSavedTitle" xml:space="preserve"><value>Änderungen gespeichert</value></data>
   <data name="Form_SavedSince" xml:space="preserve"><value>{0} · Zählung seit {1}</value></data>
   <data name="Form_SavedUntil" xml:space="preserve"><value>{0} · Zählung bis {1}</value></data>
+  <data name="Sync_ConflictsHeader_One" xml:space="preserve"><value>{0} Anlass wurde auf beiden Geräten geändert</value></data>
+  <data name="Sync_ConflictsHeader_Few" xml:space="preserve"><value>{0} Anlässe wurden auf beiden Geräten geändert</value></data>
+  <data name="Sync_ConflictsHeader_Many" xml:space="preserve"><value>{0} Anlässe wurden auf beiden Geräten geändert</value></data>
+  <data name="Sync_KindOccasion" xml:space="preserve"><value>Anlass</value></data>
+  <data name="Sync_KindCategory" xml:space="preserve"><value>Kategorie</value></data>
+  <data name="Sync_KindMilestone" xml:space="preserve"><value>Meilenstein</value></data>
+  <data name="Sync_ThisDevice" xml:space="preserve"><value>Dieses Gerät</value></data>
+  <data name="Sync_ThisDeviceDeleted" xml:space="preserve"><value>Dieses Gerät: gelöscht</value></data>
+  <data name="Sync_OtherDevice" xml:space="preserve"><value>Anderes Gerät</value></data>
+  <data name="Sync_OtherDeviceDeleted" xml:space="preserve"><value>Anderes Gerät: gelöscht</value></data>
+  <data name="Sync_Newer" xml:space="preserve"><value>Neuer</value></data>
+  <data name="Sync_FieldDate" xml:space="preserve"><value>Datum</value></data>
+  <data name="Sync_FieldDirection" xml:space="preserve"><value>Richtung</value></data>
+  <data name="Sync_FieldChanged" xml:space="preserve"><value>Geändert</value></data>
+  <data name="Sync_ValueNone" xml:space="preserve"><value>Keine</value></data>
+  <data name="Sync_ChangedToday" xml:space="preserve"><value>Heute</value></data>
+  <data name="Sync_ChangedDaysAgo_One" xml:space="preserve"><value>vor {0} Tag</value></data>
+  <data name="Sync_ChangedDaysAgo_Few" xml:space="preserve"><value>vor {0} Tagen</value></data>
+  <data name="Sync_ChangedDaysAgo_Many" xml:space="preserve"><value>vor {0} Tagen</value></data>
 </root>

@@ -56,6 +56,7 @@
     <Compile Include="..\Markd\Services\Sync\SyncScope.cs" Link="Services\Sync\SyncScope.cs" />
     <Compile Include="..\Markd\Services\Sync\SyncStatus.cs" Link="Services\Sync\SyncStatus.cs" />
     <Compile Include="..\Markd\Services\Sync\SyncCoordinator.cs" Link="Services\Sync\SyncCoordinator.cs" />
+    <Compile Include="..\Markd\ViewModels\ConflictListViewModel.cs" Link="ViewModels\ConflictListViewModel.cs" />
   </ItemGroup>
 
 </Project>
