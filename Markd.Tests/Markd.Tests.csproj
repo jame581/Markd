@@ -62,6 +62,7 @@
     <Compile Include="..\Markd\Services\Sync\ISyncLink.cs" Link="Services\Sync\ISyncLink.cs" />
     <Compile Include="..\Markd\ViewModels\SyncStatusText.cs" Link="ViewModels\SyncStatusText.cs" />
     <Compile Include="..\Markd\ViewModels\SyncSettingsViewModel.cs" Link="ViewModels\SyncSettingsViewModel.cs" />
+    <Compile Include="..\Markd\Services\Sync\SyncScheduler.cs" Link="Services\Sync\SyncScheduler.cs" />
   </ItemGroup>
 
 </Project>
