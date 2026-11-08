@@ -100,6 +100,87 @@ public class ImportAdditiveTests
     }
 
     [Fact]
+    public async Task Restore_does_not_double_an_event_deleted_and_typed_again()
+    {
+        using var a = new SyncDevice();
+        using var b = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        var family = await a.Categories.CreateAsync(new Markd.Core.Domain.Category { Name = "Family", Emoji = "🏠" });
+        var x = await a.AddOccasionAsync("X");
+        x.CategoryId = family.Id;
+        await a.Occasions.UpdateAsync(x);
+        await a.Occasions.AddMilestoneAsync(x.Id, 100, "100 days");
+        await SyncedAsync(a, cloud);
+        var backup = await BackupAsync(a);
+        await a.Occasions.DeleteAsync(x.Id);
+        await a.Categories.DeleteAsync(family.Id);
+        var family2 = await a.Categories.CreateAsync(new Markd.Core.Domain.Category { Name = "family ", Emoji = "🏠" });
+        var x2 = await a.AddOccasionAsync("X");
+        x2.CategoryId = family2.Id;
+        await a.Occasions.UpdateAsync(x2);
+        await a.Occasions.AddMilestoneAsync(x2.Id, 100, "100 days");
+        await SyncedAsync(a, cloud);
+
+        var outcome = await RestoreAsync(a, backup);
+
+        Assert.Equal(new ImportOutcome(true, 0, 0, 1), outcome);
+        Assert.Equal(new[] { "X" }, await a.TitlesAsync());
+        Assert.Single(await a.Categories.GetAllAsync());
+        Assert.Single((await a.Occasions.GetAllAsync()).Single().Milestones);
+        await SyncedAsync(a, cloud);
+        await SyncedAsync(b, cloud);
+        Assert.Equal(new[] { "X" }, await b.TitlesAsync());
+        Assert.Single(await b.Categories.GetAllAsync());
+    }
+
+    [Fact]
+    public async Task Restore_brings_back_a_deleted_event_with_no_live_look_alike()
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        var x = await a.AddOccasionAsync("X");
+        await a.AddOccasionAsync("X", daysAgo: 20);   // same title, another day: not a look-alike
+        await SyncedAsync(a, cloud);
+        var backup = await BackupAsync(a);
+        await a.Occasions.DeleteAsync(x.Id);
+        await SyncedAsync(a, cloud);
+
+        var outcome = await RestoreAsync(a, backup);
+
+        Assert.Equal(new ImportOutcome(true, 0, 1, 1), outcome);
+        Assert.Equal(new[] { "X", "X" }, await a.TitlesAsync());
+        Assert.Contains(await a.Occasions.GetAllAsync(), o => o.SyncId == x.SyncId);
+    }
+
+    [Fact]
+    public async Task Legacy_restore_treats_an_empty_category_emoji_or_colour_as_none()
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        var family = await a.Categories.CreateAsync(new Markd.Core.Domain.Category { Name = "Family", Emoji = null, ColorHex = null });
+        var work = await a.Categories.CreateAsync(new Markd.Core.Domain.Category { Name = "Work", Emoji = "", ColorHex = "#ff0000" });
+        await SyncedAsync(a, cloud);
+        var v1 = new ExportModel
+        {
+            SchemaVersion = "1",
+            Categories =
+            {
+                new CategoryDto { SourceId = 1, Name = "Family", Emoji = "", ColorHex = " " },
+                new CategoryDto { SourceId = 2, Name = "Work", Emoji = null, ColorHex = "#FF0000" },
+            },
+            Occasions =
+            {
+                new OccasionDto { SourceId = 1, Title = "Wedding", AnchorDate = new DateTime(2020, 6, 1, 0, 0, 0, DateTimeKind.Utc), Direction = "Since", CategorySourceId = 1 },
+            },
+        };
+
+        await RestoreAsync(a, v1);
+
+        Assert.Equal(new[] { family.Id, work.Id }, (await a.Categories.GetAllAsync()).Select(c => c.Id).OrderBy(i => i));
+        Assert.Equal(family.Id, (await a.Occasions.GetAllAsync()).Single(o => o.Title == "Wedding").CategoryId);
+    }
+
+    [Fact]
     public async Task Restore_never_doubles_an_unchanged_event()
     {
         using var a = new SyncDevice();
@@ -230,6 +311,46 @@ public class ImportAdditiveTests
         Assert.Equal(family.Id, all.Single(o => o.Title == "Graduation").CategoryId);
         Assert.Single(all.Single(o => o.Title == "Wedding").Milestones);
         await SyncedAsync(a, cloud);
+    }
+
+    /// <summary>Runs <see cref="BeforeApply"/> between the importer's read and its apply, like a sync landing there.</summary>
+    private sealed class InterleavingSnapshots(ISnapshotService inner) : ISnapshotService
+    {
+        public Func<Task>? BeforeApply { get; set; }
+        public TimeZoneInfo Zone => inner.Zone;
+        public Task<ExportModel> ReadForSyncAsync() => inner.ReadForSyncAsync();
+        public Task<int> PurgeTombstonesAsync(DateTime olderThanUtc) => inner.PurgeTombstonesAsync(olderThanUtc);
+
+        public async Task ApplyAsync(ExportModel target, SnapshotApplyOptions options)
+        {
+            if (BeforeApply is { } before)
+                await before();
+            await inner.ApplyAsync(target, options);
+        }
+    }
+
+    [Fact]
+    public async Task Restore_matches_against_what_a_sync_applied_just_before_it()
+    {
+        using var a = new SyncDevice();
+        var cloud = new InMemoryCloudProvider();
+        await a.AddOccasionOnAsync("Other", new DateOnly(2022, 1, 1));
+        await SyncedAsync(a, cloud);
+        var backup = await BackupAsync(a);
+        backup.Occasions.Add(new OccasionDto
+        {
+            SyncId = Guid.NewGuid(), Title = "Wedding", AnchorDay = new DateOnly(2020, 6, 1), Direction = "Since",
+            UpdatedAt = DateTime.UtcNow, CreatedAt = DateTime.UtcNow,
+        });
+        var snapshots = new InterleavingSnapshots(a.Snapshots)
+        {
+            BeforeApply = () => a.AddOccasionOnAsync("Wedding", new DateOnly(2020, 6, 1)),
+        };
+
+        var outcome = await new ImportService(a.Db, snapshots, a.State).ApplyImportAsync(backup);
+
+        Assert.Equal(new[] { "Other", "Wedding" }, await a.TitlesAsync());
+        Assert.Equal(new ImportOutcome(true, 0, 0, 2), outcome);
     }
 
     [Fact]

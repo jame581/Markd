@@ -5,17 +5,20 @@ namespace Markd.Core.Services
     /// <summary>
     /// A restore on a synced device only adds, so a backup record whose SyncId this device does not know would come
     /// back as a second copy of an event it still has: a 1.0 backup gets fresh SyncIds on upgrade, and a first sync
-    /// may have re-identified hand-typed events since a 2.0 backup was made. Such records are matched to live local
-    /// ones on content and dropped.
+    /// may have re-identified hand-typed events since a 2.0 backup was made, and an event deleted and typed again after
+    /// the backup is a tombstone here next to a live copy with a new SyncId. Such records are matched to live local ones
+    /// on content and dropped.
     /// </summary>
     public static class ImportMatcher
     {
         /// <summary>
         /// Returns a copy of <paramref name="model"/> without the records whose SyncId is unknown in
-        /// <paramref name="local"/> (tombstones included) and whose content matches a live local record: categories on
-        /// name (trimmed, case-insensitive), emoji and colour; occasions on title, day and direction; milestones of a
-        /// dropped occasion on threshold and label under the matched local occasion. Kept occasions pointing at a
-        /// dropped category point at the matched local one instead. Each local record matches at most one backup record.
+        /// <paramref name="local"/> or only a tombstone there, and whose content matches a live local record the backup
+        /// does not hold: categories on name, emoji and colour; occasions on title, day and direction; milestones of a
+        /// dropped occasion on threshold and label under the matched local occasion. Text in a key is trimmed and
+        /// compared case-insensitively (emoji only trimmed), and empty or whitespace counts as none. Kept occasions
+        /// pointing at a dropped category point at the matched local one instead. Each local record matches at most
+        /// one backup record.
         /// </summary>
         public static ExportModel SkipMatches(ExportModel model, ExportModel local) => SkipMatches(model, local, out _);
 
@@ -23,23 +26,22 @@ namespace Markd.Core.Services
         public static ExportModel SkipMatches(ExportModel model, ExportModel local, out int skippedOccasions)
         {
             var result = model.CloneModel();
-            var localIds = local.Categories.Select(c => c.SyncId)
-                .Concat(local.Occasions.Select(o => o.SyncId))
-                .Concat(local.Milestones.Select(m => m.SyncId))
+            // Live local records the backup holds are already paired with it by SyncId; a tombstone is not.
+            var liveLocalIds = local.Categories.Where(c => c.DeletedAt is null).Select(c => c.SyncId)
+                .Concat(local.Occasions.Where(o => o.DeletedAt is null).Select(o => o.SyncId))
                 .ToHashSet();
             var backupIds = model.Categories.Select(c => c.SyncId)
                 .Concat(model.Occasions.Select(o => o.SyncId))
                 .Concat(model.Milestones.Select(m => m.SyncId))
                 .ToHashSet();
 
-            // A local record the backup also holds by SyncId is already paired with it.
             var categoryMatches = Pair(
-                result.Categories.Where(c => c.DeletedAt is null && !localIds.Contains(c.SyncId)),
+                result.Categories.Where(c => c.DeletedAt is null && !liveLocalIds.Contains(c.SyncId)),
                 local.Categories.Where(c => c.DeletedAt is null && !backupIds.Contains(c.SyncId)),
-                c => c.SyncId, c => (Name: Norm(c.Name), c.Emoji, c.ColorHex));
+                c => c.SyncId, c => (Name: Norm(c.Name), Emoji: Trim(c.Emoji), Color: Norm(c.ColorHex)));
 
             var occasionMatches = Pair(
-                result.Occasions.Where(o => o.DeletedAt is null && !localIds.Contains(o.SyncId)),
+                result.Occasions.Where(o => o.DeletedAt is null && !liveLocalIds.Contains(o.SyncId)),
                 local.Occasions.Where(o => o.DeletedAt is null && !backupIds.Contains(o.SyncId)),
                 o => o.SyncId, o => (Title: Norm(o.Title), o.AnchorDay, Direction: Norm(o.Direction)));
 
@@ -49,7 +51,7 @@ namespace Markd.Core.Services
                 liveLocalMilestones.Where(m => !backupIds.Contains(m.SyncId)),
                 m => m.SyncId,
                 m => (Occasion: occasionMatches.TryGetValue(m.OccasionSyncId, out var to) ? to : m.OccasionSyncId,
-                      m.ThresholdDays, Label: m.Label.Trim()));
+                      m.ThresholdDays, Label: Trim(m.Label)));
 
             result.Categories.RemoveAll(c => categoryMatches.ContainsKey(c.SyncId));
             result.Occasions.RemoveAll(o => occasionMatches.ContainsKey(o.SyncId));
@@ -79,6 +81,8 @@ namespace Markd.Core.Services
             return matches;
         }
 
-        private static string Norm(string s) => s.Trim().ToLower(CultureInfo.InvariantCulture);
+        private static string? Trim(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
+
+        private static string? Norm(string? s) => Trim(s)?.ToLower(CultureInfo.InvariantCulture);
     }
 }

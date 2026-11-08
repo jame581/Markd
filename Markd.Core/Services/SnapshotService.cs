@@ -43,6 +43,8 @@ namespace Markd.Core.Services
 
                 if (options.Additive)
                 {
+                    if (options.PrepareAdditions is { } prepare)
+                        target = prepare(await SnapshotReader.ReadAsync(db, includeTombstones: true, includeNotified: false, _zone));
                     await ApplyAdditionsAsync(target, options, categories, occasions, milestones, now);
                     await transaction.CommitAsync();
                     db.ChangeTracker.Clear();

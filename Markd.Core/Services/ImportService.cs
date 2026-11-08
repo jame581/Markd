@@ -67,11 +67,17 @@ namespace Markd.Core.Services
             if (await _syncState.HasSyncStateAsync())
             {
                 // A synced device only adds: nothing is tombstoned, live records stay as they are, and the next sync
-                // uploads the additions as local edits against the kept base.
-                var local = await _snapshots.ReadForSyncAsync();
-                var additions = ImportMatcher.SkipMatches(target, local, out var matched);
-                outcome = Count(additions, local, matched);
-                await _snapshots.ApplyAsync(additions, new SnapshotApplyOptions(TakeNotifiedFromTarget: true, ApplySettings: true, Additive: true));
+                // uploads the additions as local edits against the kept base. Matching reads local data inside the
+                // apply transaction, so a sync applied in between cannot slip a look-alike past it.
+                ImportOutcome? counted = null;
+                await _snapshots.ApplyAsync(target, new SnapshotApplyOptions(TakeNotifiedFromTarget: true, ApplySettings: true, Additive: true,
+                    PrepareAdditions: local =>
+                    {
+                        var additions = ImportMatcher.SkipMatches(target, local, out var matched);
+                        counted = Count(additions, local, matched);
+                        return additions;
+                    }));
+                outcome = counted ?? throw new InvalidOperationException("The additive apply did not prepare the additions.");
             }
             else
             {
