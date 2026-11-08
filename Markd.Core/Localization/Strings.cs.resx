@@ -430,6 +430,9 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Sync_FailWrongPassphrase" xml:space="preserve"><value>Heslo synchronizace data v cloudu neotevře.</value></data>
   <data name="Sync_SignInWaiting" xml:space="preserve"><value>Čekání na přihlášení v prohlížeči…</value></data>
   <data name="Sync_SignInFailedDetail" xml:space="preserve"><value>Přihlášení se nepodařilo. Zkontrolujte připojení a zkuste to znovu.</value></data>
+  <data name="Sync_SignInMissingPermission" xml:space="preserve"><value>Markd potřebuje oprávnění ukládat svá data do vašeho cloudového úložiště. Přihlaste se znovu a povolte ho.</value></data>
+  <data name="Sync_BrowserDone" xml:space="preserve"><value>Přihlášení proběhlo. Tuto kartu můžete zavřít a vrátit se do Markd.</value></data>
+  <data name="Sync_BrowserFailed" xml:space="preserve"><value>Přihlášení nebylo dokončeno. Vraťte se do Markd a zkuste to znovu.</value></data>
   <data name="Sync_DisconnectSignInFirst" xml:space="preserve"><value>Pro smazání kopie v cloudu se znovu přihlaste, nebo se odpojte a kopii ponechte.</value></data>
   <data name="Sync_SectionTitle" xml:space="preserve"><value>Synchronizace</value></data>
   <data name="Sync_ConnectSub" xml:space="preserve"><value>Připojit toto zařízení</value></data>

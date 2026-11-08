@@ -166,6 +166,22 @@ public class SyncCoordinatorSignInTests
         Assert.Equal(0, _catalog.Provider.InfoCalls);
     }
 
+    [Fact]
+    public async Task Connect_SignInMissingPermission_AsksToAllowIt()
+    {
+        _auth.OnSignIn = (_, _) => throw new SignInMissingPermissionException();
+        var coordinator = Create();
+        await coordinator.InitializeAsync();
+
+        await coordinator.ConnectAsync(ProviderId);
+
+        Assert.Equal([Strings.Sync_ConnectFailed], _feedback.Titles);
+        Assert.Equal([Strings.Sync_SignInMissingPermission], _feedback.Details);
+        Assert.Empty(_prompt.Calls);
+        Assert.False(_state.Value.IsConnected);
+        Assert.Equal(0, _catalog.Provider.InfoCalls);
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

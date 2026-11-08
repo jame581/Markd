@@ -430,6 +430,9 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Sync_FailWrongPassphrase" xml:space="preserve"><value>Die Synchronisierungs-Passphrase öffnet die Cloud-Daten nicht.</value></data>
   <data name="Sync_SignInWaiting" xml:space="preserve"><value>Warten auf die Anmeldung im Browser…</value></data>
   <data name="Sync_SignInFailedDetail" xml:space="preserve"><value>Die Anmeldung hat nicht funktioniert. Prüfen Sie die Verbindung und versuchen Sie es erneut.</value></data>
+  <data name="Sync_SignInMissingPermission" xml:space="preserve"><value>Markd benötigt die Berechtigung, eigene Daten in Ihrem Cloud-Speicher abzulegen. Melden Sie sich erneut an und erlauben Sie es.</value></data>
+  <data name="Sync_BrowserDone" xml:space="preserve"><value>Angemeldet. Sie können diesen Tab schließen und zu Markd zurückkehren.</value></data>
+  <data name="Sync_BrowserFailed" xml:space="preserve"><value>Die Anmeldung wurde nicht abgeschlossen. Kehren Sie zu Markd zurück und versuchen Sie es erneut.</value></data>
   <data name="Sync_DisconnectSignInFirst" xml:space="preserve"><value>Melden Sie sich erneut an, um die Cloud-Kopie zu löschen, oder trennen Sie das Gerät und behalten Sie die Kopie.</value></data>
   <data name="Sync_SectionTitle" xml:space="preserve"><value>Synchronisierung</value></data>
   <data name="Sync_ConnectSub" xml:space="preserve"><value>Dieses Gerät verbinden</value></data>

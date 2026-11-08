@@ -51,6 +51,7 @@
     <Compile Include="..\Markd\Services\Sync\ISyncPassphrasePromptService.cs" Link="Services\Sync\ISyncPassphrasePromptService.cs" />
     <Compile Include="..\Markd\Services\Sync\ICloudProviderCatalog.cs" Link="Services\Sync\ICloudProviderCatalog.cs" />
     <Compile Include="..\Markd\Services\Sync\ICloudAuthService.cs" Link="Services\Sync\ICloudAuthService.cs" />
+    <Compile Include="..\Markd\Services\Sync\Cloud\GoogleOAuthClient.cs" Link="Services\Sync\Cloud\GoogleOAuthClient.cs" />
     <Compile Include="..\Markd\Services\Sync\ISignInWaitService.cs" Link="Services\Sync\ISignInWaitService.cs" />
     <Compile Include="..\Markd\Services\Sync\ISyncDataRefresher.cs" Link="Services\Sync\ISyncDataRefresher.cs" />
     <Compile Include="..\Markd\Services\Sync\INetworkStatus.cs" Link="Services\Sync\INetworkStatus.cs" />

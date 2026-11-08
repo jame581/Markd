@@ -640,6 +640,7 @@ public sealed class SyncCoordinator(
 
     private static string FailureDetail(Exception ex) => ex switch
     {
+        SignInFailedException { InnerException: SignInMissingPermissionException } => Strings.Sync_SignInMissingPermission,
         SignInFailedException => Strings.Sync_SignInFailedDetail,
         SyncOfflineException => FailureDetail(SyncOutcome.Offline),
         SyncAuthException => FailureDetail(SyncOutcome.AuthExpired),

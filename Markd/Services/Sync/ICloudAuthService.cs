@@ -32,3 +32,12 @@ public interface ICloudAuthService : IAccessTokenSource
     /// <summary>Forgets this device's tokens and account. Never revokes. Never throws.</summary>
     Task SignOutAsync();
 }
+
+/// <summary>
+/// The sign-in finished but the user did not grant the permission sync needs (for Google: the user unticked access to
+/// the app's own Drive data on the consent screen). Nothing was stored; the user must sign in again and allow it.
+/// </summary>
+public sealed class SignInMissingPermissionException : Exception
+{
+    public SignInMissingPermissionException() : base("The sign-in did not grant the permission sync needs.") { }
+}

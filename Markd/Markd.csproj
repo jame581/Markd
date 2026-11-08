@@ -116,8 +116,9 @@
 	  <None Include="Desktop\**" />
 	</ItemGroup>
 
-	<!-- Bakes the optional cloud client ids into Services/Sync/CloudConfig. Empty means not configured. -->
-	<Target Name="GenerateCloudConfig" BeforeTargets="CoreCompile;BeforeCompile">
+	<!-- Bakes the optional cloud client ids into Services/Sync/CloudConfig. Empty means not configured. Runs before
+	     XamlPreCompile too: the WinUI XAML compiler builds a first pass of the assembly before BeforeCompile. -->
+	<Target Name="GenerateCloudConfig" BeforeTargets="XamlPreCompile;CoreCompile;BeforeCompile">
 		<PropertyGroup>
 			<_CloudConfigFile>$(IntermediateOutputPath)CloudConfig.g.cs</_CloudConfigFile>
 			<_CfgGoogleId>$(MarkdGoogleDesktopClientId.Replace('\', '\\').Replace('&quot;', '\&quot;'))</_CfgGoogleId>
