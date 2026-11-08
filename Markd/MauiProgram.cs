@@ -2,8 +2,10 @@ using System.Globalization;
 using CommunityToolkit.Maui;
 using Markd.Core;
 using Markd.Core.Localization;
+using Markd.Core.Sync;
 using Markd.Pages;
 using Markd.Services;
+using Markd.Services.Sync;
 using Markd.ViewModels;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
@@ -56,8 +58,37 @@ namespace Markd
 
             InputChrome.Configure();
 
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "markd.db");
+            var dataDirectory = FileSystem.AppDataDirectory;
+#if DEBUG
+            // Lets two debug instances on one PC keep separate data (database and Windows sync secret) and sync with
+            // each other through the developer folder provider.
+            var dataOverride = Environment.GetEnvironmentVariable("MARKD_DATA_DIR");
+            if (!string.IsNullOrWhiteSpace(dataOverride))
+            {
+                dataDirectory = Path.GetFullPath(dataOverride);
+                Directory.CreateDirectory(dataDirectory);
+            }
+#endif
+
+            var dbPath = Path.Combine(dataDirectory, "markd.db");
             builder.Services.AddMarkdCore(dbPath);
+
+#if WINDOWS
+            builder.Services.AddSingleton<ISyncSecretStore>(sp => new Platforms.Windows.DpapiSyncSecretStore(
+                dataDirectory, sp.GetRequiredService<ILogger<Platforms.Windows.DpapiSyncSecretStore>>()));
+#else
+            builder.Services.AddSingleton<ISyncSecretStore, SecureStorageSyncSecretStore>();
+#endif
+#if DEBUG
+            builder.Services.AddSingleton<ICloudProviderCatalog, DebugCloudProviderCatalog>();
+#else
+            builder.Services.AddSingleton<ICloudProviderCatalog, EmptyCloudProviderCatalog>();
+#endif
+            builder.Services.AddSingleton<IUiDispatcher, MainThreadDispatcher>();
+            builder.Services.AddSingleton<ISyncDataRefresher, MauiSyncDataRefresher>();
+            builder.Services.AddSingleton<INetworkStatus, MauiNetworkStatus>();
+            // Sync runs on its own scope and DbContext; never inject ISyncService into app classes.
+            builder.Services.AddSingleton<ISyncSession, SyncScope>();
 
             builder.Services.AddSingleton<NotificationService>();
             builder.Services.AddSingleton<IShareService, ShareService>();

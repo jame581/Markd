@@ -91,6 +91,11 @@
 		<PackageReference Include="SQLitePCLRaw.lib.e_sqlite3.ios" Version="2.1.13" />
 	</ItemGroup>
 
+	<!-- DPAPI for the sync passphrase file (Platforms/Windows/DpapiSyncSecretStore.cs). -->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+	  <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.12" />
+	</ItemGroup>
+
 	<ItemGroup>
 	  <ProjectReference Include="..\Markd.Core\Markd.Core.csproj" />
 	</ItemGroup>
