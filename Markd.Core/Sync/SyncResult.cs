@@ -16,6 +16,12 @@ namespace Markd.Core.Sync
         /// </summary>
         public const string PassphraseNotStoredDetail = "passphrase-not-stored";
 
+        /// <summary>
+        /// True when the call wrote merged data into the local database, whatever its final outcome: an apply followed
+        /// by a failed or offline upload still changed what this device shows.
+        /// </summary>
+        public bool LocalDataChanged { get; init; }
+
         public bool IsSuccess => Outcome is SyncOutcome.Synced or SyncOutcome.NoChanges or SyncOutcome.Disconnected;
     }
 }

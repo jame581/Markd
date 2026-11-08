@@ -16,6 +16,15 @@ namespace Markd.Core.Services
         /// </summary>
         Task<Occasion> RestoreAsync(Occasion snapshot);
         Task DeleteAllAsync();
+
+        /// <summary>
+        /// Hard-deletes every occasion, milestone and category, tombstones included, so nothing is left for a sync to
+        /// read as a delete or to set against the other devices' edits (a kept category renamed elsewhere would be a
+        /// conflict on reconnect). Settings stay. Only for erasing a device that has sync state, and only after
+        /// <see cref="Sync.ISyncService.ForgetLinkAsync"/> returned <see cref="Sync.SyncOutcome.Disconnected"/>: forget
+        /// the link FIRST, then purge, so a crash between the two leaves local data intact and unlinked.
+        /// </summary>
+        Task PurgeAllAsync();
         Task SetPinnedAsync(int id);
         Task<Milestone> AddMilestoneAsync(int occasionId, int thresholdDays, string label);
         Task RemoveMilestoneAsync(int milestoneId);

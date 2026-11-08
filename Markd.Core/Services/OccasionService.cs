@@ -111,6 +111,19 @@ namespace Markd.Core.Services
                 Forget(occasion, milestones);
         }
 
+        public async Task PurgeAllAsync()
+        {
+            await db.Milestones.IgnoreQueryFilters().ExecuteDeleteAsync();
+            await db.Occasions.IgnoreQueryFilters().ExecuteDeleteAsync();
+            await db.Categories.IgnoreQueryFilters().ExecuteDeleteAsync();
+
+            // ExecuteDelete bypasses the change tracker: detach everything it removed, or the app's long-lived context
+            // would keep serving (and could save back) rows that no longer exist.
+            foreach (var entry in db.ChangeTracker.Entries()
+                         .Where(e => e.Entity is Milestone or Occasion or Category).ToList())
+                entry.State = EntityState.Detached;
+        }
+
         /// <summary>
         /// Soft delete. IsPinned is left alone on purpose: the pin index ignores tombstones, and undo restores
         /// the pin from the record itself.

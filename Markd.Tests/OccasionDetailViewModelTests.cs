@@ -278,6 +278,12 @@ public static class OccasionDetailViewModelTests
             return Task.CompletedTask;
         }
 
+        public Task PurgeAllAsync()
+        {
+            _occasions.Clear();
+            return Task.CompletedTask;
+        }
+
         public Task SetPinnedAsync(int id)
         {
             foreach (var occasion in _occasions)

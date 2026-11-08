@@ -14,9 +14,10 @@ namespace Markd.Core.Sync
             await gate.WaitAsync(ct);
             try
             {
-                var syncResult = await RunAsync(() => SyncCoreAsync(provider, resolutions, ct), ct);
+                var call = new CallScope();
+                var syncResult = await RunAsync(() => SyncCoreAsync(provider, resolutions, call, ct), ct);
                 await RecordAttemptAsync(syncResult);
-                return syncResult;
+                return syncResult with { LocalDataChanged = call.LocalDataChanged };
             }
             finally
             {
@@ -26,7 +27,7 @@ namespace Markd.Core.Sync
 
         /// <summary>The sync loop with the stored passphrase. The caller holds the gate and maps exceptions (RunAsync).</summary>
         private async Task<SyncResult> SyncCoreAsync(
-            ICloudSyncProvider provider, IReadOnlyCollection<ConflictResolution>? resolutions, CancellationToken ct)
+            ICloudSyncProvider provider, IReadOnlyCollection<ConflictResolution>? resolutions, CallScope call, CancellationToken ct)
         {
             var passphrase = await secrets.GetPassphraseAsync();
             if (string.IsNullOrEmpty(passphrase))
@@ -35,7 +36,7 @@ namespace Markd.Core.Sync
             var retry = RetryReason.RemoteChanged;
             for (var attempt = 0; attempt < Math.Max(1, options.MaxUploadAttempts); attempt++)
             {
-                (var result, retry) = await TryOnceAsync(provider, passphrase, resolutions, ct);
+                (var result, retry) = await TryOnceAsync(provider, passphrase, resolutions, call, ct);
                 if (result is not null)
                     return result;
             }
@@ -53,6 +54,7 @@ namespace Markd.Core.Sync
             await gate.WaitAsync(ct);
             try
             {
+                var call = new CallScope();
                 var changeResult = await RunAsync(async () =>
                 {
                     for (var attempt = 0; attempt < Math.Max(1, options.MaxUploadAttempts); attempt++)
@@ -60,7 +62,7 @@ namespace Markd.Core.Sync
                         // Bring both sides level first: after a successful sync the base holds the same live data as
                         // the cloud file at RemoteRevision (tombstones and timestamps may differ from the cloud copy),
                         // so re-encrypting it changes no record another device can see.
-                        var synced = await SyncCoreAsync(provider, resolutions: null, ct);
+                        var synced = await SyncCoreAsync(provider, resolutions: null, call, ct);
                         if (synced.Outcome is not (SyncOutcome.Synced or SyncOutcome.NoChanges))
                             return synced;
 
@@ -105,7 +107,7 @@ namespace Markd.Core.Sync
                     return new SyncResult(SyncOutcome.Failed, Detail: "The remote file kept changing.");
                 }, ct);
                 await RecordAttemptAsync(changeResult);
-                return changeResult;
+                return changeResult with { LocalDataChanged = call.LocalDataChanged };
             }
             finally
             {
@@ -116,11 +118,21 @@ namespace Markd.Core.Sync
         private enum RetryReason { RemoteChanged, LocalChanged }
 
         /// <summary>
+        /// What one public call did across its retries, kept outside the results so it survives an exception that
+        /// RunAsync maps to an outcome (an apply followed by an offline upload).
+        /// </summary>
+        private sealed class CallScope
+        {
+            public bool LocalDataChanged { get; set; }
+        }
+
+        /// <summary>
         /// Returns a null result when the attempt must be repeated, with the reason: the upload lost a race, or the
         /// user edited while the sync was running.
         /// </summary>
         private async Task<(SyncResult? Result, RetryReason Retry)> TryOnceAsync(
-            ICloudSyncProvider provider, string passphrase, IReadOnlyCollection<ConflictResolution>? resolutions, CancellationToken ct)
+            ICloudSyncProvider provider, string passphrase, IReadOnlyCollection<ConflictResolution>? resolutions, CallScope call,
+            CancellationToken ct)
         {
             var now = clock.GetUtcNow().UtcDateTime;
             var state = await store.LoadAsync();
@@ -201,6 +213,7 @@ namespace Markd.Core.Sync
                     await snapshots.ApplyAsync(merged, new SnapshotApplyOptions(
                         TakeNotifiedFromTarget: false, SyncIdRemaps: merge.SyncIdRemaps, NowUtc: now,
                         ExpectedLocalFingerprint: SyncContent.Fingerprint(local)));
+                    call.LocalDataChanged = true;
                 }
                 catch (SnapshotChangedException)
                 {
@@ -355,6 +368,57 @@ namespace Markd.Core.Sync
                 if (!deleteRemote && disconnectResult.Outcome == SyncOutcome.Disconnected)
                     await RecordAttemptAsync(disconnectResult);
                 return disconnectResult;
+            }
+            finally
+            {
+                gate.Release();
+            }
+        }
+
+        /// <summary>
+        /// Proves a typed passphrase against the cloud file before storing it. Never uploads and never touches local
+        /// data or the sync state, so it records no attempt.
+        /// </summary>
+        public async Task<SyncResult> UnlockAsync(ICloudSyncProvider provider, string passphrase, CancellationToken ct = default)
+        {
+            if (string.IsNullOrWhiteSpace(passphrase))
+                return new SyncResult(SyncOutcome.NeedsPassphrase);
+
+            await gate.WaitAsync(ct);
+            try
+            {
+                return await RunAsync(async () =>
+                {
+                    var file = await provider.DownloadAsync(ct);
+                    // A wrong passphrase throws here and RunAsync maps it to WrongPassphrase: nothing is stored.
+                    if (file is not null)
+                        await Task.Run(() => SyncSnapshotCodec.Decode(file.Data, passphrase), ct);
+
+                    await secrets.SetPassphraseAsync(passphrase);
+                    return new SyncResult(SyncOutcome.NoChanges);
+                }, ct);
+            }
+            finally
+            {
+                gate.Release();
+            }
+        }
+
+        /// <summary>
+        /// Forgets the whole sync state, then the passphrase, without contacting the cloud. No attempt is recorded,
+        /// since recording would create a row again.
+        /// </summary>
+        public async Task<SyncResult> ForgetLinkAsync(CancellationToken ct = default)
+        {
+            await gate.WaitAsync(ct);
+            try
+            {
+                return await RunAsync(async () =>
+                {
+                    await store.ClearAsync();
+                    await secrets.SetPassphraseAsync(null);
+                    return new SyncResult(SyncOutcome.Disconnected);
+                }, ct);
             }
             finally
             {

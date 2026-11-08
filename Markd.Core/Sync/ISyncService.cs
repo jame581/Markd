@@ -37,5 +37,25 @@ namespace Markd.Core.Sync
         /// is forgotten. Local data is never touched. Returns <see cref="SyncOutcome.Disconnected"/>.
         /// </summary>
         Task<SyncResult> DisconnectAsync(ICloudSyncProvider? provider, bool deleteRemote, CancellationToken ct = default);
+
+        /// <summary>
+        /// Checks a typed passphrase against the cloud file and stores it only when it decodes the file (or there is no
+        /// file yet): <see cref="SyncOutcome.NoChanges"/>, or <see cref="SyncOutcome.WrongPassphrase"/> with nothing
+        /// stored. Never uploads. Call it before syncing whenever the user types a passphrase for an existing cloud
+        /// file, so a typo can never encrypt an upload.
+        /// </summary>
+        Task<SyncResult> UnlockAsync(ICloudSyncProvider provider, string passphrase, CancellationToken ct = default);
+
+        /// <summary>
+        /// Forgets the whole sync state and the passphrase without touching the cloud file or local data. Returns
+        /// <see cref="SyncOutcome.Disconnected"/>.
+        /// </summary>
+        /// <remarks>
+        /// Erasing a device that has sync state calls this FIRST and then
+        /// <see cref="Services.IOccasionService.PurgeAllAsync"/>, only after this returned
+        /// <see cref="SyncOutcome.Disconnected"/>. A crash between the two leaves local data intact and unlinked, never
+        /// an empty device that a sync would read as "everything was deleted".
+        /// </remarks>
+        Task<SyncResult> ForgetLinkAsync(CancellationToken ct = default);
     }
 }
