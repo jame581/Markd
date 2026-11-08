@@ -164,6 +164,19 @@ public class ConflictListViewModelTests
     }
 
     [Fact]
+    public void Compare_FormatsTheDateLikeTheRestOfTheApp()
+    {
+        using var _ = new CultureScope("en-US");
+        var row = Create(OccasionConflictOf("Trip", "Trip 2")).Rows[0];
+        ConflictCompareViewModel? requested = null;
+        row.CompareRequested += (_, vm) => requested = vm;
+
+        row.CompareCommand.Execute(null);
+
+        Assert.Equal("Sunday, 17 May 2020", requested!.Local.Single(f => f.Label == "Date").Value);
+    }
+
+    [Fact]
     public void Compare_DeletedSideHasNoFields()
     {
         var conflict = new OccasionConflict(Guid.NewGuid(), null, Occ("x"), null, null, Now, Now);

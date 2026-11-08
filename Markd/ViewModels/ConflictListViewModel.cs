@@ -183,7 +183,7 @@ public sealed class ConflictRowViewModel : ObservableObject
                 [
                     new(Strings.Form_Title, dto.Title),
                     new(Strings.Form_Emoji, OrNone(dto.Emoji)),
-                    new(Strings.Sync_FieldDate, dto.AnchorDay.ToString("D", culture)),
+                    new(Strings.Sync_FieldDate, OccasionMath.FormatLongDate(dto.AnchorDay.ToDateTime(TimeOnly.MinValue))),
                     new(Strings.Sync_FieldDirection, dto.Direction == "Until" ? Strings.Occasion_Until : Strings.Occasion_Since),
                     new(Strings.Form_Notes, OrNone(dto.Notes)),
                     new(Strings.Form_Category, OrNone(local ? o.LocalCategoryName : o.RemoteCategoryName)),
