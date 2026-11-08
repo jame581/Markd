@@ -37,7 +37,12 @@ public sealed class PhoneSignInWaitService : ISignInWaitService
             finally
             {
                 if (page is not null)
+                {
+                    // Closing before the push lands would leave the page on the stack: wait until it is up (or the
+                    // push failed or it was abandoned, which completes shown).
+                    await Task.WhenAny(page.Appeared, shown);
                     await page.CloseAsync();
+                }
                 await shown;
             }
         }

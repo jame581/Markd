@@ -1,5 +1,5 @@
-using Markd.Desktop.Dialogs;
 using Markd.Core.Sync;
+using Markd.Desktop.Dialogs;
 using Markd.Services;
 using Markd.Services.Sync;
 using Markd.ViewModels;
