@@ -451,4 +451,7 @@ Conçu avec .NET MAUI, EF Core avec SQLite, CommunityToolkit.Mvvm, CommunityTool
   <data name="Sync_PassphraseTooShort" xml:space="preserve"><value>Utilisez au moins 8 caractères.</value></data>
   <data name="Sync_PassphraseMismatch" xml:space="preserve"><value>Les phrases secrètes ne correspondent pas.</value></data>
   <data name="Sync_PassphraseContinue" xml:space="preserve"><value>Continuer</value></data>
+  <data name="Sync_Connect" xml:space="preserve"><value>Connecter</value></data>
+  <data name="Sync_Change" xml:space="preserve"><value>Modifier</value></data>
+  <data name="Sync_ReplaceSub" xml:space="preserve"><value>Si la phrase secrète est oubliée ou si les données du cloud sont illisibles.</value></data>
 </root>

@@ -19,24 +19,27 @@ public static class DesktopRegistration
         services.AddSingleton<IFileExportService, FileSaverExportService>();
         services.AddSingleton<IActionMenuService, ActionSheetMenuService>();
         services.AddSingleton<IPasswordPromptService, DesktopPasswordPromptService>();
-        // TEMPORARY until the desktop sync dialogs exist: Later and cancel, so the sync coordinator resolves.
-        services.AddSingleton<IConflictResolutionService, DesktopLaterConflictResolutionService>();
-        services.AddSingleton<ISyncPassphrasePromptService, DesktopCancelledPassphrasePromptService>();
+        services.AddSingleton<IConflictResolutionService, DesktopConflictResolutionService>();
+        services.AddSingleton<ISyncPassphrasePromptService, DesktopSyncPassphrasePromptService>();
     }
 }
 
-/// <summary>TEMPORARY no-op until the desktop conflict dialog exists: always "Later".</summary>
-public sealed class DesktopLaterConflictResolutionService : IConflictResolutionService
+/// <summary>
+/// The conflict list as an overlay dialog. Only returns the answers (null for Later or a dismiss); never calls the
+/// sync coordinator, which is waiting for them.
+/// </summary>
+public sealed class DesktopConflictResolutionService(IServiceProvider services) : IConflictResolutionService
 {
     public Task<IReadOnlyList<ConflictResolution>?> ResolveAsync(IReadOnlyList<SyncConflict> conflicts) =>
-        Task.FromResult<IReadOnlyList<ConflictResolution>?>(null);
+        MainThread.InvokeOnMainThreadAsync(() => services.GetRequiredService<DesktopShellPage>().ResolveConflictsAsync(conflicts));
 }
 
-/// <summary>TEMPORARY no-op until the desktop passphrase dialog exists: always cancelled.</summary>
-public sealed class DesktopCancelledPassphrasePromptService : ISyncPassphrasePromptService
+/// <summary>The sync passphrase as an overlay dialog. Always completes; a dismiss is cancelled.</summary>
+public sealed class DesktopSyncPassphrasePromptService(IServiceProvider services) : ISyncPassphrasePromptService
 {
     public Task<PassphrasePromptResult> PromptAsync(PassphrasePromptKind kind, bool previousAttemptFailed) =>
-        Task.FromResult(new PassphrasePromptResult(null, false));
+        MainThread.InvokeOnMainThreadAsync(() =>
+            services.GetRequiredService<DesktopShellPage>().PromptSyncPassphraseAsync(kind, previousAttemptFailed));
 }
 
 /// <summary>Routes and dialogs for view models, resolved lazily so the page can itself depend on view models.</summary>

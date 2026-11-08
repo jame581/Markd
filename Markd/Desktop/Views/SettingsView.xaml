@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:sync="clr-namespace:Markd.Services.Sync"
              xmlns:c="clr-namespace:Markd.Controls"
              xmlns:dc="clr-namespace:Markd.Desktop.Controls"
              xmlns:loc="clr-namespace:Markd.Localization"
@@ -119,6 +120,87 @@
                             </Border>
                         </Grid>
                     </Border>
+                </VerticalStackLayout>
+
+                <!-- Sync: off (what it is, and the providers), or connected / needs you (status with its action, then device actions) -->
+                <VerticalStackLayout Spacing="10" IsVisible="{Binding Sync.IsVisible}">
+                    <Label Text="{loc:Tr Sync_SectionTitle}" Style="{StaticResource DeskCardHeader}" />
+
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding Sync.IsOff}">
+                        <Label Text="{loc:Tr Sync_Intro}" FontSize="12.5" LineHeight="1.35" Margin="2,0,0,0" Style="{StaticResource SecondaryText}" />
+                        <VerticalStackLayout Spacing="10" BindableLayout.ItemsSource="{Binding Sync.Providers}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="sync:CloudProviderOption">
+                                    <Border Style="{StaticResource SettingCard}">
+                                        <Grid ColumnDefinitions="34,*,Auto" ColumnSpacing="14">
+                                            <Border Style="{StaticResource SettingIcon}"><c:SvgIcon Glyph="WinSync" Style="{StaticResource SettingGlyph}" /></Border>
+                                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                                <Label Text="{Binding DisplayName}" Style="{StaticResource SettingTitle}" />
+                                                <Label Text="{loc:Tr Sync_ConnectSub}" Style="{StaticResource SettingSub}" />
+                                            </VerticalStackLayout>
+                                            <Button Grid.Column="2" Text="{loc:Tr Sync_Connect}" Style="{StaticResource DeskTonalButton}" HeightRequest="32"
+                                                    FontSize="12.5" Padding="13,0" VerticalOptions="Center"
+                                                    Command="{Binding Source={x:Reference Sections}, Path=BindingContext.Sync.ConnectCommand, x:DataType=VerticalStackLayout}"
+                                                    CommandParameter="{Binding .}" />
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding Sync.IsConnected}">
+                        <Border Style="{StaticResource SettingCard}">
+                            <Grid ColumnDefinitions="34,*,Auto,Auto" ColumnSpacing="14">
+                                <Border Style="{StaticResource SettingIcon}"><c:SvgIcon Glyph="WinSync" Style="{StaticResource SettingGlyph}" /></Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                    <Label Text="{Binding Sync.AccountText}" Style="{StaticResource SettingTitle}" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding Sync.StatusText}" Style="{StaticResource SettingSub}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label" Binding="{Binding Sync.IsStatusWarning}" Value="True">
+                                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
+                                </VerticalStackLayout>
+                                <Button Grid.Column="2" Text="{Binding Sync.ActionText}" Command="{Binding Sync.ActionCommand}"
+                                        Style="{StaticResource DeskPrimaryButton}" HeightRequest="32" FontSize="12.5" Padding="13,0" VerticalOptions="Center"
+                                        IsVisible="{Binding Sync.ActionText, Converter={StaticResource HasText}}" />
+                                <Button Grid.Column="3" Text="{loc:Tr Sync_SyncNow}" Command="{Binding Sync.SyncNowCommand}"
+                                        Style="{StaticResource DeskTonalButton}" HeightRequest="32" FontSize="12.5" Padding="13,0" VerticalOptions="Center" />
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource SettingCard}">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                    <Label Text="{loc:Tr Sync_ChangePassphrase}" Style="{StaticResource SettingTitle}" />
+                                    <Label Text="{loc:Tr Sync_PassphraseChangeMessage}" Style="{StaticResource SettingSub}" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1" Text="{loc:Tr Sync_Change}" Style="{StaticResource DeskTonalButton}" HeightRequest="32" FontSize="12.5"
+                                        Padding="13,0" VerticalOptions="Center" Command="{Binding Sync.ChangePassphraseCommand}" />
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource SettingCard}">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                    <Label Text="{loc:Tr Sync_DisconnectDevice}" Style="{StaticResource SettingTitle}" />
+                                    <Label Text="{loc:Tr Sync_DisconnectConfirmMessage}" Style="{StaticResource SettingSub}" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1" Text="{loc:Tr Sync_Disconnect}" Style="{StaticResource DeskTonalButton}" HeightRequest="32" FontSize="12.5"
+                                        Padding="13,0" VerticalOptions="Center" Command="{Binding Sync.DisconnectCommand}" />
+                            </Grid>
+                        </Border>
+                        <Border Style="{StaticResource SettingCard}">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                    <Label Text="{loc:Tr Sync_ReplaceWithThisDevice}" Style="{StaticResource SettingTitle}" />
+                                    <Label Text="{loc:Tr Sync_ReplaceSub}" Style="{StaticResource SettingSub}" />
+                                </VerticalStackLayout>
+                                <Button Grid.Column="1" Text="{loc:Tr Sync_ActionReplaceCloud}" Style="{StaticResource DeskDangerButton}" HeightRequest="32"
+                                        FontSize="12.5" Padding="13,0" VerticalOptions="Center" Command="{Binding Sync.ReplaceCloudCommand}" />
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout Spacing="10">

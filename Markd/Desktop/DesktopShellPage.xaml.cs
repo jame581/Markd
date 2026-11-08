@@ -1,9 +1,11 @@
 using Markd.Core.Localization;
 using Markd.Core.Services;
+using Markd.Core.Sync;
 using Markd.Desktop.Controls;
 using Markd.Desktop.Dialogs;
 using Markd.Desktop.Views;
 using Markd.Services;
+using Markd.Services.Sync;
 using Markd.ViewModels;
 using WinKeyboardAccelerator = Microsoft.UI.Xaml.Input.KeyboardAccelerator;
 using Windows.System;
@@ -17,6 +19,7 @@ namespace Markd.Desktop;
 public partial class DesktopShellPage : ContentPage
 {
     private readonly IAppSettingsService _settingsService;
+    private readonly SyncCoordinator _sync;
     private readonly Dictionary<string, IDesktopSection> _sections = new();
     private readonly List<OverlayLayer> _overlays = [];
     private IDesktopSection? _current;
@@ -25,13 +28,26 @@ public partial class DesktopShellPage : ContentPage
     private bool _formOpening;
     private ToastCard? _toast;
 
-    public DesktopShellPage(IAppSettingsService settingsService)
+    public DesktopShellPage(IAppSettingsService settingsService, SyncCoordinator sync)
     {
         InitializeComponent();
         _settingsService = settingsService;
+        _sync = sync;
         UpdateThemeItem();
+        UpdateSyncItem();
         Application.Current!.RequestedThemeChanged += (_, _) => UpdateThemeItem();
-        LocalizationManager.Instance.CultureChanged += (_, _) => UpdateThemeItem();
+        LocalizationManager.Instance.CultureChanged += (_, _) =>
+        {
+            UpdateThemeItem();
+            UpdateSyncItem();
+        };
+        _sync.StatusChanged += (_, _) =>
+        {
+            if (Dispatcher.IsDispatchRequired)
+                Dispatcher.Dispatch(UpdateSyncItem);
+            else
+                UpdateSyncItem();
+        };
         Loaded += async (_, _) =>
         {
             if (_current is null)
@@ -188,6 +204,81 @@ public partial class DesktopShellPage : ContentPage
         return result;
     }
 
+    /// <summary>
+    /// The sync conflict list. Always completes: Apply returns the choices; Later, Escape, a failure to show it and the
+    /// window closing return null. Compare opens over the list and closing it returns to the list.
+    /// </summary>
+    public async Task<IReadOnlyList<ConflictResolution>?> ResolveConflictsAsync(IReadOnlyList<SyncConflict> conflicts)
+    {
+        ConflictListViewModel viewModel;
+        OverlayLayer layer;
+        ConflictListDialog dialog;
+        try
+        {
+            viewModel = new ConflictListViewModel(conflicts);
+            dialog = new ConflictListDialog(viewModel, ShowConflictCompareAsync);
+            dialog.FitTo(Height);
+            layer = ShowOverlay(dialog, dialog.Cancel);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Showing the conflict list failed: {ex}");
+            return null;
+        }
+
+        var result = await UntilWindowCloses(viewModel.Result, dialog.Cancel);
+        await layer.CloseAsync();
+        return result;
+    }
+
+    /// <summary>The sync passphrase dialog. Always completes; Cancel, Escape and the window closing count as cancelled.</summary>
+    public async Task<PassphrasePromptResult> PromptSyncPassphraseAsync(PassphrasePromptKind kind, bool previousAttemptFailed)
+    {
+        SyncPassphraseDialog dialog;
+        OverlayLayer layer;
+        try
+        {
+            dialog = new SyncPassphraseDialog(kind, previousAttemptFailed);
+            layer = ShowOverlay(dialog, dialog.Cancel);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Showing the sync passphrase dialog failed: {ex}");
+            return new PassphrasePromptResult(null, false);
+        }
+
+        var result = await UntilWindowCloses(dialog.Result, dialog.Cancel);
+        await layer.CloseAsync();
+        return result;
+    }
+
+    private async Task ShowConflictCompareAsync(ConflictCompareViewModel compare)
+    {
+        var dialog = new ConflictCompareDialog(compare);
+        dialog.FitTo(Height);
+        var layer = ShowOverlay(dialog, dialog.Close);
+        await dialog.Closed;
+        await layer.CloseAsync();
+    }
+
+    /// <summary>Waits for a dialog's answer, cancelling the dialog if the window closes first.</summary>
+    private async Task<T> UntilWindowCloses<T>(Task<T> answer, Action cancel)
+    {
+        var window = Window;
+        void OnDestroying(object? sender, EventArgs e) => cancel();
+        if (window is not null)
+            window.Destroying += OnDestroying;
+        try
+        {
+            return await answer;
+        }
+        finally
+        {
+            if (window is not null)
+                window.Destroying -= OnDestroying;
+        }
+    }
+
     /// <summary>Cancels the topmost dialog, as Escape does. Returns false when no dialog is open.</summary>
     public bool DismissTopOverlay()
     {
@@ -276,6 +367,23 @@ public partial class DesktopShellPage : ContentPage
         var label = dark ? Strings.Desk_LightTheme : Strings.Desk_DarkTheme;
         ToolTipProperties.SetText(ThemeItem, label);
         SemanticProperties.SetDescription(ThemeItem, label);
+    }
+
+    /// <summary>The sync mark's tooltip is the status it stands for ("Syncing", "Sync paused: 2 conflicts to resolve").</summary>
+    private void UpdateSyncItem()
+    {
+        var label = SyncStatusText.Describe(_sync.Status, DateTime.UtcNow);
+        ToolTipProperties.SetText(SyncItem, label);
+        SemanticProperties.SetDescription(SyncItem, label);
+    }
+
+    /// <summary>Conflicts reopen the list; any other state needing the user is explained and acted on in Settings.</summary>
+    private async void OnSyncTapped(object? sender, EventArgs e)
+    {
+        if (_sync.Status.Kind == SyncStatusKind.Conflicts)
+            await _sync.OpenConflictsAsync();
+        else
+            await ShowSectionAsync("settings");
     }
 
     private async void OnRailItemClicked(object? sender, EventArgs e)

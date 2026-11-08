@@ -1,5 +1,6 @@
 using Markd.Core.Services;
 using Markd.Services;
+using Markd.Services.Sync;
 
 namespace Markd
 {
@@ -9,6 +10,7 @@ namespace Markd
         private readonly NotificationService _notificationService;
         private readonly Queue<MilestoneMoment> _moments = new();
         private bool _showingMoment;
+        private bool _syncStarted;
 
         public App(IServiceProvider services, NotificationService notificationService)
         {
@@ -35,6 +37,7 @@ namespace Markd
             var window = new Window(_services.GetRequiredService<AppShell>());
 #endif
             window.Resumed += OnWindowResumed;
+            window.Destroying += (_, _) => StopSync();
             return window;
         }
 
@@ -49,6 +52,36 @@ namespace Markd
             _notificationService.StartClock();
             await _notificationService.CheckOnOpenAsync();
             await _notificationService.RescheduleAsync();
+            await StartSyncAsync();
+        }
+
+        /// <summary>Reads the stored sync state, starts the triggers and runs the start-up sync. Never breaks startup.</summary>
+        private async Task StartSyncAsync()
+        {
+            try
+            {
+                await _services.GetRequiredService<SyncCoordinator>().InitializeAsync();
+                var scheduler = _services.GetRequiredService<SyncScheduler>();
+                scheduler.Start();
+                _syncStarted = true;
+                await scheduler.OnAppStartAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Starting sync failed: {ex}");
+            }
+        }
+
+        private void StopSync()
+        {
+            try
+            {
+                _services.GetRequiredService<SyncScheduler>().Stop();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Stopping sync failed: {ex}");
+            }
         }
 
         private async void OpenOccasion(int id)
@@ -59,6 +92,18 @@ namespace Markd
         private async void OnWindowResumed(object? sender, EventArgs e)
         {
             await _notificationService.CheckOnOpenAsync();
+            try
+            {
+                var scheduler = _services.GetRequiredService<SyncScheduler>();
+                // A window destroyed and recreated by the platform (Android) stopped the triggers; Start is idempotent.
+                if (_syncStarted)
+                    scheduler.Start();
+                await scheduler.OnAppResumedAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"The resume sync failed: {ex}");
+            }
         }
 
         private void EnqueueMoment(MilestoneMoment moment)

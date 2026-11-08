@@ -451,4 +451,7 @@ Built with .NET MAUI, EF Core with SQLite, CommunityToolkit.Mvvm, CommunityToolk
   <data name="Sync_PassphraseTooShort" xml:space="preserve"><value>Use at least 8 characters.</value></data>
   <data name="Sync_PassphraseMismatch" xml:space="preserve"><value>The passphrases don't match.</value></data>
   <data name="Sync_PassphraseContinue" xml:space="preserve"><value>Continue</value></data>
+  <data name="Sync_Connect" xml:space="preserve"><value>Connect</value></data>
+  <data name="Sync_Change" xml:space="preserve"><value>Change</value></data>
+  <data name="Sync_ReplaceSub" xml:space="preserve"><value>For a forgotten sync passphrase, or cloud data that can't be read.</value></data>
 </root>

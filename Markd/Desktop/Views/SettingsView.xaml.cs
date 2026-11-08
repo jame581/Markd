@@ -24,11 +24,16 @@ public partial class SettingsView : ContentView, IDesktopSection
     public bool HasHeaderRule => true;
     public string? BackLabel => null;
 
-    public Task ShowAsync() => _viewModel.LoadAsync();
-
-    public void Hide()
+    public Task ShowAsync()
     {
+        // The theme toggle reloads settings while another section is shown: only a visible section follows sync.
+        if (IsVisible)
+            _viewModel.Sync.Attach();
+        return _viewModel.LoadAsync();
     }
+
+    /// <summary>The sync section stops following the status while another section is shown.</summary>
+    public void Hide() => _viewModel.Sync.Detach();
 
     public bool GoBack() => false;
 }

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Markd.ViewModels"
+             xmlns:dc="clr-namespace:Markd.Desktop.Controls"
+             xmlns:loc="clr-namespace:Markd.Localization"
+             x:Class="Markd.Desktop.Dialogs.ConflictListDialog"
+             x:DataType="vm:ConflictListViewModel">
+    <!-- The conflict list as a dialog: header, explanation, shortcuts, one row per conflict with two choice chips -->
+    <Border x:Name="Card" Style="{StaticResource DeskCard}" StrokeShape="RoundRectangle 10" WidthRequest="600">
+        <Grid RowDefinitions="Auto,*,1,Auto">
+
+            <VerticalStackLayout Padding="26,24,26,6" Spacing="8">
+                <Label Text="{Binding HeaderText}" Style="{StaticResource DeskDialogTitle}" />
+                <Label Text="{loc:Tr Sync_ConflictsExplain}" FontSize="13.5" LineHeight="1.35" Style="{StaticResource SecondaryText}" />
+                <FlexLayout Wrap="Wrap" JustifyContent="Start" Margin="0,6,0,0">
+                    <Button Text="{loc:Tr Sync_AllFromThisDevice}" Style="{StaticResource DeskTonalButton}" HeightRequest="32" FontSize="12.5"
+                            Padding="13,0" Margin="0,0,8,8" Command="{Binding ChooseAllLocalCommand}" />
+                    <Button Text="{loc:Tr Sync_AllFromOtherDevice}" Style="{StaticResource DeskTonalButton}" HeightRequest="32" FontSize="12.5"
+                            Padding="13,0" Margin="0,0,8,8" Command="{Binding ChooseAllRemoteCommand}" />
+                    <Button Text="{loc:Tr Sync_AllNewest}" Style="{StaticResource DeskTonalButton}" HeightRequest="32" FontSize="12.5"
+                            Padding="13,0" Margin="0,0,8,8" Command="{Binding ChooseAllNewestCommand}" />
+                </FlexLayout>
+            </VerticalStackLayout>
+
+            <ScrollView Grid.Row="1">
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding Rows}" Padding="26,4,26,20" Spacing="10">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:ConflictRowViewModel">
+                            <Border Style="{StaticResource DeskCard}" StrokeShape="RoundRectangle 10" Padding="16,12">
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="10">
+                                    <VerticalStackLayout Spacing="1" VerticalOptions="Center">
+                                        <Label Text="{Binding Title}" FontFamily="FigtreeSemiBold" FontSize="14.5" LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding KindText}" Style="{StaticResource DeskRowSub}" />
+                                    </VerticalStackLayout>
+                                    <Button Grid.Column="1" Text="{loc:Tr Sync_Compare}" Style="{StaticResource DeskTextButton}"
+                                            VerticalOptions="Center" Command="{Binding CompareCommand}" />
+                                    <Grid Grid.Row="1" Grid.ColumnSpan="2" ColumnDefinitions="*,*" ColumnSpacing="8">
+                                        <dc:HoverSurface CornerRadius="8" Padding="12,8" StrokeKey="CardBorder" SelectedKey="AccentTint"
+                                                         SelectedStrokeKey="AccentFill" IsSelected="{Binding IsLocalChosen}"
+                                                         Command="{Binding ChooseLocalCommand}" SemanticProperties.Description="{Binding LocalChipText}">
+                                            <VerticalStackLayout Spacing="1" InputTransparent="True">
+                                                <Label Text="{Binding LocalChipText}" FontFamily="FigtreeSemiBold" FontSize="13" />
+                                                <Label Text="{Binding NewerText}" Style="{StaticResource DeskRowSub}" FontSize="11.5" IsVisible="{Binding IsLocalNewer}" />
+                                            </VerticalStackLayout>
+                                        </dc:HoverSurface>
+                                        <dc:HoverSurface Grid.Column="1" CornerRadius="8" Padding="12,8" StrokeKey="CardBorder" SelectedKey="AccentTint"
+                                                         SelectedStrokeKey="AccentFill" IsSelected="{Binding IsRemoteChosen}"
+                                                         Command="{Binding ChooseRemoteCommand}" SemanticProperties.Description="{Binding RemoteChipText}">
+                                            <VerticalStackLayout Spacing="1" InputTransparent="True">
+                                                <Label Text="{Binding RemoteChipText}" FontFamily="FigtreeSemiBold" FontSize="13" />
+                                                <Label Text="{Binding NewerText}" Style="{StaticResource DeskRowSub}" FontSize="11.5" IsVisible="{Binding IsRemoteNewer}" />
+                                            </VerticalStackLayout>
+                                        </dc:HoverSurface>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+            </ScrollView>
+
+            <BoxView Grid.Row="2" HeightRequest="1" />
+            <Grid Grid.Row="3" Padding="26,18,26,22" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="9"
+                  BackgroundColor="{AppThemeBinding Light={StaticResource PageBackgroundLight}, Dark={StaticResource PageBackgroundDark}}">
+                <Button Grid.Column="1" Text="{loc:Tr Sync_Later}" Style="{StaticResource DeskTonalButton}" Command="{Binding LaterCommand}" />
+                <Button Grid.Column="2" Text="{loc:Tr Sync_Apply}" Style="{StaticResource DeskPrimaryButton}" Command="{Binding ApplyCommand}" />
+            </Grid>
+        </Grid>
+    </Border>
+</ContentView>

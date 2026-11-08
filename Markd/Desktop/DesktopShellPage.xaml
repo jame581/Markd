@@ -13,9 +13,9 @@
 
         <Grid Grid.Row="1" ColumnDefinitions="56,*">
 
-            <!-- Nav rail: 56px on the WindowChrome ground, five 38px items, the theme toggle pushed to the bottom -->
+            <!-- Nav rail: 56px on the WindowChrome ground, five 38px items, the sync activity mark and the theme toggle pushed to the bottom -->
             <Grid BackgroundColor="{AppThemeBinding Light={StaticResource WindowChromeLight}, Dark={StaticResource WindowChromeDark}}">
-                <Grid Padding="9,8,9,12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto" RowSpacing="4">
+                <Grid Padding="9,8,9,12" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto,Auto" RowSpacing="4">
                     <dc:RailItem x:Name="HomeItem" Glyph="WinHome" Section="home" AutomationId="rail-home"
                                  ToolTipProperties.Text="{loc:Tr Shell_Home}" SemanticProperties.Description="{loc:Tr Shell_Home}" Clicked="OnRailItemClicked" />
                     <dc:RailItem x:Name="CalendarItem" Grid.Row="1" Glyph="WinCalendar" Section="calendar" AutomationId="rail-calendar"
@@ -26,7 +26,10 @@
                                  ToolTipProperties.Text="{loc:Tr Shell_Settings}" SemanticProperties.Description="{loc:Tr Shell_Settings}" Clicked="OnRailItemClicked" />
                     <dc:RailItem x:Name="AboutItem" Grid.Row="4" Glyph="WinInfo" Section="about" AutomationId="rail-about"
                                  ToolTipProperties.Text="{loc:Tr About_Title}" SemanticProperties.Description="{loc:Tr About_Title}" Clicked="OnRailItemClicked" />
-                    <dc:RailItem x:Name="ThemeItem" Grid.Row="6" HeightRequest="36" AutomationId="rail-theme" Clicked="OnThemeClicked" />
+                    <!-- Sync activity: spins while syncing, a warning when sync needs the user, hidden otherwise -->
+                    <c:SyncActivityIcon x:Name="SyncItem" Grid.Row="6" Size="38" IconSize="16" SyncGlyph="WinSync" WarningGlyph="WinWarning"
+                                        HorizontalOptions="Center" AutomationId="rail-sync" Tapped="OnSyncTapped" />
+                    <dc:RailItem x:Name="ThemeItem" Grid.Row="7" HeightRequest="36" AutomationId="rail-theme" Clicked="OnThemeClicked" />
                 </Grid>
                 <BoxView WidthRequest="1" HorizontalOptions="End" />
             </Grid>

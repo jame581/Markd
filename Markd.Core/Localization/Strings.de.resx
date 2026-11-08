@@ -451,4 +451,7 @@ Entwickelt mit .NET MAUI, EF Core mit SQLite, CommunityToolkit.Mvvm, CommunityTo
   <data name="Sync_PassphraseTooShort" xml:space="preserve"><value>Verwenden Sie mindestens 8 Zeichen.</value></data>
   <data name="Sync_PassphraseMismatch" xml:space="preserve"><value>Die Passphrasen stimmen nicht überein.</value></data>
   <data name="Sync_PassphraseContinue" xml:space="preserve"><value>Weiter</value></data>
+  <data name="Sync_Connect" xml:space="preserve"><value>Verbinden</value></data>
+  <data name="Sync_Change" xml:space="preserve"><value>Ändern</value></data>
+  <data name="Sync_ReplaceSub" xml:space="preserve"><value>Wenn die Synchronisierungs-Passphrase vergessen ist oder die Cloud-Daten nicht gelesen werden können.</value></data>
 </root>

@@ -87,7 +87,10 @@ public static class Icons
         ["WinGlobe"] = G16(
             StrokeCircle(8, 8, 6.4f, 1.4f),
             Stroke("M1.6 8h12.8M8 1.6c1.8 2 1.8 10.8 0 12.8M8 1.6c-1.8 2-1.8 10.8 0 12.8", 1.2f)),
-        ["WinWarning"] = G16(StrokeCircle(8, 8, 6.6f, 1.4f), Stroke("M8 4.6v4.2M8 11.2v.2", 1.6f)),
+        ["WinSync"] = G16(Stroke(
+            "M3.1 7.3C3.5 4.9 5.5 3.1 8 3.1c1.9 0 3.5.9 4.4 2.4M12.7 2.5v3.1H9.6" +
+            "M12.9 8.7c-.4 2.5-2.5 4.3-4.9 4.3-1.9 0-3.5-.9-4.4-2.4M3.3 13.5v-3.1h3.1", 1.35f)),
+        ["WinWarning"] =G16(StrokeCircle(8, 8, 6.6f, 1.4f), Stroke("M8 4.6v4.2M8 11.2v.2", 1.6f)),
         ["WinEmpty"] = new IconGlyph(44, 44,
         [
             StrokeRect(5, 9, 34, 30, 5, 2),

@@ -451,4 +451,7 @@ Vytvořeno pomocí .NET MAUI, EF Core se SQLite, CommunityToolkit.Mvvm, Communit
   <data name="Sync_PassphraseTooShort" xml:space="preserve"><value>Použijte alespoň 8 znaků.</value></data>
   <data name="Sync_PassphraseMismatch" xml:space="preserve"><value>Hesla se neshodují.</value></data>
   <data name="Sync_PassphraseContinue" xml:space="preserve"><value>Pokračovat</value></data>
+  <data name="Sync_Connect" xml:space="preserve"><value>Připojit</value></data>
+  <data name="Sync_Change" xml:space="preserve"><value>Změnit</value></data>
+  <data name="Sync_ReplaceSub" xml:space="preserve"><value>Když zapomenete heslo synchronizace nebo data v cloudu nejde přečíst.</value></data>
 </root>
