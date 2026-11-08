@@ -113,9 +113,14 @@ namespace Markd.Core.Services
 
         public async Task PurgeAllAsync()
         {
-            await db.Milestones.IgnoreQueryFilters().ExecuteDeleteAsync();
-            await db.Occasions.IgnoreQueryFilters().ExecuteDeleteAsync();
-            await db.Categories.IgnoreQueryFilters().ExecuteDeleteAsync();
+            // One transaction: a failure part way must not leave events without their milestones or categories.
+            await using (var transaction = await db.Database.BeginTransactionAsync())
+            {
+                await db.Milestones.IgnoreQueryFilters().ExecuteDeleteAsync();
+                await db.Occasions.IgnoreQueryFilters().ExecuteDeleteAsync();
+                await db.Categories.IgnoreQueryFilters().ExecuteDeleteAsync();
+                await transaction.CommitAsync();
+            }
 
             // ExecuteDelete bypasses the change tracker: detach everything it removed, or the app's long-lived context
             // would keep serving (and could save back) rows that no longer exist.

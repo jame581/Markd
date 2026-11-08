@@ -100,6 +100,20 @@ public class SyncMergerCascadeTests
     }
 
     [Fact]
+    public void Keeping_a_category_that_collapses_into_a_duplicate_moves_its_occasions_to_the_duplicate()
+    {
+        var later = T0.AddDays(1);
+        var b = Model(c: [Cat(5, "Family")], o: [Occ(1, "X", cat: 5)]);
+        var l = Model(c: [Cat(5, "Family", deleted: true)], o: [Occ(1, "X", updated: later)]);
+        var r = Model(c: [Cat(5, "Kin", updated: later), Cat(2, "Kin")], o: [Occ(1, "X", cat: 5)]);   // renamed to match a new one
+
+        var merged = MergeChoosing(b, l, r, ConflictChoice.Remote);
+
+        Assert.Equal(G(2), Assert.Single(merged.Categories, c => c.DeletedAt is null).SyncId);
+        Assert.Equal(G(2), merged.Occasions.Single().CategorySyncId);
+    }
+
+    [Fact]
     public void Keeping_the_delete_of_a_category_leaves_its_occasions_uncategorised()
     {
         var (b, l, r) = DeletedHereRenamedThere();

@@ -11,7 +11,7 @@ namespace Markd.Core.Sync
             HashSet<Guid> liveOverDeadCategories, HashSet<Guid> liveOverDeadOccasions, DateTime nowUtc)
         {
             var redirect = CollapseDuplicateCategories(baseModel, categories, nowUtc);
-            RestoreCategoryMemberships(baseModel, local, remote, categories, occasions, liveOverDeadCategories, nowUtc);
+            RestoreCategoryMemberships(baseModel, local, remote, categories, occasions, liveOverDeadCategories, redirect, nowUtc);
             RepointCategories(categories, occasions, redirect, nowUtc);
             FollowOccasions(local, remote, occasions, milestones, liveOverDeadOccasions, nowUtc);
             KeepOnePin(occasions, nowUtc);
@@ -52,11 +52,13 @@ namespace Markd.Core.Sync
         /// The user kept a category against a delete: the delete had also cleared its occasions' category, and that
         /// side effect merged without a conflict. Put back each occasion that was in it before and still is on the
         /// keeping side. An occasion whose core came from neither side, or that was moved elsewhere, is left alone.
+        /// A kept category that collapsed into a duplicate still counts: its occasions get its id back and
+        /// <see cref="RepointCategories"/> moves them to the duplicate.
         /// </summary>
         private static void RestoreCategoryMemberships(
             ExportModel baseModel, ExportModel local, ExportModel remote,
             Dictionary<Guid, CategoryDto> categories, Dictionary<Guid, OccasionDto> occasions,
-            HashSet<Guid> liveOverDeadCategories, DateTime nowUtc)
+            HashSet<Guid> liveOverDeadCategories, Dictionary<Guid, Guid> redirect, DateTime nowUtc)
         {
             if (liveOverDeadCategories.Count == 0)
                 return;
@@ -66,7 +68,8 @@ namespace Markd.Core.Sync
             var remoteOccasions = remote.Occasions.ToDictionary(o => o.SyncId);
             foreach (var categoryId in liveOverDeadCategories)
             {
-                if (!categories.TryGetValue(categoryId, out var category) || category.DeletedAt is not null)
+                if (!categories.TryGetValue(categoryId, out var category)
+                    || (category.DeletedAt is not null && !redirect.ContainsKey(categoryId)))
                     continue;
                 var keptLocally = local.Categories.Any(c => c.SyncId == categoryId && c.DeletedAt is null);
                 var kept = keptLocally ? localOccasions : remoteOccasions;

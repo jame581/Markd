@@ -1,6 +1,7 @@
 using Markd.Core.Domain;
 using Markd.Core.Services;
 using Markd.Core.Sync;
+using Markd.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -119,8 +120,8 @@ public class SyncServiceTests
 
         // A opens the edit form: what it shows is the baseline its save compares against.
         var loadedOnA = (await a.Occasions.GetByIdAsync(x.Id))!;
-        var loadedTitle = loadedOnA.Title;
-        var loadedNotes = loadedOnA.Notes;
+        var loaded = new OccasionFields(loadedOnA.Title, loadedOnA.Emoji, loadedOnA.ColorHex, loadedOnA.AnchorDate,
+            loadedOnA.Direction, loadedOnA.Notes, loadedOnA.IsPinned, loadedOnA.CategoryId);
 
         var onB = Assert.Single(await b.Occasions.GetAllAsync());
         onB.Title = "B-title";
@@ -128,15 +129,9 @@ public class SyncServiceTests
         await b.Sync.SyncAsync(cloud);
         Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);
 
-        // A saves with only the note changed: the edit lands on the re-read record, field by field (OccasionEdit's rule).
-        const string editedTitle = "A-title";
-        const string editedNotes = "from a";
+        // A saves with only the note changed: the edit lands on the re-read record, field by field.
         var current = (await a.Occasions.GetByIdAsync(x.Id))!;
-        if (editedTitle != loadedTitle)
-            current.Title = editedTitle;
-        if (editedNotes != loadedNotes)
-            current.Notes = editedNotes;
-        await a.Occasions.UpdateAsync(current);
+        await a.Occasions.UpdateAsync(OccasionEdit.ApplyChanges(current, loaded, loaded with { Notes = "from a" }));
 
         Assert.Equal(SyncOutcome.Synced, (await a.Sync.SyncAsync(cloud)).Outcome);
         await b.Sync.SyncAsync(cloud);

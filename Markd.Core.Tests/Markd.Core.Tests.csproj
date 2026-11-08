@@ -21,4 +21,8 @@
 	<ProjectReference Include="..\Markd.Core\Markd.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+	<Compile Include="..\Markd\ViewModels\OccasionEdit.cs" Link="Linked\OccasionEdit.cs" />
+  </ItemGroup>
+
 </Project>

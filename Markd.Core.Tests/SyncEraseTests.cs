@@ -18,6 +18,24 @@ public class SyncEraseTests
     }
 
     [Fact]
+    public async Task A_purge_that_fails_part_way_deletes_nothing()
+    {
+        using var a = new SyncDevice();
+        var family = await a.Categories.CreateAsync(new Category { Name = "Family" });
+        var x = await a.AddOccasionAsync("X");
+        await a.Occasions.AddMilestoneAsync(x.Id, 100, "100 days");
+        await a.Db.Database.ExecuteSqlRawAsync(
+            "CREATE TRIGGER block_category_delete BEFORE DELETE ON Categories BEGIN SELECT RAISE(ABORT, 'blocked'); END;",
+            TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAnyAsync<Exception>(() => a.Occasions.PurgeAllAsync());
+
+        Assert.Equal(1, await a.Db.Milestones.IgnoreQueryFilters().CountAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(1, await a.Db.Occasions.IgnoreQueryFilters().CountAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(family.Id, (await a.Db.Categories.IgnoreQueryFilters().SingleAsync(TestContext.Current.CancellationToken)).Id);
+    }
+
+    [Fact]
     public async Task Erasing_a_synced_device_then_reconnecting_brings_everything_back()
     {
         using var a = new SyncDevice();
