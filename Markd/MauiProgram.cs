@@ -144,7 +144,8 @@ namespace Markd
 
         /// <summary>
         /// Every provider this app knows, with whether this build and device can use it. Google needs its desktop
-        /// client id on Windows and Play services on Android; other platforms only keep its name.
+        /// client id on Windows and Play services on Android; OneDrive needs the Microsoft client id on Android and
+        /// Windows. Other platforms only keep their names.
         /// </summary>
         private static List<CloudProviderRegistration> CloudProviders(IServiceProvider sp, string dataDirectory)
         {
@@ -162,6 +163,15 @@ namespace Markd
             ICloudAuthService? googleAuth = null;
 #endif
 
+#if ANDROID || WINDOWS
+            ICloudAuthService? microsoftAuth = CloudConfig.HasMicrosoft
+                ? new MsalAuthService(
+                    dataDirectory, sp.GetRequiredService<INetworkStatus>(), sp.GetRequiredService<ILogger<MsalAuthService>>())
+                : null;
+#else
+            ICloudAuthService? microsoftAuth = null;
+#endif
+
             // Brand name, not localized.
             var providers = new List<CloudProviderRegistration>
             {
@@ -171,6 +181,15 @@ namespace Markd
                         googleAuth!,
                         sp.GetRequiredService<ILogger<GoogleDriveProvider>>()),
                     googleAuth),
+                // OneDriveProvider follows Graph's download redirect itself (without the bearer token), so its
+                // handler must not. SocketsHttpHandler on every platform, so this does not depend on how Android's
+                // default AndroidMessageHandler treats AllowAutoRedirect.
+                new(OneDriveProvider.ProviderId, "OneDrive", microsoftAuth is not null,
+                    () => new OneDriveProvider(
+                        new HttpClient(new SocketsHttpHandler { AllowAutoRedirect = false }) { Timeout = TimeSpan.FromSeconds(60) },
+                        microsoftAuth!,
+                        sp.GetRequiredService<ILogger<OneDriveProvider>>()),
+                    microsoftAuth),
             };
 #if DEBUG
             providers.Add(DebugLocalFolder.Registration);

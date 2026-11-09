@@ -12,6 +12,8 @@ namespace Markd
         {
             base.OnActivityResult(requestCode, resultCode, data);
             Platforms.Android.ActivityResults.OnResult(requestCode, resultCode, data);
+            // Completes a Microsoft sign-in (MSAL) that started from this activity.
+            Microsoft.Identity.Client.AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(requestCode, resultCode, data);
         }
     }
 }

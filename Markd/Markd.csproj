@@ -111,6 +111,15 @@
 	  <PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="1.6.0.1" />
 	</ItemGroup>
 
+	<!-- Microsoft sign-in for OneDrive (Services/Sync/MsalAuthService.cs) on Android and Windows. The cache helper
+	     (DPAPI token cache file) is only used on Windows: MSAL keeps its own cache on Android. -->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+	  <PackageReference Include="Microsoft.Identity.Client" Version="4.92.0" />
+	</ItemGroup>
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+	  <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="4.92.0" />
+	</ItemGroup>
+
 	<ItemGroup>
 	  <ProjectReference Include="..\Markd.Core\Markd.Core.csproj" />
 	</ItemGroup>
@@ -126,6 +135,12 @@
 	  <Compile Remove="Desktop\**" />
 	  <MauiXaml Remove="Desktop\**" />
 	  <None Include="Desktop\**" />
+	</ItemGroup>
+
+	<!-- OneDrive is only offered on Android and Windows, so iOS and Mac Catalyst build without MSAL. -->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' or $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">
+	  <Compile Remove="Services\Sync\MsalAuthService.cs" />
+	  <None Include="Services\Sync\MsalAuthService.cs" />
 	</ItemGroup>
 
 	<!-- Bakes the optional cloud client ids into Services/Sync/CloudConfig. Empty means not configured. Runs before

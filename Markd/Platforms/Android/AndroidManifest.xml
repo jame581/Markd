@@ -6,4 +6,10 @@
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<uses-permission android:name="android.permission.VIBRATE" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<!-- Microsoft sign-in (MSAL) opens a custom tab, which Android 11+ only finds when the browser service is declared. -->
+	<queries>
+		<intent>
+			<action android:name="android.support.customtabs.action.CustomTabsService" />
+		</intent>
+	</queries>
 </manifest>
