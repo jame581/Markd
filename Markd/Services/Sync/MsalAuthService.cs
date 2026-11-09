@@ -159,6 +159,21 @@ public sealed class MsalAuthService : ICloudAuthService
             await _gate.WaitAsync(ct);
             try
             {
+                if (result.Account?.HomeAccountId?.ObjectId is not { Length: > 0 })
+                {
+                    // Without an object id there is no stable account id to link: nothing is kept.
+                    if (result.Account is { } unusable)
+                        await RemoveQuietlyAsync(app, unusable);
+                    throw new SyncAuthException("Microsoft returned an account without an id.");
+                }
+
+                // The cache holds only the signed-in account, so the next start cannot pick another one.
+                foreach (var other in await app.GetAccountsAsync())
+                {
+                    if (other.HomeAccountId?.Identifier != result.Account.HomeAccountId.Identifier)
+                        await RemoveQuietlyAsync(app, other);
+                }
+
                 SetAccount(result.Account);
             }
             finally
@@ -178,8 +193,9 @@ public sealed class MsalAuthService : ICloudAuthService
         {
             return null;
         }
-        catch (Exception ex) when (ex is not (OperationCanceledException or SyncAuthException or SyncOfflineException))
+        catch (Exception ex) when (ex is not (SyncAuthException or SyncOfflineException))
         {
+            // The caller's cancellation was handled above, so an OperationCanceledException here is a request timeout.
             // The original is not attached: an MSAL message may carry account details.
             _logger.LogInformation("Microsoft sign-in failed: {Code}", (ex as MsalException)?.ErrorCode ?? ex.GetType().Name);
             if (IsOffline(ex))
@@ -190,6 +206,8 @@ public sealed class MsalAuthService : ICloudAuthService
 
     public async Task SignOutAsync()
     {
+        // Loads first, so a sign-out before anything else still finds the cached accounts to remove.
+        await LoadAsync();
         await _gate.WaitAsync();
         try
         {
@@ -206,7 +224,6 @@ public sealed class MsalAuthService : ICloudAuthService
         }
         finally
         {
-            _loaded = true;
             _gate.Release();
         }
     }
@@ -224,6 +241,18 @@ public sealed class MsalAuthService : ICloudAuthService
         _account = account?.HomeAccountId?.ObjectId is { Length: > 0 } id ? new CloudAccount(id, account.Username) : null;
         if (_account is null)
             _msalAccount = null;
+    }
+
+    private async Task RemoveQuietlyAsync(IPublicClientApplication app, IAccount account)
+    {
+        try
+        {
+            await app.RemoveAsync(account);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("Removing a cached Microsoft account failed: {Error}", ex.GetType().Name);
+        }
     }
 
     /// <summary>
