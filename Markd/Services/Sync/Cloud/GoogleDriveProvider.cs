@@ -5,6 +5,7 @@ using System.Text.Json;
 using Markd.Core.Sync;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using static Markd.Services.Sync.Cloud.CloudHttp;
 
 namespace Markd.Services.Sync.Cloud;
 
@@ -221,31 +222,9 @@ public sealed class GoogleDriveProvider(
         for (var attempt = 0; ; attempt++)
         {
             var token = await tokens.GetAccessTokenAsync(forceRefresh: attempt > 0, ct);
-            HttpStatusCode status;
-            byte[] body;
-            string? etagHeader;
-            try
-            {
-                using var request = build();
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                using var response = await http.SendAsync(request, ct);
-                status = response.StatusCode;
-                body = await response.Content.ReadAsByteArrayAsync(ct);
-                etagHeader = response.Headers.TryGetValues("ETag", out var values) ? values.FirstOrDefault() : null;
-            }
-            catch (OperationCanceledException) when (ct.IsCancellationRequested)
-            {
-                throw;
-            }
-            catch (OperationCanceledException ex)
-            {
-                // HttpClient's own timeout, not the caller.
-                throw new SyncOfflineException(null, ex);
-            }
-            catch (HttpRequestException ex)
-            {
-                throw new SyncOfflineException(null, ex);
-            }
+            var request = build();
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var (status, body, etagHeader, _) = await CloudHttp.SendAsync(http, request, ct);
 
             if (status == HttpStatusCode.Unauthorized)
             {
@@ -273,8 +252,6 @@ public sealed class GoogleDriveProvider(
         error.TryGetProperty(listName, out var list) && list.ValueKind == JsonValueKind.Array
         && list.EnumerateArray().Any(e => e.ValueKind == JsonValueKind.Object && GetString(e, "reason") == reason);
 
-    private static bool IsSuccess(HttpStatusCode status) => (int)status is >= 200 and <= 299;
-
     /// <summary>Only the status and Google's error reason, never the body (it can echo request details).</summary>
     private static InvalidOperationException Unexpected(string action, HttpStatusCode status, byte[] body)
     {
@@ -286,24 +263,4 @@ public sealed class GoogleDriveProvider(
                 .FirstOrDefault(r => r is not null);
         return new InvalidOperationException($"{action} failed with HTTP {(int)status} ({reason ?? "no reason"}).");
     }
-
-    /// <summary>The JSON object in the body, or an empty object when there is none or it is not JSON.</summary>
-    private static JsonElement Parse(byte[] body)
-    {
-        try
-        {
-            using var document = JsonDocument.Parse(body.Length == 0 ? "{}"u8.ToArray() : body);
-            if (document.RootElement.ValueKind == JsonValueKind.Object)
-                return document.RootElement.Clone();
-        }
-        catch (JsonException)
-        {
-        }
-
-        using var empty = JsonDocument.Parse("{}");
-        return empty.RootElement.Clone();
-    }
-
-    private static string? GetString(JsonElement root, string name) =>
-        root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
 }

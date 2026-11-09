@@ -53,6 +53,7 @@
     <Compile Include="..\Markd\Services\Sync\ICloudAuthService.cs" Link="Services\Sync\ICloudAuthService.cs" />
     <Compile Include="..\Markd\Services\Sync\CloudProviderCatalog.cs" Link="Services\Sync\CloudProviderCatalog.cs" />
     <Compile Include="..\Markd\Services\Sync\Cloud\GoogleOAuthClient.cs" Link="Services\Sync\Cloud\GoogleOAuthClient.cs" />
+    <Compile Include="..\Markd\Services\Sync\Cloud\CloudHttp.cs" Link="Services\Sync\Cloud\CloudHttp.cs" />
     <Compile Include="..\Markd\Services\Sync\Cloud\GoogleDriveProvider.cs" Link="Services\Sync\Cloud\GoogleDriveProvider.cs" />
     <Compile Include="..\Markd\Services\Sync\Cloud\OneDriveProvider.cs" Link="Services\Sync\Cloud\OneDriveProvider.cs" />
     <Compile Include="..\Markd\Services\Sync\ISignInWaitService.cs" Link="Services\Sync\ISignInWaitService.cs" />

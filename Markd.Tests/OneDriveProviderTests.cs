@@ -190,6 +190,27 @@ public class OneDriveProviderTests
     }
 
     [Fact]
+    public async Task Update_409_IsRevisionConflict()
+    {
+        var (provider, http, _) = Create();
+        http.Respond(HttpStatusCode.Conflict, Error("resourceModified"));
+
+        await Assert.ThrowsAsync<RevisionConflictException>(
+            () => provider.UploadAsync([1], "01ITEM:" + ETag1, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Update_BodyWithoutETag_UsesTheETagHeader()
+    {
+        var (provider, http, _) = Create();
+        http.Respond(HttpStatusCode.OK, """{"id":"01ITEM"}""", etagHeader: ETag2);
+
+        var revision = await provider.UploadAsync([1], "01ITEM:" + ETag1, TestContext.Current.CancellationToken);
+
+        Assert.Equal("01ITEM:" + ETag2, revision);
+    }
+
+    [Fact]
     public async Task Update_404_IsRevisionConflict()
     {
         var (provider, http, _) = Create();
