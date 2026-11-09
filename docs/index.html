@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Markd</title>
+<meta name="description" content="Markd counts the days since or until the dates that matter, on Windows and Android.">
+<link rel="icon" href="assets/markd-icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#F5F5FA;--card:#FFFFFF;--border:#E3E3EA;--text:#1C1E22;--muted:#6B6F76;--accent:#5A4FB0;--fill:#6F63C9;--on:#FFFFFF;--tint:#EDEBFB}
+@media (prefers-color-scheme:dark){:root{--bg:#0B0F14;--card:#1B212A;--border:#2A313C;--text:#F5F6F7;--muted:#8A8F98;--accent:#A79CF0;--fill:#8B7FE8;--on:#14102E;--tint:#241F3D}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:42rem;margin:0 auto;padding:2rem 1rem 3rem}
+h1{font-size:2rem;line-height:1.2;margin:0 0 .5rem}
+a{color:var(--accent)}
+.muted{color:var(--muted)}
+.hero{text-align:center}
+.hero img.icon{width:112px;height:112px;border-radius:24px}
+.hero img.shot{width:100%;height:auto;border-radius:16px;border:1px solid var(--border);margin:1.5rem 0}
+.btns{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin:1.25rem 0}
+.btn{display:inline-block;background:var(--fill);color:var(--on);text-decoration:none;font-weight:600;padding:.7rem 1.2rem;border-radius:999px}
+footer{margin-top:2.5rem;font-size:.9rem}
+</style>
+</head>
+<body>
+<main class="hero">
+<img class="icon" src="assets/markd-icon.svg" alt="Markd icon" width="112" height="112">
+<h1>Markd</h1>
+<p>Markd counts the days that matter. Mark a date and it counts since it or until it, with milestones along the way.</p>
+<p>No ads and no analytics. Your data stays on your device, with optional encrypted sync through your own OneDrive or Google Drive.</p>
+<div class="btns">
+<a class="btn" href="https://apps.microsoft.com/search?query=Markd%20Day%20Counter">Get it on Microsoft Store</a>
+<a class="btn" href="https://play.google.com/store/apps/details?id=com.janmesarc.markd">Get it on Google Play</a>
+</div>
+<img class="shot" src="assets/markd-hero.png" alt="Markd showing occasions and their day counts" width="1280" height="640">
+<footer class="muted"><a href="privacy.html">Privacy policy</a> &middot; <a href="https://github.com/jame581/Markd">Source on GitHub</a></footer>
+</main>
+</body>
+</html>

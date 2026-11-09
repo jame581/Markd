@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Markd privacy policy</title>
+<meta name="description" content="How Markd handles your data, including optional cloud sync.">
+<link rel="icon" href="assets/markd-icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#F5F5FA;--border:#E3E3EA;--text:#1C1E22;--muted:#6B6F76;--accent:#5A4FB0;--tint:#EDEBFB}
+@media (prefers-color-scheme:dark){:root{--bg:#0B0F14;--border:#2A313C;--text:#F5F6F7;--muted:#8A8F98;--accent:#A79CF0;--tint:#241F3D}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:42rem;margin:0 auto;padding:2rem 1rem 3rem}
+h1{font-size:2rem;line-height:1.2;margin:0 0 .5rem}
+h2{font-size:1.25rem;margin:2rem 0 .5rem}
+a{color:var(--accent)}
+code{background:var(--tint);padding:.1em .35em;border-radius:4px;font-size:.9em;overflow-wrap:anywhere}
+.muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<p><a href="./">&larr; Markd</a></p>
+<h1>Privacy policy</h1>
+<p class="muted">Last updated: 2026-11-09</p>
+<p>This policy covers Markd (listed in the Microsoft Store as Markd Day Counter) on Windows and Android. The part about cloud sync applies to Markd 1.1 and later.</p>
+<p>Markd stores the occasions, milestones, categories, notes and settings you enter on your own device. If you turn on sync, an encrypted copy also goes to your own Google Drive or OneDrive, and nowhere else.</p>
+
+<h2>What is collected</h2>
+<p>Nothing by the developer. Markd has no Markd account and no server of its own. It does not collect, transmit or share personal information, usage analytics or crash reports with the developer, and it contains no advertising and no third-party tracking.</p>
+
+<h2>What leaves your device</h2>
+<p>Only what you choose: an export you make yourself, and the encrypted sync file if you turn sync on.</p>
+<p>Export writes a backup file wherever you choose to save or share it, and you decide where that goes. A backup contains your occasions, milestones, categories and settings, plus the name of the device it was made on, so you can tell backups apart. A backup can be protected with a password, in which case it is encrypted on your device before it is written.</p>
+<p>On Android, if you have backup turned on in your device settings, Android can include Markd's database in your device backup to your own Google account, and restore it when you set up a new phone. Markd does not send it anywhere itself, and it has no access to that backup. Turn off backup in your device settings to keep it out. The database also holds the email address and account id described under Cloud sync, so they are covered by the same backup.</p>
+
+<h2>Cloud sync (Markd 1.1 and later)</h2>
+<p>Sync is optional and off by default. Markd works fully without it.</p>
+<p><strong>What it stores.</strong> When you turn sync on and sign in with Google or Microsoft, Markd keeps one file in a hidden folder that belongs only to Markd in your own Google Drive (the app data folder, scope <code>drive.appdata</code>) or your own OneDrive (the <code>Apps/Markd</code> app folder, permission <code>Files.ReadWrite.AppFolder</code>). Markd cannot see, list or change any of your other files in either service.</p>
+<p><strong>Encryption.</strong> The file is encrypted on your device with your sync passphrase before it is uploaded. Nobody, including the developer, can read it without that passphrase. If you lose the passphrase, the cloud copy can no longer be read. Your data on your devices is never affected.</p>
+<p><strong>Account details.</strong> Markd reads the email address and account id of the account you sign in with (for Google through the openid and email scopes, for Microsoft through the User.Read permission). They are used only to show which account is connected and to recognise it again. They are kept in Markd's database on your device and are not sent anywhere else.</p>
+<p><strong>Sign-in data.</strong> On Windows, Markd keeps the Google refresh token and the Microsoft sign-in cache in files that are encrypted for your Windows user (DPAPI) in Markd's data folder. On Android, Google sign-in is handled by Google Play services on your phone, and the Microsoft sign-in cache is kept by the Microsoft sign-in library inside Markd's private app storage. None of this is sent to the developer. There is no Markd server.</p>
+<p><strong>Network.</strong> Sync talks only to Google's or Microsoft's servers. On Android, Markd uses the network state permission to pause sync while the device is offline.</p>
+<p><strong>Disconnecting.</strong> Disconnecting removes the sign-in from that device and offers to delete the cloud file. To remove Markd's access for all your devices, use your account settings: in your Google Account under Security and third-party access, or in your Microsoft account under Privacy and apps and services.</p>
+<p><strong>Google user data.</strong> Markd's use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+<ul>
+<li>Accessed: the Markd file in your Drive app data folder, and your email address and account id.</li>
+<li>Used: only to sync your occasions between your own devices and to show which account is connected.</li>
+<li>Stored: the file stays in your Drive, encrypted with your passphrase. The email address and account id stay in Markd's database on your device.</li>
+<li>Shared: not shared with anyone and not sold. Not used for advertising, profiling or for training AI models. No human at the developer reads it.</li>
+</ul>
+
+<h2>Notifications</h2>
+<p>Markd schedules milestone notifications locally on your device. No notification content is sent to any server.</p>
+
+<h2>Deleting your data</h2>
+<p>Erase all occasions in Settings removes every occasion and milestone from the device. Uninstalling Markd from the Microsoft Store or from Android removes all of its data on that device, including categories and settings. The portable Windows zip keeps its data in a <code>com.janmesarc.markd</code> folder under <code>%LOCALAPPDATA%</code>; delete that folder to remove it. If you used sync, disconnect and choose to delete the cloud file, or delete the Markd app folder data from Google Drive or OneDrive yourself. Backup files you exported stay wherever you saved them until you delete them.</p>
+
+<h2>Changes</h2>
+<p>If this policy changes, the new version is published at this address with a new date.</p>
+
+<h2>Contact</h2>
+<p>Questions about this policy: <a href="https://github.com/jame581/Markd/issues">https://github.com/jame581/Markd/issues</a></p>
+</main>
+</body>
+</html>
