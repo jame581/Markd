@@ -6,6 +6,7 @@ using Markd.Core.Sync;
 using Markd.Pages;
 using Markd.Services;
 using Markd.Services.Sync;
+using Markd.Services.Sync.Cloud;
 using Markd.ViewModels;
 using Microsoft.Extensions.Logging;
 using Plugin.LocalNotification;
@@ -79,11 +80,7 @@ namespace Markd
 #else
             builder.Services.AddSingleton<ISyncSecretStore, SecureStorageSyncSecretStore>();
 #endif
-#if DEBUG
-            builder.Services.AddSingleton<ICloudProviderCatalog, DebugCloudProviderCatalog>();
-#else
-            builder.Services.AddSingleton<ICloudProviderCatalog, EmptyCloudProviderCatalog>();
-#endif
+            builder.Services.AddSingleton<ICloudProviderCatalog>(sp => new CloudProviderCatalog(CloudProviders(sp, dataDirectory)));
             builder.Services.AddSingleton<IUiDispatcher, MainThreadDispatcher>();
             builder.Services.AddSingleton<ISyncDataRefresher, MauiSyncDataRefresher>();
             builder.Services.AddSingleton<INetworkStatus, MauiNetworkStatus>();
@@ -143,6 +140,42 @@ namespace Markd
             app.Services.InitializeMarkdDatabase();
 
             return app;
+        }
+
+        /// <summary>
+        /// Every provider this app knows, with whether this build and device can use it. Google needs its desktop
+        /// client id on Windows and Play services on Android; other platforms only keep its name.
+        /// </summary>
+        private static List<CloudProviderRegistration> CloudProviders(IServiceProvider sp, string dataDirectory)
+        {
+#if WINDOWS
+            ICloudAuthService? googleAuth = CloudConfig.HasGoogleDesktop
+                ? new Platforms.Windows.GoogleWindowsAuthService(
+                    dataDirectory, sp.GetRequiredService<ILogger<Platforms.Windows.GoogleWindowsAuthService>>())
+                : null;
+#elif ANDROID
+            ICloudAuthService? googleAuth = Platforms.Android.GoogleAndroidAuthService.IsAvailable()
+                ? new Platforms.Android.GoogleAndroidAuthService(
+                    sp.GetRequiredService<INetworkStatus>(), sp.GetRequiredService<ILogger<Platforms.Android.GoogleAndroidAuthService>>())
+                : null;
+#else
+            ICloudAuthService? googleAuth = null;
+#endif
+
+            // Brand name, not localized.
+            var providers = new List<CloudProviderRegistration>
+            {
+                new(GoogleDriveProvider.ProviderId, "Google Drive", googleAuth is not null,
+                    () => new GoogleDriveProvider(
+                        new HttpClient { Timeout = TimeSpan.FromSeconds(60) },
+                        googleAuth!,
+                        sp.GetRequiredService<ILogger<GoogleDriveProvider>>()),
+                    googleAuth),
+            };
+#if DEBUG
+            providers.Add(DebugLocalFolder.Registration);
+#endif
+            return providers;
         }
     }
 }

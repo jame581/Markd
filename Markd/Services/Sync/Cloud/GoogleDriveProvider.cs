@@ -41,7 +41,9 @@ public sealed class GoogleDriveProvider(
         public string Revision => Id + ":" + Etag;
     }
 
-    public string Id => "google-drive";
+    public const string ProviderId = "google-drive";
+
+    public string Id => ProviderId;
 
     public string? AccountName => tokens.Account?.Id;
 

@@ -99,6 +99,18 @@
 	  <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.12" />
 	</ItemGroup>
 
+	<!-- Google sign-in on Android (AuthorizationClient, Platforms/Android/GoogleAndroidAuthService.cs). -->
+	<ItemGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+	  <PackageReference Include="Xamarin.GooglePlayServices.Auth" Version="122.0.0" />
+	  <!-- It lifts Fragment, Lifecycle and Collection past the versions MAUI's own -ktx packages pin, which puts the same
+	       classes in two jars (D8 "defined multiple times"). These keep the -ktx packages in step with what it resolves. -->
+	  <PackageReference Include="Xamarin.AndroidX.Fragment.Ktx" Version="1.9.0" />
+	  <PackageReference Include="Xamarin.AndroidX.Lifecycle.LiveData" Version="2.11.0.1" />
+	  <PackageReference Include="Xamarin.AndroidX.Lifecycle.LiveData.Core.Ktx" Version="2.11.0.1" />
+	  <PackageReference Include="Xamarin.AndroidX.Lifecycle.Process" Version="2.11.0.1" />
+	  <PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="1.6.0.1" />
+	</ItemGroup>
+
 	<ItemGroup>
 	  <ProjectReference Include="..\Markd.Core\Markd.Core.csproj" />
 	</ItemGroup>
