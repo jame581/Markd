@@ -20,6 +20,7 @@ public sealed class GoogleAndroidAuthService : ICloudAuthService
     private const string IdKey = "markd.sync.google.id";
     private const string EmailKey = "markd.sync.google.email";
     private const string GoogleAccountType = "com.google";
+    private static readonly TimeSpan ClearTokenTimeout = TimeSpan.FromSeconds(10);
     private static readonly string[] Scopes = [GoogleOAuthClient.DriveAppDataScope, "openid", "email"];
 
     private readonly INetworkStatus _network;
@@ -104,9 +105,9 @@ public sealed class GoogleAndroidAuthService : ICloudAuthService
             _accessToken = result.AccessToken;
             return result.AccessToken;
         }
-        catch (ApiException ex)
+        catch (Exception ex) when (!IsMapped(ex))
         {
-            throw MapApiException(ex);
+            throw Map(ex);
         }
         finally
         {
@@ -130,7 +131,8 @@ public sealed class GoogleAndroidAuthService : ICloudAuthService
             {
                 result = await AuthorizeAsync(client, BuildRequest(loginHint), ct);
             }
-            catch (ApiException ex) when (!string.IsNullOrWhiteSpace(loginHint) && !IsOffline(ex))
+            catch (ApiException ex) when (!string.IsNullOrWhiteSpace(loginHint) && !IsOffline(ex)
+                && ex.StatusCode != CommonStatusCodes.Canceled)
             {
                 // The hinted account is not on this device: let the user pick one instead.
                 _logger.LogInformation("Authorizing the hinted Google account failed ({Status}), asking for one", ex.StatusCode);
@@ -180,9 +182,9 @@ public sealed class GoogleAndroidAuthService : ICloudAuthService
         {
             return null;
         }
-        catch (ApiException ex)
+        catch (Exception ex) when (!IsMapped(ex))
         {
-            throw MapApiException(ex);
+            throw Map(ex);
         }
     }
 
@@ -198,7 +200,11 @@ public sealed class GoogleAndroidAuthService : ICloudAuthService
             Preferences.Default.Remove(IdKey);
             Preferences.Default.Remove(EmailKey);
             if (stale is not null)
-                await ClearTokenAsync(Identity.GetAuthorizationClient(global::Android.App.Application.Context), stale, CancellationToken.None);
+            {
+                // Bounded, so a stuck Play services task cannot hold the gate.
+                using var timeout = new CancellationTokenSource(ClearTokenTimeout);
+                await ClearTokenAsync(Identity.GetAuthorizationClient(global::Android.App.Application.Context), stale, timeout.Token);
+            }
         }
         catch (Exception ex)
         {
@@ -233,10 +239,28 @@ public sealed class GoogleAndroidAuthService : ICloudAuthService
 
     private bool IsOffline(ApiException ex) => ex.StatusCode == CommonStatusCodes.NetworkError || !_network.IsOnline;
 
-    private Exception MapApiException(ApiException ex)
+    /// <summary>Exceptions that already follow the ICloudAuthService contract and pass through unchanged.</summary>
+    private static bool IsMapped(Exception ex) =>
+        ex is OperationCanceledException or SyncAuthException or SyncOfflineException or SignInMissingPermissionException;
+
+    /// <summary>
+    /// Any other failure (ApiException, Java exceptions from the GMS tasks) becomes offline or a sign-in error. The
+    /// original is not attached: its message may carry account details.
+    /// </summary>
+    private Exception Map(Exception ex)
     {
-        // Only the status code: the message may carry account details.
-        _logger.LogInformation("Google authorization failed with status {Status}", ex.StatusCode);
-        return IsOffline(ex) ? new SyncOfflineException(null, ex) : new SyncAuthException("Google refused the authorization.", ex);
+        bool offline;
+        if (ex is ApiException api)
+        {
+            _logger.LogInformation("Google authorization failed with status {Status}", api.StatusCode);
+            offline = IsOffline(api);
+        }
+        else
+        {
+            _logger.LogInformation("Google authorization failed: {Error}", ex.GetType().Name);
+            offline = !_network.IsOnline;
+        }
+
+        return offline ? new SyncOfflineException() : new SyncAuthException("Google refused the authorization.");
     }
 }
