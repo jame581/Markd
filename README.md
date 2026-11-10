@@ -12,6 +12,13 @@
 
 Markd counts the days that matter. Mark a date and it counts **since** it (a first day, a streak, a birthday) or **until** it (a trip, a deadline), with milestones along the way. No ads, no account, no network calls: everything lives in one SQLite file on the device. See the [privacy policy](docs/privacy-policy.md).
 
+## Get Markd
+
+- **Android**: [Google Play](https://play.google.com/store/apps/details?id=com.janmesarc.markd)
+- **Windows**: [Microsoft Store](https://apps.microsoft.com/detail/9N05867SQCN8)
+
+Standalone packages (Android `.apk`, Windows `.zip`) are attached to each [GitHub release](https://github.com/jame581/Markd/releases/latest).
+
 ## Features
 
 - Occasions counting since or until a date, with a live years / months / days / time breakdown
